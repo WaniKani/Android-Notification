@@ -1,0 +1,45 @@
+<resources>
+     <!--
+        Base application theme, dependent on API level. This theme is replaced
+        by AppBaseTheme from res/values-vXX/styles.xml on newer devices.
+    -->
+    <style name="AppBaseTheme" parent="android:Theme.Light">
+        <!--
+            Theme customizations available in newer API levels can go in
+            res/values-vXX/styles.xml, while customizations related to
+            backward-compatibility can go here.
+        -->
+    </style>
+
+    <!-- Application theme. -->
+    <style name="AppTheme" parent="AppBaseTheme">
+        <!-- All customizations that are NOT specific to a particular API-level can go here. -->
+    </style>
+    <style parent="AppTheme" name="Table">
+        <item name="android:layout_margin">5dp</item>
+        <item name="android:padding">5dp</item>
+        <item name="android:layout_weight">0</item>
+        <item name="android:background">@drawable/table_background</item>
+    </style>
+	<style parent="Table" name="QueueTable">
+	</style>
+	<style parent="Table" name="NextTable">
+	</style>
+	<style parent="Table" name="StatsTable">
+	</style>
+	<style parent="AppTheme" name="LabelNextReview"> 
+		<item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
+	</style>
+	<style parent="AppTheme" name="LabelNextReviewVal"> 
+		<item name="android:textAppearance">?android:attr/textAppearanceLarge</item>
+		<item name="android:gravity">center</item>
+	</style>
+	<style parent="AppTheme" name="LabelKey">
+		<item name="android:textAppearance">?android:attr/textAppearanceLarge</item>
+	    <item name="android:gravity">left</item>	    	    	
+	</style>
+	<style parent="AppTheme" name="LabelValue">
+		<item name="android:textAppearance">?android:attr/textAppearanceLarge</item>
+	    <item name="android:gravity">right</item>	    	
+	</style>
+</resources>

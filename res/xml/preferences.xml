@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+    <CheckBoxPreference 
+        	android:key="pref_enabled" 
+        	android:title="@string/pref_enabled" 
+        	android:defaultValue="true" android:summary="@string/pref_enabled_descr"/>
+    <EditTextPreference android:key="pref_userkey" 
+        	android:title="@string/pref_userkey" android:summary="@string/pref_userkey_descr"/>
+    <EditTextPreference  
+        	android:title="@string/pref_url" 
+        	android:key="pref_url" 
+        	android:defaultValue="@string/pref_default_url"/>    
+</PreferenceScreen>
