@@ -18,6 +18,7 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 
+import com.wanikani.androidnotifier.NotifierStateMachine.Event;
 import com.wanikani.wklib.Connection;
 import com.wanikani.wklib.SRSDistribution;
 import com.wanikani.wklib.StudyQueue;
@@ -117,6 +118,12 @@ public class NotificationService
 	public static final String ACTION_ALARM = 
 			PREFIX + "ALARM";
 
+	/** Called when the user taps the notification.
+	 *  We start an external browser, but also reset the state machine
+	 *  that may be polling with large intervals */
+	public static final String ACTION_TAP = 
+			PREFIX + "TAP";
+
 	/** The ID associated to the notification icon. Since we can
 	 *  only display one notification at a time, this is a
 	 *  constant */
@@ -145,12 +152,22 @@ public class NotificationService
 	{
 		SharedPreferences prefs;
 		String action;
+		boolean enabled;
 		
 		prefs = PreferenceManager.getDefaultSharedPreferences (this);
-		if (!SettingsActivity.getEnabled (prefs))
+		enabled = SettingsActivity.getEnabled (prefs);
+		action = intent.getAction ();
+
+		/* ACTION_TAP is special, because we must call it even if notifications
+		 * are disabled */
+		if (action.equals (ACTION_TAP)) {
+			tap (intent, enabled);
+			return;
+		}
+		
+		if (!enabled)
 			return;
 		
-		action = intent.getAction ();
 		if (action.equals (ACTION_BOOT_COMPLETED))
 			bootCompleted (intent);
 		else if (action.equals (ACTION_CONNECTIVITY_CHANGE))
@@ -171,7 +188,7 @@ public class NotificationService
 		
 		fsm = new NotifierStateMachine (this);
 		
-		feed (fsm, false);
+		feed (fsm, NotifierStateMachine.Event.E_INITIAL);
 	}
 	
 	/**
@@ -188,9 +205,29 @@ public class NotificationService
 		
 		fsm = new NotifierStateMachine (this);
 		
-		feed (fsm, true);
+		feed (fsm, NotifierStateMachine.Event.E_UNSOLICITED);
 	}
 	
+	/**
+	 * Handler of the {@link #ACTION_TAP} intent, called when
+	 * the user taps the notification. If notifications are enabled,
+	 * we reset the state machine, to make it more responsive.
+	 * In addition, we start the browser. .  
+	 * @param intent the intent
+	 * @param enabled set if notifications are enabled 
+	 */
+	protected void tap (Intent intent, boolean enabled)
+	{
+		NotifierStateMachine fsm;
+		
+		openBrowser ();
+		if (enabled) {
+			fsm = new NotifierStateMachine (this);
+
+			feed (fsm, NotifierStateMachine.Event.E_TAP);
+		}
+	}
+
 	/**
 	 * Handler of the {@link #ACTION_ALARM} intent, called when
 	 * a timeout expires. This deserializes the current state machine,
@@ -206,7 +243,7 @@ public class NotificationService
 
 		fsm = new NotifierStateMachine (this, b);
 		
-		feed (fsm, false);
+		feed (fsm, NotifierStateMachine.Event.E_SOLICITED);
 	}
 	
 	/**
@@ -216,11 +253,9 @@ public class NotificationService
 	 * connectivity state changes. The latter case is useful
 	 * to fix temporary errors.
 	 *  @param fsm the state machine
-	 *	@param gratuitous if the this event has not
-	 *		been triggered by a timeout set by the state
-	 *		machine
+	 *	@param event the event that triggered this call
 	 */
-	private void feed (NotifierStateMachine fsm, boolean gratuitous)
+	private void feed (NotifierStateMachine fsm, Event event)
 	{
 		SharedPreferences prefs;
 		UserLogin login;
@@ -238,14 +273,14 @@ public class NotificationService
 			srs = conn.getSRSDistribution ();
 			dd = new DashboardData (sq, srs);
 		} catch (IOException e) {
-			if (gratuitous)
+			if (event == Event.E_UNSOLICITED)
 				return;
 			
 			dd = new DashboardData (e);
 		}
 		
-		fsm.next (dd);
-	}
+		fsm.next (event, dd);
+	}	
 	
 	/**
 	 * Shows the notification icon.
@@ -253,7 +288,6 @@ public class NotificationService
 	 */
 	public void showNotification (int reviews)
 	{
-		SharedPreferences prefs;
 		NotificationManager nmanager;
 		NotificationCompat.Builder builder;
 		Notification not;
@@ -261,12 +295,10 @@ public class NotificationService
 		Intent intent;
 		String text;
 		
-		prefs = PreferenceManager.getDefaultSharedPreferences (this);
-
-		intent = new Intent (Intent.ACTION_VIEW);
-		intent.setData (Uri.parse (SettingsActivity.getURL (prefs)));
+		intent = new Intent (this, NotificationService.class);
+		intent.setAction (ACTION_TAP);
 		
-		pint = PendingIntent.getActivity (this, 0, intent, 0);
+		pint = PendingIntent.getService (this, 0, intent, 0);
 
 		builder = new NotificationCompat.Builder (this);
 		builder.setSmallIcon (R.drawable.not_icon);
@@ -323,5 +355,22 @@ public class NotificationService
 		
 		alarm = (AlarmManager) getSystemService (Context.ALARM_SERVICE);
 		alarm.set (AlarmManager.RTC, date.getTime (), pi);
+	}
+	
+	/**
+	 * Open the browser, showing the reviews page.
+	 */
+	protected void openBrowser ()
+	{		
+		SharedPreferences prefs;
+		Intent intent;
+		
+		prefs = PreferenceManager.getDefaultSharedPreferences (this);
+
+		intent = new Intent (Intent.ACTION_VIEW);
+		intent.setData (Uri.parse (SettingsActivity.getURL (prefs)));
+		intent.setFlags (Intent.FLAG_ACTIVITY_NEW_TASK);
+		
+		startActivity (intent);
 	}
 }

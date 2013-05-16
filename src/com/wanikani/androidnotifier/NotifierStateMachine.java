@@ -77,6 +77,25 @@ public class NotifierStateMachine {
 	/** Retry timeout when it is review time but no reviews are in the
 	 *  queue (this means clock disalignment between the terminal and WaniKani */
 	private static int T_INT_CLOCK_COMPENSATION = 3;
+	
+	/**
+	 * This enum conveys additional info to @link {@link NotifierStateMachine#next(DashboardData)},
+	 * in order to let the state machine know what event triggered the state machine.
+	 */
+	public enum Event {
+		
+		/** The state machine boots */ 
+		E_INITIAL,
+		
+		/** A timeout explicitly set by the state machine */
+		E_SOLICITED,
+		
+		/** Any event of interest to the state machine (connectivity change) */
+		E_UNSOLICITED,
+		
+		/** The user tapping the notification icon */
+		E_TAP	
+	};
 
 	static enum State {
 
@@ -85,8 +104,8 @@ public class NotifierStateMachine {
 		 * available.
 		 */
 		S_NO_REVIEWS {
-			public void enter (NotifierStateMachine fsm, State prev,
-					   			DashboardData ldd, DashboardData cdd) 
+			public void enter (NotifierStateMachine fsm, Event event, 
+								State prev, DashboardData ldd, DashboardData cdd) 
 				{
 					fsm.ifc.hideNotification ();
 					if (cdd.nextReviewDate.after (new Date ()))
@@ -101,10 +120,11 @@ public class NotifierStateMachine {
 		 * pending reviews. Here we have to poll.
 		 */
 		S_REVIEWS_AVAILABLE {			
-				public void enter (NotifierStateMachine fsm, State prev,
-							       DashboardData ldd, DashboardData cdd) 
+				public void enter (NotifierStateMachine fsm, Event event, 
+									State prev, DashboardData ldd, DashboardData cdd) 
 				{
-					if (prev == this && detectActivity (ldd, cdd)) {
+					if (event == Event.E_TAP ||
+						(prev == this && detectActivity (ldd, cdd))) {
 						fsm.ifc.hideNotification ();
 						fsm.schedule (NotifierStateMachine.T_INT_REVIEWING);
 					} else if (prev != this) {
@@ -123,8 +143,8 @@ public class NotifierStateMachine {
 		 * the server anymore. Start polling.
 		 */
 		S_ERROR {
-			public void enter (NotifierStateMachine fsm, State prev,
-				       DashboardData ldd, DashboardData cdd) 
+			public void enter (NotifierStateMachine fsm, Event event, 
+							   State prev, DashboardData ldd, DashboardData cdd) 
 				{
 					if (cdd.e instanceof AuthenticationException)
 						fsm.schedule (NotifierStateMachine.T_CAP_ERROR);
@@ -143,11 +163,12 @@ public class NotifierStateMachine {
 		 * decides how long to wait before triggering a new
 		 * timeout event.
 		 *	@param fsm the state machine
+		 *  @param e the event that triggered the call
 		 *	@param prev the previous state (may be self)
 		 *	@param ldd the previous study queue data (or null)
 		 *	@param cdd the current study queue data
 		 */
-		public abstract void enter (NotifierStateMachine fsm, State prev,
+		public abstract void enter (NotifierStateMachine fsm, Event e, State prev,
 						   			DashboardData ldd, DashboardData cdd);	 
 
 		/**
@@ -239,9 +260,10 @@ public class NotifierStateMachine {
 	/**
 	 * Called when a timeout (or network connectivity change) event
 	 * is triggered <i>and</i> study queue data is available
+	 *  @param event the kind of event
 	 *	@param dd the study queue
 	 */
-	public void next (DashboardData dd)
+	public void next (Event event, DashboardData dd)
 	{
 		State cstate, llstate;
 		DashboardData lldd;
@@ -263,7 +285,7 @@ public class NotifierStateMachine {
 		lstate = cstate;
 		ldd = dd;
 		
-		cstate.enter (this, llstate, lldd, dd);
+		cstate.enter (this, event, llstate, lldd, dd);
 	}
 	
  	/**
