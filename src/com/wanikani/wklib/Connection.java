@@ -11,6 +11,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
+import android.graphics.BitmapFactory;
+
 /* 
  *  Copyright (c) 2013 Alberto Cuda
  *
@@ -69,7 +71,19 @@ public class Connection {
 	public UserInformation getUserInformation ()
 		throws IOException
 	{
-		return call ("user-information").ui;
+		return getUserInformation (false);		
+	}
+	
+	public UserInformation getUserInformation (boolean resolveGravatar)
+		throws IOException
+	{
+		UserInformation ui;
+		
+		ui = call ("user-information").ui;
+		if (resolveGravatar)
+			resolve (ui);
+		
+		return ui;
 	}	
 
 	public StudyQueue getStudyQueue ()
@@ -151,6 +165,26 @@ public class Connection {
 		}
 	}
 		
+	protected void resolve (UserInformation ui)
+	{
+			HttpURLConnection conn;
+			InputStream is;
+			URL url;
+			
+			conn = null;
+			try {
+				url = new URL (config.gravatarUrl + "/" + ui.gravatar);
+				conn = (HttpURLConnection) url.openConnection ();
+				is = conn.getInputStream ();
+				ui.gravatarBitmap = BitmapFactory.decodeStream (is);
+			} catch (IOException e) {
+				/* empty */
+			} finally {
+				if (conn != null)
+					conn.disconnect ();
+			}
+	}
+
 	private String makeURL (String resource, String arg)
 	{
 		String ans;

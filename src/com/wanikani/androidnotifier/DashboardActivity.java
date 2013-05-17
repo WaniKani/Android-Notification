@@ -16,7 +16,7 @@ import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.ProgressBar;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.wanikani.wklib.AuthenticationException;
@@ -24,6 +24,7 @@ import com.wanikani.wklib.Connection;
 import com.wanikani.wklib.SRSDistribution;
 import com.wanikani.wklib.StudyQueue;
 import com.wanikani.wklib.UserLogin;
+import com.wanikani.wklib.UserInformation;
 
 /* 
  *  Copyright (c) 2013 Alberto Cuda
@@ -113,11 +114,8 @@ public class DashboardActivity extends Activity implements Runnable {
 		@Override
 		protected void onPreExecute ()
 		{
-			if (dd != null) {
-				spin (true);
+			if (dd != null)
 				status (R.string.status_msg_retrieving);
-			} else
-				spinTheWorld (true);
 		}
 		
 		/**
@@ -130,13 +128,15 @@ public class DashboardActivity extends Activity implements Runnable {
 		protected DashboardData doInBackground (Connection... conn)
 		{
 			DashboardData dd;
+			UserInformation ui;
 			StudyQueue sq;
 			SRSDistribution srs;
 			
 			try {
+				ui = conn [0].getUserInformation (true);
 				sq = conn [0].getStudyQueue ();
 				srs = conn [0].getSRSDistribution ();
-				dd = new DashboardData (sq, srs);
+				dd = new DashboardData (ui, sq, srs);
 			} catch (IOException e) {
 				dd = new DashboardData (e);
 			}
@@ -161,9 +161,6 @@ public class DashboardActivity extends Activity implements Runnable {
 				status (R.string.status_msg_unauthorized);
 			} catch (IOException e) {
 				status (R.string.status_msg_error);
-			} finally {
-				spin (false);
-				spinTheWorld (false);
 			}
 		}
 	}
@@ -224,7 +221,7 @@ public class DashboardActivity extends Activity implements Runnable {
 		SharedPreferences prefs;
 		
 	    super.onCreate (bundle);
-	    		
+	    
 	    registerIntents ();
 	    setContentView(R.layout.dashboard);
 	    alarm = new Alarm ();
@@ -406,11 +403,22 @@ public class DashboardActivity extends Activity implements Runnable {
 	 */
 	private void refreshComplete (DashboardData dd)
 	{
+		ImageView iw;
 		TextView tw;
 
 		this.dd = dd;
 		
 		rtask = null;
+
+		iw = (ImageView) findViewById (R.id.iv_gravatar);
+		iw.setImageBitmap (dd.gravatar);
+
+		tw = (TextView) findViewById (R.id.tv_username);
+		tw.setText (dd.username);
+
+		tw = (TextView) findViewById (R.id.tv_title);
+		tw.setText (dd.title);
+
 		tw = (TextView) findViewById (R.id.reviews_val);
 		tw.setText (Integer.toString (dd.reviewsAvailable));
 		
@@ -428,21 +436,6 @@ public class DashboardActivity extends Activity implements Runnable {
 		
 		tw = (TextView) findViewById (R.id.next_day_val);
 		tw.setText (Integer.toString (dd.reviewsAvailableNextDay));
-		
-		tw = (TextView) findViewById (R.id.apprentice_val);
-		tw.setText (Integer.toString (dd.apprentice));
-		
-		tw = (TextView) findViewById (R.id.guru_val);
-		tw.setText (Integer.toString (dd.guru));
-
-		tw = (TextView) findViewById (R.id.master_val);
-		tw.setText (Integer.toString (dd.master));
-
-		tw = (TextView) findViewById (R.id.enlightened_val);
-		tw.setText (Integer.toString (dd.enlighten));
-
-		tw = (TextView) findViewById (R.id.burned_val);
-		tw.setText (Integer.toString (dd.burned));
 		
 		alarm.schedule (this, T_INT_AUTOREFRESH);
 	}
@@ -475,56 +468,7 @@ public class DashboardActivity extends Activity implements Runnable {
 		tw = (TextView) findViewById (R.id.tv_alert);
 		tw.setText (id);		
 	}
-
-	/**
-	 * Show or hide the spinner.
-	 * @param enable true if should be shown
-	 */
-	private void spin (boolean enable)
-	{
-		ProgressBar pb;
-		
-		pb = (ProgressBar) findViewById (R.id.pb_status);
-		pb.setVisibility (enable ? ProgressBar.VISIBLE : ProgressBar.INVISIBLE);
-	}
 	
-	/**
-	 * Show or hide the spinners placed "above" the data.
-	 * @param enable true if they should be shown
-	 */
-	private void spinTheWorld (boolean enable)
-	{
-		spinField (enable, R.id.pb_lessons, R.id.lessons_val);
-		spinField (enable, R.id.pb_reviews, R.id.reviews_val);
-		
-		spinField (enable, R.id.pb_next_hour, R.id.lessons_val);
-		spinField (enable, R.id.pb_next_day, R.id.lessons_val);
-
-		spinField (enable, R.id.pb_apprentice, R.id.apprentice_val);
-		spinField (enable, R.id.pb_guru, R.id.guru_val);
-		spinField (enable, R.id.pb_master, R.id.master_val);
-		spinField (enable, R.id.pb_enlightened, R.id.enlightened_val);
-		spinField (enable, R.id.pb_burned, R.id.burned_val);
-	}
-	
-	/**
-	 * Show or hide a single spinner place above a single field.
-	 * @param enable true if it should be shown
-	 * @param pbid spinner on the field
-	 * @param fid  the field 
-	 */
-	private void spinField (boolean enable, int pbid, int fid)
-	{
-		ProgressBar pb; 
-		TextView tv;
-		
-		pb = (ProgressBar) findViewById (pbid);
-		pb.setVisibility (enable ? ProgressBar.VISIBLE : ProgressBar.GONE);
-
-		tv = (TextView) findViewById (fid);
-		tv.setVisibility (enable ? ProgressBar.GONE : ProgressBar.VISIBLE);
-	}
-
 	/**
 	 * Pretty-prints a date. This implementation tries to mimic the WaniKani website,
 	 * by returning an approximate interval. 

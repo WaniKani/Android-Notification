@@ -3,10 +3,12 @@ package com.wanikani.androidnotifier;
 import java.io.IOException;
 import java.util.Date;
 
+import android.graphics.Bitmap;
 import android.os.Bundle;
 
 import com.wanikani.wklib.SRSDistribution;
 import com.wanikani.wklib.StudyQueue;
+import com.wanikani.wklib.UserInformation;
 
 /* 
  *  Copyright (c) 2013 Alberto Cuda
@@ -33,6 +35,10 @@ import com.wanikani.wklib.StudyQueue;
 class DashboardData {
 	
 	private static final String PREFIX = "com.wanikani.wanikaninotifier.DashboardData.";
+
+	private static final String KEY_USERNAME = PREFIX + "username";
+	private static final String KEY_TITLE = PREFIX + "title";
+	private static final String KEY_GRAVATAR = PREFIX + "gravatar";
 	
 	private static final String KEY_LESSONS_AVAILABLE = PREFIX + "lessons_available";
 	private static final String KEY_REVIEWS_AVAILABLE = PREFIX + "reviews_available";
@@ -53,6 +59,12 @@ class DashboardData {
 	
 	public Date nextReviewDate;
 	
+	public String username;
+	
+	public String title;
+	
+	public Bitmap gravatar;
+	
 	public int reviewsAvailableNextHour;
 	
 	public int reviewsAvailableNextDay;
@@ -72,11 +84,17 @@ class DashboardData {
 	/**
 	 * Constructor. An instance is created from the information returned
 	 * by the WaniKani API.
+	 * @param ui the user information
 	 * @param sq the study queue
 	 * @param srs the SRS distribution info
 	 */
-	public DashboardData (StudyQueue sq, SRSDistribution srs)
+	public DashboardData (UserInformation ui, StudyQueue sq, SRSDistribution srs)
 	{
+		if (ui != null) {
+			username = ui.username;
+			title = ui.title;
+			gravatar = ui.gravatarBitmap;
+		}
 		reviewsAvailable = sq.reviewsAvailable;
 		nextReviewDate = sq.nextReviewDate;
 		reviewsAvailableNextHour = sq.reviewsAvailableNextHour;
@@ -124,6 +142,9 @@ class DashboardData {
 	 */
 	public void serialize (Bundle bundle)
 	{
+		bundle.putString (KEY_USERNAME, username);
+		bundle.putString (KEY_TITLE, title);
+		
 		bundle.putInt (KEY_LESSONS_AVAILABLE, lessonsAvailable);
 		bundle.putInt (KEY_REVIEWS_AVAILABLE, reviewsAvailable);
 		if (nextReviewDate != null)
@@ -147,6 +168,9 @@ class DashboardData {
 	 */
 	public void deserialize (Bundle bundle)
 	{		
+		username = bundle.getString (KEY_USERNAME);
+		title = bundle.getString (KEY_TITLE);
+		
 		lessonsAvailable = bundle.getInt (KEY_LESSONS_AVAILABLE);
 		reviewsAvailable = bundle.getInt (KEY_REVIEWS_AVAILABLE);
 		if (bundle.containsKey (KEY_NEXT_REVIEW_DATE))

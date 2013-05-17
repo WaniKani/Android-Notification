@@ -236,7 +236,7 @@ public class NotificationService
 		try {
 			sq = conn.getStudyQueue ();
 			srs = conn.getSRSDistribution ();
-			dd = new DashboardData (sq, srs);
+			dd = new DashboardData (null, sq, srs);
 		} catch (IOException e) {
 			if (gratuitous)
 				return;

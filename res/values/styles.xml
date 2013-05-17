@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
      <!--
         Base application theme, dependent on API level. This theme is replaced
         by AppBaseTheme from res/values-vXX/styles.xml on newer devices.
@@ -15,6 +15,22 @@
     <style name="AppTheme" parent="AppBaseTheme">
         <!-- All customizations that are NOT specific to a particular API-level can go here. -->
     </style>
+    <style name="Background" parent="AppTheme">
+        <item name="android:background">@drawable/wool</item>
+    </style>
+    <style name="Heading" parent="AppTheme">
+        <item name="android:background">@drawable/blue</item>
+    </style>
+    <style name="Username" parent="AppTheme">
+		<item name="android:textAppearance">?android:attr/textAppearanceLarge</item>
+        <item name="android:textColor">#ffffff</item>
+        <item name="android:textStyle">bold</item>        
+		</style>
+    <style name="UserTitle" parent="AppTheme">
+		<item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
+        <item name="android:textColor">#ffffff</item>
+        <item name="android:textStyle">italic</item>        
+        </style>
     <style parent="AppTheme" name="Table">
         <item name="android:layout_margin">5dp</item>
         <item name="android:padding">5dp</item>
