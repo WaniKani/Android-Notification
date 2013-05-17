@@ -71,21 +71,27 @@ class DashboardData {
 		
 	/**
 	 * Constructor. An instance is created from the information returned
-	 * by the WaniKani API.
+	 * by the WaniKani API. Any of the arguments may be null; in that
+	 * case its corresponding field values will be unspecified
 	 * @param sq the study queue
 	 * @param srs the SRS distribution info
 	 */
 	public DashboardData (StudyQueue sq, SRSDistribution srs)
 	{
-		reviewsAvailable = sq.reviewsAvailable;
-		nextReviewDate = sq.nextReviewDate;
-		reviewsAvailableNextHour = sq.reviewsAvailableNextHour;
-		reviewsAvailableNextDay = sq.reviewsAvailableNextDay;
-		apprentice = srs.apprentice.total;
-		guru = srs.guru.total;
-		master = srs.master.total;
-		enlighten = srs.enlighten.total;
-		burned = srs.burned.total;
+		if (sq != null) {
+			reviewsAvailable = sq.reviewsAvailable;
+			nextReviewDate = sq.nextReviewDate;
+			reviewsAvailableNextHour = sq.reviewsAvailableNextHour;
+			reviewsAvailableNextDay = sq.reviewsAvailableNextDay;
+		}
+		
+		if (srs != null) {
+			apprentice = srs.apprentice.total;
+			guru = srs.guru.total;
+			master = srs.master.total;
+			enlighten = srs.enlighten.total;
+			burned = srs.burned.total;
+		}
 	}
 		
 	/**

@@ -34,8 +34,11 @@
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
                 <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
             </intent-filter>
-        </receiver>
-
-        </application>
+     		<intent-filter>
+        		<action android:name="android.intent.action.PACKAGE_REPLACED"/>
+        		<data android:scheme="package" android:path="com.wanikani.androidnotifier" />
+      		</intent-filter>
+      </receiver>
+      </application>
 
 </manifest>

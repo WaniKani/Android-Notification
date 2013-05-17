@@ -65,7 +65,8 @@ public class NotificationService
 	 * 			state changes.  This is useful to quickly fix IO errors,
 	 * 			bypassing the exponential backoff algorithm the FSM would
 	 * 			use.
-	 * 
+	 *  <li><code>PACKAGE_REPLACED</code> to restart the notifier after
+	 *  		our package gets updated
 	 */
 	public static class Receiver extends BroadcastReceiver {
 	 
@@ -79,12 +80,14 @@ public class NotificationService
 	    {
 			String action, sAction;
 			Intent sIntent;
-			
+						
 			action = intent.getAction ();
 			if (action.equals (Intent.ACTION_BOOT_COMPLETED))
 				sAction = ACTION_BOOT_COMPLETED;
 			else if (action.equals (ConnectivityManager.CONNECTIVITY_ACTION))
 				sAction = ACTION_CONNECTIVITY_CHANGE;
+			else if (action.equals (Intent.ACTION_PACKAGE_REPLACED))
+				sAction = ACTION_BOOT_COMPLETED;
 			else
 				return;
 			
@@ -262,7 +265,6 @@ public class NotificationService
 		Connection conn;
 		DashboardData dd;
 		StudyQueue sq;
-		SRSDistribution srs;
 		
 		prefs = PreferenceManager.getDefaultSharedPreferences (this);
 		login = SettingsActivity.getLogin (prefs);
@@ -270,8 +272,7 @@ public class NotificationService
 		conn = new Connection (login);
 		try {
 			sq = conn.getStudyQueue ();
-			srs = conn.getSRSDistribution ();
-			dd = new DashboardData (sq, srs);
+			dd = new DashboardData (sq, null);
 		} catch (IOException e) {
 			if (event == Event.E_UNSOLICITED)
 				return;
@@ -294,7 +295,7 @@ public class NotificationService
 		PendingIntent pint;
 		Intent intent;
 		String text;
-		
+			
 		intent = new Intent (this, NotificationService.class);
 		intent.setAction (ACTION_TAP);
 		
@@ -302,6 +303,7 @@ public class NotificationService
 
 		builder = new NotificationCompat.Builder (this);
 		builder.setSmallIcon (R.drawable.not_icon);
+		
 		text = String.format (getString (reviews == 1 ? 
 						 R.string.new_review : R.string.new_reviews), reviews);
 		builder.setContentTitle (getString (R.string.app_name));
