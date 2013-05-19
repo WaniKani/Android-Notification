@@ -10,6 +10,13 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -23,8 +30,8 @@ import com.wanikani.wklib.AuthenticationException;
 import com.wanikani.wklib.Connection;
 import com.wanikani.wklib.SRSDistribution;
 import com.wanikani.wklib.StudyQueue;
-import com.wanikani.wklib.UserLogin;
 import com.wanikani.wklib.UserInformation;
+import com.wanikani.wklib.UserLogin;
 
 /* 
  *  Copyright (c) 2013 Alberto Cuda
@@ -131,9 +138,13 @@ public class DashboardActivity extends Activity implements Runnable {
 			UserInformation ui;
 			StudyQueue sq;
 			SRSDistribution srs;
+			int size;
+
+			size = getResources ().getDimensionPixelSize (R.dimen.m_avatar_size);
 			
 			try {
-				ui = conn [0].getUserInformation (true);
+				ui = conn [0].getUserInformation ();
+				conn [0].resolve (ui, size);
 				sq = conn [0].getStudyQueue ();
 				srs = conn [0].getSRSDistribution ();
 				dd = new DashboardData (ui, sq, srs);
@@ -156,6 +167,7 @@ public class DashboardActivity extends Activity implements Runnable {
 			try {
 				dd.wail ();
 				status (R.string.status_msg_success);
+			    setContentView (R.layout.dashboard);	    	
 				refreshComplete (dd);
 			} catch (AuthenticationException e) {
 				status (R.string.status_msg_unauthorized);
@@ -223,7 +235,6 @@ public class DashboardActivity extends Activity implements Runnable {
 	    super.onCreate (bundle);
 	    
 	    registerIntents ();
-	    setContentView(R.layout.dashboard);
 	    alarm = new Alarm ();
 
 	    prefs = PreferenceManager.getDefaultSharedPreferences (this);
@@ -231,10 +242,13 @@ public class DashboardActivity extends Activity implements Runnable {
 	    	settings ();
 	    
 	    conn = new Connection (SettingsActivity.getLogin (prefs));
-	    if (bundle == null || !bundle.containsKey (BUNDLE_VALID))
+	    if (bundle == null || !bundle.containsKey (BUNDLE_VALID)) {
 	    	refresh ();
-	    else
+		    setContentView (R.layout.splash);	    	
+	    } else {
+		    setContentView (R.layout.dashboard);	    	
 	    	refreshComplete (new DashboardData (bundle));
+	    }
 	}
 	
 	/**
@@ -411,7 +425,8 @@ public class DashboardActivity extends Activity implements Runnable {
 		rtask = null;
 
 		iw = (ImageView) findViewById (R.id.iv_gravatar);
-		iw.setImageBitmap (dd.gravatar);
+		if (dd.gravatar != null)
+			iw.setImageBitmap (mask (dd.gravatar));
 
 		tw = (TextView) findViewById (R.id.tv_username);
 		tw.setText (dd.username);
@@ -438,6 +453,34 @@ public class DashboardActivity extends Activity implements Runnable {
 		tw.setText (Integer.toString (dd.reviewsAvailableNextDay));
 		
 		alarm.schedule (this, T_INT_AUTOREFRESH);
+	}
+
+	/**
+	 * Apply a circular mask on the given bitmap. This method is
+	 * used to display the avatar.
+	 * @param bmp an input bitmap
+	 * @param result the output (masked) bitmap
+	 */
+	private Bitmap mask (Bitmap bmp)
+	{
+		Bitmap result, mask;
+		Drawable dmask;
+		Canvas canvas;
+		Paint paint;
+
+		result = Bitmap.createBitmap (bmp.getWidth (), bmp.getHeight (),
+									  Bitmap.Config.ARGB_8888);
+		canvas = new Canvas (result);
+		
+		dmask = getResources ().getDrawable (R.drawable.gravatar_mask);
+		mask = ((BitmapDrawable) dmask).getBitmap ();
+		
+		paint = new Paint (Paint.ANTI_ALIAS_FLAG);
+		paint.setXfermode (new PorterDuffXfermode (PorterDuff.Mode.DST_IN));
+		canvas.drawBitmap (bmp, 0, 0, null);
+		canvas.drawBitmap (mask, 0, 0, paint);
+		
+		return result;
 	}
 	
 	/**
@@ -466,7 +509,9 @@ public class DashboardActivity extends Activity implements Runnable {
 		TextView tw;
 		
 		tw = (TextView) findViewById (R.id.tv_alert);
-		tw.setText (id);		
+		/* The status line is not available on all the activities */
+		if (tw != null)
+			tw.setText (id);		
 	}
 	
 	/**

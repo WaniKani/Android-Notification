@@ -20,6 +20,8 @@
     <string name="tag_master">Master</string>
     <string name="tag_burned">Burned</string>
     <string name="tag_gravatar">Gravatar</string>
+    <string name="tag_loading">Loading&#8230;</string>
+    
     <string name="em_refresh">Refresh</string>
     <string name="em_settings">Settings</string>
     <string name="pref_enabled_descr">Show event icon when reviews are pending</string>

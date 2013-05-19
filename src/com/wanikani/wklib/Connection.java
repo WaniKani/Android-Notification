@@ -71,19 +71,7 @@ public class Connection {
 	public UserInformation getUserInformation ()
 		throws IOException
 	{
-		return getUserInformation (false);		
-	}
-	
-	public UserInformation getUserInformation (boolean resolveGravatar)
-		throws IOException
-	{
-		UserInformation ui;
-		
-		ui = call ("user-information").ui;
-		if (resolveGravatar)
-			resolve (ui);
-		
-		return ui;
+		return call ("user-information").ui;
 	}	
 
 	public StudyQueue getStudyQueue ()
@@ -165,7 +153,7 @@ public class Connection {
 		}
 	}
 		
-	protected void resolve (UserInformation ui)
+	public void resolve (UserInformation ui, int size)
 	{
 			HttpURLConnection conn;
 			InputStream is;
@@ -173,7 +161,7 @@ public class Connection {
 			
 			conn = null;
 			try {
-				url = new URL (config.gravatarUrl + "/" + ui.gravatar);
+				url = new URL (config.gravatarUrl + "/" + ui.gravatar + "?s=" + size);
 				conn = (HttpURLConnection) url.openConnection ();
 				is = conn.getInputStream ();
 				ui.gravatarBitmap = BitmapFactory.decodeStream (is);

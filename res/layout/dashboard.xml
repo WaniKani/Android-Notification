@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/scrollView1"
     style="@style/Background"
-    android:id="@+id/scrollView1"    
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
@@ -13,47 +13,58 @@
         android:orientation="vertical" >
 
 		<LinearLayout
-		    style="@style/Heading"
 		    android:layout_width="match_parent"
-		    android:layout_height="96dp"
+		    android:layout_height="wrap_content"
 		    android:orientation="horizontal" >
+	   		<RelativeLayout
+        	    android:id="@+id/rl_gravatar"
+        	    android:layout_width="@dimen/m_gravatar_frame"
+        	    android:layout_height="@dimen/m_gravatar_frame" >
 
-        	<ImageView
-        	    android:id="@+id/iv_gravatar"
-        	    android:layout_width="96dp"
-        	    android:layout_height="96dp"
-        	    android:contentDescription="@string/tag_gravatar"
-        	    android:src="@drawable/default_avatar" />
+        	    <ImageView
+        	        android:layout_width="wrap_content"
+        	        android:layout_height="wrap_content"
+        	        android:layout_alignParentLeft="true"
+        	        android:layout_alignParentTop="true"
+        	        android:src="@drawable/gravatar_frame" />
 
+		    	<ImageView
+		    	    android:id="@+id/iv_gravatar"
+		    	    android:layout_width="@dimen/m_avatar_size"
+		    	    android:layout_height="@dimen/m_avatar_size"
+		    	    android:layout_centerInParent="true"
+		    	    android:layout_margin="@dimen/m_gap"
+		    	    android:contentDescription="@string/tag_gravatar"
+		    	    android:src="@drawable/default_avatar" />
+		</RelativeLayout>
 			<LinearLayout
+			    style="@style/Heading"
 			    android:layout_width="fill_parent"
-			    android:layout_height="match_parent"
-			    android:layout_margin="4dp"
+			    android:layout_height="@dimen/m_header"
 			    android:layout_weight="1"
-			    android:orientation="vertical" >
+			    android:orientation="vertical"
+			    android:padding="@dimen/m_half_gap" >
 
 				<TextView
 				    android:id="@+id/tv_username"
 				    style="@style/Username"
 				    android:layout_width="match_parent"
-				    android:layout_height="48dp"
+				    android:layout_height="@dimen/m_rythm"
 				    android:gravity="center_vertical|center_horizontal"
-				    android:text="username" />
+				    android:text="" />
 
 			    <TextView
 			        android:id="@+id/tv_title"
 			        style="@style/UserTitle"
 			        android:layout_width="match_parent"
-			        android:layout_height="48dp"
+			        android:layout_height="@dimen/m_rythm"
 			        android:layout_gravity="center"
 			        android:gravity="right|center_vertical"
-			        android:text="title" />
+			        android:text="" />
 
 			</LinearLayout>
-			    	
-        	
+			    	        	
         </LinearLayout>    
-        
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
