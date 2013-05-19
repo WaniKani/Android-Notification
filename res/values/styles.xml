@@ -26,6 +26,11 @@
         <item name="android:textStyle">italic</item>                
     </style>
     
+    <!-- Error Screen  -->
+    <style name="Error" parent="AppTheme">
+		<item name="android:textAppearance">?android:attr/textAppearanceLarge</item>
+    </style>
+    
     <!-- Dashboard -->
     <style name="Heading" parent="AppTheme">
         <item name="android:background">@drawable/blue</item>

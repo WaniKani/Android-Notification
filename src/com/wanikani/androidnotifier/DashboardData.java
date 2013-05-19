@@ -38,7 +38,6 @@ class DashboardData {
 
 	private static final String KEY_USERNAME = PREFIX + "username";
 	private static final String KEY_TITLE = PREFIX + "title";
-	private static final String KEY_GRAVATAR = PREFIX + "gravatar";
 	
 	private static final String KEY_LESSONS_AVAILABLE = PREFIX + "lessons_available";
 	private static final String KEY_REVIEWS_AVAILABLE = PREFIX + "reviews_available";

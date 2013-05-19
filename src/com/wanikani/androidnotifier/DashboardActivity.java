@@ -27,6 +27,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.wanikani.wklib.AuthenticationException;
@@ -122,13 +123,11 @@ public class DashboardActivity extends Activity implements Runnable {
 		
 		/**
 		 * Called before starting the task, inside the activity thread.
-		 * Updates the status message.
 		 */
 		@Override
 		protected void onPreExecute ()
 		{
-			if (dd != null)
-				status (R.string.status_msg_retrieving);
+			startRefresh ();
 		}
 		
 		/**
@@ -173,13 +172,11 @@ public class DashboardActivity extends Activity implements Runnable {
 		{
 			try {
 				dd.wail ();
-				status (R.string.status_msg_success);
-			    setContentView (R.layout.dashboard);	    	
 				refreshComplete (dd);
 			} catch (AuthenticationException e) {
-				status (R.string.status_msg_unauthorized);
+				error (R.string.status_msg_unauthorized);
 			} catch (IOException e) {
-				status (R.string.status_msg_error);
+				error (R.string.status_msg_error);
 			}
 		}
 	}
@@ -249,13 +246,10 @@ public class DashboardActivity extends Activity implements Runnable {
 	    	settings ();
 	    
 	    conn = new Connection (SettingsActivity.getLogin (prefs));
-	    if (bundle == null || !bundle.containsKey (BUNDLE_VALID)) {
+	    if (bundle == null || !bundle.containsKey (BUNDLE_VALID))
 	    	refresh ();
-		    setContentView (R.layout.splash);	    	
-	    } else {
-		    setContentView (R.layout.dashboard);	    	
+	    else
 	    	refreshComplete (new DashboardData (bundle));
-	    }
 	}
 	
 	/**
@@ -283,8 +277,8 @@ public class DashboardActivity extends Activity implements Runnable {
 	public void onResume ()
 	{
 		super.onResume ();
-		
-		alarm.screenOn ();
+				
+	    alarm.screenOn ();
 	}
 	
 	/**
@@ -406,7 +400,7 @@ public class DashboardActivity extends Activity implements Runnable {
 	}
 
 	/**
-	 * Called when the GUI needs to be refreshed.
+	 * Called when the GUI needs to be refreshed. 
 	 * It starts an asynchrous task that actually performs the job.
 	 */
 	private void refresh ()
@@ -483,6 +477,11 @@ public class DashboardActivity extends Activity implements Runnable {
 	{
 		ImageView iw;
 		TextView tw;
+
+		if (this.dd == null)
+			setContentView (R.layout.dashboard);
+		else
+			spin (false);
 
 		this.dd = dd;
 		
@@ -568,19 +567,50 @@ public class DashboardActivity extends Activity implements Runnable {
 	}
 
 	/**
-	 * Updates the status line.
+	 * Called when retrieveing data from WaniKani. Updates the 
+	 * status message or switches to the splash screen, depending
+	 * on the current state  
+	 */
+	private void startRefresh ()
+	{
+		if (dd == null)
+			setContentView (R.layout.splash);
+		else
+			spin (true);
+	}
+
+	/**
+	 * Displays an error message, choosing the best way to do that.
+	 * If we did not gather any stats, the only thing we can do is to display
+	 * the error page and hope for the best
 	 * @param id resource string ID
 	 */
-	private void status (int id)
+	private void error (int id)
 	{
 		TextView tw;
+	
+		if (dd == null)
+			setContentView (R.layout.error);
+		else
+			spin (false);
 		
 		tw = (TextView) findViewById (R.id.tv_alert);
-		/* The status line is not available on all the activities */
 		if (tw != null)
-			tw.setText (id);		
+			tw.setText (id);
 	}
 	
+	/**
+	 * Show or hide the spinner.
+	 * @param enable true if should be shown
+	 */
+	private void spin (boolean enable)
+	{
+		ProgressBar pb;
+		
+		pb = (ProgressBar) findViewById (R.id.pb_status);
+		pb.setVisibility (enable ? ProgressBar.VISIBLE : ProgressBar.INVISIBLE);
+	}
+
 	/**
 	 * Pretty-prints a date. This implementation tries to mimic the WaniKani website,
 	 * by returning an approximate interval. 
