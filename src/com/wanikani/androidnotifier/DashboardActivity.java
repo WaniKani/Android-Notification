@@ -1,6 +1,8 @@
 package com.wanikani.androidnotifier;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Date;
 
 import android.app.Activity;
@@ -11,6 +13,7 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
@@ -64,6 +67,9 @@ public class DashboardActivity extends Activity implements Runnable {
 
 	/*** The auto-refresh time (milliseconds) */
 	public static final int T_INT_AUTOREFRESH = 5 * 60 * 1000;
+	
+	/*** The avatar bitmap filename */
+	private static final String AVATAR_FILENAME = "avatar.png";
 		
 	/**
 	 * A receiver that gets notifications when 
@@ -148,6 +154,7 @@ public class DashboardActivity extends Activity implements Runnable {
 				sq = conn [0].getStudyQueue ();
 				srs = conn [0].getSRSDistribution ();
 				dd = new DashboardData (ui, sq, srs);
+				saveAvatar (dd);
 			} catch (IOException e) {
 				dd = new DashboardData (e);
 			}
@@ -411,6 +418,63 @@ public class DashboardActivity extends Activity implements Runnable {
 	}
 	
 	/**
+	 * Stores the avatar locally. Needed to avoid storing it into the
+	 * bundle. Useful also to have a fallback when we can't reach the
+	 * server.
+	 * @param dd the data, containing a valid avatar bitmap. If null, this
+	 * 	method does nothing
+	 */
+	protected void saveAvatar (DashboardData dd)
+	{
+		OutputStream os;
+		
+		if (dd == null)
+			return;
+		
+		os = null;
+		try {
+			os = openFileOutput (AVATAR_FILENAME, Context.MODE_PRIVATE);
+			dd.gravatar.compress(Bitmap.CompressFormat.PNG, 90, os);
+		} catch (IOException e) {
+			/* Life goes on... */
+		} finally {
+			try {
+				if (os != null)
+					os.close ();
+			} catch (IOException e) {
+				/* Probably next decode will go wrong */
+			}
+		}
+	}
+	
+	/**
+	 * Restores the avatar from local storage.
+	 * @param dd the data, that will be filled with the bitmap, if everything
+	 * 	goes fine
+	 */
+	protected void restoreAvatar (DashboardData dd)
+	{
+		InputStream is;
+		
+		if (dd == null)
+			return;
+		
+		is= null;
+		try {
+			is = openFileInput (AVATAR_FILENAME);
+			dd.gravatar = BitmapFactory.decodeStream (is);
+		} catch (IOException e) {
+			/* Life goes on... */
+		} finally {
+			try {
+				if (is != null)
+					is.close ();
+			} catch (IOException e) {
+				/* At least we tried */
+			}
+		}
+	}
+	/**
 	 * Called by {@link RefreshTask} when asynchronous data 
 	 * retrieval is completed.
 	 * @param dd the retrieved data
@@ -425,6 +489,9 @@ public class DashboardActivity extends Activity implements Runnable {
 		rtask = null;
 
 		iw = (ImageView) findViewById (R.id.iv_gravatar);
+		if (dd.gravatar == null)
+			restoreAvatar (dd);
+		
 		if (dd.gravatar != null)
 			iw.setImageBitmap (mask (dd.gravatar));
 
