@@ -82,7 +82,8 @@
                 style="@style/LabelNextReviewVal"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:textIsSelectable="true" />
+                android:clickable="true"
+                android:textIsSelectable="true"/>
         </LinearLayout>
 
         <TableLayout

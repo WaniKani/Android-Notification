@@ -24,8 +24,11 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
+import android.text.Html;
+import android.text.method.LinkMovementMethod;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -180,6 +183,26 @@ public class DashboardActivity extends Activity implements Runnable {
 			}
 		}
 	}
+	
+	/**
+	 * A listener that intercepts clicks on "Available now" link.
+	 * We need to do that because it's reasonable to hide the notification
+	 * icon.
+	 */
+	private class ClickListener implements View.OnClickListener {
+				
+		@Override
+		public void onClick (View v)
+		{
+			Intent intent;
+			
+			intent = new Intent (DashboardActivity.this, NotificationService.class);
+			
+			intent.setAction (NotificationService.ACTION_HIDE_NOTIFICATION);
+
+			startService (intent);
+		}
+	};
 
 	/** The key checked by {@link #onCreate} to make 
 	 *  sure that the statistics contained in the bundle are valid
@@ -207,6 +230,9 @@ public class DashboardActivity extends Activity implements Runnable {
 	
 	/** The object that notifies us when the refresh timeout expires */
 	Alarm alarm;
+	
+	/** The object that listens for "Available now" click events */
+	ClickListener clickListener;
 	
 	/**
 	 * Constructor.
@@ -240,7 +266,8 @@ public class DashboardActivity extends Activity implements Runnable {
 	    
 	    registerIntents ();
 	    alarm = new Alarm ();
-
+	    clickListener = new ClickListener ();
+	    
 	    prefs = PreferenceManager.getDefaultSharedPreferences (this);
 	    if (!SettingsActivity.credentialsAreValid (prefs))
 	    	settings ();
@@ -507,7 +534,9 @@ public class DashboardActivity extends Activity implements Runnable {
 		tw.setText (R.string.tag_next_review);
 		
 		tw = (TextView) findViewById (R.id.tv_next_review_val);
-		tw.setText (niceInterval (dd.nextReviewDate));
+		tw.setText (Html.fromHtml (niceInterval (dd.nextReviewDate)));		
+		tw.setMovementMethod (LinkMovementMethod.getInstance ());
+		tw.setOnClickListener (clickListener);
 		
 		tw = (TextView) findViewById (R.id.lessons_val);
 		tw.setText (Integer.toString (dd.lessonsAvailable));

@@ -36,7 +36,9 @@
     <string name="fmt_X_minutes">%d minutes</string>
     <string name="fmt_one_minute">~1 minute</string>
     <string name="fmt_seconds">&lt;1 minute</string>
-    <string name="fmt_available_now">Available now</string>
+    <string name="fmt_available_now">
+        &lt;a href="http://www.wanikani.com/review"&gt;Available now&lt;/a&gt;        
+    </string>
 
     <string name="fmt_title">Sect of %s</string>
     

@@ -117,6 +117,11 @@ public class NotificationService
 	public static final String ACTION_ALARM = 
 			PREFIX + "ALARM";
 
+	/** Called by @link DashboardActivity when the notification icon needs to
+	 *  be hiddn  */
+	public static final String ACTION_HIDE_NOTIFICATION = 
+			PREFIX + "HIDE_NOTIFICATION";
+
 	/** The ID associated to the notification icon. Since we can
 	 *  only display one notification at a time, this is a
 	 *  constant */
@@ -146,11 +151,16 @@ public class NotificationService
 		SharedPreferences prefs;
 		String action;
 		
+		action = intent.getAction ();
+		if (action.equals (ACTION_HIDE_NOTIFICATION)) {
+			hideNotification ();
+			return;
+		}
+		
 		prefs = PreferenceManager.getDefaultSharedPreferences (this);
 		if (!SettingsActivity.getEnabled (prefs))
 			return;
 		
-		action = intent.getAction ();
 		if (action.equals (ACTION_BOOT_COMPLETED))
 			bootCompleted (intent);
 		else if (action.equals (ACTION_CONNECTIVITY_CHANGE))
