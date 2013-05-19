@@ -112,13 +112,6 @@
                     android:layout_weight="1"
                     android:textIsSelectable="true" />
 
-                <ProgressBar
-                    android:id="@+id/pb_lessons"
-                    android:maxHeight="24dp"
-                    android:maxWidth="24dp"
-                    android:minHeight="24dip"
-                    android:minWidth="24dip"
-                    android:visibility="gone" />
             </TableRow>
 
             <TableRow
@@ -141,14 +134,6 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:textIsSelectable="true" />
-
-                <ProgressBar
-                    android:id="@+id/pb_reviews"
-                    android:maxHeight="24dp"
-                    android:maxWidth="24dp"
-                    android:minHeight="24dip"
-                    android:minWidth="24dip"
-                    android:visibility="gone" />
             </TableRow>
         </TableLayout>
 
@@ -178,14 +163,6 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:textIsSelectable="true" />
-
-                <ProgressBar
-                    android:id="@+id/pb_next_hour"
-                    android:maxHeight="24dp"
-                    android:maxWidth="24dp"
-                    android:minHeight="24dip"
-                    android:minWidth="24dip"
-                    android:visibility="gone" />
             </TableRow>
 
             <TableRow
@@ -208,14 +185,6 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:textIsSelectable="true" />
-
-                <ProgressBar
-                    android:id="@+id/pb_next_day"
-                    android:maxHeight="24dp"
-                    android:maxWidth="24dp"
-                    android:minHeight="24dip"
-                    android:minWidth="24dip"
-                    android:visibility="gone" />
             </TableRow>
         </TableLayout>
 
