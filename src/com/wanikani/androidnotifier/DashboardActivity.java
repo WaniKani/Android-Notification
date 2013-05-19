@@ -498,7 +498,7 @@ public class DashboardActivity extends Activity implements Runnable {
 		tw.setText (dd.username);
 
 		tw = (TextView) findViewById (R.id.tv_title);
-		tw.setText (dd.title);
+		tw.setText (String.format (getString (R.string.fmt_title), dd.title));
 
 		tw = (TextView) findViewById (R.id.reviews_val);
 		tw.setText (Integer.toString (dd.reviewsAvailable));
