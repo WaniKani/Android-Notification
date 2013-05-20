@@ -1,3 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
+    <dimen name="m_half_gap">4dp</dimen>
+    <dimen name="m_rythm">48dp</dimen>
+    <dimen name="m_gravatar_frame">144dp</dimen>
+    <dimen name="m_avatar_size">128dp</dimen>
+    <dimen name="m_gap">8dp</dimen>
+    <dimen name="m_header">96dp</dimen>
 </resources>

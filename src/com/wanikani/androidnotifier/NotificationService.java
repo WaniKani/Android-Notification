@@ -127,6 +127,11 @@ public class NotificationService
 	public static final String ACTION_TAP = 
 			PREFIX + "TAP";
 
+	/** Called by @link DashboardActivity when the notification icon needs to
+	 *  be hiddn  */
+	public static final String ACTION_HIDE_NOTIFICATION = 
+			PREFIX + "HIDE_NOTIFICATION";
+
 	/** The ID associated to the notification icon. Since we can
 	 *  only display one notification at a time, this is a
 	 *  constant */
@@ -156,6 +161,12 @@ public class NotificationService
 		SharedPreferences prefs;
 		String action;
 		boolean enabled;
+		
+		action = intent.getAction ();
+		if (action.equals (ACTION_HIDE_NOTIFICATION)) {
+			hideNotification ();
+			return;
+		}
 		
 		prefs = PreferenceManager.getDefaultSharedPreferences (this);
 		enabled = SettingsActivity.getEnabled (prefs);
@@ -272,7 +283,7 @@ public class NotificationService
 		conn = new Connection (login);
 		try {
 			sq = conn.getStudyQueue ();
-			dd = new DashboardData (sq, null);
+			dd = new DashboardData (null, sq, null);
 		} catch (IOException e) {
 			if (event == Event.E_UNSOLICITED)
 				return;

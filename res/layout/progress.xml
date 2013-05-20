@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/scrollView1"
     style="@style/Background"
+    android:id="@+id/scrollView1"    
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
@@ -12,180 +12,161 @@
         android:gravity="center_horizontal"
         android:orientation="vertical" >
 
-		<LinearLayout
-		    android:layout_width="match_parent"
-		    android:layout_height="wrap_content"
-		    android:orientation="horizontal" 
-		    android:baselineAligned="false">
-	   		<RelativeLayout
-        	    android:id="@+id/rl_gravatar"
-        	    android:layout_width="@dimen/m_gravatar_frame"
-        	    android:layout_height="@dimen/m_gravatar_frame" >
-
-        	    <ImageView
-        	        android:layout_width="wrap_content"
-        	        android:layout_height="wrap_content"
-        	        android:layout_alignParentLeft="true"
-        	        android:layout_alignParentTop="true"
-        	        android:src="@drawable/gravatar_frame" />
-
-		    	<ImageView
-		    	    android:id="@+id/iv_gravatar"
-		    	    android:layout_width="@dimen/m_avatar_size"
-		    	    android:layout_height="@dimen/m_avatar_size"
-		    	    android:layout_centerInParent="true"
-		    	    android:layout_margin="@dimen/m_gap"
-		    	    android:contentDescription="@string/tag_gravatar"
-		    	    android:src="@drawable/default_avatar" />
-		</RelativeLayout>
-			<LinearLayout
-			    style="@style/Heading"
-			    android:layout_width="fill_parent"
-			    android:layout_height="@dimen/m_header"
-			    android:layout_weight="1"
-			    android:orientation="vertical"
-			    android:padding="@dimen/m_half_gap" >
-
-				<TextView
-				    android:id="@+id/tv_username"
-				    style="@style/Username"
-				    android:layout_width="match_parent"
-				    android:layout_height="@dimen/m_rythm"
-				    android:gravity="center_vertical|center_horizontal"
-				    android:text="" />
-
-			    <TextView
-			        android:id="@+id/tv_title"
-			        style="@style/UserTitle"
-			        android:layout_width="match_parent"
-			        android:layout_height="@dimen/m_rythm"
-			        android:layout_gravity="center"
-			        android:gravity="right|center_vertical"
-			        android:text="" />
-
-			</LinearLayout>
-			    	        	
-        </LinearLayout>    
-        <LinearLayout
-            android:layout_width="match_parent"
+        <TableLayout
+            android:id="@+id/tab_stats"
+            style="@style/StatsTable"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical" >
-
-            <TextView
-                android:id="@+id/tv_next_review"
-                style="@style/LabelNextReview"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-
-            <TextView
-                android:id="@+id/tv_next_review_val"
-                style="@style/LabelNextReviewVal"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:clickable="true"
-                android:textIsSelectable="true"/>
-        </LinearLayout>
-
-        <TableLayout
-            android:id="@+id/tab_queue"
-            style="@style/QueueTable"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content" >
+            android:layout_weight="0" >
 
             <TableRow
-                android:id="@+id/tableRow1"
+                android:id="@+id/tableRow5"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" >
 
                 <TextView
-                    android:id="@+id/lessons"
+                    android:id="@+id/apprentice"
                     style="@style/LabelKey"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="@string/tag_lessons" />
+                    android:text="@string/tag_apprentice" />
 
                 <TextView
-                    android:id="@+id/lessons_val"
+                    android:id="@+id/apprentice_val"
                     style="@style/LabelValue"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:textIsSelectable="true" />
 
+                <ProgressBar
+                    android:id="@+id/pb_apprentice"
+                    android:maxHeight="24dp"
+                    android:maxWidth="24dp"
+                    android:minHeight="24dip"
+                    android:minWidth="24dip"
+                    android:visibility="gone" />
             </TableRow>
 
             <TableRow
-                android:id="@+id/tableRow2"
+                android:id="@+id/tableRow6"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" >
 
                 <TextView
-                    android:id="@+id/reviews"
+                    android:id="@+id/guru"
                     style="@style/LabelKey"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="@string/tag_reviews" />
+                    android:text="@string/tag_guru" />
 
                 <TextView
-                    android:id="@+id/reviews_val"
+                    android:id="@+id/guru_val"
                     style="@style/LabelValue"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:textIsSelectable="true" />
-            </TableRow>
-        </TableLayout>
 
-        <TableLayout
-            android:id="@+id/tab_next"
-            style="@style/NextTable"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content" >
-
-            <TableRow
-                android:id="@+id/tableRow3"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" >
-
-                <TextView
-                    android:id="@+id/next_hour"
-                    style="@style/LabelKey"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/tag_next_hour" />
-
-                <TextView
-                    android:id="@+id/next_hour_val"
-                    style="@style/LabelValue"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:textIsSelectable="true" />
+                <ProgressBar
+                    android:id="@+id/pb_guru"
+                    android:maxHeight="24dp"
+                    android:maxWidth="24dp"
+                    android:minHeight="24dip"
+                    android:minWidth="24dip"
+                    android:visibility="gone" />
             </TableRow>
 
             <TableRow
-                android:id="@+id/tableRow4"
+                android:id="@+id/tableRow7"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" >
 
                 <TextView
-                    android:id="@+id/next_day"
+                    android:id="@+id/master"
                     style="@style/LabelKey"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="@string/tag_next_day" />
+                    android:text="@string/tag_master" />
 
                 <TextView
-                    android:id="@+id/next_day_val"
+                    android:id="@+id/master_val"
                     style="@style/LabelValue"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:textIsSelectable="true" />
+
+                <ProgressBar
+                    android:id="@+id/pb_master"
+                    android:maxHeight="24dp"
+                    android:maxWidth="24dp"
+                    android:minHeight="24dip"
+                    android:minWidth="24dip"
+                    android:visibility="gone" />
+            </TableRow>
+
+            <TableRow
+                android:id="@+id/tableRow8"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" >
+
+                <TextView
+                    android:id="@+id/enlightened"
+                    style="@style/LabelKey"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/tag_enlightened" />
+
+                <TextView
+                    android:id="@+id/enlightened_val"
+                    style="@style/LabelValue"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:textIsSelectable="true" />
+
+                <ProgressBar
+                    android:id="@+id/pb_enlightened"
+                    android:maxHeight="24dp"
+                    android:maxWidth="24dp"
+                    android:minHeight="24dip"
+                    android:minWidth="24dip"
+                    android:visibility="gone" />
+            </TableRow>
+
+            <TableRow
+                android:id="@+id/tableRow9"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" >
+
+                <TextView
+                    android:id="@+id/burned"
+                    style="@style/LabelKey"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/tag_burned" />
+
+                <TextView
+                    android:id="@+id/burned_val"
+                    style="@style/LabelValue"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:textIsSelectable="true" />
+
+                <ProgressBar
+                    android:id="@+id/pb_burned"
+                    android:maxHeight="24dp"
+                    android:maxWidth="24dp"
+                    android:minHeight="24dip"
+                    android:minWidth="24dip"
+                    android:visibility="gone" />
             </TableRow>
         </TableLayout>
 
@@ -211,7 +192,7 @@
                 android:minHeight="24dip"
                 android:minWidth="24dip"
                 android:visibility="invisible" />
-        </LinearLayout>
-    </LinearLayout>
+        </LinearLayout>    
 
+	</LinearLayout>
 </ScrollView>

@@ -1,6 +1,8 @@
 package com.wanikani.androidnotifier;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Date;
 
 import android.app.Activity;
@@ -10,12 +12,24 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
+import android.text.Html;
+import android.text.method.LinkMovementMethod;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -23,6 +37,7 @@ import com.wanikani.wklib.AuthenticationException;
 import com.wanikani.wklib.Connection;
 import com.wanikani.wklib.SRSDistribution;
 import com.wanikani.wklib.StudyQueue;
+import com.wanikani.wklib.UserInformation;
 import com.wanikani.wklib.UserLogin;
 
 /* 
@@ -56,6 +71,9 @@ public class DashboardActivity extends Activity implements Runnable {
 
 	/*** The auto-refresh time (milliseconds) */
 	public static final int T_INT_AUTOREFRESH = 5 * 60 * 1000;
+	
+	/*** The avatar bitmap filename */
+	private static final String AVATAR_FILENAME = "avatar.png";
 		
 	/**
 	 * A receiver that gets notifications when 
@@ -108,16 +126,11 @@ public class DashboardActivity extends Activity implements Runnable {
 		
 		/**
 		 * Called before starting the task, inside the activity thread.
-		 * Updates the status message.
 		 */
 		@Override
 		protected void onPreExecute ()
 		{
-			if (dd != null) {
-				spin (true);
-				status (R.string.status_msg_retrieving);
-			} else
-				spinTheWorld (true);
+			startRefresh ();
 		}
 		
 		/**
@@ -130,13 +143,20 @@ public class DashboardActivity extends Activity implements Runnable {
 		protected DashboardData doInBackground (Connection... conn)
 		{
 			DashboardData dd;
+			UserInformation ui;
 			StudyQueue sq;
 			SRSDistribution srs;
+			int size;
+
+			size = getResources ().getDimensionPixelSize (R.dimen.m_avatar_size);
 			
 			try {
+				ui = conn [0].getUserInformation ();
+				conn [0].resolve (ui, size);
 				sq = conn [0].getStudyQueue ();
 				srs = conn [0].getSRSDistribution ();
-				dd = new DashboardData (sq, srs);
+				dd = new DashboardData (ui, sq, srs);
+				saveAvatar (dd);
 			} catch (IOException e) {
 				dd = new DashboardData (e);
 			}
@@ -155,18 +175,34 @@ public class DashboardActivity extends Activity implements Runnable {
 		{
 			try {
 				dd.wail ();
-				status (R.string.status_msg_success);
 				refreshComplete (dd);
 			} catch (AuthenticationException e) {
-				status (R.string.status_msg_unauthorized);
+				error (R.string.status_msg_unauthorized);
 			} catch (IOException e) {
-				status (R.string.status_msg_error);
-			} finally {
-				spin (false);
-				spinTheWorld (false);
+				error (R.string.status_msg_error);
 			}
 		}
 	}
+	
+	/**
+	 * A listener that intercepts clicks on "Available now" link.
+	 * We need to do that because it's reasonable to hide the notification
+	 * icon.
+	 */
+	private class ClickListener implements View.OnClickListener {
+				
+		@Override
+		public void onClick (View v)
+		{
+			Intent intent;
+			
+			intent = new Intent (DashboardActivity.this, NotificationService.class);
+			
+			intent.setAction (NotificationService.ACTION_HIDE_NOTIFICATION);
+
+			startService (intent);
+		}
+	};
 
 	/** The key checked by {@link #onCreate} to make 
 	 *  sure that the statistics contained in the bundle are valid
@@ -194,6 +230,9 @@ public class DashboardActivity extends Activity implements Runnable {
 	
 	/** The object that notifies us when the refresh timeout expires */
 	Alarm alarm;
+	
+	/** The object that listens for "Available now" click events */
+	ClickListener clickListener;
 	
 	/**
 	 * Constructor.
@@ -224,11 +263,11 @@ public class DashboardActivity extends Activity implements Runnable {
 		SharedPreferences prefs;
 		
 	    super.onCreate (bundle);
-	    		
+	    
 	    registerIntents ();
-	    setContentView(R.layout.dashboard);
 	    alarm = new Alarm ();
-
+	    clickListener = new ClickListener ();
+	    
 	    prefs = PreferenceManager.getDefaultSharedPreferences (this);
 	    if (!SettingsActivity.credentialsAreValid (prefs))
 	    	settings ();
@@ -265,8 +304,8 @@ public class DashboardActivity extends Activity implements Runnable {
 	public void onResume ()
 	{
 		super.onResume ();
-		
-		alarm.screenOn ();
+				
+	    alarm.screenOn ();
 	}
 	
 	/**
@@ -388,7 +427,7 @@ public class DashboardActivity extends Activity implements Runnable {
 	}
 
 	/**
-	 * Called when the GUI needs to be refreshed.
+	 * Called when the GUI needs to be refreshed. 
 	 * It starts an asynchrous task that actually performs the job.
 	 */
 	private void refresh ()
@@ -400,17 +439,94 @@ public class DashboardActivity extends Activity implements Runnable {
 	}
 	
 	/**
+	 * Stores the avatar locally. Needed to avoid storing it into the
+	 * bundle. Useful also to have a fallback when we can't reach the
+	 * server.
+	 * @param dd the data, containing a valid avatar bitmap. If null, this
+	 * 	method does nothing
+	 */
+	protected void saveAvatar (DashboardData dd)
+	{
+		OutputStream os;
+		
+		if (dd == null)
+			return;
+		
+		os = null;
+		try {
+			os = openFileOutput (AVATAR_FILENAME, Context.MODE_PRIVATE);
+			dd.gravatar.compress(Bitmap.CompressFormat.PNG, 90, os);
+		} catch (IOException e) {
+			/* Life goes on... */
+		} finally {
+			try {
+				if (os != null)
+					os.close ();
+			} catch (IOException e) {
+				/* Probably next decode will go wrong */
+			}
+		}
+	}
+	
+	/**
+	 * Restores the avatar from local storage.
+	 * @param dd the data, that will be filled with the bitmap, if everything
+	 * 	goes fine
+	 */
+	protected void restoreAvatar (DashboardData dd)
+	{
+		InputStream is;
+		
+		if (dd == null)
+			return;
+		
+		is= null;
+		try {
+			is = openFileInput (AVATAR_FILENAME);
+			dd.gravatar = BitmapFactory.decodeStream (is);
+		} catch (IOException e) {
+			/* Life goes on... */
+		} finally {
+			try {
+				if (is != null)
+					is.close ();
+			} catch (IOException e) {
+				/* At least we tried */
+			}
+		}
+	}
+	/**
 	 * Called by {@link RefreshTask} when asynchronous data 
 	 * retrieval is completed.
 	 * @param dd the retrieved data
 	 */
 	private void refreshComplete (DashboardData dd)
 	{
+		ImageView iw;
 		TextView tw;
+
+		if (this.dd == null)
+			setContentView (R.layout.dashboard);
+		else
+			spin (false);
 
 		this.dd = dd;
 		
 		rtask = null;
+
+		iw = (ImageView) findViewById (R.id.iv_gravatar);
+		if (dd.gravatar == null)
+			restoreAvatar (dd);
+		
+		if (dd.gravatar != null)
+			iw.setImageBitmap (mask (dd.gravatar));
+
+		tw = (TextView) findViewById (R.id.tv_username);
+		tw.setText (dd.username);
+
+		tw = (TextView) findViewById (R.id.tv_title);
+		tw.setText (String.format (getString (R.string.fmt_title), dd.title));
+
 		tw = (TextView) findViewById (R.id.reviews_val);
 		tw.setText (Integer.toString (dd.reviewsAvailable));
 		
@@ -418,7 +534,9 @@ public class DashboardActivity extends Activity implements Runnable {
 		tw.setText (R.string.tag_next_review);
 		
 		tw = (TextView) findViewById (R.id.tv_next_review_val);
-		tw.setText (niceInterval (dd.nextReviewDate));
+		tw.setText (Html.fromHtml (niceInterval (dd.nextReviewDate)));		
+		tw.setMovementMethod (LinkMovementMethod.getInstance ());
+		tw.setOnClickListener (clickListener);
 		
 		tw = (TextView) findViewById (R.id.lessons_val);
 		tw.setText (Integer.toString (dd.lessonsAvailable));
@@ -429,22 +547,35 @@ public class DashboardActivity extends Activity implements Runnable {
 		tw = (TextView) findViewById (R.id.next_day_val);
 		tw.setText (Integer.toString (dd.reviewsAvailableNextDay));
 		
-		tw = (TextView) findViewById (R.id.apprentice_val);
-		tw.setText (Integer.toString (dd.apprentice));
-		
-		tw = (TextView) findViewById (R.id.guru_val);
-		tw.setText (Integer.toString (dd.guru));
-
-		tw = (TextView) findViewById (R.id.master_val);
-		tw.setText (Integer.toString (dd.master));
-
-		tw = (TextView) findViewById (R.id.enlightened_val);
-		tw.setText (Integer.toString (dd.enlighten));
-
-		tw = (TextView) findViewById (R.id.burned_val);
-		tw.setText (Integer.toString (dd.burned));
-		
 		alarm.schedule (this, T_INT_AUTOREFRESH);
+	}
+
+	/**
+	 * Apply a circular mask on the given bitmap. This method is
+	 * used to display the avatar.
+	 * @param bmp an input bitmap
+	 * @param result the output (masked) bitmap
+	 */
+	private Bitmap mask (Bitmap bmp)
+	{
+		Bitmap result, mask;
+		Drawable dmask;
+		Canvas canvas;
+		Paint paint;
+
+		result = Bitmap.createBitmap (bmp.getWidth (), bmp.getHeight (),
+									  Bitmap.Config.ARGB_8888);
+		canvas = new Canvas (result);
+		
+		dmask = getResources ().getDrawable (R.drawable.gravatar_mask);
+		mask = ((BitmapDrawable) dmask).getBitmap ();
+		
+		paint = new Paint (Paint.ANTI_ALIAS_FLAG);
+		paint.setXfermode (new PorterDuffXfermode (PorterDuff.Mode.DST_IN));
+		canvas.drawBitmap (bmp, 0, 0, null);
+		canvas.drawBitmap (mask, 0, 0, paint);
+		
+		return result;
 	}
 	
 	/**
@@ -465,17 +596,38 @@ public class DashboardActivity extends Activity implements Runnable {
 	}
 
 	/**
-	 * Updates the status line.
-	 * @param id resource string ID
+	 * Called when retrieveing data from WaniKani. Updates the 
+	 * status message or switches to the splash screen, depending
+	 * on the current state  
 	 */
-	private void status (int id)
+	private void startRefresh ()
 	{
-		TextView tw;
-		
-		tw = (TextView) findViewById (R.id.tv_alert);
-		tw.setText (id);		
+		if (dd == null)
+			setContentView (R.layout.splash);
+		else
+			spin (true);
 	}
 
+	/**
+	 * Displays an error message, choosing the best way to do that.
+	 * If we did not gather any stats, the only thing we can do is to display
+	 * the error page and hope for the best
+	 * @param id resource string ID
+	 */
+	private void error (int id)
+	{
+		TextView tw;
+	
+		if (dd == null)
+			setContentView (R.layout.error);
+		else
+			spin (false);
+		
+		tw = (TextView) findViewById (R.id.tv_alert);
+		if (tw != null)
+			tw.setText (id);
+	}
+	
 	/**
 	 * Show or hide the spinner.
 	 * @param enable true if should be shown
@@ -486,43 +638,6 @@ public class DashboardActivity extends Activity implements Runnable {
 		
 		pb = (ProgressBar) findViewById (R.id.pb_status);
 		pb.setVisibility (enable ? ProgressBar.VISIBLE : ProgressBar.INVISIBLE);
-	}
-	
-	/**
-	 * Show or hide the spinners placed "above" the data.
-	 * @param enable true if they should be shown
-	 */
-	private void spinTheWorld (boolean enable)
-	{
-		spinField (enable, R.id.pb_lessons, R.id.lessons_val);
-		spinField (enable, R.id.pb_reviews, R.id.reviews_val);
-		
-		spinField (enable, R.id.pb_next_hour, R.id.lessons_val);
-		spinField (enable, R.id.pb_next_day, R.id.lessons_val);
-
-		spinField (enable, R.id.pb_apprentice, R.id.apprentice_val);
-		spinField (enable, R.id.pb_guru, R.id.guru_val);
-		spinField (enable, R.id.pb_master, R.id.master_val);
-		spinField (enable, R.id.pb_enlightened, R.id.enlightened_val);
-		spinField (enable, R.id.pb_burned, R.id.burned_val);
-	}
-	
-	/**
-	 * Show or hide a single spinner place above a single field.
-	 * @param enable true if it should be shown
-	 * @param pbid spinner on the field
-	 * @param fid  the field 
-	 */
-	private void spinField (boolean enable, int pbid, int fid)
-	{
-		ProgressBar pb; 
-		TextView tv;
-		
-		pb = (ProgressBar) findViewById (pbid);
-		pb.setVisibility (enable ? ProgressBar.VISIBLE : ProgressBar.GONE);
-
-		tv = (TextView) findViewById (fid);
-		tv.setVisibility (enable ? ProgressBar.GONE : ProgressBar.VISIBLE);
 	}
 
 	/**
