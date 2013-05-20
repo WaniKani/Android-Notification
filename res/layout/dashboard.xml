@@ -36,7 +36,7 @@
 		    	    android:layout_centerInParent="true"
 		    	    android:layout_margin="@dimen/m_gap"
 		    	    android:contentDescription="@string/tag_gravatar"
-		    	    android:src="@drawable/default_avatar" />
+		    	    android:src="@drawable/default_avatar_pale" />
 		</RelativeLayout>
 			<LinearLayout
 			    style="@style/Heading"

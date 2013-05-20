@@ -122,7 +122,9 @@ public class DashboardActivity extends Activity implements Runnable {
 	 * A task that gets called whenever the stats need to be refreshed.
 	 * In order to keep the GUI responsive, we do this through an AsyncTask
 	 */
-	private class RefreshTask extends AsyncTask<Connection, Void, DashboardData > {
+	private class RefreshTask extends AsyncTask<Connection, Bitmap, DashboardData > {
+		
+		Bitmap defAvatar;
 		
 		/**
 		 * Called before starting the task, inside the activity thread.
@@ -130,7 +132,12 @@ public class DashboardActivity extends Activity implements Runnable {
 		@Override
 		protected void onPreExecute ()
 		{
+			Drawable d;
+			
 			startRefresh ();
+
+			d = getResources ().getDrawable (R.drawable.default_avatar);
+			defAvatar = ((BitmapDrawable) d).getBitmap ();
 		}
 		
 		/**
@@ -152,11 +159,14 @@ public class DashboardActivity extends Activity implements Runnable {
 			
 			try {
 				ui = conn [0].getUserInformation ();
-				conn [0].resolve (ui, size);
+				conn [0].resolve (ui, size, defAvatar);
 				sq = conn [0].getStudyQueue ();
 				srs = conn [0].getSRSDistribution ();
 				dd = new DashboardData (ui, sq, srs);
-				saveAvatar (dd);
+				if (dd.gravatar != null)
+					saveAvatar (dd);
+				else
+					restoreAvatar (dd);
 			} catch (IOException e) {
 				dd = new DashboardData (e);
 			}
@@ -449,7 +459,7 @@ public class DashboardActivity extends Activity implements Runnable {
 	{
 		OutputStream os;
 		
-		if (dd == null)
+		if (dd == null || dd.gravatar == null)
 			return;
 		
 		os = null;

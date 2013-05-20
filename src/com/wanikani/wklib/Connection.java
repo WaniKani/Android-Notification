@@ -11,6 +11,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
 /* 
@@ -153,18 +154,24 @@ public class Connection {
 		}
 	}
 		
-	public void resolve (UserInformation ui, int size)
+	public void resolve (UserInformation ui, int size, Bitmap defAvatar)
 	{
 			HttpURLConnection conn;
 			InputStream is;
 			URL url;
+			int code;
 			
 			conn = null;
 			try {
-				url = new URL (config.gravatarUrl + "/" + ui.gravatar + "?s=" + size);
+				url = new URL (config.gravatarUrl + "/" + ui.gravatar + 
+							   "?s=" + size + "&d=404");
 				conn = (HttpURLConnection) url.openConnection ();
-				is = conn.getInputStream ();
-				ui.gravatarBitmap = BitmapFactory.decodeStream (is);
+				code = conn.getResponseCode ();
+				if (code == 200) {
+					is = conn.getInputStream ();
+					ui.gravatarBitmap = BitmapFactory.decodeStream (is);
+				} else if (code == 404)
+					ui.gravatarBitmap = defAvatar;
 			} catch (IOException e) {
 				/* empty */
 			} finally {
