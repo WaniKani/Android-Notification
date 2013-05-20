@@ -7,3 +7,7 @@ uses radical, mnemonics, and SRS (Spaced Repetition Software).
 This (unofficial) app for Android shows a notification icon whenever you
 have pending reviews. It also featues a small dashboard, giving a 
 summary of your study queue and your progress.
+
+You can download the binary package from Google Play:
+
+    https://play.google.com/store/apps/details?id=com.wanikani.androidnotifier
