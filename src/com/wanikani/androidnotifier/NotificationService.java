@@ -128,7 +128,8 @@ public class NotificationService
 			PREFIX + "TAP";
 
 	/** Called by @link DashboardActivity when the notification icon needs to
-	 *  be hiddn  */
+	 *  be hidden. It is similar to @link {@link #ACTION_TAP}, however it
+	 *  does not start the browser, because this is done at activity level  */
 	public static final String ACTION_HIDE_NOTIFICATION = 
 			PREFIX + "HIDE_NOTIFICATION";
 
@@ -162,19 +163,17 @@ public class NotificationService
 		String action;
 		boolean enabled;
 		
-		action = intent.getAction ();
-		if (action.equals (ACTION_HIDE_NOTIFICATION)) {
-			hideNotification ();
-			return;
-		}
-		
 		prefs = PreferenceManager.getDefaultSharedPreferences (this);
 		enabled = SettingsActivity.getEnabled (prefs);
 		action = intent.getAction ();
-
-		/* ACTION_TAP is special, because we must call it even if notifications
+		
+		/* ACTION_HIDE_NOTIFICATION and ACTION_TAP are special, 
+		 * because we must call it even if notifications
 		 * are disabled */
-		if (action.equals (ACTION_TAP)) {
+		if (action.equals (ACTION_HIDE_NOTIFICATION)) {
+			hideNotification (intent, enabled);
+			return;
+		} else if (action.equals (ACTION_TAP)) {
 			tap (intent, enabled);
 			return;
 		}
@@ -222,6 +221,27 @@ public class NotificationService
 		feed (fsm, NotifierStateMachine.Event.E_UNSOLICITED);
 	}
 	
+	/**
+	 * Handler of the {@link #ACTION_HIDE_NOTIFICATION} intent, called when
+	 * the user taps the "Review now" link in the dashboard. 
+	 * If notifications are enabled,
+	 * we reset the state machine, to make it more responsive.
+	 * In addition, we hide the notification icon.  
+	 * @param intent the intent
+	 * @param enabled set if notifications are enabled 
+	 */
+	protected void hideNotification (Intent intent, boolean enabled)
+	{
+		NotifierStateMachine fsm;
+		
+		hideNotification ();	
+		if (enabled) {
+			fsm = new NotifierStateMachine (this);
+
+			feed (fsm, NotifierStateMachine.Event.E_TAP);
+		}
+	}
+
 	/**
 	 * Handler of the {@link #ACTION_TAP} intent, called when
 	 * the user taps the notification. If notifications are enabled,
@@ -332,7 +352,7 @@ public class NotificationService
 	}
 	
 	/**
-	 * Hides the notification icon.
+	 * Hides the notification icon and resets the state machine.
 	 */
 	public void hideNotification ()
 	{
