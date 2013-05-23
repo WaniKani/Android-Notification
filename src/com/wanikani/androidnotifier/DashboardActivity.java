@@ -560,8 +560,12 @@ public class DashboardActivity extends Activity implements Runnable {
 		if (dd.lessonsAvailable > 1) {
 			s = String.format (getString (R.string.fmt_lessons), dd.lessonsAvailable);
 			tw.setText (Html.fromHtml (s));
-		} else if (dd.lessonsAvailable == 1)
+			tw.setMovementMethod (LinkMovementMethod.getInstance ());
+		} else if (dd.lessonsAvailable == 1) {
 			tw.setText (Html.fromHtml (getString (R.string.fmt_one_lesson)));
+			tw.setMovementMethod (LinkMovementMethod.getInstance ());
+		}
+		
 		tw.setVisibility (dd.lessonsAvailable > 0 ? View.VISIBLE : View.GONE);
 		
 		tw = (TextView) findViewById (R.id.next_hour_val);
