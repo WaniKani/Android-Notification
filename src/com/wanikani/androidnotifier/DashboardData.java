@@ -145,6 +145,8 @@ class DashboardData {
 	 */
 	public DashboardData (Bundle bundle)
 	{
+		od = new OptionalData ();
+		
 		deserialize (bundle);	
 	}
 	
@@ -164,6 +166,8 @@ class DashboardData {
 	public DashboardData (IOException e)
 	{
 		this.e = e;
+	
+		od = new OptionalData ();
 	}
 		
 	/**
