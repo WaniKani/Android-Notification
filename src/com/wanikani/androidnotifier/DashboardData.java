@@ -6,6 +6,7 @@ import java.util.Date;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 
+import com.wanikani.wklib.LevelProgression;
 import com.wanikani.wklib.SRSDistribution;
 import com.wanikani.wklib.StudyQueue;
 import com.wanikani.wklib.UserInformation;
@@ -38,6 +39,7 @@ class DashboardData {
 
 	private static final String KEY_USERNAME = PREFIX + "username";
 	private static final String KEY_TITLE = PREFIX + "title";
+	private static final String KEY_LEVEL = PREFIX + "level";
 	
 	private static final String KEY_LESSONS_AVAILABLE = PREFIX + "lessons_available";
 	private static final String KEY_REVIEWS_AVAILABLE = PREFIX + "reviews_available";
@@ -52,6 +54,11 @@ class DashboardData {
 	private static final String KEY_ENLIGHTEN = PREFIX + "enlighten";
 	private static final String KEY_BURNED = PREFIX + "burned";
 	
+	private static final String KEY_RADICALS_PROGRESS = PREFIX + "radicals_progress";
+	private static final String KEY_RADICALS_TOTAL = PREFIX + "radicals_total";
+	private static final String KEY_KANJI_PROGRESS = PREFIX + "kanji_progress";
+	private static final String KEY_KANJI_TOTAL = PREFIX + "kanji_total";
+	
 	public int lessonsAvailable;
 	
 	public int reviewsAvailable;
@@ -61,6 +68,8 @@ class DashboardData {
 	public String username;
 	
 	public String title;
+	
+	public int level;
 	
 	public Bitmap gravatar;
 	
@@ -77,7 +86,9 @@ class DashboardData {
 	public int enlighten;
 	
 	public int burned;
-			
+	
+	public LevelProgression lp;
+	
 	public IOException e;
 		
 	/**
@@ -87,12 +98,14 @@ class DashboardData {
 	 * @param ui the user information
 	 * @param sq the study queue
 	 * @param srs the SRS distribution info
+	 * @param lp the level progression
 	 */
 	public DashboardData (UserInformation ui, StudyQueue sq, SRSDistribution srs)
 	{
 		if (ui != null) {
 			username = ui.username;
 			title = ui.title;
+			level = ui.level;
 			gravatar = ui.gravatarBitmap;
 		}		
 		if (sq != null) {
@@ -117,6 +130,15 @@ class DashboardData {
 	public DashboardData (Bundle bundle)
 	{
 		deserialize (bundle);	
+	}
+	
+	/**
+	 * Updates this object, setting level progression data.
+	 * 	@param lp a populated level progression object
+	 */
+	public void setLevelProgression (LevelProgression lp)
+	{
+		this.lp = lp;
 	}
 		
 	/**
@@ -148,6 +170,7 @@ class DashboardData {
 	{
 		bundle.putString (KEY_USERNAME, username);
 		bundle.putString (KEY_TITLE, title);
+		bundle.putInt(KEY_LEVEL, level);
 		
 		bundle.putInt (KEY_LESSONS_AVAILABLE, lessonsAvailable);
 		bundle.putInt (KEY_REVIEWS_AVAILABLE, reviewsAvailable);
@@ -162,6 +185,14 @@ class DashboardData {
 		bundle.putInt (KEY_ENLIGHTEN, enlighten);
 		bundle.putInt (KEY_BURNED, burned);
 		
+		if (lp != null) {
+			bundle.putInt(KEY_RADICALS_PROGRESS, lp.radicalsProgress);
+			bundle.putInt(KEY_RADICALS_TOTAL, lp.radicalsTotal);
+			bundle.putInt(KEY_KANJI_PROGRESS, lp.kanjiProgress);
+			bundle.putInt(KEY_KANJI_TOTAL, lp.kanjiTotal);
+			
+		}
+		
 		if (e != null)
 			bundle.putSerializable (KEY_EXCEPTION, e);
 	}
@@ -174,6 +205,7 @@ class DashboardData {
 	{		
 		username = bundle.getString (KEY_USERNAME);
 		title = bundle.getString (KEY_TITLE);
+		level = bundle.getInt (KEY_LEVEL);
 		
 		lessonsAvailable = bundle.getInt (KEY_LESSONS_AVAILABLE);
 		reviewsAvailable = bundle.getInt (KEY_REVIEWS_AVAILABLE);
@@ -188,7 +220,19 @@ class DashboardData {
 		enlighten = bundle.getInt (KEY_ENLIGHTEN);
 		burned = bundle.getInt (KEY_BURNED);
 		
+		if (bundle.containsKey (KEY_RADICALS_PROGRESS)) {
+			lp = new LevelProgression ();
+			lp.radicalsProgress = bundle.getInt (KEY_RADICALS_PROGRESS);
+			lp.radicalsTotal = bundle.getInt (KEY_RADICALS_TOTAL);
+			lp.kanjiProgress = bundle.getInt (KEY_KANJI_PROGRESS);
+			lp.kanjiTotal = bundle.getInt (KEY_KANJI_TOTAL);
+		} else
+			lp = null;
+		
 		if (bundle.containsKey (KEY_EXCEPTION))
 			e = (IOException) bundle.getSerializable (KEY_EXCEPTION);
+		else
+			e = null;
+		
 	}
 }

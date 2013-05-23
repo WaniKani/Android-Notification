@@ -101,6 +101,19 @@ public class Connection {
 		}
 	}	
 
+	public LevelProgression getLevelProgression ()
+			throws IOException
+	{
+		Response res;
+		
+		try {
+			res = call ("level-progression");
+			return new LevelProgression (res.info);
+		} catch (JSONException e) {
+			throw new ParseException ();
+		}
+	}
+	
 	private static String readStream (InputStream is)
 		throws IOException
 	{
