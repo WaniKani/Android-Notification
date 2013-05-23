@@ -227,9 +227,11 @@
             android:textIsSelectable="true" />
             
        <ProgressBar
+            android:id="@+id/pb_radicals"
          	android:layout_width="fill_parent"
          	android:layout_height="wrap_content"
          	android:layout_gravity="center"
+         	android:max="100"
          	style="@android:style/Widget.ProgressBar.Horizontal"
          	android:progressDrawable="@drawable/radicalsprog"
          	android:layout_marginBottom="@dimen/m_gap"/>
@@ -243,9 +245,11 @@
             android:text="@string/tag_kanji_progression" />
             
        <ProgressBar
+            android:id="@+id/pb_kanji"
          	android:layout_width="fill_parent"
          	android:layout_height="wrap_content"
          	android:layout_gravity="center"
+         	android:max="100"
          	style="@android:style/Widget.ProgressBar.Horizontal"
          	android:progressDrawable="@drawable/kanjiprog"
          	android:layout_marginBottom="@dimen/m_gap"/>
