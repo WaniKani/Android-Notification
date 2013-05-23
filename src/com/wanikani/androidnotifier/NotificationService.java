@@ -97,6 +97,8 @@ public class NotificationService
 	    }
 	}
 	
+	private static final String REVIEW_URL = "http://www.wanikani.com/review";
+	
 	private static final String PREFIX = "com.wanikani.wanikaninotifier.NotificationService.";
 	
 	/// FSM bundle key;
@@ -404,7 +406,7 @@ public class NotificationService
 		prefs = PreferenceManager.getDefaultSharedPreferences (this);
 
 		intent = new Intent (Intent.ACTION_VIEW);
-		intent.setData (Uri.parse (SettingsActivity.getURL (prefs)));
+		intent.setData (Uri.parse (REVIEW_URL));
 		intent.setFlags (Intent.FLAG_ACTIVITY_NEW_TASK);
 		
 		startActivity (intent);

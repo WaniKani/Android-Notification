@@ -42,8 +42,6 @@ public class SettingsActivity
 	private static final String KEY_PREF_ENABLED = "pref_enabled";
 	/** User key. Must match preferences.xml */
 	private static final String KEY_PREF_USERKEY = "pref_userkey";
-	/** Wanikani URL key. Must match preferences.xml */
-	private static final String KEY_PREF_URL = "pref_url";
 
 	/** The correct length of the API key (as far as we know) */
 	private static final int EXPECTED_KEYLEN = 32;
@@ -89,7 +87,6 @@ public class SettingsActivity
 		enabled = getEnabled (prefs);
 				
 		onSharedPreferenceChanged (prefs, KEY_PREF_USERKEY);
-		onSharedPreferenceChanged (prefs, KEY_PREF_URL);
 		onSharedPreferenceChanged (prefs, KEY_PREF_ENABLED);
 		prefs.registerOnSharedPreferenceChangeListener (this);
 	}
@@ -117,12 +114,6 @@ public class SettingsActivity
 			else
 				pref.setSummary (R.string.pref_userkey_descr);
 			enableNotificationCheck (prefs);
-		} else if (key.equals (KEY_PREF_URL)) {
-			s = prefs.getString (KEY_PREF_URL, "").trim ();
-			if (s.length () > 0)
-				pref.setSummary (s);
-			else
-				pref.setSummary (R.string.pref_default_url);
 		}
 		
 		updateConfig (prefs);
@@ -174,11 +165,6 @@ public class SettingsActivity
 		return prefs.getString (KEY_PREF_USERKEY, "").length () > 0;
 	}
 	
-	public static String getURL (SharedPreferences prefs)
-	{
-		return prefs.getString (KEY_PREF_URL, "");
-	}
-	int val;
 	@SuppressWarnings ("deprecation")
 	private void updateConfig (SharedPreferences prefs)
 	{
