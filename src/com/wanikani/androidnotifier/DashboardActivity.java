@@ -725,6 +725,11 @@ public class DashboardActivity extends Activity implements Runnable {
 		String s;
 		TextView tw;
 
+		/* If the API code is invalid, switch to error screen even if we have
+		 * already opened the dashboard */
+		if (id == R.string.status_msg_unauthorized)
+			dd = null;
+		
 		if (dd == null)
 			setContentView (R.layout.error);
 		else
