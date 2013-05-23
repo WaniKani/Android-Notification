@@ -46,8 +46,8 @@
     <string name="fmt_level">Level %d</string>
     <string name="fmt_title">Sect of %s</string>
     <string name="fmt_lessons">
-  You can &lt;a href=http://www.wanikani.com/lesson"&gt;unlock %d items&lt;/a&gt;</string>
+  You can &lt;a href=http://www.wanikani.com/lesson"&gt;unlock&lt;/a&gt; %d items</string>
     <string name="fmt_one_lesson">
-  You can &lt;a href=http://www.wanikani.com/lesson"&gt;unlock one item&lt;/a&gt;</string>
+  You can &lt;a href=http://www.wanikani.com/lesson"&gt;unlock&lt;/a&gt; one item</string>
     
 </resources>
