@@ -35,6 +35,40 @@ import com.wanikani.wklib.UserInformation;
  */
 class DashboardData {
 	
+	/**
+	 * A container of all the fields that may not (yet) been available
+	 * when the dashboard is displayed. The object may be partially populated.
+	 */
+	public static class OptionalData {
+		
+		/** The SRS Distribution */
+		public SRSDistribution srs;
+		
+		/** The level progression */
+		public LevelProgression lp;
+		
+		/**
+		 * Constructor. Input parameters may be null.
+		 * 
+		 * @param srs SRS Distribution
+		 * @param lp the level progression
+		 */
+		public OptionalData (SRSDistribution srs, LevelProgression lp)
+		{
+			this.srs = srs;
+			this.lp = lp;
+		}
+		
+		/**
+		 * Empty constructor.
+		 */
+		public OptionalData ()
+		{
+			/* empty */			
+		}
+				
+	};
+	
 	private static final String PREFIX = "com.wanikani.wanikaninotifier.DashboardData.";
 
 	private static final String KEY_USERNAME = PREFIX + "username";
@@ -77,18 +111,8 @@ class DashboardData {
 	
 	public int reviewsAvailableNextDay;
 	
-	public int apprentice;
-	
-	public int guru;
-	
-	public int master;
-	
-	public int enlighten;
-	
-	public int burned;
-	
-	public LevelProgression lp;
-	
+	public OptionalData od;
+
 	public IOException e;
 		
 	/**
@@ -98,30 +122,21 @@ class DashboardData {
 	 * @param ui the user information
 	 * @param sq the study queue
 	 * @param srs the SRS distribution info
-	 * @param lp the level progression
 	 */
-	public DashboardData (UserInformation ui, StudyQueue sq, SRSDistribution srs)
+	public DashboardData (UserInformation ui, StudyQueue sq)
 	{
-		if (ui != null) {
-			username = ui.username;
-			title = ui.title;
-			level = ui.level;
-			gravatar = ui.gravatarBitmap;
-		}		
-		if (sq != null) {
-			reviewsAvailable = sq.reviewsAvailable;
-			lessonsAvailable = sq.lessonsAvailable;
-			nextReviewDate = sq.nextReviewDate;
-			reviewsAvailableNextHour = sq.reviewsAvailableNextHour;
-			reviewsAvailableNextDay = sq.reviewsAvailableNextDay;
-		}		
-		if (srs != null) {
-			apprentice = srs.apprentice.total;
-			guru = srs.guru.total;
-			master = srs.master.total;
-			enlighten = srs.enlighten.total;
-			burned = srs.burned.total;
-		}
+		od = new OptionalData ();
+		
+		username = ui.username;
+		title = ui.title;
+		level = ui.level;
+		gravatar = ui.gravatarBitmap;
+
+		reviewsAvailable = sq.reviewsAvailable;
+		lessonsAvailable = sq.lessonsAvailable;
+		nextReviewDate = sq.nextReviewDate;
+		reviewsAvailableNextHour = sq.reviewsAvailableNextHour;
+		reviewsAvailableNextDay = sq.reviewsAvailableNextDay;
 	}
 		
 	/**
@@ -134,14 +149,14 @@ class DashboardData {
 	}
 	
 	/**
-	 * Updates this object, setting level progression data.
-	 * 	@param lp a populated level progression object
+	 * Updates this object with optional data.
+	 * 	@param od the optional data
 	 */
-	public void setLevelProgression (LevelProgression lp)
+	public void setOptionalData (OptionalData od)
 	{
-		this.lp = lp;
+		this.od = od;
 	}
-		
+
 	/**
 	 * A constructor to be used when information retrieval fails 
 	 * @param e the exception that occurred
@@ -180,17 +195,19 @@ class DashboardData {
 		bundle.putInt (KEY_REVIEWS_AVAILABLE_NEXT_HOUR, reviewsAvailableNextHour);
 		bundle.putInt (KEY_REVIEWS_AVAILABLE_NEXT_DAY, reviewsAvailableNextDay);
 		
-		bundle.putInt (KEY_APPRENTICE, apprentice);
-		bundle.putInt (KEY_GURU, guru);
-		bundle.putInt (KEY_MASTER, master);
-		bundle.putInt (KEY_ENLIGHTEN, enlighten);
-		bundle.putInt (KEY_BURNED, burned);
+		if (od.srs != null) {
+			bundle.putInt (KEY_APPRENTICE, od.srs.apprentice.total);
+			bundle.putInt (KEY_GURU, od.srs.guru.total);
+			bundle.putInt (KEY_MASTER, od.srs.master.total);
+			bundle.putInt (KEY_ENLIGHTEN, od.srs.enlighten.total);
+			bundle.putInt (KEY_BURNED, od.srs.burned.total);
+		}		
 		
-		if (lp != null) {
-			bundle.putInt(KEY_RADICALS_PROGRESS, lp.radicalsProgress);
-			bundle.putInt(KEY_RADICALS_TOTAL, lp.radicalsTotal);
-			bundle.putInt(KEY_KANJI_PROGRESS, lp.kanjiProgress);
-			bundle.putInt(KEY_KANJI_TOTAL, lp.kanjiTotal);
+		if (od.lp != null) {
+			bundle.putInt(KEY_RADICALS_PROGRESS, od.lp.radicalsProgress);
+			bundle.putInt(KEY_RADICALS_TOTAL, od.lp.radicalsTotal);
+			bundle.putInt(KEY_KANJI_PROGRESS, od.lp.kanjiProgress);
+			bundle.putInt(KEY_KANJI_TOTAL, od.lp.kanjiTotal);
 			
 		}
 		
@@ -215,20 +232,25 @@ class DashboardData {
 		reviewsAvailableNextHour = bundle.getInt (KEY_REVIEWS_AVAILABLE_NEXT_HOUR);
 		reviewsAvailableNextDay = bundle.getInt (KEY_REVIEWS_AVAILABLE_NEXT_DAY);
 
-		apprentice = bundle.getInt (KEY_APPRENTICE);
-		guru = bundle.getInt (KEY_GURU);
-		master = bundle.getInt (KEY_MASTER);
-		enlighten = bundle.getInt (KEY_ENLIGHTEN);
-		burned = bundle.getInt (KEY_BURNED);
+		if (bundle.containsKey (KEY_APPRENTICE)) {
+			od.srs = new SRSDistribution ();
+			
+			od.srs.apprentice.total = bundle.getInt (KEY_APPRENTICE);
+			od.srs.guru.total = bundle.getInt (KEY_GURU);
+			od.srs.master.total = bundle.getInt (KEY_MASTER);
+			od.srs.enlighten.total = bundle.getInt (KEY_ENLIGHTEN);
+			od.srs.burned.total = bundle.getInt (KEY_BURNED);
+		} else
+			od.srs = null;
 		
 		if (bundle.containsKey (KEY_RADICALS_PROGRESS)) {
-			lp = new LevelProgression ();
-			lp.radicalsProgress = bundle.getInt (KEY_RADICALS_PROGRESS);
-			lp.radicalsTotal = bundle.getInt (KEY_RADICALS_TOTAL);
-			lp.kanjiProgress = bundle.getInt (KEY_KANJI_PROGRESS);
-			lp.kanjiTotal = bundle.getInt (KEY_KANJI_TOTAL);
+			od.lp = new LevelProgression ();
+			od.lp.radicalsProgress = bundle.getInt (KEY_RADICALS_PROGRESS);
+			od.lp.radicalsTotal = bundle.getInt (KEY_RADICALS_TOTAL);
+			od.lp.kanjiProgress = bundle.getInt (KEY_KANJI_PROGRESS);
+			od.lp.kanjiTotal = bundle.getInt (KEY_KANJI_TOTAL);
 		} else
-			lp = null;
+			od.lp = null;
 		
 		if (bundle.containsKey (KEY_EXCEPTION))
 			e = (IOException) bundle.getSerializable (KEY_EXCEPTION);

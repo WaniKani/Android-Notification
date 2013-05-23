@@ -35,6 +35,7 @@ import android.widget.TextView;
 
 import com.wanikani.wklib.AuthenticationException;
 import com.wanikani.wklib.Connection;
+import com.wanikani.wklib.LevelProgression;
 import com.wanikani.wklib.SRSDistribution;
 import com.wanikani.wklib.StudyQueue;
 import com.wanikani.wklib.UserInformation;
@@ -122,7 +123,7 @@ public class DashboardActivity extends Activity implements Runnable {
 	 * A task that gets called whenever the stats need to be refreshed.
 	 * In order to keep the GUI responsive, we do this through an AsyncTask
 	 */
-	private class RefreshTask extends AsyncTask<Connection, Bitmap, DashboardData > {
+	private class RefreshTask extends AsyncTask<Connection, Void, DashboardData > {
 		
 		Bitmap defAvatar;
 		
@@ -142,8 +143,7 @@ public class DashboardActivity extends Activity implements Runnable {
 		
 		/**
 		 * Performs the real job, by using the provided
-		 * connection to obtain the study queue and the SRS
-		 * distribution.
+		 * connection to obtain the study queue.
 		 * 	@param conn a connection to the WaniKani API site
 		 */
 		@Override
@@ -152,21 +152,19 @@ public class DashboardActivity extends Activity implements Runnable {
 			DashboardData dd;
 			UserInformation ui;
 			StudyQueue sq;
-			SRSDistribution srs;
 			int size;
 
 			size = getResources ().getDimensionPixelSize (R.dimen.m_avatar_size);
 			
 			try {
 				sq = conn [0].getStudyQueue ();
-				srs = conn [0].getSRSDistribution ();
 				/* getUserInformation should be called after at least one
 				 * of the other calls, so we give Connection a chance
 				 * to cache its contents */
 				ui = conn [0].getUserInformation ();
 				conn [0].resolve (ui, size, defAvatar);
 
-				dd = new DashboardData (ui, sq, srs);
+				dd = new DashboardData (ui, sq);
 				if (dd.gravatar != null)
 					saveAvatar (dd);
 				else
@@ -189,7 +187,10 @@ public class DashboardActivity extends Activity implements Runnable {
 		{
 			try {
 				dd.wail ();
+				
 				refreshComplete (dd);
+
+				new RefreshTaskPartII ().execute (conn);
 			} catch (AuthenticationException e) {
 				error (R.string.status_msg_unauthorized);
 			} catch (IOException e) {
@@ -198,6 +199,65 @@ public class DashboardActivity extends Activity implements Runnable {
 		}
 	}
 	
+	/**
+	 * A task that gets called whenever the stats need to be refreshed, part II.
+	 * This task retrieves all the data that is not needed to display the dashboard,
+	 * so it can be run after the splash screen disappears (and the startup is faster). 
+	 */
+	private class RefreshTaskPartII extends AsyncTask<Connection, Void, DashboardData.OptionalData> {
+					
+		/**
+		 * Called before starting the task, inside the activity thread.
+		 */
+		@Override
+		protected void onPreExecute ()
+		{
+			/* empty */
+		}
+		
+		/**
+		 * Performs the real job, by using the provided
+		 * connection to obtain the SRS distribution and the LevelProgression.
+		 * If any operation goes wrong, the data is simply not retrieved (this
+		 * is meant to be data of lesser importance), so it should be ok anyway.
+		 * 	@param conn a connection to the WaniKani API site
+		 */
+		@Override
+		protected DashboardData.OptionalData doInBackground (Connection... conn)
+		{
+			SRSDistribution srs;
+			LevelProgression lp;
+			
+			try {
+				srs = conn [0].getSRSDistribution();
+			} catch (IOException e) {
+				srs = null;
+			}
+
+			try {
+				lp = conn [0].getLevelProgression ();
+			} catch (IOException e) {
+				lp = null;
+			}
+
+			return new DashboardData.OptionalData (srs, lp);
+		}	
+						
+		/**
+		 * Called at completion of the job, inside the Activity thread.
+		 * Updates the stats and the status page.
+		 * 	@param dd the results encoded by 
+		 *		{@link #doInBackground(Connection...)}
+		 */
+		@Override
+		protected void onPostExecute (DashboardData.OptionalData od)
+		{
+			dd.setOptionalData (od);
+			
+			refreshComplete (dd);
+		}
+	}
+
 	/**
 	 * A listener that intercepts clicks on "Available now" link.
 	 * We need to do that because it's reasonable to hide the notification
@@ -651,7 +711,6 @@ public class DashboardActivity extends Activity implements Runnable {
 		Resources res;
 		String s;
 		TextView tw;
-		int len;
 
 		if (dd == null)
 			setContentView (R.layout.error);

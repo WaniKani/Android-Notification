@@ -21,6 +21,7 @@ import android.support.v4.app.NotificationCompat;
 import com.wanikani.androidnotifier.NotifierStateMachine.Event;
 import com.wanikani.wklib.Connection;
 import com.wanikani.wklib.StudyQueue;
+import com.wanikani.wklib.UserInformation;
 import com.wanikani.wklib.UserLogin;
 
 /* 
@@ -292,6 +293,7 @@ public class NotificationService
 	{
 		SharedPreferences prefs;
 		UserLogin login;
+		UserInformation ui;
 		Connection conn;
 		DashboardData dd;
 		StudyQueue sq;
@@ -302,7 +304,9 @@ public class NotificationService
 		conn = new Connection (login);
 		try {
 			sq = conn.getStudyQueue ();
-			dd = new DashboardData (null, sq, null);
+			/* This call does not cause network traffic */
+			ui = conn.getUserInformation ();
+			dd = new DashboardData (ui, sq);
 		} catch (IOException e) {
 			if (event == Event.E_UNSOLICITED)
 				return;

@@ -58,4 +58,9 @@ public class SRSDistribution {
 		enlighten = new Level (obj.getJSONObject ("enlighten"));
 		burned = new Level (obj.getJSONObject ("burned"));
 	}
+
+	public SRSDistribution ()
+	{
+		/* empty */
+	}
 }
