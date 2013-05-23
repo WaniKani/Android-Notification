@@ -2,6 +2,7 @@ package com.wanikani.androidnotifier;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
@@ -43,6 +44,10 @@ public class SettingsActivity
 	private static final String KEY_PREF_USERKEY = "pref_userkey";
 	/** Wanikani URL key. Must match preferences.xml */
 	private static final String KEY_PREF_URL = "pref_url";
+
+	/** The correct length of the API key (as far as we know) */
+	private static final int EXPECTED_KEYLEN = 32;
+	
 	
 	/** The current login. Used to check whether something gets changed */
 	private UserLogin login;
@@ -130,6 +135,28 @@ public class SettingsActivity
 		
 		pref = findPreference (KEY_PREF_ENABLED);
 		pref.setEnabled (credentialsAreValid (prefs));	
+	}
+	
+	public static String diagnose (SharedPreferences prefs, Resources res)
+	{
+			StringBuffer sb;
+			String key, fmt;
+			int delta;
+			
+			sb = new StringBuffer (res.getString (R.string.status_msg_unauthorized));
+			key = prefs.getString (KEY_PREF_USERKEY, "");
+			delta = key.length () - EXPECTED_KEYLEN;
+			if (key.length () == 0 || delta == 0)
+				/* Say nothing more */;
+			else if (delta > 0) {
+				fmt = res.getString (R.string.status_msg_unauthorized_too_long);
+				sb.append ('\n').append (String.format (fmt, delta));
+			} else {
+				fmt = res.getString (R.string.status_msg_unauthorized_too_short);
+				sb.append ('\n').append (String.format (fmt, -delta));
+			}
+			
+			return sb.toString ();
 	}
 	
 	public static UserLogin getLogin (SharedPreferences prefs)

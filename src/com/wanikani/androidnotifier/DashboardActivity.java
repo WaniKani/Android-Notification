@@ -636,16 +636,27 @@ public class DashboardActivity extends Activity implements Runnable {
 	 */
 	private void error (int id)
 	{
+		SharedPreferences prefs;
+		Resources res;
+		String s;
 		TextView tw;
-	
+		int len;
+
 		if (dd == null)
 			setContentView (R.layout.error);
 		else
 			spin (false);
 		
+		res = getResources ();
+		if (id == R.string.status_msg_unauthorized) {
+			prefs = PreferenceManager.getDefaultSharedPreferences (this);
+			s = SettingsActivity.diagnose (prefs, res);
+		} else
+			s = res.getString (id);
+	
 		tw = (TextView) findViewById (R.id.tv_alert);
 		if (tw != null)
-			tw.setText (id);
+			tw.setText (s);
 	}
 	
 	/**

@@ -28,6 +28,8 @@
     <string name="pref_enabled_descr">Show event icon when reviews are pending</string>
     <string name="status_msg_error">Error while connecting to WaniKani</string>
     <string name="status_msg_unauthorized">Authentication failed: check User API Key</string>
+    <string name="status_msg_unauthorized_too_short">(hint: it is %d chars too short)</string>
+    <string name="status_msg_unauthorized_too_long">(hint: it is %d chars too long)</string>
     
     <string name="fmt_X_days">%d days</string>
     <string name="fmt_one_day">~1 day</string>
