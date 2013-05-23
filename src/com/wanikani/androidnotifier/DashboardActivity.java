@@ -646,6 +646,9 @@ public class DashboardActivity extends Activity implements Runnable {
 
 			pb = (ProgressBar) findViewById (R.id.pb_kanji);
 			pb.setProgress (100 * dd.od.lp.kanjiProgress / dd.od.lp.kanjiTotal);
+
+			view = findViewById (R.id.progress_w_section);
+			view.setVisibility (View.GONE);
 			
 			view = findViewById (R.id.progress_section);
 			view.setVisibility (View.VISIBLE);

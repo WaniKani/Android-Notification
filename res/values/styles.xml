@@ -73,7 +73,7 @@
 		<item name="android:gravity">center</item>
 	</style>
 	
-	<style parent="AppTheme" name="LabelKey">
+    <style parent="AppTheme" name="LabelKey">
 		<item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
 	    <item name="android:gravity">left</item>	    	    	
 	</style>
@@ -88,16 +88,13 @@
         <item name="android:layout_margin">@dimen/m_half_gap</item>
 	</style>
 	
-	<style parent="AppTheme" name="HorzSeparator">
-		<item name="android:layout_width">match_parent</item>
-    	<item name="android:layout_height">1dp</item>    	
-    	<item name="android:background">?android:attr/listDivider</item>
-		<item name="android:layout_margin">@dimen/m_gap</item>		
-   	</style>
-		
 	<style parent="AppTheme" name="Progressions"> 
 		<item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
 		<item name="android:layout_margin">@dimen/m_half_gap</item>
+	</style>
+	
+    <style parent="Table" name="ProgressTable">
+	    <item name="android:layout_height">@dimen/m_progress_table</item>
 	</style>
 	
 </resources>

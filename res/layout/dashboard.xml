@@ -209,16 +209,31 @@
             android:visibility="gone"
             android:text="" />
 
-        <!-- The only purpose of this view is to hide the progress
-             bar while progress info is not availabe -->
-
         <!-- Progress -->
+
+        <LinearLayout
+            android:id="@+id/progress_w_section"
+            style="@style/ProgressTable"
+            android:layout_width="fill_parent"
+            android:gravity="right|top"
+            android:orientation="horizontal" >
+
+                <ProgressBar
+                    android:id="@+id/pb_w_section"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:maxHeight="24dp"
+                    android:maxWidth="24dp"
+                    android:minHeight="24dip"
+                    android:minWidth="24dip"/>            
+         </LinearLayout>
+                    
         <TableLayout
             android:id="@+id/progress_section"
+            style="@style/ProgressTable"
             android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:visibility="gone"
-            style="@style/Table">
+            android:gravity="center"
+            android:visibility="gone" >
 
         <TextView
             android:id="@+id/radicals_progression"
