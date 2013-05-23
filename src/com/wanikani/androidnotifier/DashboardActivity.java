@@ -576,6 +576,7 @@ public class DashboardActivity extends Activity implements Runnable {
 	 */
 	private void refreshComplete (DashboardData dd)
 	{
+		ProgressBar pb;
 		ImageView iw;
 		TextView tw;
 		View view;
@@ -637,6 +638,18 @@ public class DashboardActivity extends Activity implements Runnable {
 		
 		tw = (TextView) findViewById (R.id.next_day_val);
 		tw.setText (Integer.toString (dd.reviewsAvailableNextDay));
+		
+		/* Now the optional stuff */
+		if (dd.od.lp != null) {
+			pb = (ProgressBar) findViewById (R.id.pb_radicals);
+			pb.setProgress (100 * dd.od.lp.radicalsProgress / dd.od.lp.radicalsTotal);
+
+			pb = (ProgressBar) findViewById (R.id.pb_kanji);
+			pb.setProgress (100 * dd.od.lp.kanjiProgress / dd.od.lp.kanjiTotal);
+			
+			view = findViewById (R.id.progress_section);
+			view.setVisibility (View.VISIBLE);
+		}
 		
 		alarm.schedule (this, T_INT_AUTOREFRESH);
 	}

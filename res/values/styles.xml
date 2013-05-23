@@ -96,7 +96,7 @@
    	</style>
 		
 	<style parent="AppTheme" name="Progressions"> 
-		<item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
+		<item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
 		<item name="android:layout_margin">@dimen/m_half_gap</item>
 	</style>
 	

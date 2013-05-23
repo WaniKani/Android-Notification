@@ -208,14 +208,16 @@
             android:textIsSelectable="true"
             android:visibility="gone"
             android:text="" />
-        
-        <!-- A separator -->
-        <View style="@style/HorzSeparator"/>
-        
+
+        <!-- The only purpose of this view is to hide the progress
+             bar while progress info is not availabe -->
+
         <!-- Progress -->
         <TableLayout
+            android:id="@+id/progress_section"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
+            android:visibility="gone"
             style="@style/Table">
 
         <TextView
@@ -253,6 +255,6 @@
          	style="@android:style/Widget.ProgressBar.Horizontal"
          	android:progressDrawable="@drawable/kanjiprog"
          	android:layout_marginBottom="@dimen/m_gap"/>
-   	</TableLayout>   	
+   	</TableLayout>   	   	
     </LinearLayout>
 </ScrollView>
