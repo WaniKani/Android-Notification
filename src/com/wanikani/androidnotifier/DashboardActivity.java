@@ -158,10 +158,14 @@ public class DashboardActivity extends Activity implements Runnable {
 			size = getResources ().getDimensionPixelSize (R.dimen.m_avatar_size);
 			
 			try {
-				ui = conn [0].getUserInformation ();
-				conn [0].resolve (ui, size, defAvatar);
 				sq = conn [0].getStudyQueue ();
 				srs = conn [0].getSRSDistribution ();
+				/* getUserInformation should be called after at least one
+				 * of the other calls, so we give Connection a chance
+				 * to cache its contents */
+				ui = conn [0].getUserInformation ();
+				conn [0].resolve (ui, size, defAvatar);
+
 				dd = new DashboardData (ui, sq, srs);
 				if (dd.gravatar != null)
 					saveAvatar (dd);

@@ -58,6 +58,8 @@ public class Connection {
 	
 	Authenticator auth;
 	
+	UserInformation ui;
+	
 	public Connection (UserLogin login, Config config)
 	{
 		this.login = login;
@@ -72,7 +74,10 @@ public class Connection {
 	public UserInformation getUserInformation ()
 		throws IOException
 	{
-		return call ("user-information").ui;
+		if (ui == null)
+			ui = call ("user-information").ui;
+		
+		return ui;
 	}	
 
 	public StudyQueue getStudyQueue ()
@@ -82,6 +87,8 @@ public class Connection {
 		
 		try {
 			res = call ("study-queue");
+			ui = res.ui;
+
 			return new StudyQueue (res.info);
 		} catch (JSONException e) {
 			throw new ParseException ();
@@ -95,6 +102,8 @@ public class Connection {
 		
 		try {
 			res = call ("srs-distribution");
+			ui = res.ui;
+
 			return new SRSDistribution (res.info);
 		} catch (JSONException e) {
 			throw new ParseException ();
@@ -108,6 +117,8 @@ public class Connection {
 		
 		try {
 			res = call ("level-progression");
+			ui = res.ui;
+
 			return new LevelProgression (res.info);
 		} catch (JSONException e) {
 			throw new ParseException ();
