@@ -5,71 +5,107 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
+    <!-- Main container -->
+
     <LinearLayout
         style="@style/AppBaseTheme"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center_horizontal"
-        android:orientation="vertical" >
+        android:orientation="vertical">
 
-		<LinearLayout
-		    android:layout_width="match_parent"
-		    android:layout_height="wrap_content"
-		    android:orientation="horizontal" 
-		    android:baselineAligned="false">
-	   		<RelativeLayout
-        	    android:id="@+id/rl_gravatar"
-        	    android:layout_width="@dimen/m_gravatar_frame"
-        	    android:layout_height="@dimen/m_gravatar_frame" >
+        <!-- Top "blue" bar -->
 
-        	    <ImageView
-        	        android:layout_width="wrap_content"
-        	        android:layout_height="wrap_content"
-        	        android:layout_alignParentLeft="true"
-        	        android:layout_alignParentTop="true"
-        	        android:src="@drawable/gravatar_frame" />
-
-		    	<ImageView
-		    	    android:id="@+id/iv_gravatar"
-		    	    android:layout_width="@dimen/m_avatar_size"
-		    	    android:layout_height="@dimen/m_avatar_size"
-		    	    android:layout_centerInParent="true"
-		    	    android:layout_margin="@dimen/m_gap"
-		    	    android:contentDescription="@string/tag_gravatar"
-		    	    android:src="@drawable/default_avatar_pale" />
-		</RelativeLayout>
-			<LinearLayout
-			    style="@style/Heading"
-			    android:layout_width="fill_parent"
-			    android:layout_height="@dimen/m_header"
-			    android:layout_weight="1"
-			    android:orientation="vertical" >
-
-				<TextView
-				    android:id="@+id/tv_username"
-				    style="@style/Username"
-				    android:layout_width="match_parent"
-				    android:layout_height="fill_parent"
-				    android:layout_weight="1"
-				    android:gravity="center_vertical|center_horizontal"
-				    android:text="" />
-
-			    <TextView
-			        android:id="@+id/tv_title"
-			        style="@style/UserTitle"
-			        android:layout_width="match_parent"
-			        android:layout_height="wrap_content"
-			        android:layout_gravity="center"
-			        android:layout_margin="@dimen/m_half_gap"
-			        android:gravity="right|center_vertical"
-			        android:text="" />
-
-			</LinearLayout>
-			    	        	
-        </LinearLayout>    
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:baselineAligned="false"
+            android:orientation="horizontal" >
+
+            <!-- The avatar (+image mask) -->
+
+            <RelativeLayout
+                android:id="@+id/rl_gravatar"
+                android:layout_width="@dimen/m_gravatar_frame"
+                android:layout_height="@dimen/m_gravatar_frame" >
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentTop="true"
+                    android:src="@drawable/gravatar_frame" />
+
+                <ImageView
+                    android:id="@+id/iv_gravatar"
+                    android:layout_width="@dimen/m_avatar_size"
+                    android:layout_height="@dimen/m_avatar_size"
+                    android:layout_centerInParent="true"
+                    android:layout_margin="@dimen/m_gap"
+                    android:contentDescription="@string/tag_gravatar"
+                    android:src="@drawable/default_avatar_pale" />
+            </RelativeLayout>
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" >
+
+                <RelativeLayout
+                    style="@style/Heading"
+                    android:layout_width="fill_parent"
+                    android:layout_height="@dimen/m_header"
+                    android:layout_weight="1"
+                    android:orientation="vertical" >
+
+                    <TextView
+                        android:id="@+id/tv_level"
+                        style="@style/UserLevel"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentRight="true"
+                        android:layout_alignParentTop="true"
+                        android:layout_margin="@dimen/m_half_gap"
+                        android:gravity="right|center_vertical"
+                        android:text="" />
+
+                    <TextView
+                        android:id="@+id/tv_username"
+                        style="@style/Username"
+                        android:layout_width="match_parent"
+                        android:layout_height="fill_parent"
+                        android:gravity="center_vertical|center_horizontal"
+                        android:text="" />
+
+                    <TextView
+                        android:id="@+id/tv_title"
+                        style="@style/UserTitle"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentBottom="true"
+                        android:layout_alignParentRight="true"
+                        android:layout_margin="@dimen/m_half_gap"
+                        android:gravity="right|center_vertical"
+                        android:text="" />
+                </RelativeLayout>
+
+                <ProgressBar
+                    android:id="@+id/pb_status"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="right"
+                    android:maxHeight="24dp"
+                    android:maxWidth="24dp"
+                    android:minHeight="24dip"
+                    android:minWidth="24dip"/>
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Next review indicator -->
+
+        <LinearLayout
+            style="@style/Row"
+            android:layout_width="match_parent"
             android:orientation="vertical" >
 
             <TextView
@@ -84,42 +120,22 @@
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:clickable="true"
-                android:textIsSelectable="true"/>
+                android:textIsSelectable="true" />
         </LinearLayout>
 
+        <!-- The first (review) table -->
+
         <TableLayout
-            android:id="@+id/tab_queue"
-            style="@style/QueueTable"
+            android:id="@+id/tab_next"
+            style="@style/Table"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content" >
 
             <TableRow
-                android:id="@+id/tableRow1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" >
-
-                <TextView
-                    android:id="@+id/lessons"
-                    style="@style/LabelKey"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/tag_lessons" />
-
-                <TextView
-                    android:id="@+id/lessons_val"
-                    style="@style/LabelValue"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:textIsSelectable="true" />
-
-            </TableRow>
-
-            <TableRow
-                android:id="@+id/tableRow2"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" >
+                android:id="@+id/tr_r_now"
+                style="@style/Row"
+                android:layout_width="fill_parent"
+                android:visibility="gone" >
 
                 <TextView
                     android:id="@+id/reviews"
@@ -127,7 +143,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="@string/tag_reviews" />
+                    android:text="@string/tag_reviews_now" />
 
                 <TextView
                     android:id="@+id/reviews_val"
@@ -137,18 +153,11 @@
                     android:layout_weight="1"
                     android:textIsSelectable="true" />
             </TableRow>
-        </TableLayout>
-
-        <TableLayout
-            android:id="@+id/tab_next"
-            style="@style/NextTable"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content" >
 
             <TableRow
-                android:id="@+id/tableRow3"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" >
+                android:id="@+id/tr_r_hour"
+                style="@style/Row"
+                android:layout_width="match_parent" >
 
                 <TextView
                     android:id="@+id/next_hour"
@@ -168,9 +177,9 @@
             </TableRow>
 
             <TableRow
-                android:id="@+id/tableRow4"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" >
+                android:id="@+id/tr_r_day"
+                style="@style/Row"
+                android:layout_width="match_parent" >
 
                 <TextView
                     android:id="@+id/next_day"
@@ -190,29 +199,56 @@
             </TableRow>
         </TableLayout>
 
-        <LinearLayout
-            style="@style/AppBaseTheme"
-            android:layout_width="match_parent"
+        <!-- Unlock/Lessons message -->
+
+        <TextView
+            android:id="@+id/lessons_available"
+            style="@style/LessonsAvailable"
+            android:layout_width="fill_parent"
+            android:textIsSelectable="true"
+            android:visibility="gone"
+            android:text="" />
+        
+        <!-- A separator -->
+        <View style="@style/HorzSeparator"/>
+        
+        <!-- Progress -->
+        <TableLayout
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal" >
+            style="@style/Table">
 
-            <TextView
-                android:id="@+id/tv_alert"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:gravity="left|center"
-                android:textIsSelectable="true" />
+        <TextView
+            android:id="@+id/radicals_progression"
+            style="@style/Progressions"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/tag_radicals_progression"
+            android:textIsSelectable="true" />
+            
+       <ProgressBar
+         	android:layout_width="fill_parent"
+         	android:layout_height="wrap_content"
+         	android:layout_gravity="center"
+         	style="@android:style/Widget.ProgressBar.Horizontal"
+         	android:progressDrawable="@drawable/radicalsprog"
+         	android:layout_marginBottom="@dimen/m_gap"/>
 
-            <ProgressBar
-                android:id="@+id/pb_status"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:maxHeight="24dp"
-                android:maxWidth="24dp"
-                android:minHeight="24dip"
-                android:minWidth="24dip"
-                android:visibility="invisible" />
-        </LinearLayout>
+       <TextView
+            android:id="@+id/kanji_progression"
+            style="@style/Progressions"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textIsSelectable="true" 
+            android:text="@string/tag_kanji_progression" />
+            
+       <ProgressBar
+         	android:layout_width="fill_parent"
+         	android:layout_height="wrap_content"
+         	android:layout_gravity="center"
+         	style="@android:style/Widget.ProgressBar.Horizontal"
+         	android:progressDrawable="@drawable/kanjiprog"
+         	android:layout_marginBottom="@dimen/m_gap"/>
+   	</TableLayout>   	
     </LinearLayout>
-
 </ScrollView>

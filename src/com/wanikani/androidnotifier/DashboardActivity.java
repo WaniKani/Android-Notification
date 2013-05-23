@@ -514,11 +514,12 @@ public class DashboardActivity extends Activity implements Runnable {
 	{
 		ImageView iw;
 		TextView tw;
+		String s;
 
 		if (this.dd == null)
 			setContentView (R.layout.dashboard);
-		else
-			spin (false);
+		
+		spin (false);
 
 		this.dd = dd;
 		
@@ -534,11 +535,15 @@ public class DashboardActivity extends Activity implements Runnable {
 		tw = (TextView) findViewById (R.id.tv_username);
 		tw.setText (dd.username);
 
+		tw = (TextView) findViewById (R.id.tv_level);
+		tw.setText (String.format (getString (R.string.fmt_level), dd.level));
+
 		tw = (TextView) findViewById (R.id.tv_title);
 		tw.setText (String.format (getString (R.string.fmt_title), dd.title));
 
 		tw = (TextView) findViewById (R.id.reviews_val);
 		tw.setText (Integer.toString (dd.reviewsAvailable));
+		tw.setVisibility (dd.reviewsAvailable > 0 ? View.VISIBLE : View.GONE);
 		
 		tw = (TextView) findViewById (R.id.tv_next_review);
 		tw.setText (R.string.tag_next_review);
@@ -548,9 +553,14 @@ public class DashboardActivity extends Activity implements Runnable {
 		tw.setMovementMethod (LinkMovementMethod.getInstance ());
 		tw.setOnClickListener (clickListener);
 		
-		tw = (TextView) findViewById (R.id.lessons_val);
-		tw.setText (Integer.toString (dd.lessonsAvailable));
-
+		tw = (TextView) findViewById (R.id.lessons_available);
+		if (dd.lessonsAvailable > 1) {
+			s = String.format (getString (R.string.fmt_lessons), dd.lessonsAvailable);
+			tw.setText (Html.fromHtml (s));
+		} else if (dd.lessonsAvailable == 1)
+			tw.setText (Html.fromHtml (getString (R.string.fmt_one_lesson)));
+		tw.setVisibility (dd.lessonsAvailable > 0 ? View.VISIBLE : View.GONE);
+		
 		tw = (TextView) findViewById (R.id.next_hour_val);
 		tw.setText (Integer.toString (dd.reviewsAvailableNextHour));
 		

@@ -1,6 +1,5 @@
-
-<resources>
-
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
     <string name="app_name">WaniKani Notifier</string>
     <string name="new_reviews">You have %d pending reviews</string>
     <string name="new_review">You have one pending review</string>
@@ -10,8 +9,7 @@
     <string name="pref_userkey_descr">Copy here the "Public API Key" from your Account Settings page</string>
     <string name="pref_userkey">User API Key</string>
     <string name="tag_next_review">Next Review</string>
-    <string name="tag_lessons">Lessons</string>
-    <string name="tag_reviews">Reviews</string>
+    <string name="tag_reviews_now">Now</string>
     <string name="tag_next_hour">Next hour</string>
     <string name="tag_next_day">Next day</string>
     <string name="tag_apprentice">Apprentice</string>
@@ -21,6 +19,9 @@
     <string name="tag_burned">Burned</string>
     <string name="tag_gravatar">Gravatar</string>
     <string name="tag_loading">Loading&#8230;</string>
+    
+    <string name="tag_radicals_progression">Radicals Progression</string>
+    <string name="tag_kanji_progression">Kanji Progression</string>
     
     <string name="em_refresh">Refresh</string>
     <string name="em_settings">Settings</string>
@@ -40,6 +41,11 @@
         &lt;a href="http://www.wanikani.com/review"&gt;Available now&lt;/a&gt;        
     </string>
 
+    <string name="fmt_level">Level %d</string>
     <string name="fmt_title">Sect of %s</string>
+    <string name="fmt_lessons">
+  You can &lt;a href=http://www.wanikani.com/lesson"&gt;unlock %d items&lt;/a&gt;</string>
+    <string name="fmt_one_lesson">
+  You can &lt;a href=http://www.wanikani.com/lesson"&gt;unlock one item&lt;/a&gt;</string>
     
 </resources>

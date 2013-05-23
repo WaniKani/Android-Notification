@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
-
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
     <dimen name="m_half_gap">4dp</dimen>
     <dimen name="m_rythm">48dp</dimen>
     <dimen name="m_gravatar_frame">96dp</dimen>

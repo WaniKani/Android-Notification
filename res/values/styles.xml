@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
      <!--
         Base application theme, dependent on API level. This theme is replaced
@@ -17,6 +18,9 @@
     </style>
     <style name="Background" parent="AppTheme">
         <item name="android:background">@drawable/wool</item>
+    </style>
+    <style name="ErrorBackground" parent="AppTheme">
+        <item name="android:background">#ffffff</item>
     </style>
     
     <!-- Splash Screen  -->
@@ -45,18 +49,22 @@
         <item name="android:textColor">#ffffff</item>
         <item name="android:textStyle">italic</item>        
         </style>
-    <style parent="AppTheme" name="Table">
-        <item name="android:layout_margin">5dp</item>
-        <item name="android:padding">5dp</item>
-        <item name="android:layout_weight">0</item>
-        <item name="android:background">@drawable/table_background</item>
+    <style name="UserLevel" parent="AppTheme">
+		<item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
+        <item name="android:textColor">#ffffff</item>
     </style>
-	<style parent="Table" name="QueueTable">
+
+    <style parent="AppTheme" name="Table">
+	    <item name="android:layout_margin">@dimen/m_gap</item>
+	    <item name="android:background">@drawable/table_background</item>
+	    <item name="android:padding">@dimen/m_gap</item>
 	</style>
-	<style parent="Table" name="NextTable">
-	</style>
-	<style parent="Table" name="StatsTable">
-	</style>
+        
+    <style parent="AppTheme" name="Row">
+        <item name="android:layout_height">@dimen/m_rythm</item>
+        <item name="android:layout_margin">@dimen/m_half_gap</item>
+    </style> 
+    
 	<style parent="AppTheme" name="LabelNextReview"> 
 		<item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
 	</style>
@@ -64,12 +72,32 @@
 		<item name="android:textAppearance">?android:attr/textAppearanceLarge</item>
 		<item name="android:gravity">center</item>
 	</style>
+	
 	<style parent="AppTheme" name="LabelKey">
-		<item name="android:textAppearance">?android:attr/textAppearanceLarge</item>
+		<item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
 	    <item name="android:gravity">left</item>	    	    	
 	</style>
 	<style parent="AppTheme" name="LabelValue">
-		<item name="android:textAppearance">?android:attr/textAppearanceLarge</item>
+		<item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
 	    <item name="android:gravity">right</item>	    	
 	</style>
+	
+	<style parent="AppTheme" name="LessonsAvailable">
+	    <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
+	    <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_margin">@dimen/m_half_gap</item>
+	</style>
+	
+	<style parent="AppTheme" name="HorzSeparator">
+		<item name="android:layout_width">match_parent</item>
+    	<item name="android:layout_height">1dp</item>    	
+    	<item name="android:background">?android:attr/listDivider</item>
+		<item name="android:layout_margin">@dimen/m_gap</item>		
+   	</style>
+		
+	<style parent="AppTheme" name="Progressions"> 
+		<item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
+		<item name="android:layout_margin">@dimen/m_half_gap</item>
+	</style>
+	
 </resources>
