@@ -110,6 +110,7 @@ class DashboardData {
 		}		
 		if (sq != null) {
 			reviewsAvailable = sq.reviewsAvailable;
+			lessonsAvailable = sq.lessonsAvailable;
 			nextReviewDate = sq.nextReviewDate;
 			reviewsAvailableNextHour = sq.reviewsAvailableNextHour;
 			reviewsAvailableNextDay = sq.reviewsAvailableNextDay;
