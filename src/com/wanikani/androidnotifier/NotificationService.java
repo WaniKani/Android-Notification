@@ -20,7 +20,6 @@ import android.support.v4.app.NotificationCompat;
 
 import com.wanikani.androidnotifier.NotifierStateMachine.Event;
 import com.wanikani.wklib.Connection;
-import com.wanikani.wklib.SRSDistribution;
 import com.wanikani.wklib.StudyQueue;
 import com.wanikani.wklib.UserLogin;
 
