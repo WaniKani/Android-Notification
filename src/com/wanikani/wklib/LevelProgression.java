@@ -1,11 +1,7 @@
 package com.wanikani.wklib;
 
-import java.util.Date;
-
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import android.graphics.Bitmap;
 
 /* 
  *  Copyright (c) 2013 Alberto Cuda
