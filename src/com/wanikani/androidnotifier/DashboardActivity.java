@@ -514,6 +514,7 @@ public class DashboardActivity extends Activity implements Runnable {
 	{
 		ImageView iw;
 		TextView tw;
+		View view;
 		String s;
 
 		if (this.dd == null)
@@ -543,7 +544,9 @@ public class DashboardActivity extends Activity implements Runnable {
 
 		tw = (TextView) findViewById (R.id.reviews_val);
 		tw.setText (Integer.toString (dd.reviewsAvailable));
-		tw.setVisibility (dd.reviewsAvailable > 0 ? View.VISIBLE : View.GONE);
+		
+		view = findViewById (R.id.tr_r_now);
+		view.setVisibility (dd.reviewsAvailable > 0 ? View.VISIBLE : View.GONE);
 		
 		tw = (TextView) findViewById (R.id.tv_next_review);
 		tw.setText (R.string.tag_next_review);
