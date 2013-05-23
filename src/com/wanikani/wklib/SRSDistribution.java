@@ -41,6 +41,11 @@ public class SRSDistribution {
 			vocabulary = Util.getInt (obj, "vocabulary");
 			total = Util.getInt (obj, "total");
 		}
+		
+		Level ()
+		{
+			/* empty */
+		}
 	}
 	
 	public Level apprentice;
@@ -61,6 +66,10 @@ public class SRSDistribution {
 
 	public SRSDistribution ()
 	{
-		/* empty */
+		apprentice = new Level ();
+		guru = new Level ();
+		master = new Level ();
+		enlighten = new Level ();
+		burned = new Level ();
 	}
 }
