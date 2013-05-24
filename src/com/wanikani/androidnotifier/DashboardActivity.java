@@ -580,6 +580,7 @@ public class DashboardActivity extends Activity implements Runnable {
 		ImageView iw;
 		TextView tw;
 		View view;
+		long delay;
 		String s;
 
 		if (this.dd == null)
@@ -654,7 +655,15 @@ public class DashboardActivity extends Activity implements Runnable {
 			view.setVisibility (View.VISIBLE);
 		}
 		
-		alarm.schedule (this, T_INT_AUTOREFRESH);
+		delay = dd.nextReviewDate.getTime () - System.currentTimeMillis ();
+		if (delay > T_INT_AUTOREFRESH)
+			delay = T_INT_AUTOREFRESH;
+		
+		/* May happen if local clock is not perfectly synchronized with WK clock */
+		if (delay < 1000)
+			delay = 1000;
+		
+		alarm.schedule (this, delay);
 	}
 
 	/**
