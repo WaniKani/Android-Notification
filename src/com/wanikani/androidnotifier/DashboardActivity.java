@@ -29,6 +29,7 @@ import android.text.method.LinkMovementMethod;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -259,11 +260,10 @@ public class DashboardActivity extends Activity implements Runnable {
 	}
 
 	/**
-	 * A listener that intercepts clicks on "Available now" link.
-	 * We need to do that because it's reasonable to hide the notification
-	 * icon.
+	 * A listener that intercepts clicks on "Available now" link or on the review button.
+	 * Hides the notification icon.	 
 	 */
-	private class ClickListener implements View.OnClickListener {
+	private class ReviewBaseClickListener implements View.OnClickListener {
 				
 		@Override
 		public void onClick (View v)
@@ -277,6 +277,26 @@ public class DashboardActivity extends Activity implements Runnable {
 			startService (intent);
 		}
 	};
+	
+	/**
+	 * A listener that intercepts review button clicks.
+	 * It starts the {@link WebReviewActivity}.
+	 */
+	private class ReviewClickListener extends ReviewBaseClickListener {
+		
+		@Override
+		public void onClick (View v)
+		{
+			Intent intent;
+			
+			super.onClick (v);
+			
+			intent = new Intent (DashboardActivity.this, WebReviewActivity.class);
+			intent.setAction (WebReviewActivity.OPEN_ACTION);
+		
+			startActivity (intent);
+		}	
+	}
 
 	/** The key checked by {@link #onCreate} to make 
 	 *  sure that the statistics contained in the bundle are valid
@@ -304,9 +324,6 @@ public class DashboardActivity extends Activity implements Runnable {
 	
 	/** The object that notifies us when the refresh timeout expires */
 	Alarm alarm;
-	
-	/** The object that listens for "Available now" click events */
-	ClickListener clickListener;
 	
 	/**
 	 * Constructor.
@@ -340,7 +357,6 @@ public class DashboardActivity extends Activity implements Runnable {
 	    
 	    registerIntents ();
 	    alarm = new Alarm ();
-	    clickListener = new ClickListener ();
 	    
 	    prefs = PreferenceManager.getDefaultSharedPreferences (this);
 	    if (!SettingsActivity.credentialsAreValid (prefs))
@@ -417,6 +433,25 @@ public class DashboardActivity extends Activity implements Runnable {
 
 		filter = new IntentFilter (SettingsActivity.ACT_NOTIFY);
 		lbm.registerReceiver (notifyRecv, filter);
+	}
+	
+	/**
+	 * Registers all the click listeners.
+	 * Currently they are:
+	 * <ul>
+	 * 	<li>The listener that handles "Available now" web link
+	 *  <li>The listener of the "Review button"
+	 * </ul>
+	 */
+	private void registerListeners ()
+	{
+		View view;
+		
+		view = findViewById (R.id.tv_next_review_val);
+		view.setOnClickListener (new ReviewBaseClickListener ());
+		
+		view = findViewById (R.id.btn_review);
+		view.setOnClickListener (new ReviewClickListener ());
 	}
 	
 	/**
@@ -583,8 +618,10 @@ public class DashboardActivity extends Activity implements Runnable {
 		long delay;
 		String s;
 
-		if (this.dd == null)
+		if (this.dd == null) {
 			setContentView (R.layout.dashboard);
+			registerListeners ();
+		}
 		
 		spin (false);
 
@@ -620,7 +657,6 @@ public class DashboardActivity extends Activity implements Runnable {
 		tw = (TextView) findViewById (R.id.tv_next_review_val);
 		tw.setText (Html.fromHtml (niceInterval (dd.nextReviewDate)));		
 		tw.setMovementMethod (LinkMovementMethod.getInstance ());
-		tw.setOnClickListener (clickListener);
 		
 		tw = (TextView) findViewById (R.id.lessons_available);
 		if (dd.lessonsAvailable > 1) {

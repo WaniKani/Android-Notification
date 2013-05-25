@@ -121,6 +121,7 @@
                 android:layout_height="wrap_content"
                 android:clickable="true"
                 android:textIsSelectable="true" />
+            
         </LinearLayout>
 
         <!-- The first (review) table -->
@@ -270,6 +271,12 @@
          	style="@android:style/Widget.ProgressBar.Horizontal"
          	android:progressDrawable="@drawable/kanjiprog"
          	android:layout_marginBottom="@dimen/m_gap"/>
-   	</TableLayout>   	   	
+   	</TableLayout>
+   	<Button
+                android:id="@+id/btn_review"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Experimental Review" />   	   	
     </LinearLayout>
+    
 </ScrollView>

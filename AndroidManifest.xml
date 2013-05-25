@@ -26,6 +26,8 @@
         </activity>
         <activity android:name="SettingsActivity" />
 
+        <activity android:name="WebReviewActivity" />
+        
         <receiver
             android:name="NotificationService$Receiver"
             android:enabled="true"
