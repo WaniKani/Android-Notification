@@ -656,7 +656,7 @@ public class DashboardActivity extends Activity implements Runnable {
 		}
 		
 		delay = dd.nextReviewDate.getTime () - System.currentTimeMillis ();
-		if (delay > T_INT_AUTOREFRESH)
+		if (delay > T_INT_AUTOREFRESH || dd.reviewsAvailable > 0)
 			delay = T_INT_AUTOREFRESH;
 		
 		/* May happen if local clock is not perfectly synchronized with WK clock */
