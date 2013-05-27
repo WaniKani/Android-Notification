@@ -97,4 +97,15 @@
 	    <item name="android:layout_height">@dimen/m_progress_table</item>
 	</style>
 	
+    <style parent="AppTheme" name="kb_key">
+        <item name="android:layout_height">@dimen/m_kb_key</item>
+        <item name="android:layout_width">0dip</item>
+        <item name="android:layout_margin">0dip</item>
+    </style>
+
+    <style parent="kb_key" name="kb_meta_key"/>
+    
+    <style parent="AppTheme" name="keyboard">
+        <item name="android:background">@drawable/wool</item>
+    </style>	
 </resources>
