@@ -70,9 +70,6 @@ import com.wanikani.wklib.UserLogin;
  */
 public class DashboardActivity extends Activity implements Runnable { 
 
-	/*** The auto-refresh time (milliseconds) */
-	public static final int T_INT_AUTOREFRESH = 5 * 60 * 1000;
-	
 	/*** The avatar bitmap filename */
 	private static final String AVATAR_FILENAME = "avatar.png";
 		
@@ -576,11 +573,12 @@ public class DashboardActivity extends Activity implements Runnable {
 	 */
 	private void refreshComplete (DashboardData dd)
 	{
+		SharedPreferences prefs;
 		ProgressBar pb;
 		ImageView iw;
 		TextView tw;
 		View view;
-		long delay;
+		long delay, refresh;
 		String s;
 
 		if (this.dd == null)
@@ -654,14 +652,16 @@ public class DashboardActivity extends Activity implements Runnable {
 			view = findViewById (R.id.progress_section);
 			view.setVisibility (View.VISIBLE);
 		}
-		
+				
+		prefs = PreferenceManager.getDefaultSharedPreferences (this);
+		refresh = SettingsActivity.getRefreshTimeout (prefs) * 60 * 1000; 
 		if (dd.nextReviewDate != null)
 			delay = dd.nextReviewDate.getTime () - System.currentTimeMillis ();
 		else
-			delay = T_INT_AUTOREFRESH;
+			delay = refresh;
 		
-		if (delay > T_INT_AUTOREFRESH || dd.reviewsAvailable > 0)
-			delay = T_INT_AUTOREFRESH;
+		if (delay > refresh || dd.reviewsAvailable > 0)
+			delay = refresh;
 		
 		/* May happen if local clock is not perfectly synchronized with WK clock */
 		if (delay < 1000)
