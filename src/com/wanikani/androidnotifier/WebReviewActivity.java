@@ -426,6 +426,7 @@ public class WebReviewActivity extends Activity {
 		while (i < key_table.length) {
 			key = (Button) findViewById (key_table [i]);
 			key.setText ("");
+			i++;
 		}
 	}
 	
