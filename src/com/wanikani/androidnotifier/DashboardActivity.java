@@ -294,6 +294,8 @@ public class DashboardActivity extends Activity implements Runnable {
 			intent = new Intent (DashboardActivity.this, WebReviewActivity.class);
 			intent.setAction (WebReviewActivity.OPEN_ACTION);
 		
+			refreshOnResume = true;
+			
 			startActivity (intent);
 		}	
 	}
@@ -324,6 +326,11 @@ public class DashboardActivity extends Activity implements Runnable {
 	
 	/** The object that notifies us when the refresh timeout expires */
 	Alarm alarm;
+	
+	/** If set, when the activity is resumed, we force a refresh.
+	 *  Needed when we start another activity that may significatly
+	 *  change the data (e.g. {@link WebReviewActivity}) */
+	private boolean refreshOnResume;
 	
 	/**
 	 * Constructor.
@@ -395,6 +402,10 @@ public class DashboardActivity extends Activity implements Runnable {
 	{
 		super.onResume ();
 				
+		if (refreshOnResume) {
+			refresh ();
+			refreshOnResume = false;
+		}
 	    alarm.screenOn ();
 	}
 	
