@@ -49,5 +49,8 @@
   You can &lt;a href=http://www.wanikani.com/lesson"&gt;unlock&lt;/a&gt; %d items</string>
     <string name="fmt_one_lesson">
   You can &lt;a href=http://www.wanikani.com/lesson"&gt;unlock&lt;/a&gt; one item</string>
+  
+    <string name="fmt_web_review_connecting">Connecting to WaniKani&#8230;</string>
+    <string name="fmt_web_review_error">Connection failed: %s</string>
     
 </resources>

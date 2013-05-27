@@ -1,188 +1,249 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical" >
+    android:layout_height="match_parent" 
+    android:orientation="vertical">
 
     <ProgressBar
-        android:id="@+id/pb_reviews"
-        style="?android:attr/progressBarStyleHorizontal"
+    	    android:id="@+id/pb_reviews"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+    <LinearLayout
+        android:id="@+id/wv_splash"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:visibility="gone" >
 
-    	<WebView
-        	android:id="@+id/wv_reviews"
-        	android:layout_width="match_parent"
-        	android:layout_height="0dp"
-        	android:layout_weight="1" />
-    	<LinearLayout
- 	    	android:id="@+id/keyboard"
-    	    android:layout_width="match_parent"
-    	    android:layout_height="wrap_content"
-    	    android:orientation="vertical"
-    	    style="@style/keyboard"
-    	    android:visibility="gone">
-    	<LinearLayout
-    	    android:layout_width="match_parent"
-    	    android:layout_height="wrap_content"
-    	    android:orientation="horizontal">
+        <TextView
+            android:id="@+id/tv_message"
+            android:layout_width="match_parent"
+            android:layout_height="0dip"
+            android:layout_weight="1"
+            android:background="@drawable/wool"
+            android:gravity="center_vertical|center_horizontal" />
 
-    	    <Button
-    	        android:id="@+id/kb_0"
-    	        style="@style/kb_key"
-    	        android:layout_weight="1"/>
-    	    <Button
-    	        android:id="@+id/kb_1"
-    	        style="@style/kb_key"
-    	        android:layout_weight="1" />
+        <ImageView
+            android:id="@+id/imageView1"
+            android:layout_width="match_parent"
+            android:layout_height="0dip"
+            android:layout_weight="2"
+            android:src="@drawable/wrsplash" />
+    </LinearLayout>
 
-    	    <Button
-    	        android:id="@+id/kb_2"
-    	        style="@style/kb_key"
-    	        android:layout_weight="1" />
+    <LinearLayout
+        android:id="@+id/wv_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:visibility="visible" >
+        <WebView
+            android:id="@+id/wv_reviews"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
 
-    	    <Button
-    	        android:id="@+id/kb_3"
-    	        style="@style/kb_key"
-    	        android:layout_weight="1" />
-    	    <Button
-    	        android:id="@+id/kb_4"
-    	        style="@style/kb_key"
-    	        android:layout_weight="1" />
-    	    <Button
-    	        android:id="@+id/kb_5"
-    	        style="@style/kb_key"
-    	        android:layout_weight="1" />
-    	    <Button
-    	        android:id="@+id/kb_6"
-    	        style="@style/kb_key"
-    	        android:layout_weight="1" />
-    	    <Button
-    	        android:id="@+id/kb_7"
-    	        style="@style/kb_key"
-    	        android:layout_weight="1" />
-    	    <Button
-    	        android:id="@+id/kb_8"
-    	        style="@style/kb_key"
-    	        android:layout_weight="1" />
-    	    <Button
-    	        android:id="@+id/kb_9"
-    	        style="@style/kb_key"
-    	        android:layout_weight="1" />
-    	    	    	    	    	    	    	    	    	    
-    	</LinearLayout>
-    	<LinearLayout
-    	    android:layout_width="match_parent"
-    	    android:layout_height="wrap_content"
-    	    android:orientation="horizontal"
-    	    android:layout_alignParentBottom="true">
-     
-	   	    <View
-    	        style="@style/kb_key"
-    	        android:layout_weight="0.5" />
-    	     <Button
-    	        android:id="@+id/kb_10"
-    	        style="@style/kb_key"
-    	        android:layout_weight="1" />
-    	    <Button
-    	        android:id="@+id/kb_11"
-    	        style="@style/kb_key"
-    	        android:layout_weight="1" />
-    	    <Button
-    	        android:id="@+id/kb_12"
-    	        style="@style/kb_key"
-    	        android:layout_weight="1"/>
-    	    <Button
-    	        android:id="@+id/kb_13"
-    	        style="@style/kb_key"
-    	        android:layout_weight="1"/>
-    	    <Button
-    	        android:id="@+id/kb_14"
-    	        style="@style/kb_key"
-    	        android:layout_weight="1" />
-     	    <Button
-    	        android:id="@+id/kb_15"
-    	        style="@style/kb_key"
-    	        android:layout_weight="1"/>
-    	    <Button
-    	        android:id="@+id/kb_16"
-    	        style="@style/kb_key"
-    	        android:layout_weight="1"/>
-    	    <Button
-    	        android:id="@+id/kb_17"
-    	        style="@style/kb_key"
-    	        android:layout_weight="1"/>
-    	    <Button
-    	        android:id="@+id/kb_18"
-    	        style="@style/kb_key"
-    	        android:layout_weight="1"/>
-	   	    <View
-    	        style="@style/kb_key"
-    	        android:layout_weight="0.5" />
-    	</LinearLayout>
-    	<LinearLayout
-    	    android:layout_width="match_parent"
-    	    android:layout_height="wrap_content"
-    	    android:orientation="horizontal">
-     
-	   	    <Button
-    	        android:id="@+id/kb_quote"
-    	        style="@style/kb_meta_key"
-    	        android:layout_weight="1.2"
-    	        android:text="'" />
-    	    <Button
-    	        android:id="@+id/kb_19"
-    	        style="@style/kb_key"
-    	        android:layout_weight="1" />
-    	    <Button
-    	        android:id="@+id/kb_20"
-    	        style="@style/kb_key"
-    	        android:layout_weight="1" />
-    	    <Button
-    	        android:id="@+id/kb_21"
-    	        style="@style/kb_key"
-    	        android:layout_weight="1"/>
-    	    <Button
-    	        android:id="@+id/kb_22"
-    	        style="@style/kb_key"
-    	        android:layout_weight="1"/>
-    	    <Button
-    	        android:id="@+id/kb_23"
-    	        style="@style/kb_key"
-    	        android:layout_weight="1" />
-     	    <Button
-    	        android:id="@+id/kb_24"
-    	        style="@style/kb_key"
-    	        android:layout_weight="1"/>
-    	    <Button
-    	        android:id="@+id/kb_25"
-    	        style="@style/kb_key"
-    	        android:layout_weight="1"/>    	    			    	    
-	   	    <Button
-    	        android:id="@+id/kb_backspace"
-    	        style="@style/kb_meta_key"
-    	        android:layout_weight="1.2" 
-    	        android:text="BS"/>
-    	    </LinearLayout>
-    	<LinearLayout
-    	    android:layout_width="match_parent"
-    	    android:layout_height="wrap_content"
-    	    android:orientation="horizontal">
-     
-	   	    <Button
-    	        android:id="@+id/kb_meta"
-    	        style="@style/kb_meta_key"
-    	        android:layout_weight="1.5"
-    	        android:text="123" />
-    	    <Button
-    	        android:id="@+id/kb_space"
-    	        style="@style/kb_key"
-    	        android:layout_weight="5" />
-    	    <Button
-    	        android:id="@+id/kb_enter"
-    	        style="@style/kb_key"
-    	        android:layout_weight="1.5"
-    	        android:text="Enter" />
-    	    </LinearLayout>
-    		</LinearLayout>    	
+        <LinearLayout
+            android:id="@+id/keyboard"
+            style="@style/keyboard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone" >
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal" >
+
+                <Button
+                    android:id="@+id/kb_0"
+                    style="@style/kb_key"
+                    android:layout_weight="1" />
+
+                <Button
+                    android:id="@+id/kb_1"
+                    style="@style/kb_key"
+                    android:layout_weight="1" />
+
+                <Button
+                    android:id="@+id/kb_2"
+                    style="@style/kb_key"
+                    android:layout_weight="1" />
+
+                <Button
+                    android:id="@+id/kb_3"
+                    style="@style/kb_key"
+                    android:layout_weight="1" />
+
+                <Button
+                    android:id="@+id/kb_4"
+                    style="@style/kb_key"
+                    android:layout_weight="1" />
+
+                <Button
+                    android:id="@+id/kb_5"
+                    style="@style/kb_key"
+                    android:layout_weight="1" />
+
+                <Button
+                    android:id="@+id/kb_6"
+                    style="@style/kb_key"
+                    android:layout_weight="1" />
+
+                <Button
+                    android:id="@+id/kb_7"
+                    style="@style/kb_key"
+                    android:layout_weight="1" />
+
+                <Button
+                    android:id="@+id/kb_8"
+                    style="@style/kb_key"
+                    android:layout_weight="1" />
+
+                <Button
+                    android:id="@+id/kb_9"
+                    style="@style/kb_key"
+                    android:layout_weight="1" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal" >
+
+                <View
+                    style="@style/kb_key"
+                    android:layout_weight="0.5" />
+
+                <Button
+                    android:id="@+id/kb_10"
+                    style="@style/kb_key"
+                    android:layout_weight="1" />
+
+                <Button
+                    android:id="@+id/kb_11"
+                    style="@style/kb_key"
+                    android:layout_weight="1" />
+
+                <Button
+                    android:id="@+id/kb_12"
+                    style="@style/kb_key"
+                    android:layout_weight="1" />
+
+                <Button
+                    android:id="@+id/kb_13"
+                    style="@style/kb_key"
+                    android:layout_weight="1" />
+
+                <Button
+                    android:id="@+id/kb_14"
+                    style="@style/kb_key"
+                    android:layout_weight="1" />
+
+                <Button
+                    android:id="@+id/kb_15"
+                    style="@style/kb_key"
+                    android:layout_weight="1" />
+
+                <Button
+                    android:id="@+id/kb_16"
+                    style="@style/kb_key"
+                    android:layout_weight="1" />
+
+                <Button
+                    android:id="@+id/kb_17"
+                    style="@style/kb_key"
+                    android:layout_weight="1" />
+
+                <Button
+                    android:id="@+id/kb_18"
+                    style="@style/kb_key"
+                    android:layout_weight="1" />
+
+                <View
+                    style="@style/kb_key"
+                    android:layout_weight="0.5" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal" >
+
+                <Button
+                    android:id="@+id/kb_quote"
+                    style="@style/kb_meta_key"
+                    android:layout_weight="1.2"
+                    android:text="&apos;" />
+
+                <Button
+                    android:id="@+id/kb_19"
+                    style="@style/kb_key"
+                    android:layout_weight="1" />
+
+                <Button
+                    android:id="@+id/kb_20"
+                    style="@style/kb_key"
+                    android:layout_weight="1" />
+
+                <Button
+                    android:id="@+id/kb_21"
+                    style="@style/kb_key"
+                    android:layout_weight="1" />
+
+                <Button
+                    android:id="@+id/kb_22"
+                    style="@style/kb_key"
+                    android:layout_weight="1" />
+
+                <Button
+                    android:id="@+id/kb_23"
+                    style="@style/kb_key"
+                    android:layout_weight="1" />
+
+                <Button
+                    android:id="@+id/kb_24"
+                    style="@style/kb_key"
+                    android:layout_weight="1" />
+
+                <Button
+                    android:id="@+id/kb_25"
+                    style="@style/kb_key"
+                    android:layout_weight="1" />
+
+                <ImageButton
+                    android:id="@+id/kb_backspace"
+                    style="@style/kb_meta_key"
+                    android:layout_weight="1.2"
+                    android:src="@drawable/backspace" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal" >
+
+                <Button
+                    android:id="@+id/kb_meta"
+                    style="@style/kb_meta_key"
+                    android:layout_weight="1.5"
+                    android:text="123" />
+
+                <Button
+                    android:id="@+id/kb_space"
+                    style="@style/kb_key"
+                    android:layout_weight="5" />
+
+                <ImageButton
+                    android:id="@+id/kb_enter"
+                    style="@style/kb_key"
+                    android:layout_weight="1.5"
+                    android:src="@drawable/enter" />
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+
 </LinearLayout>
