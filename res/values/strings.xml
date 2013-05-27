@@ -42,6 +42,7 @@
     <string name="fmt_available_now">
         &lt;a href="http://www.wanikani.com/review"&gt;Available now&lt;/a&gt;        
     </string>
+    <string name="fmt_no_reviews">None yet!</string>
 
     <string name="fmt_level">Level %d</string>
     <string name="fmt_title">Sect of %s</string>

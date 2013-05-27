@@ -655,7 +655,11 @@ public class DashboardActivity extends Activity implements Runnable {
 			view.setVisibility (View.VISIBLE);
 		}
 		
-		delay = dd.nextReviewDate.getTime () - System.currentTimeMillis ();
+		if (dd.nextReviewDate != null)
+			delay = dd.nextReviewDate.getTime () - System.currentTimeMillis ();
+		else
+			delay = T_INT_AUTOREFRESH;
+		
 		if (delay > T_INT_AUTOREFRESH || dd.reviewsAvailable > 0)
 			delay = T_INT_AUTOREFRESH;
 		
@@ -786,6 +790,9 @@ public class DashboardActivity extends Activity implements Runnable {
 		int x;
 			
 		res = this.getResources ();
+		if (date == null)
+			return res.getString (R.string.fmt_no_reviews);
+		
 		delta = date.getTime () - new Date ().getTime ();
 		forward = delta > 0;
 		if (!forward)

@@ -64,6 +64,9 @@ public class NotifierStateMachine {
 	 *  This interval is doubled and capped by {@link #T_CAP_REVIEWS} */
 	private static int T_INT_REVIEWS = T_INT_REVIEWING;
 	
+	/** Timeout for an user who has no reviews pending */
+	private static int T_NO_REVIEWS = 60;
+
 	/** Cap polling timeout when reviews are availble (one hour) */
 	private static int T_CAP_REVIEWS = 60;
 	
@@ -108,7 +111,9 @@ public class NotifierStateMachine {
 								State prev, DashboardData ldd, DashboardData cdd) 
 				{
 					fsm.ifc.hideNotification ();
-					if (cdd.nextReviewDate.after (new Date ()))
+					if (cdd.nextReviewDate == null)
+						fsm.schedule (T_NO_REVIEWS);
+					else if (cdd.nextReviewDate.after (new Date ()))
 						fsm.schedule (cdd.nextReviewDate, 5000);
 					else
 						fsm.schedule (T_INT_CLOCK_COMPENSATION); 
