@@ -400,11 +400,8 @@ public class NotificationService
 	 */
 	protected void openBrowser ()
 	{		
-		SharedPreferences prefs;
 		Intent intent;
 		
-		prefs = PreferenceManager.getDefaultSharedPreferences (this);
-
 		intent = new Intent (Intent.ACTION_VIEW);
 		intent.setData (Uri.parse (REVIEW_URL));
 		intent.setFlags (Intent.FLAG_ACTIVITY_NEW_TASK);
