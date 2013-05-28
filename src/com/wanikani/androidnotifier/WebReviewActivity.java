@@ -35,15 +35,15 @@ import android.widget.TextView;
  */
 
 /**
- * This activity that allows the user to perform its reviews through an integrated
- * browser. The only reason we need this (instead of just giving spawning an external
+ * This activity allows the user to perform its reviews through an integrated
+ * browser. The only reason we need this (instead of just spawning an external
  * browser) is that we also display a minimal keyboard, that interacts with WK scripts
  * to compose kanas. Ordinarily, in fact, Android keyboards do not behave correctly.
  * <p>
  * The keyboard is displayed only when needed, so we need to check whether the
  * page contains a <code>user_response</code> text box, and it is enabled.
- * In addition, to submit the form, we look up from the page, assuming its id
- * is <code>question-form</code>.
+ * In addition, to submit the form, we simulate a click on the <code>option-submit</code>
+ * button.
  * <p>
  * To accomplish this, we register a JavascriptObject (<code>wknKeyboard</code>) and inject
  * a javascript to check how the page looks like. If the keyboard needs to be shown,
