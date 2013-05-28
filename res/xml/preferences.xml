@@ -4,6 +4,10 @@
         	android:key="pref_enabled" 
         	android:title="@string/pref_enabled" 
         	android:defaultValue="true" android:summary="@string/pref_enabled_descr"/>
+    <CheckBoxPreference
+        	android:key="pref_use_integrated_browser"
+        	android:title="@string/pref_use_integrated_browser"
+        	android:defaultValue="false" />
     <EditTextPreference android:key="pref_userkey" 
         	android:title="@string/pref_userkey" android:summary="@string/pref_userkey_descr"/>
     <EditTextPreference  

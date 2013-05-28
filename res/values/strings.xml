@@ -4,6 +4,9 @@
     <string name="new_reviews">You have %d pending reviews</string>
     <string name="new_review">You have one pending review</string>
     <string name="pref_enabled">Enable notifications</string>
+    <string name="pref_use_integrated_browser">Use integrated browser</string>
+    <string name="pref_use_integrated_browser_desc">Tapping on the message opens integrated browser</string>
+    <string name="pref_use_external_browser_desc">Tapping on the message opens external browser</string>  
     <string name="pref_refresh_timeout">Refresh interval</string>
     <string name="pref_refresh_descr">Data will be refreshed every %d minutes</string>
 	<string name="pref_refresh_one_min_descr">Data will be refreshed every minute</string>

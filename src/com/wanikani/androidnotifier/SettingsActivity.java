@@ -40,6 +40,8 @@ public class SettingsActivity
 	
 	/** Preferences enabled key. Must match preferences.xml */
 	private static final String KEY_PREF_ENABLED = "pref_enabled";
+	/** Use integrated browser key. Must match preferences.xml */
+	private static final String KEY_PREF_USE_INTEGRATED_BROWSER = "pref_use_integrated_browser";
 	/** User key. Must match preferences.xml */
 	private static final String KEY_PREF_USERKEY = "pref_userkey";
 	/** Refresh timeout. Must match preferences.xml */
@@ -94,6 +96,7 @@ public class SettingsActivity
 		onSharedPreferenceChanged (prefs, KEY_PREF_USERKEY);
 		onSharedPreferenceChanged (prefs, KEY_PREF_ENABLED);
 		onSharedPreferenceChanged (prefs, KEY_PREF_REFRESH_TIMEOUT);
+		onSharedPreferenceChanged (prefs, KEY_PREF_USE_INTEGRATED_BROWSER);
 		prefs.registerOnSharedPreferenceChangeListener (this);
 	}
 	
@@ -107,7 +110,7 @@ public class SettingsActivity
 	public void onSharedPreferenceChanged (SharedPreferences prefs, String key)
 	{
 		Resources res;
-		Preference pref;
+		Preference pref, subpref;
 		int timeout;
 		String s;
 		
@@ -115,7 +118,12 @@ public class SettingsActivity
 		res = getResources ();
 		
 		if (key.equals (KEY_PREF_ENABLED)) {
-				/* empty */
+			subpref = findPreference (KEY_PREF_USE_INTEGRATED_BROWSER);
+			subpref.setEnabled (getEnabled (prefs));
+		} else if (key.equals (KEY_PREF_USE_INTEGRATED_BROWSER)) {
+			pref.setSummary (getUseIntegratedBrowser (prefs) ? 
+							 R.string.pref_use_integrated_browser :
+							 R.string.pref_use_external_browser_desc);
 		} else if (key.equals (KEY_PREF_USERKEY)) {
 			s = prefs.getString (KEY_PREF_USERKEY, "").trim ();
 			if (s.length () > 0)
@@ -178,6 +186,11 @@ public class SettingsActivity
 		return prefs.getBoolean (KEY_PREF_ENABLED, true);	
 	}
 	
+	public static boolean getUseIntegratedBrowser (SharedPreferences prefs)
+	{
+		return prefs.getBoolean (KEY_PREF_USE_INTEGRATED_BROWSER, false);	
+	}
+
 	public static boolean credentialsAreValid (SharedPreferences prefs)
 	{
 		return prefs.getString (KEY_PREF_USERKEY, "").length () > 0;
