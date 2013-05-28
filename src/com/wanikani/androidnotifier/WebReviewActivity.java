@@ -159,7 +159,7 @@ public class WebReviewActivity extends Activity {
 	 */
 	private class ShowHideKeyboard implements Runnable {
 		
-		/// Whether the keyboard should be shown or hidden
+		/** Whether the keyboard should be shown or hidden */
 		boolean show;
 		
 		/**
@@ -294,10 +294,13 @@ public class WebReviewActivity extends Activity {
 	/** The web progress bar */
 	ProgressBar bar;
 			
+	/** The local prefix of this class */
 	private static final String PREFIX = "com.wanikani.androidnotifier.WebReviewActivity.";
 	
+	/** Open action, invoked to start this action */
 	public static final String OPEN_ACTION = PREFIX + "OPEN";
 	
+	/** Javascript to be called each time an HTML page is loaded. It hides or shows the keyboard */
 	private static final String JS_INIT = 
 			"var textbox = document.getElementById (\"" + WKConfig.ANSWER_BOX + "\"); " +
 			"if (textbox != null && !textbox.disabled) {" +
@@ -305,17 +308,20 @@ public class WebReviewActivity extends Activity {
 			"} else {" +
 			"	wknKeyboard.hide ();" +
 			"}";
-	private static final String JS_FOCUS = 
-			"var textbox = document.getElementById (\"" + WKConfig.ANSWER_BOX + "\"); " +
-			"	textbox.focus ();";
 
+	/** Javascript to be invoked to simulate a click on the submit (heart-shaped) button */
 	private static final String JS_ENTER = 
 			"$(\"#" + WKConfig.SUBMIT_BUTTON + "\").click();";
 
+	/** The default keyboard. This is the sequence of keys from left to right, from top to bottom */
 	private static final String KB_LATIN = "qwertyuiopasdfghjklzxcvbnm";
 
+	/** The alt keyboard (loaded when the user presses the '123' button). 
+	 *  This is the sequence of keys from left to right, from top to bottom */
 	private static final String KB_ALT = "1234567890";
 	
+	/** A table that maps key position (left to right, top to bottom) to button IDs for the
+	 *  ordinary keys */
 	private static final int key_table [] = new int [] {
 		R.id.kb_0, R.id.kb_1,  R.id.kb_2, R.id.kb_3, R.id.kb_4,
 		R.id.kb_5, R.id.kb_6,  R.id.kb_7, R.id.kb_8, R.id.kb_9,
@@ -325,21 +331,28 @@ public class WebReviewActivity extends Activity {
 		R.id.kb_25
 	};
 	
+	/** A table that maps key positions (left to right, top to bottom) to button IDs for the
+	 *  meta keys */
 	private static final int meta_table [] = new int [] {
 		R.id.kb_quote, R.id.kb_backspace, R.id.kb_meta, 
 		R.id.kb_space, R.id.kb_enter		
 	};
 	
+	/** A table that maps key positions (left to right, top to bottom) to keycodes for the meta
+	 *  keys */
 	private static final int meta_codes [] = new int [] {
 		KeyEvent.KEYCODE_APOSTROPHE, KeyEvent.KEYCODE_DEL, KeyEvent.KEYCODE_NUM,
 		KeyEvent.KEYCODE_SPACE, KeyEvent.KEYCODE_ENTER		
 	};
 	
+	/** The current keyboard. It may be set to either {@link #KB_LATIN} or {@link #KB_ALT} */
 	private String keyboard;
-	
-	private KeyListener klist;
-	private MetaListener mlist;
 
+	/**
+	 * Called when the action is initially displayed. It initializes the objects
+	 * and starts loading the review page.
+	 * 	@param bundle the saved bundle
+	 */
 	@Override
 	public void onCreate (Bundle bundle) 
 	{
@@ -369,8 +382,12 @@ public class WebReviewActivity extends Activity {
 		wv.loadUrl (WKConfig.REVIEW_START);
 	}
 	
+	/**
+	 * Sets up listener and bindings of the initial keyboard.
+	 */
 	protected void initKeyboard ()
 	{
+		View.OnClickListener klist, mlist;
 		View key;
 		int i;
 		
@@ -390,6 +407,10 @@ public class WebReviewActivity extends Activity {
 		}					
 	}
 	
+	/**
+	 * Changes the bindings of the ordinary (non meta) keys. Meta keys never change.
+	 * 	@param kbd the sequence of keys, from left to right, from top to bottom  
+	 */
 	protected void loadKeyboard (String kbd)
 	{
 		Button key;
@@ -407,6 +428,16 @@ public class WebReviewActivity extends Activity {
 		}
 	}
 	
+	/**
+	 * Delivers a keycode to the answer text box. There are two notable exceptions:
+	 * <ul>
+	 * 	<li>The {@link KeyEvent.KEYCODE_NUM} key just switches the keys, so it does not
+	 * 	interact with the web page
+	 *  <li>The {@link KeyEvent.KEYCODE_ENTER} key simulates a click on the submit button
+	 *  rather than delivering the key evento to the action box. In fact, this has no effect
+	 *  on text boxes.
+	 *  </ul> 
+	 */
 	public void insert (int keycode)
 	{
 		KeyEvent kdown, kup;
@@ -423,6 +454,12 @@ public class WebReviewActivity extends Activity {
 		}
 	}
 	
+	/**
+	 * A simple ASCII to Android Keycode translation function. It is meant to work
+	 * on ordinary (non meta) keys only. 
+	 * 	@param c the ASCII character
+	 *  @return a KeyCode 
+	 */
 	protected int charToKeyCode (char c)
 	{
 		if (Character.isLetter (c))
@@ -438,12 +475,20 @@ public class WebReviewActivity extends Activity {
 		return KeyEvent.KEYCODE_SPACE;
 	}
 	
-	private void js (String s)
+	/**
+	 * Executes a javascript on the web page.
+	 * @param js the javascript statements. This method wraps it into a function
+	 */
+	protected void js (String s)
 	{
        wv.loadUrl ("javascript:(function() { " + s + "})()");
 	}
 	
-	private void splashScreen (String msg)
+	/**
+	 * Displays the splash screen, also providing a text message
+	 * @param msg the text message to display
+	 */
+	protected void splashScreen (String msg)
 	{
 		msgw.setText (msg);
 		contentView.setVisibility (View.GONE);
