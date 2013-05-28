@@ -7,7 +7,8 @@
     <EditTextPreference android:key="pref_userkey" 
         	android:title="@string/pref_userkey" android:summary="@string/pref_userkey_descr"/>
     <EditTextPreference  
-        	android:title="@string/pref_url" 
-        	android:key="pref_url" 
-        	android:defaultValue="@string/pref_default_url"/>    
+        	android:title="@string/pref_refresh_timeout" 
+        	android:key="pref_refresh_timeout"
+        	android:inputType="number"
+        	android:defaultValue="5"/>    
 </PreferenceScreen>

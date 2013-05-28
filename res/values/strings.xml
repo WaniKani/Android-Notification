@@ -4,8 +4,9 @@
     <string name="new_reviews">You have %d pending reviews</string>
     <string name="new_review">You have one pending review</string>
     <string name="pref_enabled">Enable notifications</string>
-    <string name="pref_url">Wanikani URL</string>
-    <string name="pref_default_url">http://www.wanikani.com/dashboard</string>
+    <string name="pref_refresh_timeout">Refresh interval</string>
+    <string name="pref_refresh_descr">Data will be refreshed every %d minutes</string>
+	<string name="pref_refresh_one_min_descr">Data will be refreshed every minute</string>
     <string name="pref_userkey_descr">Copy here the "Public API Key" from your Account Settings page</string>
     <string name="pref_userkey">User API Key</string>
     <string name="tag_next_review">Next Review</string>
@@ -42,6 +43,7 @@
     <string name="fmt_available_now">
         &lt;a href="http://www.wanikani.com/review"&gt;Available now&lt;/a&gt;        
     </string>
+    <string name="fmt_no_reviews">None yet!</string>
 
     <string name="fmt_level">Level %d</string>
     <string name="fmt_title">Sect of %s</string>

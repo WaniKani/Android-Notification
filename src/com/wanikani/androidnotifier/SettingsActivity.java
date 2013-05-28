@@ -42,9 +42,14 @@ public class SettingsActivity
 	private static final String KEY_PREF_ENABLED = "pref_enabled";
 	/** User key. Must match preferences.xml */
 	private static final String KEY_PREF_USERKEY = "pref_userkey";
-
+	/** Refresh timeout. Must match preferences.xml */
+	private static final String KEY_PREF_REFRESH_TIMEOUT = "pref_refresh_timeout";
+	
 	/** The correct length of the API key (as far as we know) */
 	private static final int EXPECTED_KEYLEN = 32;
+	
+	/** Default timeout */
+	private static final int DEFAULT_REFRESH_TIMEOUT = 5;
 	
 	
 	/** The current login. Used to check whether something gets changed */
@@ -88,6 +93,7 @@ public class SettingsActivity
 				
 		onSharedPreferenceChanged (prefs, KEY_PREF_USERKEY);
 		onSharedPreferenceChanged (prefs, KEY_PREF_ENABLED);
+		onSharedPreferenceChanged (prefs, KEY_PREF_REFRESH_TIMEOUT);
 		prefs.registerOnSharedPreferenceChangeListener (this);
 	}
 	
@@ -100,10 +106,13 @@ public class SettingsActivity
 	@SuppressWarnings ("deprecation")
 	public void onSharedPreferenceChanged (SharedPreferences prefs, String key)
 	{
+		Resources res;
 		Preference pref;
+		int timeout;
 		String s;
 		
 		pref = findPreference (key);
+		res = getResources ();
 		
 		if (key.equals (KEY_PREF_ENABLED)) {
 				/* empty */
@@ -114,6 +123,15 @@ public class SettingsActivity
 			else
 				pref.setSummary (R.string.pref_userkey_descr);
 			enableNotificationCheck (prefs);
+		} else if (key.equals (KEY_PREF_REFRESH_TIMEOUT)) {
+			timeout = getInt (prefs, KEY_PREF_REFRESH_TIMEOUT, DEFAULT_REFRESH_TIMEOUT);
+			if (timeout <= 0)
+				timeout = 1;
+			if (timeout > 1)
+				s = String.format (res.getString (R.string.pref_refresh_descr), timeout);
+			else
+				s = String.format (res.getString (R.string.pref_refresh_one_min_descr));
+			pref.setSummary (s);
 		}
 		
 		updateConfig (prefs);
@@ -163,6 +181,23 @@ public class SettingsActivity
 	public static boolean credentialsAreValid (SharedPreferences prefs)
 	{
 		return prefs.getString (KEY_PREF_USERKEY, "").length () > 0;
+	}
+	
+	public static int getRefreshTimeout (SharedPreferences prefs)
+	{
+		return getInt (prefs, KEY_PREF_REFRESH_TIMEOUT, DEFAULT_REFRESH_TIMEOUT);
+	}
+	
+	private static int getInt (SharedPreferences prefs, String key, int defval)
+	{
+		String s;
+		
+		s = prefs.getString (key, Integer.toString (defval));
+		try {
+			return Integer.parseInt (s);
+		} catch (NumberFormatException e) {
+			return defval;
+		}
 	}
 	
 	@SuppressWarnings ("deprecation")
