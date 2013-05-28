@@ -659,6 +659,9 @@ public class DashboardActivity extends Activity implements Runnable {
 		
 		view = findViewById (R.id.tr_r_now);
 		view.setVisibility (dd.reviewsAvailable > 0 ? View.VISIBLE : View.GONE);
+
+		view = findViewById (R.id.btn_review);
+		view.setVisibility (dd.reviewsAvailable > 0 ? View.VISIBLE : View.GONE);
 		
 		tw = (TextView) findViewById (R.id.tv_next_review);
 		tw.setText (R.string.tag_next_review);

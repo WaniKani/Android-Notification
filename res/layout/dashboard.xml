@@ -121,9 +121,16 @@
                 android:layout_height="wrap_content"
                 android:clickable="true"
                 android:textIsSelectable="true" />
-            
-        </LinearLayout>
-
+                        
+            </LinearLayout>
+        
+        <Button
+                android:id="@+id/btn_review"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/tag_btn_review" 
+                android:visibility="gone"/>   	   	
+        
         <!-- The first (review) table -->
 
         <TableLayout
@@ -131,7 +138,7 @@
             style="@style/Table"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content" >
-
+       
             <TableRow
                 android:id="@+id/tr_r_now"
                 style="@style/Row"
@@ -272,11 +279,5 @@
          	android:progressDrawable="@drawable/kanjiprog"
          	android:layout_marginBottom="@dimen/m_gap"/>
    	</TableLayout>
-   	<Button
-                android:id="@+id/btn_review"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Experimental Review" />   	   	
     </LinearLayout>
-    
 </ScrollView>
