@@ -59,20 +59,14 @@ public class WebReviewActivity extends Activity {
 	 */
 	static class WKConfig {
 		
-		/** All the pages that are shown inside the integrated WebView */
-		static final String REVIEW_SPACE =  "http://www.wanikani.com/review";
-		
 		/** Review start page. Of course must be inside of @link {@link #REVIEW_SPACE} */
 		static final String REVIEW_START = "http://www.wanikani.com/review/session/start";
-
-		/** Login page. Needed when authentication has not been performed yet */
-		static final String LOGIN_PAGE =  "http://www.wanikani.com/login";
 
 		/** HTML id of the textbox the user types its answer in */
 		static final String ANSWER_BOX = "user_response";
 
-		/** HTML id of the review form */
-		static final String QUESTION_FORM = "question-form";
+		/** HTML id of the submit button */
+		static final String SUBMIT_BUTTON = "option-submit";
 
 	};
 
@@ -132,7 +126,6 @@ public class WebReviewActivity extends Activity {
 		@Override  
 	    public void onPageFinished(WebView view, String url)  
 	    {  
-			contentScreen ();
 			bar.setVisibility (View.GONE);
 			if (url.startsWith ("http"))
 				js (JS_INIT);
@@ -317,8 +310,7 @@ public class WebReviewActivity extends Activity {
 			"	textbox.focus ();";
 
 	private static final String JS_ENTER = 
-			"var form = document.getElementById (\"" + WKConfig.QUESTION_FORM + "\"); " +
-			"form.submit ();";
+			"$(\"#" + WKConfig.SUBMIT_BUTTON + "\").click();";
 
 	private static final String KB_LATIN = "qwertyuiopasdfghjklzxcvbnm";
 
@@ -365,8 +357,6 @@ public class WebReviewActivity extends Activity {
 		msgw = (TextView) findViewById (R.id.tv_message);
 		wv = (WebView) findViewById (R.id.wv_reviews);
 
-		splashScreen (getResources ().getString (R.string.fmt_web_review_connecting));
-				
 		wv.getSettings ().setJavaScriptEnabled (true);
 		wv.getSettings().setJavaScriptCanOpenWindowsAutomatically (true);
 		wv.getSettings ().setSupportMultipleWindows (true);
@@ -376,20 +366,7 @@ public class WebReviewActivity extends Activity {
 		wv.setWebViewClient (new WebViewClientImpl ());
 		wv.setWebChromeClient (new WebChromeClientImpl ());
 		
-		//resetCookies (wv);
-		
 		wv.loadUrl (WKConfig.REVIEW_START);
-	}
-	
-	private void resetCookies (WebView wv)
-	{
-		CookieSyncManager smgr;
-		CookieManager mgr;
-		
-		smgr = CookieSyncManager.createInstance (wv.getContext ());
-		mgr = CookieManager.getInstance ();
-		mgr.removeAllCookie ();
-		smgr.sync ();
 	}
 	
 	protected void initKeyboard ()
@@ -473,10 +450,4 @@ public class WebReviewActivity extends Activity {
 		splashView.setVisibility (View.VISIBLE);
 	}
 	
-	private void contentScreen ()
-	{
-		splashView.setVisibility (View.GONE);
-		contentView.setVisibility (View.VISIBLE);
-		msgw.setText ("");
-	}
 }
