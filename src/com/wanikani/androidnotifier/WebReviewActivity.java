@@ -314,11 +314,11 @@ public class WebReviewActivity extends Activity {
 			"$(\"#" + WKConfig.SUBMIT_BUTTON + "\").click();";
 
 	/** The default keyboard. This is the sequence of keys from left to right, from top to bottom */
-	private static final String KB_LATIN = "qwertyuiopasdfghjklzxcvbnm";
+	private static final String KB_LATIN = "qwertyuiopasdfghjkl'zxcvbnm";
 
 	/** The alt keyboard (loaded when the user presses the '123' button). 
 	 *  This is the sequence of keys from left to right, from top to bottom */
-	private static final String KB_ALT = "1234567890";
+	private static final String KB_ALT = "1234567890-";
 	
 	/** A table that maps key position (left to right, top to bottom) to button IDs for the
 	 *  ordinary keys */
@@ -328,20 +328,19 @@ public class WebReviewActivity extends Activity {
 		R.id.kb_10, R.id.kb_11,  R.id.kb_12, R.id.kb_13, R.id.kb_14,
 		R.id.kb_15, R.id.kb_16,  R.id.kb_17, R.id.kb_18, R.id.kb_19,
 		R.id.kb_20, R.id.kb_21,  R.id.kb_22, R.id.kb_23, R.id.kb_24,
-		R.id.kb_25
+		R.id.kb_25, R.id.kb_26
 	};
 	
 	/** A table that maps key positions (left to right, top to bottom) to button IDs for the
 	 *  meta keys */
 	private static final int meta_table [] = new int [] {
-		R.id.kb_quote, R.id.kb_backspace, R.id.kb_meta, 
-		R.id.kb_space, R.id.kb_enter		
+		R.id.kb_backspace, R.id.kb_meta, R.id.kb_space, R.id.kb_enter		
 	};
 	
 	/** A table that maps key positions (left to right, top to bottom) to keycodes for the meta
 	 *  keys */
 	private static final int meta_codes [] = new int [] {
-		KeyEvent.KEYCODE_APOSTROPHE, KeyEvent.KEYCODE_DEL, KeyEvent.KEYCODE_NUM,
+		KeyEvent.KEYCODE_DEL, KeyEvent.KEYCODE_NUM,
 		KeyEvent.KEYCODE_SPACE, KeyEvent.KEYCODE_ENTER		
 	};
 	
@@ -470,6 +469,12 @@ public class WebReviewActivity extends Activity {
 		switch (c) {
 		case ' ':
 			return KeyEvent.KEYCODE_SPACE;
+			
+		case '\'':
+			return KeyEvent.KEYCODE_APOSTROPHE;
+			
+		case '-':
+			return KeyEvent.KEYCODE_MINUS;
 		}
 		
 		return KeyEvent.KEYCODE_SPACE;
