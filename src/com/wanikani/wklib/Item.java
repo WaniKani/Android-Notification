@@ -2,6 +2,9 @@ package com.wanikani.wklib;
 
 import java.util.Date;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 /* 
  *  Copyright (c) 2013 Alberto Cuda
  *
@@ -21,14 +24,14 @@ import java.util.Date;
 
 public class Item {
 	
-	public enum Type {
+	public static enum Type {
 		
 		RADICAL,	
 		KANJI,
 		VOCAB
 	}
 	
-	public class Performance {
+	public static class Performance {
 		
 		public int correct;
 		
@@ -38,9 +41,18 @@ public class Item {
 		
 		public int currentStreak;
 		
+		Performance (JSONObject obj, String prefix)
+			throws JSONException
+		{
+			correct = Util.getInt (obj, prefix + "_correct");
+			incorrect = Util.getInt (obj, prefix + "_incorrect");
+			maxStreak = Util.getInt (obj, prefix + "_max_streak");
+			currentStreak = Util.getInt (obj, prefix + "_current_streak");
+		}
+		
 	};
 	
-	public class Stats {
+	public static class Stats {
 		
 		public SRSDistribution.Level srs;
 		
@@ -54,8 +66,21 @@ public class Item {
 				
 		public Item.Performance reading;
 		
-		public Item.Performance meaning;
-		
+		public Item.Performance meaning;		
+
+		Stats (JSONObject obj)
+			throws JSONException
+		{
+			srs = new SRSDistribution.Level (obj);
+			
+			unlockedDate = Util.getDate (obj, "unlocked_date"); 
+			availableDate = Util.getDate (obj, "available_date"); 
+			burnedDate = Util.getDate (obj, "burned_date");
+			burned = Util.getBoolean (obj, "burned");
+			
+			reading = new Item.Performance (obj, "reading");
+			meaning = new Item.Performance (obj, "meaning");
+		}
 	};
 	
 	public Type type;
@@ -68,9 +93,15 @@ public class Item {
 	
 	public Stats stats;
 	
-	protected Item (Type type)
+	protected Item (JSONObject obj, Type type)
+		throws JSONException
 	{
 		this.type = type;
+		
+		character = Util.getString (obj, "character");
+		meaning = Util.getString (obj, "meaning");
+		level = Util.getInt (obj, "level");
+		
+		stats = new Stats (obj);
 	}
-	
 }

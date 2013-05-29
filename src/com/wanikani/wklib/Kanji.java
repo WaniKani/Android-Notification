@@ -1,5 +1,8 @@
 package com.wanikani.wklib;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 /* 
  *  Copyright (c) 2013 Alberto Cuda
  *
@@ -19,12 +22,21 @@ package com.wanikani.wklib;
 
 public class Kanji extends Item {
 
-	public enum Reading {
+	public static enum Reading {
 		
 		ONYOMI, 
 		
-		KUNYOMI
+		KUNYOMI;
 		
+		public static Reading fromString (String s)
+		{
+			if (s.equals ("onyomi"))
+				return ONYOMI;
+			else if (s.equals ("kunyomi"))
+				return KUNYOMI;
+			else
+				return null;
+		}
 	};
 	
 	String onyomi;
@@ -32,10 +44,20 @@ public class Kanji extends Item {
 	String kunyomi;
 	
 	Reading importantReading;
-	
-	
-	public Kanji ()
+		
+	public Kanji (JSONObject obj)
+		throws JSONException
 	{
-		super (Item.Type.KANJI);
+		super (obj, Item.Type.KANJI);
+
+		String s;
+		
+		onyomi = Util.getString (obj, "onyomi");
+		kunyomi = Util.getString (obj, "kunyomi");
+		s = Util.getString (obj, "important_reading");
+		importantReading = Reading.fromString (Util.getString (obj, s));
+		if (importantReading == null)
+			throw new JSONException ("Unknown important reading: " + s);
 	}
 }
+;

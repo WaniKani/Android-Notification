@@ -1,5 +1,8 @@
 package com.wanikani.wklib;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 /* 
  *  Copyright (c) 2013 Alberto Cuda
  *
@@ -21,9 +24,12 @@ public class Vocab extends Item {
 
 	String kana;
 	
-	public Vocab ()
+	public Vocab (JSONObject obj)
+		throws JSONException
 	{
-		super (Item.Type.VOCAB);
+		super (obj, Item.Type.VOCAB);
+		
+		kana = Util.getString (obj, "kana");
 	}
 	
 }
