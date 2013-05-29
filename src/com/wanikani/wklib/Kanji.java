@@ -22,6 +22,17 @@ import org.json.JSONObject;
 
 public class Kanji extends Item {
 
+	private static class Factory implements Item.Factory<Kanji> {
+
+		public Kanji deserialize (JSONObject obj)
+			throws JSONException
+		{
+			return new Kanji (obj);
+		}
+	}
+	
+	public static final Factory FACTORY = new Factory ();
+
 	public static enum Reading {
 		
 		ONYOMI, 
@@ -55,9 +66,15 @@ public class Kanji extends Item {
 		onyomi = Util.getString (obj, "onyomi");
 		kunyomi = Util.getString (obj, "kunyomi");
 		s = Util.getString (obj, "important_reading");
-		importantReading = Reading.fromString (Util.getString (obj, s));
+		importantReading = Reading.fromString (s);
 		if (importantReading == null)
 			throw new JSONException ("Unknown important reading: " + s);
+	}
+	
+	public Item deserialize (JSONObject obj)
+		throws JSONException
+	{
+		return new Kanji (obj);
 	}
 }
 ;

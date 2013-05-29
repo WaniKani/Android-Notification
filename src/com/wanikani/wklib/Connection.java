@@ -7,6 +7,7 @@ import java.net.Authenticator;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
@@ -37,15 +38,21 @@ public class Connection {
 		
 		UserInformation ui;
 		
-		JSONObject info;
-		
-		public Response (JSONObject obj)
+		JSONObject infoAsObj;
+
+		JSONArray infoAsArray;
+
+		public Response (JSONObject obj, boolean isArray)
 			throws JSONException, IOException
 		{
 			if (!obj.isNull("user_information")) {
 				ui = new UserInformation (obj.getJSONObject ("user_information"));
-				if (!obj.isNull ("requested_information"))
-					info = obj.getJSONObject ("requested_information");
+				if (!obj.isNull ("requested_information")) {
+					if (isArray)
+						infoAsArray = obj.getJSONArray ("requested_information");
+					else
+						infoAsObj = obj.getJSONObject ("requested_information");
+				}
 			} else {
 				throw ApplicationException.buildFromJSON (obj);
 			}
@@ -75,7 +82,7 @@ public class Connection {
 		throws IOException
 	{
 		if (ui == null)
-			ui = call ("user-information").ui;
+			ui = call ("user-information", false).ui;
 		
 		return ui;
 	}	
@@ -86,10 +93,10 @@ public class Connection {
 		Response res;
 		
 		try {
-			res = call ("study-queue");
+			res = call ("study-queue", false);
 			ui = res.ui;
 
-			return new StudyQueue (res.info);
+			return new StudyQueue (res.infoAsObj);
 		} catch (JSONException e) {
 			throw new ParseException ();
 		}
@@ -101,10 +108,10 @@ public class Connection {
 		Response res;
 		
 		try {
-			res = call ("srs-distribution");
+			res = call ("srs-distribution", false);
 			ui = res.ui;
 
-			return new SRSDistribution (res.info);
+			return new SRSDistribution (res.infoAsObj);
 		} catch (JSONException e) {
 			throw new ParseException ();
 		}
@@ -116,10 +123,10 @@ public class Connection {
 		Response res;
 		
 		try {
-			res = call ("level-progression");
+			res = call ("level-progression", false);
 			ui = res.ui;
 
-			return new LevelProgression (res.info);
+			return new LevelProgression (res.infoAsObj);
 		} catch (JSONException e) {
 			throw new ParseException ();
 		}
@@ -131,9 +138,9 @@ public class Connection {
 		Response res;
 		
 		try {
-			res = call ("radicals/" + level);
+			res = call ("radicals", true, Integer.toString (level));
 
-			return new ItemLibrary<Radical> (res.info);
+			return new ItemLibrary<Radical> (Radical.FACTORY, res.infoAsArray);
 			
 		} catch (JSONException e) {
 			throw new ParseException ();
@@ -146,9 +153,9 @@ public class Connection {
 		Response res;
 		
 		try {
-			res = call ("kanji/" + level);
+			res = call ("kanji", true, Integer.toString (level));
 
-			return new ItemLibrary<Kanji> (res.info);
+			return new ItemLibrary<Kanji> (Kanji.FACTORY, res.infoAsArray);
 			
 		} catch (JSONException e) {
 			throw new ParseException ();
@@ -161,9 +168,9 @@ public class Connection {
 		Response res;
 		
 		try {
-			res = call ("vocabulary/" + level);
+			res = call ("vocabulary", true, Integer.toString (level));
 
-			return new ItemLibrary<Vocabulary> (res.info);
+			return new ItemLibrary<Vocabulary> (Vocabulary.FACTORY, res.infoAsArray);
 			
 		} catch (JSONException e) {
 			throw new ParseException ();
@@ -190,13 +197,13 @@ public class Connection {
 		return sb.toString ();
 	}
 	
-	protected Response call (String resource)
+	protected Response call (String resource, boolean isArray)
 			throws IOException
 	{
-			return call (resource, null);
+			return call (resource, isArray, null);
 	}
 		
-	protected Response call (String resource, String arg)
+	protected Response call (String resource, boolean isArray, String arg)
 		throws IOException
 	{
 		HttpURLConnection conn;
@@ -217,7 +224,7 @@ public class Connection {
 		}
 		
 		try {
-			return new Response (new JSONObject (tok));
+			return new Response (new JSONObject (tok), isArray);
 		} catch (JSONException e) {
 			throw new ParseException ();
 		}

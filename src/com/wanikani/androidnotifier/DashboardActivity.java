@@ -29,18 +29,21 @@ import android.text.method.LinkMovementMethod;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.wanikani.wklib.AuthenticationException;
 import com.wanikani.wklib.Connection;
+import com.wanikani.wklib.ItemLibrary;
+import com.wanikani.wklib.Kanji;
 import com.wanikani.wklib.LevelProgression;
+import com.wanikani.wklib.Radical;
 import com.wanikani.wklib.SRSDistribution;
 import com.wanikani.wklib.StudyQueue;
 import com.wanikani.wklib.UserInformation;
 import com.wanikani.wklib.UserLogin;
+import com.wanikani.wklib.Vocabulary;
 
 /* 
  *  Copyright (c) 2013 Alberto Cuda
@@ -238,6 +241,10 @@ public class DashboardActivity extends Activity implements Runnable {
 			try {
 				lp = conn [0].getLevelProgression ();
 				lpStatus = DashboardData.OptionalDataStatus.RETRIEVED;
+				
+				ItemLibrary<Radical> rs = conn [0].getRadicals (1);
+				ItemLibrary<Kanji> ks = conn [0].getKanji (1);
+				ItemLibrary<Vocabulary> vs = conn [0].getVocabulary(1);
 			} catch (IOException e) {
 				lp = null;
 				lpStatus = DashboardData.OptionalDataStatus.FAILED;

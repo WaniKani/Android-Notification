@@ -22,7 +22,14 @@ import org.json.JSONObject;
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-public class Item {
+public abstract class Item {
+
+	public interface Factory<T extends Item> {
+		
+		public T deserialize (JSONObject obj)
+			throws JSONException;
+		
+	};
 	
 	public static enum Type {
 		
@@ -54,7 +61,7 @@ public class Item {
 	
 	public static class Stats {
 		
-		public SRSDistribution.Level srs;
+		public SRSLevel srs;
 		
 		public Date unlockedDate;
 		
@@ -68,17 +75,23 @@ public class Item {
 		
 		public Item.Performance meaning;		
 
-		Stats (JSONObject obj)
+		Stats (JSONObject obj, boolean hasReading)
 			throws JSONException
 		{
-			srs = new SRSDistribution.Level (obj);
+			String s;
+			
+			s = obj.getString ("srs");
+			srs = SRSLevel.fromString (s);
+			if (srs == null)
+				throw new JSONException ("Bad SRS: " + s);
 			
 			unlockedDate = Util.getDate (obj, "unlocked_date"); 
 			availableDate = Util.getDate (obj, "available_date"); 
 			burnedDate = Util.getDate (obj, "burned_date");
 			burned = Util.getBoolean (obj, "burned");
 			
-			reading = new Item.Performance (obj, "reading");
+			if (hasReading)
+				reading = new Item.Performance (obj, "reading");
 			meaning = new Item.Performance (obj, "meaning");
 		}
 	};
@@ -102,6 +115,11 @@ public class Item {
 		meaning = Util.getString (obj, "meaning");
 		level = Util.getInt (obj, "level");
 		
-		stats = new Stats (obj);
+		stats = new Stats (obj.getJSONObject ("stats"), hasReading ());
+	}
+	
+	protected boolean hasReading ()
+	{
+		return true;
 	}
 }

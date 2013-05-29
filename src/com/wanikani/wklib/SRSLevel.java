@@ -1,8 +1,5 @@
 package com.wanikani.wklib;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 /* 
  *  Copyright (c) 2013 Alberto Cuda
  *
@@ -20,27 +17,23 @@ import org.json.JSONObject;
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-public class Vocabulary extends Item {
+public enum SRSLevel {
 
-	private static class Factory implements Item.Factory<Vocabulary> {
-
-		public Vocabulary deserialize (JSONObject obj)
-			throws JSONException
-		{
-			return new Vocabulary (obj);
-		}
-	}
-
-	public final static Factory FACTORY = new Factory ();
+	APPRENTICE, GURU, MASTER, ENLIGHTEN, BURNED;
 	
-	String kana;
-	
-	public Vocabulary (JSONObject obj)
-		throws JSONException
+	public static SRSLevel fromString (String s)
 	{
-		super (obj, Item.Type.VOCABULARY);
+		if (s.equals ("apprentice"))
+			return APPRENTICE;
+		else if (s.equals ("guru"))
+			return GURU;
+		else if (s.equals ("master"))
+			return MASTER;
+		else if (s.equals ("enlighten"))
+			return ENLIGHTEN;
+		else if (s.equals ("burned"))
+			return BURNED;
 		
-		kana = Util.getString (obj, "kana");
+		return null;
 	}
-	
 }
