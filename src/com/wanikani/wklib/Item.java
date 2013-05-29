@@ -28,7 +28,7 @@ public class Item {
 		
 		RADICAL,	
 		KANJI,
-		VOCAB
+		VOCABULARY
 	}
 	
 	public static class Performance {

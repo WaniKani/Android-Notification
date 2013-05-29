@@ -125,6 +125,51 @@ public class Connection {
 		}
 	}
 	
+	public ItemLibrary<Radical> getRadicals (int level)
+		throws IOException
+	{
+		Response res;
+		
+		try {
+			res = call ("radicals/" + level);
+
+			return new ItemLibrary<Radical> (res.info);
+			
+		} catch (JSONException e) {
+			throw new ParseException ();
+		}
+	}
+
+	public ItemLibrary<Kanji> getKanji (int level)
+		throws IOException
+	{
+		Response res;
+		
+		try {
+			res = call ("kanji/" + level);
+
+			return new ItemLibrary<Kanji> (res.info);
+			
+		} catch (JSONException e) {
+			throw new ParseException ();
+		}
+	}
+	
+	public ItemLibrary<Vocabulary> getVocabulary (int level)
+		throws IOException
+	{
+		Response res;
+		
+		try {
+			res = call ("vocabulary/" + level);
+
+			return new ItemLibrary<Vocabulary> (res.info);
+			
+		} catch (JSONException e) {
+			throw new ParseException ();
+		}
+	}
+
 	private static String readStream (InputStream is)
 		throws IOException
 	{

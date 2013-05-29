@@ -20,14 +20,14 @@ import org.json.JSONObject;
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-public class Vocab extends Item {
+public class Vocabulary extends Item {
 
 	String kana;
 	
-	public Vocab (JSONObject obj)
+	public Vocabulary (JSONObject obj)
 		throws JSONException
 	{
-		super (obj, Item.Type.VOCAB);
+		super (obj, Item.Type.VOCABULARY);
 		
 		kana = Util.getString (obj, "kana");
 	}
