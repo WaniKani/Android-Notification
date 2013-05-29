@@ -223,22 +223,27 @@ public class DashboardActivity extends Activity implements Runnable {
 		@Override
 		protected DashboardData.OptionalData doInBackground (Connection... conn)
 		{
+			DashboardData.OptionalDataStatus srsStatus, lpStatus;
 			SRSDistribution srs;
 			LevelProgression lp;
 			
 			try {
 				srs = conn [0].getSRSDistribution();
+				srsStatus = DashboardData.OptionalDataStatus.RETRIEVED;
 			} catch (IOException e) {
 				srs = null;
+				srsStatus = DashboardData.OptionalDataStatus.FAILED;
 			}
 
 			try {
 				lp = conn [0].getLevelProgression ();
+				lpStatus = DashboardData.OptionalDataStatus.RETRIEVED;
 			} catch (IOException e) {
 				lp = null;
+				lpStatus = DashboardData.OptionalDataStatus.FAILED;
 			}
 
-			return new DashboardData.OptionalData (srs, lp);
+			return new DashboardData.OptionalData (srs, srsStatus, lp, lpStatus);
 		}	
 						
 		/**
@@ -356,6 +361,7 @@ public class DashboardActivity extends Activity implements Runnable {
 	public void onCreate (Bundle bundle) 
 	{	
 		SharedPreferences prefs;
+		DashboardData ldd;
 		
 	    super.onCreate (bundle);
 	    
@@ -367,10 +373,13 @@ public class DashboardActivity extends Activity implements Runnable {
 	    	settings ();
 	    
 	    conn = new Connection (SettingsActivity.getLogin (prefs));
-	    if (bundle == null || !bundle.containsKey (BUNDLE_VALID))
+	    if (bundle != null && bundle.containsKey (BUNDLE_VALID)) {
+	    	ldd = new DashboardData (bundle);
+	    	refreshComplete (ldd);
+	    	if (ldd.isIncomplete ())
+	    		refreshOptional ();
+	    } else
 	    	refresh ();
-	    else
-	    	refreshComplete (new DashboardData (bundle));
 	}
 	
 	/**
@@ -556,6 +565,17 @@ public class DashboardActivity extends Activity implements Runnable {
 	}
 	
 	/**
+	 * Called when optional data needs to be refreshed. This happen in
+	 * some strange situations, e.g. when the application is stopped before
+	 * optional data, and then is resumed from a bundle. I'm not even
+	 * sure it can happen, however...
+	 */
+	private void refreshOptional ()
+	{
+			new RefreshTaskPartII ().execute (conn);			
+	}
+
+	/**
 	 * Stores the avatar locally. Needed to avoid storing it into the
 	 * bundle. Useful also to have a fallback when we can't reach the
 	 * server.
@@ -634,6 +654,8 @@ public class DashboardActivity extends Activity implements Runnable {
 		
 		spin (false);
 
+		if (this.dd != null)
+			dd.merge (this.dd);
 		this.dd = dd;
 		
 		rtask = null;
@@ -689,7 +711,17 @@ public class DashboardActivity extends Activity implements Runnable {
 		tw.setText (Integer.toString (dd.reviewsAvailableNextDay));
 		
 		/* Now the optional stuff */
-		if (dd.od.lp != null) {
+		switch (dd.od.lpStatus) {
+		case RETRIEVING:
+			if (this.dd.od.lpStatus != DashboardData.OptionalDataStatus.RETRIEVING) {
+				view = findViewById (R.id.pb_w_section);
+				view.setVisibility (View.VISIBLE);
+			}
+			view = findViewById (R.id.progress_w_section);
+			view.setVisibility (View.VISIBLE);
+			break;
+			
+		case RETRIEVED:
 			pb = (ProgressBar) findViewById (R.id.pb_radicals);
 			pb.setProgress (100 * dd.od.lp.radicalsProgress / dd.od.lp.radicalsTotal);
 
@@ -701,6 +733,13 @@ public class DashboardActivity extends Activity implements Runnable {
 			
 			view = findViewById (R.id.progress_section);
 			view.setVisibility (View.VISIBLE);
+			break;
+			
+		case FAILED:
+			/* Just hide the spinner. 
+			 * If we already have some data, it is displayed anyway */
+			view = findViewById (R.id.progress_w_section);
+			view.setVisibility (View.GONE);			
 		}
 				
 		prefs = PreferenceManager.getDefaultSharedPreferences (this);

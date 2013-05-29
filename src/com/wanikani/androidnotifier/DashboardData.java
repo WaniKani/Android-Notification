@@ -6,6 +6,7 @@ import java.util.Date;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 
+import com.wanikani.androidnotifier.DashboardData.OptionalDataStatus;
 import com.wanikani.wklib.LevelProgression;
 import com.wanikani.wklib.SRSDistribution;
 import com.wanikani.wklib.StudyQueue;
@@ -36,6 +37,25 @@ import com.wanikani.wklib.UserInformation;
 class DashboardData {
 	
 	/**
+	 * An additional description of the contents of {@link DashboardData.OptionalData} 
+	 * fields. We need this information because the dashboard is displayed even if
+	 * one of these optional query is underway, so we need to distinguish between the different
+	 * cases.
+	 */
+	public enum OptionalDataStatus {
+		
+		/** The query is being performed */
+		RETRIEVING, 
+		
+		/** The query completed successfully */
+		RETRIEVED, 
+		
+		/** The query failed, and the field contains no useful data */
+		FAILED
+		
+	};
+	
+	/**
 	 * A container of all the fields that may not (yet) been available
 	 * when the dashboard is displayed. The object may be partially populated.
 	 */
@@ -44,29 +64,80 @@ class DashboardData {
 		/** The SRS Distribution */
 		public SRSDistribution srs;
 		
+		/** SRS Distribution status */
+		public DashboardData.OptionalDataStatus srsStatus;
+		
 		/** The level progression */
 		public LevelProgression lp;
 		
+		/** Level progression status */
+		public DashboardData.OptionalDataStatus lpStatus;
+		
 		/**
 		 * Constructor. Input parameters may be null.
+		 * In order to provide consistent behaviour:
+		 * <ul>
+		 * 	<li>If a parameter is not null, its status should be 
+		 * 		@link {@link DashboardData.OptionalDataStatus#RETRIEVED}
+		 * 	<li>If a parameter is null, its status should be 
+		 * 		either @link {@link DashboardData.OptionalDataStatus#RETRIEVING}
+		 * 		or @link {@link DashboardData.OptionalDataStatus#FAILED}
+		 * </ul>
 		 * 
 		 * @param srs SRS Distribution
+		 * @param srsStatus SRS Distribution status
 		 * @param lp the level progression
+		 * @param lpStatus level progression status
 		 */
-		public OptionalData (SRSDistribution srs, LevelProgression lp)
+		public OptionalData (SRSDistribution srs, DashboardData.OptionalDataStatus srsStatus, 
+							 LevelProgression lp, DashboardData.OptionalDataStatus lpStatus)
 		{
 			this.srs = srs;
 			this.lp = lp;
+			
+			this.srsStatus = srsStatus;
+			this.lpStatus = lpStatus;
 		}
 		
 		/**
-		 * Empty constructor.
+		 * Empty constructor. We assume that queries are underway, so
+		 * the statuses are set to {@link DashboardData.OptionalDataStatus#RETRIEVING}
 		 */
 		public OptionalData ()
 		{
-			/* empty */			
+			srsStatus = DashboardData.OptionalDataStatus.RETRIEVING;
+			lpStatus = DashboardData.OptionalDataStatus.RETRIEVING;
 		}
 				
+		/**
+		 * Merge the data contained in this object with an external (<i>older</i>) 
+		 * object.
+		 * 	@param od the new data
+		 */
+		private void merge (DashboardData.OptionalData od)
+		{
+			if (srsStatus != DashboardData.OptionalDataStatus.RETRIEVED &&
+				od.srsStatus == DashboardData.OptionalDataStatus.RETRIEVED) {
+				srs = od.srs;
+				srsStatus = od.srsStatus;				
+			}
+
+			if (lpStatus != DashboardData.OptionalDataStatus.RETRIEVED &&
+				od.lpStatus == DashboardData.OptionalDataStatus.RETRIEVED) {
+				lp = od.lp;
+				lpStatus = od.lpStatus;				
+			}
+		}
+
+		/**
+		 * Tells whether some data is still missing.
+		 * @return true if a refresh of optional data is adivsable
+		 */
+		public boolean isIncomplete ()
+		{
+			return 	lpStatus != DashboardData.OptionalDataStatus.RETRIEVED ||
+					srsStatus != DashboardData.OptionalDataStatus.RETRIEVED;
+		}
 	};
 	
 	private static final String PREFIX = "com.wanikani.wanikaninotifier.DashboardData.";
@@ -160,6 +231,17 @@ class DashboardData {
 	}
 
 	/**
+	 * Merge the data contained in this object with an external (<i>older</i>) 
+	 * object. This isn't much intuitive, but the implementation
+	 * is safer (look at the code if you don't believe it :).
+	 * 	@param dd the new data
+	 */
+	public void merge (DashboardData dd)
+	{
+		od.merge (dd.od);
+	}
+
+	/**
 	 * A constructor to be used when information retrieval fails 
 	 * @param e the exception that occurred
 	 */
@@ -223,7 +305,7 @@ class DashboardData {
 	 * Deserialize data from a bundle
 	 * @param bundle the source bundle
 	 */
-	public void deserialize (Bundle bundle)
+	private void deserialize (Bundle bundle)
 	{		
 		username = bundle.getString (KEY_USERNAME);
 		title = bundle.getString (KEY_TITLE);
@@ -238,28 +320,48 @@ class DashboardData {
 
 		if (bundle.containsKey (KEY_APPRENTICE)) {
 			od.srs = new SRSDistribution ();
-			
+
+			od.srsStatus = OptionalDataStatus.RETRIEVED;
 			od.srs.apprentice.total = bundle.getInt (KEY_APPRENTICE);
 			od.srs.guru.total = bundle.getInt (KEY_GURU);
 			od.srs.master.total = bundle.getInt (KEY_MASTER);
 			od.srs.enlighten.total = bundle.getInt (KEY_ENLIGHTEN);
 			od.srs.burned.total = bundle.getInt (KEY_BURNED);
-		} else
+		} else {
+			/* RETRIEVING is correct, because this is what DashboardActivity
+			 * will do right after calling this method */
+			od.srsStatus = OptionalDataStatus.RETRIEVING;
 			od.srs = null;
+		}
 		
 		if (bundle.containsKey (KEY_RADICALS_PROGRESS)) {
 			od.lp = new LevelProgression ();
+
+			od.lpStatus = OptionalDataStatus.RETRIEVED;
 			od.lp.radicalsProgress = bundle.getInt (KEY_RADICALS_PROGRESS);
 			od.lp.radicalsTotal = bundle.getInt (KEY_RADICALS_TOTAL);
 			od.lp.kanjiProgress = bundle.getInt (KEY_KANJI_PROGRESS);
 			od.lp.kanjiTotal = bundle.getInt (KEY_KANJI_TOTAL);
-		} else
+		} else {
+			/* RETRIEVING is correct, because this is what DashboardActivity
+			 * will do right after calling this method */
+			od.lpStatus = OptionalDataStatus.RETRIEVING;
 			od.lp = null;
+		}
 		
 		if (bundle.containsKey (KEY_EXCEPTION))
 			e = (IOException) bundle.getSerializable (KEY_EXCEPTION);
 		else
 			e = null;
 		
+	}
+	
+	/**
+	 * Tells whether some optional data is still missing.
+	 * @return true if a refresh of optional data is adivsable
+	 */
+	public boolean isIncomplete ()
+	{
+		return od.isIncomplete ();
 	}
 }
