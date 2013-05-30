@@ -19,7 +19,7 @@
         
         <service android:name="NotificationService" />
 
-        <activity android:name="DashboardActivity" >
+        <activity android:name="MainActivity" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

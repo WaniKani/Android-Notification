@@ -391,7 +391,7 @@ public class WebReviewActivity extends Activity {
 	
 		super.onPause ();
 		lbm = LocalBroadcastManager.getInstance (this);
-		intent = new Intent (DashboardActivity.ACTION_REFRESH);
+		intent = new Intent (MainActivity.ACTION_REFRESH);
 		lbm.sendBroadcast (intent);
 	}
 	
