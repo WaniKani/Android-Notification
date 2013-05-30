@@ -188,7 +188,7 @@ public class SettingsActivity
 	
 	public static boolean getUseIntegratedBrowser (SharedPreferences prefs)
 	{
-		return prefs.getBoolean (KEY_PREF_USE_INTEGRATED_BROWSER, false);	
+		return prefs.getBoolean (KEY_PREF_USE_INTEGRATED_BROWSER, true);	
 	}
 
 	public static boolean credentialsAreValid (SharedPreferences prefs)
