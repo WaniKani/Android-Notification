@@ -23,7 +23,7 @@
     <string name="tag_burned">Burned</string>
     <string name="tag_gravatar">Gravatar</string>
     <string name="tag_loading">Loading&#8230;</string>
-    <string name="tag_btn_review">Review (EXPERIMENTAL)</string>
+    <string name="tag_btn_review">Review</string>
     
     <string name="tag_radicals_progression">Radicals Progression</string>
     <string name="tag_kanji_progression">Kanji Progression</string>
