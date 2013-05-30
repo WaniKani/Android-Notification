@@ -7,7 +7,7 @@
 
     <!-- Main container -->
 
-    <LinearLayout
+   	<LinearLayout
         style="@style/AppBaseTheme"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -100,7 +100,9 @@
                     android:minWidth="24dip"/>
             </LinearLayout>
         </LinearLayout>
-
+        
+                    
+        
         <!-- Next review indicator -->
 
         <LinearLayout
@@ -112,24 +114,23 @@
                 android:id="@+id/tv_next_review"
                 style="@style/LabelNextReview"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"/>
 
             <TextView
                 android:id="@+id/tv_next_review_val"
                 style="@style/LabelNextReviewVal"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:clickable="true"
-                android:textIsSelectable="true" />
-                        
-            </LinearLayout>
-        
-        <Button
+                android:textIsSelectable="true"/>
+
+            <Button
                 android:id="@+id/btn_review"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/tag_btn_review" 
-                android:visibility="gone"/>   	   	
+                android:text="@string/tag_available_now" 
+                android:layout_gravity="center"/>   	   	
+            
+         </LinearLayout>
         
         <!-- The first (review) table -->
 

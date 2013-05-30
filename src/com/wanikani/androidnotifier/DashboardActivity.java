@@ -20,6 +20,7 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -29,7 +30,6 @@ import android.text.method.LinkMovementMethod;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -75,12 +75,16 @@ public class DashboardActivity extends Activity implements Runnable {
 	private static final String AVATAR_FILENAME = "avatar.png";
 		
 	/**
-	 * A receiver that gets notifications when 
-	 * {@link SettingsActivity} updates the credentials. We need this
-	 * both to update the credentials used to fill the stats
-	 * screen, and to enable notifications if the user chose so.
+	 * A receiver that gets notifications on several occasions:
+	 * <ul>
+	 * 	<li>@link {@link SettingsActivity#ACT_CREDENTIALS}: We need this
+	 * 			both to update the credentials used to fill the stats
+	 * 			screen, and to enable notifications if the user chose so.
+	 * 	<li>@link {@link SettingsActivity#ACT_NOTIFY}: Enable the notification
+	 * 			flag
+	 * 	<li>@link {@link #ACTION_REFRESH}: force a refresh onto the dashboard
 	 */
-	private class CredentialsReceiver extends BroadcastReceiver {
+	private class Receiver extends BroadcastReceiver {
 		
 		/**
 		 * Handles credentials change notifications
@@ -91,32 +95,22 @@ public class DashboardActivity extends Activity implements Runnable {
 		public void onReceive (Context ctxt, Intent i)
 		{
 			UserLogin ul;
+			String action;
 			
-			ul = new UserLogin (i.getStringExtra (SettingsActivity.E_USERKEY));
+			action = i.getAction ();
+			if (action.equals (SettingsActivity.ACT_CREDENTIALS)) {
+				ul = new UserLogin (i.getStringExtra (SettingsActivity.E_USERKEY));
 			
-			updateCredentials (ul);
-			enableNotifications (i.getBooleanExtra (SettingsActivity.E_ENABLED, true));
+				updateCredentials (ul);				
+				enableNotifications (i.getBooleanExtra (SettingsActivity.E_ENABLED, true));
+			} else if (action.equals (SettingsActivity.ACT_NOTIFY))
+				enableNotifications (i.getBooleanExtra (SettingsActivity.E_ENABLED, true));			
+			else if (action.equals (ACTION_REFRESH))
+				refresh ();
 		}
 		
 	}
 	
-	/**
-	 * A receiver that gets notifications when {@link SettingsActivity} 
-	 * updates the "enable notif" flag.
-	 */
-	private class NotifyReceiver extends BroadcastReceiver {
-		
-		/**
-		 * Handles enable/disable notification notifications.
-		 */
-		@Override
-		public void onReceive (Context ctxt, Intent i)
-		{
-			enableNotifications (i.getBooleanExtra (SettingsActivity.E_ENABLED, true));
-		}
-		
-	}
-
 	/**
 	 * A task that gets called whenever the stats need to be refreshed.
 	 * In order to keep the GUI responsive, we do this through an AsyncTask
@@ -243,6 +237,7 @@ public class DashboardActivity extends Activity implements Runnable {
 				lpStatus = DashboardData.OptionalDataStatus.FAILED;
 			}
 
+			
 			return new DashboardData.OptionalData (srs, srsStatus, lp, lpStatus);
 		}	
 						
@@ -262,42 +257,30 @@ public class DashboardActivity extends Activity implements Runnable {
 	}
 
 	/**
-	 * A listener that intercepts clicks on "Available now" link or on the review button.
-	 * Hides the notification icon.	 
-	 */
-	private class ReviewBaseClickListener implements View.OnClickListener {
-				
-		@Override
-		public void onClick (View v)
-		{
-			Intent intent;
-			
-			intent = new Intent (DashboardActivity.this, NotificationService.class);
-			
-			intent.setAction (NotificationService.ACTION_HIDE_NOTIFICATION);
-
-			startService (intent);
-		}
-	};
-	
-	/**
 	 * A listener that intercepts review button clicks.
 	 * It starts the {@link WebReviewActivity}.
 	 */
-	private class ReviewClickListener extends ReviewBaseClickListener {
+	private class ReviewClickListener implements View.OnClickListener {
 		
 		@Override
 		public void onClick (View v)
 		{
+			SharedPreferences prefs;
 			Intent intent;
 			
-			super.onClick (v);
-			
-			intent = new Intent (DashboardActivity.this, WebReviewActivity.class);
-			intent.setAction (WebReviewActivity.OPEN_ACTION);
-		
-			refreshOnResume = true;
-			
+			intent = new Intent (DashboardActivity.this, NotificationService.class);			
+			intent.setAction (NotificationService.ACTION_HIDE_NOTIFICATION);			
+			startService (intent);
+
+			prefs = PreferenceManager.getDefaultSharedPreferences (DashboardActivity.this);
+			if (SettingsActivity.getUseIntegratedBrowser (prefs)) {
+				intent = new Intent (DashboardActivity.this, WebReviewActivity.class);
+				intent.setAction (WebReviewActivity.OPEN_ACTION);
+			} else {
+				intent = new Intent (Intent.ACTION_VIEW);
+				intent.setData (Uri.parse (NotificationService.REVIEW_URL));
+			}
+
 			startActivity (intent);
 		}	
 	}
@@ -308,14 +291,9 @@ public class DashboardActivity extends Activity implements Runnable {
 	 * @see #onSaveInstanceState */
 	private static final String BUNDLE_VALID = "bundle_valid";
 
-	/** The broadcast receiver that informs this activity of
-	 * changes in the credentials */
-	private CredentialsReceiver credentialsRecv;
+	/** The broadcast receiver that handles all the actions */
+	private Receiver receiver;
 
-	/** The broadcast receiver that informs this activity when
-	 * notifications are enabled or disabled */
-	private NotifyReceiver notifyRecv;
-	
 	/** The object that implements the WaniKani API client */
 	private Connection conn;
 	
@@ -329,18 +307,20 @@ public class DashboardActivity extends Activity implements Runnable {
 	/** The object that notifies us when the refresh timeout expires */
 	Alarm alarm;
 	
-	/** If set, when the activity is resumed, we force a refresh.
-	 *  Needed when we start another activity that may significatly
-	 *  change the data (e.g. {@link WebReviewActivity}) */
-	private boolean refreshOnResume;
+	/** Private prefix */
+	private static final String PREFIX = "com.wanikani.androidnotifier.DashboardData";
+	
+	/** An action that should be invoked to force refresh. This is used typically
+	 *  when reviews complete
+	 */
+	public static final String ACTION_REFRESH = PREFIX + "REFRESH"; 
 	
 	/**
 	 * Constructor.
 	 */
 	public DashboardActivity ()
 	{
-		credentialsRecv = new CredentialsReceiver ();
-		notifyRecv = new NotifyReceiver ();
+		receiver = new Receiver ();
 	}
 	
 	/** 
@@ -408,10 +388,6 @@ public class DashboardActivity extends Activity implements Runnable {
 	{
 		super.onResume ();
 				
-		if (refreshOnResume) {
-			refresh ();
-			refreshOnResume = false;
-		}
 	    alarm.screenOn ();
 	}
 	
@@ -425,7 +401,7 @@ public class DashboardActivity extends Activity implements Runnable {
 	{	
 		super.onDestroy ();
 		
-		unregisterIntents ();
+		unregisterIntents ();		
 		alarm.stopAlarm ();
 	}
 
@@ -435,6 +411,7 @@ public class DashboardActivity extends Activity implements Runnable {
 	 * <ul>
 	 * 	<li>{@link SettingsActivity#ACT_CREDENTIALS}, when the credentials are changed
 	 *  <li>{@link SettingsActivity#ACT_NOTIFY}, when notifications are enabled or disabled
+	 *  <li>{@link #ACTION_REFRESH}, when the dashboard should refreshed
 	 * </ul>
 	 * Both intents are triggered by {@link SettingsActivity}
 	 */
@@ -446,10 +423,9 @@ public class DashboardActivity extends Activity implements Runnable {
 		lbm = LocalBroadcastManager.getInstance (this);
 		
 		filter = new IntentFilter (SettingsActivity.ACT_CREDENTIALS);
-		lbm.registerReceiver (credentialsRecv, filter);
-
-		filter = new IntentFilter (SettingsActivity.ACT_NOTIFY);
-		lbm.registerReceiver (notifyRecv, filter);
+		filter.addAction (SettingsActivity.ACT_NOTIFY);
+		filter.addAction (ACTION_REFRESH);
+		lbm.registerReceiver (receiver, filter);
 	}
 	
 	/**
@@ -464,9 +440,6 @@ public class DashboardActivity extends Activity implements Runnable {
 	{
 		View view;
 		
-		view = findViewById (R.id.tv_next_review_val);
-		view.setOnClickListener (new ReviewBaseClickListener ());
-		
 		view = findViewById (R.id.btn_review);
 		view.setOnClickListener (new ReviewClickListener ());
 	}
@@ -480,8 +453,7 @@ public class DashboardActivity extends Activity implements Runnable {
 		
 		lbm = LocalBroadcastManager.getInstance (this);
 		
-		lbm.unregisterReceiver (credentialsRecv);
-		lbm.unregisterReceiver (notifyRecv);
+		lbm.unregisterReceiver (receiver);
 	}
 	
 	/**
@@ -642,7 +614,7 @@ public class DashboardActivity extends Activity implements Runnable {
 		SharedPreferences prefs;
 		ProgressBar pb;
 		ImageView iw;
-		TextView tw;
+		TextView tw, ow;
 		View view;
 		long delay, refresh;
 		String s;
@@ -682,15 +654,22 @@ public class DashboardActivity extends Activity implements Runnable {
 		view = findViewById (R.id.tr_r_now);
 		view.setVisibility (dd.reviewsAvailable > 0 ? View.VISIBLE : View.GONE);
 
-		view = findViewById (R.id.btn_review);
-		view.setVisibility (dd.reviewsAvailable > 0 ? View.VISIBLE : View.GONE);
-		
 		tw = (TextView) findViewById (R.id.tv_next_review);
 		tw.setText (R.string.tag_next_review);
 		
 		tw = (TextView) findViewById (R.id.tv_next_review_val);
-		tw.setText (Html.fromHtml (niceInterval (dd.nextReviewDate)));		
-		tw.setMovementMethod (LinkMovementMethod.getInstance ());
+		ow = (TextView) findViewById (R.id.tv_next_review);
+		view = findViewById (R.id.btn_review);
+		if (dd.reviewsAvailable > 0) {
+			ow.setVisibility (View.GONE);
+			tw.setVisibility (View.GONE);
+			view.setVisibility (View.VISIBLE);
+		} else {
+			ow.setVisibility (View.VISIBLE);
+			tw.setText (niceInterval (dd.nextReviewDate));
+			tw.setVisibility (View.VISIBLE);
+			view.setVisibility (View.GONE);
+		}
 		
 		tw = (TextView) findViewById (R.id.lessons_available);
 		if (dd.lessonsAvailable > 1) {
@@ -885,7 +864,7 @@ public class DashboardActivity extends Activity implements Runnable {
 		delta = date.getTime () - new Date ().getTime ();
 		forward = delta > 0;
 		if (!forward)
-			return res.getString (R.string.fmt_available_now);
+			return res.getString (R.string.tag_available_now);
 		
 		minutes = delta / (60 * 1000);
 		hours = minutes / 60;

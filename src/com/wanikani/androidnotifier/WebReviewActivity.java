@@ -1,8 +1,10 @@
 package com.wanikani.androidnotifier;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.support.v4.content.LocalBroadcastManager;
 import android.view.KeyEvent;
 import android.view.View;
 import android.webkit.ConsoleMessage;
@@ -379,6 +381,18 @@ public class WebReviewActivity extends Activity {
 		wv.setWebChromeClient (new WebChromeClientImpl ());
 		
 		wv.loadUrl (WKConfig.REVIEW_START);
+	}
+	
+	@Override
+	protected void onPause ()
+	{
+		LocalBroadcastManager lbm;
+		Intent intent;
+	
+		super.onPause ();
+		lbm = LocalBroadcastManager.getInstance (this);
+		intent = new Intent (DashboardActivity.ACTION_REFRESH);
+		lbm.sendBroadcast (intent);
 	}
 	
 	/**

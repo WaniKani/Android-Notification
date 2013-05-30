@@ -97,7 +97,7 @@ public class NotificationService
 	    }
 	}
 	
-	private static final String REVIEW_URL = "http://www.wanikani.com/review";
+	public static final String REVIEW_URL = "http://www.wanikani.com/review";
 	
 	private static final String PREFIX = "com.wanikani.wanikaninotifier.NotificationService.";
 	
@@ -236,7 +236,7 @@ public class NotificationService
 	{
 		NotifierStateMachine fsm;
 		
-		hideNotification ();	
+		hideNotification ();
 		if (enabled) {
 			fsm = new NotifierStateMachine (this);
 
