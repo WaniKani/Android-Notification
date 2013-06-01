@@ -57,4 +57,6 @@
     <string name="fmt_web_review_connecting">Connecting to WaniKani&#8230;</string>
     <string name="fmt_web_review_error">Connection failed: %s</string>
     
+    <string name="key_meta">123</string>
+    <string name="key_show">Show</string>
 </resources>

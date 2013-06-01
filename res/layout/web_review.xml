@@ -228,7 +228,7 @@
                     android:id="@+id/kb_meta"
                     style="@style/kb_meta_key"
                     android:layout_weight="1.5"
-                    android:text="123" />
+                    android:text="@string/key_meta" />
 
                 <Button
                     android:id="@+id/kb_space"

@@ -45,7 +45,9 @@ import android.widget.TextView;
  * The keyboard is displayed only when needed, so we need to check whether the
  * page contains a <code>user_response</code> text box, and it is enabled.
  * In addition, to submit the form, we simulate a click on the <code>option-submit</code>
- * button.
+ * button. Since the keyboard hides the standard controls (in particular the
+ * info ("did you know...") balloons), we hide the keyboard when the user enters 
+ * his/her response. 
  * <p>
  * To accomplish this, we register a JavascriptObject (<code>wknKeyboard</code>) and inject
  * a javascript to check how the page looks like. If the keyboard needs to be shown,
@@ -153,7 +155,7 @@ public class WebReviewActivity extends Activity {
 	};
 
 	/**
-	 * A small job that hides or shows the keyboard. We need to implement this
+	 * A small job that hides, shows or iconizes the keyboard. We need to implement this
 	 * here because {@link WebReviewActibity.WKNKeyboard} gets called from a
 	 * javascript thread, which is not necessarily an UI thread.
 	 * The constructor simply calls <code>runOnUIThread</code> to make sure
@@ -161,18 +163,18 @@ public class WebReviewActivity extends Activity {
 	 */
 	private class ShowHideKeyboard implements Runnable {
 		
-		/** Whether the keyboard should be shown or hidden */
-		boolean show;
+		/** New state to enter */
+		KeyboardStatus kbstatus;
 		
 		/**
 		 * Constructor. It also takes care to schedule the invokation
 		 * on the UI thread, so all you have to do is just to create an
 		 * instance of this object
-		 * @param show <code>true</code> iff the keyboard should be shown
+		 * @param kbstatus the new keyboard status to enter
 		 */
-		ShowHideKeyboard (boolean show)
+		ShowHideKeyboard (KeyboardStatus kbstatus)
 		{
-			this.show = show;
+			this.kbstatus = kbstatus;
 			
 			runOnUiThread (this);
 		}
@@ -182,10 +184,19 @@ public class WebReviewActivity extends Activity {
 		 */
 		public void run ()
 		{
-			View view;
-			
-			view = findViewById (R.id.keyboard);
-			view.setVisibility (show ? View.VISIBLE : View.GONE);			
+			switch (kbstatus) {
+			case VISIBLE:
+				show ();
+				break;
+				
+			case HIDDEN:
+				hide ();
+				break;
+				
+			case ICONIZED:
+				iconize ();
+				break;
+			}
 		}
 		
 	}
@@ -202,7 +213,7 @@ public class WebReviewActivity extends Activity {
 		@JavascriptInterface
 		public void show ()
 		{
-			new ShowHideKeyboard (true);
+			new ShowHideKeyboard (KeyboardStatus.VISIBLE);
 		}
 
 		/**
@@ -211,9 +222,18 @@ public class WebReviewActivity extends Activity {
 		@JavascriptInterface
 		public void hide ()
 		{
-			new ShowHideKeyboard (false);
+			new ShowHideKeyboard (KeyboardStatus.HIDDEN);
 		}
-	}
+
+		/**
+		 * Called by javascript when the keyboard should be iconized.
+		 */
+		@JavascriptInterface
+		public void iconize ()
+		{
+			new ShowHideKeyboard (KeyboardStatus.ICONIZED);
+		}
+}
 	
 	/**
 	 * A button listener that handles all the meta keys on the keyboard.
@@ -277,6 +297,20 @@ public class WebReviewActivity extends Activity {
 			}
 		}
 	};
+	
+	/**
+	 * Keyboard visiblity status.
+	 */
+	enum KeyboardStatus {
+		/** Keyboard visible, all keys visible */
+		VISIBLE, 
+		
+		/** Keyboard invisible */
+		HIDDEN, 
+		
+		/** Keyboard visible, just "Show" and "Enter" keys are visible */ 
+		ICONIZED
+	};
 
 	/** The web view, where the web contents are rendered */
 	WebView wv;
@@ -311,8 +345,17 @@ public class WebReviewActivity extends Activity {
 			"	wknKeyboard.hide ();" +
 			"}";
 
-	/** Javascript to be invoked to simulate a click on the submit (heart-shaped) button */
-	private static final String JS_ENTER = 
+	/** Javascript to be invoked to simulate a click on the submit (heart-shaped) button.
+	 *  It also handles keyboard show/iconize logic. If the textbox is enabled, then this
+	 *  is an answer, so we iconize the keyboard. Otherwise we are entering the new question,
+	 *  so we need to show it  */
+	private static final String JS_ENTER =
+			"var textbox = document.getElementById (\"" + WKConfig.ANSWER_BOX + "\"); " +
+			"if (textbox.disabled) {" +
+			"	wknKeyboard.show ();" +
+			"} else {" +
+			"	wknKeyboard.iconize ();" +
+			"} " +
 			"$(\"#" + WKConfig.SUBMIT_BUTTON + "\").click();";
 
 	/** The default keyboard. This is the sequence of keys from left to right, from top to bottom */
@@ -348,6 +391,9 @@ public class WebReviewActivity extends Activity {
 	
 	/** The current keyboard. It may be set to either {@link #KB_LATIN} or {@link #KB_ALT} */
 	private String keyboard;
+	
+	/** The current keyboard status */
+	protected KeyboardStatus kbstatus;
 
 	/**
 	 * Called when the action is initially displayed. It initializes the objects
@@ -404,6 +450,7 @@ public class WebReviewActivity extends Activity {
 		View key;
 		int i;
 		
+		kbstatus = KeyboardStatus.HIDDEN;
 		loadKeyboard (KB_LATIN);		
 
 		klist = new KeyListener ();
@@ -455,9 +502,13 @@ public class WebReviewActivity extends Activity {
 	{
 		KeyEvent kdown, kup;
 	
-		if (keycode == KeyEvent.KEYCODE_NUM)
-			loadKeyboard (keyboard == KB_ALT ? KB_LATIN : KB_ALT);
-		else if (keycode == KeyEvent.KEYCODE_ENTER)
+		if (keycode == KeyEvent.KEYCODE_NUM) {
+			/* Num == meta -> if iconized, it means "Show"*/
+			if (kbstatus == KeyboardStatus.ICONIZED)
+				show ();
+			else
+				loadKeyboard (keyboard == KB_ALT ? KB_LATIN : KB_ALT);
+		} else if (keycode == KeyEvent.KEYCODE_ENTER)
 			js (JS_ENTER);
 		else {
 			kdown = new KeyEvent (KeyEvent.ACTION_DOWN, keycode);
@@ -514,4 +565,75 @@ public class WebReviewActivity extends Activity {
 		splashView.setVisibility (View.VISIBLE);
 	}
 	
+	/**
+	 * Hides the keyboard
+	 */
+	protected void hide ()
+	{
+		View view;
+		
+		kbstatus = KeyboardStatus.HIDDEN;
+		view = findViewById (R.id.keyboard);
+		view.setVisibility (View.GONE);					
+	}
+	 
+	/**
+	 * Shows the keyboard. This method does what's expected either when
+	 * called after the keyboard has been hidden, and when it is simply
+	 * iconized. To do this, in addition to changing its visibility,
+	 * we show the keys. 
+	 */
+	protected void show ()
+	{
+		View key, view;
+		int i;
+		
+		kbstatus = KeyboardStatus.VISIBLE;
+		for (i = 0; i < key_table.length; i++) {
+			key = findViewById (key_table [i]);
+			key.setVisibility (View.VISIBLE);
+		}					
+
+		for (i = 0; i < meta_table.length; i++) {
+			key = findViewById (meta_table [i]);
+			key.setVisibility (View.VISIBLE);
+		}
+		
+		key = findViewById (R.id.kb_meta);
+		((Button) key).setText (R.string.key_meta);
+
+		view = findViewById (R.id.keyboard);
+		view.setVisibility (View.VISIBLE);					
+}
+
+	/**
+	 * Iconize the keyboard. This method hides all the keys except
+	 * Enter and Meta (which is renamed to "Show").
+	 */
+	protected void iconize ()
+	{
+		View view, key;
+		int i;
+		
+		kbstatus = KeyboardStatus.ICONIZED;
+		for (i = 0; i < key_table.length; i++) {
+			key = findViewById (key_table [i]);
+			key.setVisibility (View.GONE);
+		}					
+
+		for (i = 0; i < meta_table.length; i++) {
+			key = findViewById (meta_table [i]);
+			key.setVisibility (View.GONE);
+		}
+		
+		key = findViewById (R.id.kb_enter);
+		key.setVisibility (View.VISIBLE);
+		
+		key = findViewById (R.id.kb_meta);
+		key.setVisibility (View.VISIBLE);
+		((Button) key).setText (R.string.key_show);
+
+		view = findViewById (R.id.keyboard);
+		view.setVisibility (View.VISIBLE);					
+	}
 }
