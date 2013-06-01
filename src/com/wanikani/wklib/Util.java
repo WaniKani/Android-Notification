@@ -1,5 +1,7 @@
 package com.wanikani.wklib;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Date;
 
 import org.json.JSONException;
@@ -37,9 +39,30 @@ public class Util {
 			return obj.getInt (key);
 	}
 
+	public static boolean getBoolean (JSONObject obj, String key)
+			throws JSONException
+	{
+			return obj.getBoolean (key);
+	}
+
 	public static Date getDate (JSONObject obj, String key)
 			throws JSONException
 	{		
-			return obj.isNull (key) ? null : new Date (obj.getLong (key) * 1000);
+			return obj.isNull (key) || obj.getLong (key) == 0 ? 
+						null : new Date (obj.getLong (key) * 1000);
+	}
+	
+	public static URL getURL (JSONObject obj, String key)
+			throws JSONException
+	{
+			String s;
+		
+			try {
+				s = getString (obj, key);
+				
+				return s != null ? new URL (s) : null;
+			} catch (MalformedURLException e) { 
+				throw new JSONException (e.getMessage ());
+			}
 	}
 }

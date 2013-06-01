@@ -108,11 +108,111 @@
     <style parent="AppTheme" name="keyboard">
         <item name="android:background">@drawable/wool</item>
     </style>
-    
+
     <style parent="AppTheme" name="ListLevel">
 		<item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
 	    <item name="android:gravity">center</item>	
 	    <item name="android:textColor">#000</item>    	    	
 	</style>
     	
+    <style parent="AppTheme" name="Item">
+        <item name="android:layout_height">@dimen/m_item</item>
+    </style>
+
+    <style parent="AppTheme" name="ItemGlyph">
+        <item name="android:layout_width">@dimen/m_item</item>
+        <item name="android:layout_height">@dimen/m_item</item>
+    	<item name="android:padding">@dimen/m_gap</item>    
+        <item name="android:layout_gravity">center</item>
+        <item name="android:textColor">#fff</item>
+    </style>
+    
+    <style parent="Item" name="RadicalItem">
+        <item name="android:background">@drawable/blue</item>
+    </style>	
+    
+    <style parent="Item" name="KanjiItem">
+        <item name="android:background">@drawable/magenta</item>
+    </style>
+    
+    <style parent="AppTheme" name="ItemProgressFrame">
+        <item name="android:layout_width">@dimen/m_gap</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:background">#000</item>
+    </style>
+        
+    <style parent="AppTheme" name="ItemDescription">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">match_parent</item>
+    </style>
+    
+    <style parent="AppTheme" name="ItemProgress">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">0dip</item>
+    </style>
+    
+    <style parent="ItemProgress" name="ItemFiller">
+        <item name="android:background">#fff</item>
+    </style>
+    
+    <style parent="ItemProgress" name="ItemProgressApprentice">
+        <item name="android:background">@color/apprentice</item>
+        <item name="android:layout_weight">1</item>
+    </style>
+    	
+    <style parent="ItemFiller" name="ItemFillerApprentice">
+        <item name="android:layout_weight">4</item>
+    </style>	
+
+    <style parent="ItemProgress" name="ItemProgressGuru">
+        <item name="android:background">@color/guru</item>
+        <item name="android:layout_weight">2</item>
+    </style>	
+    <style parent="ItemFiller" name="ItemFillerGuru">
+        <item name="android:layout_weight">3</item>
+    </style>	
+
+    <style parent="ItemProgress" name="ItemProgressMaster">
+        <item name="android:background">@color/master</item>
+        <item name="android:layout_weight">3</item>
+        </style>	
+    <style parent="ItemFiller" name="ItemFillerMaster">
+        <item name="android:layout_weight">2</item>
+    </style>	
+
+    <style parent="ItemProgress" name="ItemProgressEnlightened">
+        <item name="android:background">@color/enlightened</item>
+        <item name="android:layout_weight">4</item>
+        </style>	
+    <style parent="ItemFiller" name="ItemFillerEnlightened">
+        <item name="android:layout_weight">1</item>
+    </style>	
+
+    <style parent="ItemProgress" name="ItemProgressBurned">
+        <item name="android:background">@color/burned</item>
+        <item name="android:layout_weight">5</item>
+        </style>	
+    <style parent="ItemFiller" name="ItemFillerBurned">
+        <item name="android:layout_weight">0</item>
+    </style>
+    
+    <style name="ItemMeaning" parent="AppTheme">
+		<item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
+        <item name="android:textColor">#fff</item>
+        <item name="android:textStyle">italic</item>                
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+   </style>
+    	
+    <style name="ItemReading" parent="AppTheme">
+		<item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
+        <item name="android:textColor">#fff</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+    </style>
+
+    <style name="ItemImportantReading" parent="ItemReading">
+        <item name="android:textStyle">bold</item>                
+    </style>
+
 </resources>

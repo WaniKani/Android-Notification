@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="apprentice">#ff00aa</color>
+    <color name="guru">#aa38c6</color>
+    <color name="enlightened">#00aaff</color>
+    <color name="master">#5571e2</color>
+    <color name="burned">#555</color>
+</resources>

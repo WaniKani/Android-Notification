@@ -23,7 +23,7 @@ import org.json.JSONObject;
 
 public class SRSDistribution {
 
-	public class Level {
+	public static class Level {
 	
 		public int radicals;
 		
