@@ -276,11 +276,34 @@ public class DashboardActivity extends Activity implements Runnable {
 			if (SettingsActivity.getUseIntegratedBrowser (prefs)) {
 				intent = new Intent (DashboardActivity.this, WebReviewActivity.class);
 				intent.setAction (WebReviewActivity.OPEN_ACTION);
-			} else {
+			} else
 				intent = new Intent (Intent.ACTION_VIEW);
-				intent.setData (Uri.parse (NotificationService.REVIEW_URL));
-			}
 
+			intent.setData (Uri.parse (WebReviewActivity.WKConfig.REVIEW_START));
+			startActivity (intent);
+		}	
+	}
+
+	/**
+	 * A listener that intercepts lessons button clicks.
+	 * It starts the {@link WebReviewActivity}.
+	 */
+	private class LessonsClickListener implements View.OnClickListener {
+		
+		@Override
+		public void onClick (View v)
+		{
+			SharedPreferences prefs;
+			Intent intent;
+			
+			prefs = PreferenceManager.getDefaultSharedPreferences (DashboardActivity.this);
+			if (SettingsActivity.getUseIntegratedBrowser (prefs) && INTEGRATED_LESSONS) {
+				intent = new Intent (DashboardActivity.this, WebReviewActivity.class);
+				intent.setAction (WebReviewActivity.OPEN_ACTION);
+			} else
+				intent = new Intent (Intent.ACTION_VIEW);
+			
+			intent.setData (Uri.parse (WebReviewActivity.WKConfig.LESSON_START));
 			startActivity (intent);
 		}	
 	}
@@ -310,10 +333,16 @@ public class DashboardActivity extends Activity implements Runnable {
 	/** Private prefix */
 	private static final String PREFIX = "com.wanikani.androidnotifier.DashboardData";
 	
+	/** Compiler flag, enabling integrated lessons. Currently they are disabled
+	 *  because javascript here is a lot different and it is quite hard to debug
+	 *  (lessons are not quite as frequent as reviews)
+	 */
+	private static final boolean INTEGRATED_LESSONS = false;
+	
 	/** An action that should be invoked to force refresh. This is used typically
 	 *  when reviews complete
 	 */
-	public static final String ACTION_REFRESH = PREFIX + "REFRESH"; 
+	public static final String ACTION_REFRESH = PREFIX + "REFRESH";
 	
 	/**
 	 * Constructor.
@@ -442,6 +471,9 @@ public class DashboardActivity extends Activity implements Runnable {
 		
 		view = findViewById (R.id.btn_review);
 		view.setOnClickListener (new ReviewClickListener ());
+		
+		view = findViewById (R.id.btn_lessons_available);
+		view.setOnClickListener (new LessonsClickListener ());
 	}
 	
 	/**
@@ -674,14 +706,12 @@ public class DashboardActivity extends Activity implements Runnable {
 		tw = (TextView) findViewById (R.id.lessons_available);
 		if (dd.lessonsAvailable > 1) {
 			s = String.format (getString (R.string.fmt_lessons), dd.lessonsAvailable);
-			tw.setText (Html.fromHtml (s));
-			tw.setMovementMethod (LinkMovementMethod.getInstance ());
-		} else if (dd.lessonsAvailable == 1) {
-			tw.setText (Html.fromHtml (getString (R.string.fmt_one_lesson)));
-			tw.setMovementMethod (LinkMovementMethod.getInstance ());
-		}
+			tw.setText (s);
+		} else if (dd.lessonsAvailable == 1)
+			tw.setText (getString (R.string.fmt_one_lesson));
 		
-		tw.setVisibility (dd.lessonsAvailable > 0 ? View.VISIBLE : View.GONE);
+		view = findViewById (R.id.lay_lessons_available);
+		view.setVisibility (dd.lessonsAvailable > 0 ? View.VISIBLE : View.GONE);
 		
 		tw = (TextView) findViewById (R.id.next_hour_val);
 		tw.setText (Integer.toString (dd.reviewsAvailableNextHour));

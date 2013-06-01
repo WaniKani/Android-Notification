@@ -210,14 +210,25 @@
 
         <!-- Unlock/Lessons message -->
 
+
+		<LinearLayout
+            android:id="@+id/lay_lessons_available"
+            style="@style/LessonsAvailable"
+            android:layout_width="fill_parent"
+            android:orientation="horizontal"
+            android:visibility="gone">            
         <TextView
             android:id="@+id/lessons_available"
             style="@style/LessonsAvailable"
-            android:layout_width="fill_parent"
-            android:textIsSelectable="true"
-            android:visibility="gone"
-            android:text="" />
-
+            android:layout_width="wrap_content"
+            android:textIsSelectable="true"/>
+        <Button
+            android:id="@+id/btn_lessons_available"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/tag_unlock"/>
+		</LinearLayout>
+		
         <!-- Progress -->
 
         <LinearLayout

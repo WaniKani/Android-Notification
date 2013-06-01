@@ -61,17 +61,25 @@ public class WebReviewActivity extends Activity {
 	 * WaniKani portal. Hopefully none of these will ever be changed, but in case
 	 * it does, here is where to look for.
 	 */
-	static class WKConfig {
+	public static class WKConfig {
 		
 		/** Review start page. Of course must be inside of @link {@link #REVIEW_SPACE} */
 		static final String REVIEW_START = "http://www.wanikani.com/review/session/start";
 
-		/** HTML id of the textbox the user types its answer in */
+		/** Review start page. Of course must be inside of @link {@link #REVIEW_SPACE} */
+		static final String LESSON_START = "http://www.wanikani.com/lesson";
+
+		/** HTML id of the textbox the user types its answer in (reviews) */
 		static final String ANSWER_BOX = "user_response";
 
+		/** HTML id of the textbox the user types its answer in (lessons) */
+		static final String LESSON_ANSWER_BOX = "lesson_user_response";
+		
 		/** HTML id of the submit button */
 		static final String SUBMIT_BUTTON = "option-submit";
 
+		/** HTML id of the lessons review form */
+		static final String LESSONS_REVIEW_FORM = "new_lesson";
 	};
 
 	/**
@@ -339,6 +347,12 @@ public class WebReviewActivity extends Activity {
 	/** Javascript to be called each time an HTML page is loaded. It hides or shows the keyboard */
 	private static final String JS_INIT = 
 			"var textbox = document.getElementById (\"" + WKConfig.ANSWER_BOX + "\"); " +
+		    "if (textbox == null) {" +
+		    "    textbox = document.getElementById (\"" + WKConfig.LESSON_ANSWER_BOX + "\"); " +
+		    "       if (textbox != null) {" +
+		    "           textbox.focus ();" +
+		    "    }" +
+		    "} " +
 			"if (textbox != null && !textbox.disabled) {" +
 			"	wknKeyboard.show ();" +
 			"} else {" +
@@ -351,12 +365,18 @@ public class WebReviewActivity extends Activity {
 	 *  so we need to show it  */
 	private static final String JS_ENTER =
 			"var textbox = document.getElementById (\"" + WKConfig.ANSWER_BOX + "\"); " +
-			"if (textbox.disabled) {" +
-			"	wknKeyboard.show ();" +
-			"} else {" +
-			"	wknKeyboard.iconize ();" +
+			"if (textbox != null) { " +
+			"   if (textbox.disabled) {" +
+			"	   wknKeyboard.show ();" +
+			"   } else {" +
+			"	   wknKeyboard.iconize ();" +
+			"   }" +
+			"   $(\"#" + WKConfig.SUBMIT_BUTTON + "\").click();" + 
 			"} " +
-			"$(\"#" + WKConfig.SUBMIT_BUTTON + "\").click();";
+			"var form = document.getElementById (\"" + WKConfig.LESSONS_REVIEW_FORM + "\"); " +
+		    "if (form != null) {" +
+		    "   form.submit ();" +
+		    "}";
 
 	/** The default keyboard. This is the sequence of keys from left to right, from top to bottom */
 	private static final String KB_LATIN = "qwertyuiopasdfghjkl'zxcvbnm";
@@ -424,9 +444,11 @@ public class WebReviewActivity extends Activity {
 		wv.addJavascriptInterface (new WKNKeyboard (), "wknKeyboard");
 		wv.setScrollBarStyle (ScrollView.SCROLLBARS_OUTSIDE_OVERLAY);
 		wv.setWebViewClient (new WebViewClientImpl ());
-		wv.setWebChromeClient (new WebChromeClientImpl ());
+		wv.setWebChromeClient (new WebChromeClientImpl ());		
 		
-		wv.loadUrl (WKConfig.REVIEW_START);
+		System.out.println ("XXX" + getIntent ().getData ());
+		String s = getIntent ().getData ().toString ();
+		wv.loadUrl (getIntent ().getData ().toString ());
 	}
 	
 	@Override
