@@ -7,9 +7,6 @@
     android:layout_height="match_parent" >
 
     <!-- Main container -->
-	<ViewSwitcher 
-	    	android:layout_width="match_parent"
-	    	android:layout_height="wrap_content">
 	<LinearLayout
         style="@style/AppBaseTheme"
         android:layout_width="match_parent"
@@ -92,7 +89,17 @@
                         android:text="" />
                 </RelativeLayout>
 
-            </LinearLayout>
+                <ProgressBar
+                    android:id="@+id/pb_status"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="right"
+                    android:maxHeight="24dp"
+                    android:maxWidth="24dp"
+                    android:minHeight="24dip"
+                    android:minWidth="24dip"/>
+                
+                </LinearLayout>
         </LinearLayout>
         
                     
@@ -275,8 +282,4 @@
          	android:layout_marginBottom="@dimen/m_gap"/>
    	</TableLayout>
     </LinearLayout>
-	    	<AnalogClock 
-	    	    	android:layout_width="match_parent"
-	    	    	android:layout_height="match_parent"/>
-	</ViewSwitcher>
 </ScrollView>

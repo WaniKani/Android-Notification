@@ -52,7 +52,7 @@ import android.widget.TextView;
  * large to avoid needless traffic and power consumption; if the user
  * really needs to update the stats, we provide also a "refresh" menu.
  */
-public class DashboardFragment extends Fragment { 
+public class DashboardFragment extends Fragment implements Tab { 
 
 	/**
 	 * A listener that intercepts review button clicks.
@@ -292,6 +292,25 @@ public class DashboardFragment extends Fragment {
 		canvas.drawBitmap (mask, 0, 0, paint);
 		
 		return result;
+	}
+
+	/**
+	 * Show or hide the spinner.
+	 * @param enable true if should be shown
+	 */
+	public void spin (boolean enable)
+	{
+		ProgressBar pb;
+		
+		if (parent != null) {
+			pb = (ProgressBar) parent.findViewById (R.id.pb_status);
+			pb.setVisibility (enable ? ProgressBar.VISIBLE : ProgressBar.INVISIBLE);
+		}
+	}
+	
+	public int getName ()
+	{
+		return R.string.tag_dashboard;
 	}
 }
 	

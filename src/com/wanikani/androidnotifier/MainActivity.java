@@ -3,6 +3,8 @@ package com.wanikani.androidnotifier;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.List;
+import java.util.Vector;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -26,8 +28,6 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.wanikani.wklib.AuthenticationException;
@@ -42,27 +42,50 @@ public class MainActivity extends FragmentActivity implements Runnable {
 		
 	public class PagerAdapter extends FragmentPagerAdapter {
         
-		 public PagerAdapter (FragmentManager fm) 
-		 {
-			 super(fm);
-	     }
+		List<Tab> tabs;
+		
+		public PagerAdapter (FragmentManager fm, List<Tab> tabs) 
+		{
+			super(fm);
+			
+			this.tabs = tabs;
+			
+			for (Tab tab : tabs)
+				tab.setMainActivity (MainActivity.this);
+	    }
 
 		 @Override
 	     public int getCount () 
 		 {
-			 return 1;
+			 return tabs.size ();
 	     }
 
 		 @Override
 	     public Fragment getItem (int position) 
 		 {
-	         return dashboard;
+	         return (Fragment) tabs.get (position);
 	     }
 		 
 		 @Override
 		 public CharSequence getPageTitle (int position) 
 		 {
-		     return "Home"; 
+			Resources res;
+				
+			res = getResources ();
+				
+			return res.getString (tabs.get (position).getName ());
+		 }
+		 
+		 public void spin (boolean enable)
+		 {
+			 for (Tab tab : tabs)
+				 tab.spin (enable);
+		 }
+		 
+		 public void refreshComplete (DashboardData dd)
+		 {
+			 for (Tab tab : tabs)
+				 tab.refreshComplete (dd);
 		 }
 	 }
 
@@ -277,9 +300,6 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	/** Pager adapter instance */
 	PagerAdapter pad;
 	
-	/** The dashboard fragment */
-	DashboardFragment dashboard;
-
 	/** Private prefix */
 	private static final String PREFIX = "com.wanikani.androidnotifier.DashboardData";
 	
@@ -307,16 +327,18 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	{	
 		SharedPreferences prefs;
 		DashboardData ldd;
+		List<Tab> tabs;
 		
 	    super.onCreate (bundle);
 
 	    receiver = new Receiver ();
 	    alarm = new Alarm ();
 	    
-	    dashboard = new DashboardFragment ();
-	    dashboard.setMainActivity (this);
-
-        pad = new PagerAdapter (getSupportFragmentManager ());
+	    tabs = new Vector<Tab> ();
+	    tabs.add (new DashboardFragment ());
+	    tabs.add (new ItemsFragment ());
+	    
+        pad = new PagerAdapter (getSupportFragmentManager (), tabs);
 
         registerIntents ();
 	    
@@ -572,7 +594,7 @@ public class MainActivity extends FragmentActivity implements Runnable {
 		long delay, refresh;
 		ViewPager pager;
 
-		spin (false);
+		pad.spin (false);
 
 		if (this.dd == null) {
 			setContentView (R.layout.main);
@@ -590,7 +612,7 @@ public class MainActivity extends FragmentActivity implements Runnable {
 		if (dd.gravatar == null)
 			restoreAvatar (dd);
 		
-		dashboard.refreshComplete (dd);
+		pad.refreshComplete (dd);
 						
 		prefs = PreferenceManager.getDefaultSharedPreferences (this);
 		refresh = SettingsActivity.getRefreshTimeout (prefs) * 60 * 1000; 
@@ -636,7 +658,7 @@ public class MainActivity extends FragmentActivity implements Runnable {
 		if (dd == null)
 			setContentView (R.layout.splash);
 		else
-			spin (true);
+			pad.spin (true);
 	}
 
 	/**
@@ -660,7 +682,7 @@ public class MainActivity extends FragmentActivity implements Runnable {
 		if (dd == null)
 			setContentView (R.layout.error);
 		else
-			spin (false);
+			pad.spin (false);
 		
 		res = getResources ();
 		if (id == R.string.status_msg_unauthorized) {
@@ -693,22 +715,6 @@ public class MainActivity extends FragmentActivity implements Runnable {
 		}
 		
 		startActivity (intent);
-	}
-
-	
-	/**
-	 * Show or hide the spinner.
-	 * @param enable true if should be shown
-	 */
-	private void spin (boolean enable)
-	{
-		/*
-		ProgressBar pb;
-		
-		pb = (ProgressBar) findViewById (R.id.pb_status);
-		pb.setVisibility (enable ? ProgressBar.VISIBLE : ProgressBar.INVISIBLE);
-		*/
-	}
-	
+	}	
 }
 	

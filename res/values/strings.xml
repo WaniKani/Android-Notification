@@ -57,4 +57,7 @@
     <string name="fmt_web_review_connecting">Connecting to WaniKani&#8230;</string>
     <string name="fmt_web_review_error">Connection failed: %s</string>
     
+    <string name="tag_dashboard">Dashboard</string>
+    <string name="tag_items">Items</string>
+    
 </resources>

@@ -107,5 +107,12 @@
     
     <style parent="AppTheme" name="keyboard">
         <item name="android:background">@drawable/wool</item>
-    </style>	
+    </style>
+    
+    <style parent="AppTheme" name="ListLevel">
+		<item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
+	    <item name="android:gravity">center</item>	
+	    <item name="android:textColor">#000</item>    	    	
+	</style>
+    	
 </resources>
