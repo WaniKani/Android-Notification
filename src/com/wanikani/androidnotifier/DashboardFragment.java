@@ -151,8 +151,7 @@ public class DashboardFragment extends Fragment implements Tab {
 
 		this.dd = dd;
 		
-		/* Too early */
-		if (parent == null)
+		if (parent == null || getActivity () == null)
 			return;
 		
 		iw = (ImageView) parent.findViewById (R.id.iv_gravatar);
@@ -232,7 +231,7 @@ public class DashboardFragment extends Fragment implements Tab {
 		long delta;
 		int x;
 			
-		res = this.getResources ();
+		res = getResources ();
 		if (date == null)
 			return res.getString (R.string.fmt_no_reviews);
 		
