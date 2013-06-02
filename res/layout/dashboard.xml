@@ -97,7 +97,8 @@
                     android:maxHeight="24dp"
                     android:maxWidth="24dp"
                     android:minHeight="24dip"
-                    android:minWidth="24dip"/>
+                    android:minWidth="24dip"
+                    android:visibility="gone"/>
                 
                 </LinearLayout>
         </LinearLayout>
