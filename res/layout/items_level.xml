@@ -2,10 +2,7 @@
 <LinearLayout 
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="horizontal" 
-    android:layout_width="fill_parent"
-    android:layout_height="48dp"
-	android:layout_gravity="center"
-    android:background="@drawable/items_level_selector">
+    style="@style/LevelRow">
     
      <TextView android:id="@+id/tgr_level"
          style="@style/ListLevel"

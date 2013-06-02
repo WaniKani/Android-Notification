@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/RadicalItem"
+    android:layout_width="match_parent"
+    android:orientation="horizontal" >
+    
+    <ImageView         
+        android:id="@+id/img_srs" 
+        style="@style/ItemProgressLevel" />
+    
+    <TextView
+        android:id="@+id/it_glyph"
+        style="@style/ItemGlyph"
+        android:textSize="@dimen/m_glyph" />
+    <ImageView
+        android:id="@+id/img_glyph"
+        style="@style/ItemGlyph" />
+    
+    <RelativeLayout style="@style/ItemDescription" >
+
+        <TextView
+            android:id="@+id/it_meaning"
+            style="@style/ItemMeaning"
+            android:layout_alignParentBottom="true" />
+    </RelativeLayout>
+
+</LinearLayout>

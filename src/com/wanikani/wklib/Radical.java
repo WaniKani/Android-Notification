@@ -18,14 +18,14 @@ public class Radical extends Item {
 
 	public final static Factory FACTORY = new Factory ();
 
-	URL image;
+	public String image;
 	
 	public Radical (JSONObject obj)
 		throws JSONException
 	{
 		super (obj, Item.Type.RADICAL);
 		
-		image = Util.getURL (obj, "image");
+		image = Util.getString (obj, "image");
 	}	
 
 	@Override

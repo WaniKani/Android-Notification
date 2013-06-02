@@ -9,5 +9,6 @@
     <dimen name="m_progress_table">124dp</dimen>
     <dimen name="m_kb_key">42dp</dimen>
     <dimen name="m_item">96dp</dimen>
+    <dimen name="m_srs_size">30dp</dimen>
     <dimen name="m_glyph">78dp</dimen>
 </resources>

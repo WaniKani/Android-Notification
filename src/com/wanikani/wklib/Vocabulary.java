@@ -33,7 +33,7 @@ public class Vocabulary extends Item {
 
 	public final static Factory FACTORY = new Factory ();
 	
-	String kana;
+	public String kana;
 	
 	public Vocabulary (JSONObject obj)
 		throws JSONException

@@ -115,7 +115,8 @@ public abstract class Item {
 		meaning = Util.getString (obj, "meaning");
 		level = Util.getInt (obj, "level");
 		
-		stats = new Stats (obj.getJSONObject ("stats"), hasReading ());
+		if (!obj.isNull ("stats"))
+			stats = new Stats (obj.getJSONObject ("stats"), hasReading ());
 	}
 	
 	protected boolean hasReading ()

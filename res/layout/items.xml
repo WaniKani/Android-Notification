@@ -6,11 +6,10 @@
     android:orientation="horizontal" >
     <ListView
 	    android:id="@+id/lv_levels"
-        android:layout_width="48dp"
-        android:layout_height="wrap_content"
-        android:divider="#b5b5b5"
-        android:dividerHeight="1dp"
-    	android:listSelector="@drawable/items_level_selector" /> 
+	    style="@style/LevelTable"/>
+	    <ListView
+		    android:id="@+id/lv_items"
+	    	style="@style/ItemTable"/>
 </LinearLayout>
 
 

@@ -715,6 +715,11 @@ public class MainActivity extends FragmentActivity implements Runnable {
 		}
 		
 		startActivity (intent);
-	}	
+	}
+	
+	public Connection getConnection ()
+	{
+		return conn;
+	}
 }
 	

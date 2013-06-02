@@ -50,11 +50,11 @@ public class Kanji extends Item {
 		}
 	};
 	
-	String onyomi;
+	public String onyomi;
 	
-	String kunyomi;
+	public String kunyomi;
 	
-	Reading importantReading;
+	public Reading importantReading;
 		
 	public Kanji (JSONObject obj)
 		throws JSONException

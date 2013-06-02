@@ -177,6 +177,20 @@ public class Connection {
 		}
 	}
 
+	public ItemLibrary<Item> getItems (int level)
+			throws IOException
+	{
+		ItemLibrary<Radical> radicals;
+		ItemLibrary<Kanji> kanji; 
+		ItemLibrary<Vocabulary> vocab;
+		
+		radicals = getRadicals (level);
+		kanji = getKanji (level);
+		vocab = getVocabulary (level);
+		
+		return new ItemLibrary<Item> (radicals, kanji, vocab);
+	}		
+
 	private static String readStream (InputStream is)
 		throws IOException
 	{
