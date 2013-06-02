@@ -280,6 +280,11 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	 * @see #onCreate
 	 * @see #onSaveInstanceState */
 	private static final String BUNDLE_VALID = "bundle_valid";
+	
+	/**
+	 * The key stored into the bundle to keep the track of the current tab
+	 */
+	private static final String CURRENT_TAB = "current_tab";
 
 	/** The broadcast receiver that handles all the actions */
 	private Receiver receiver;
@@ -296,6 +301,9 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	
 	/** The object that notifies us when the refresh timeout expires */
 	Alarm alarm;
+	
+	/** The pager */
+	ViewPager pager;
 	
 	/** Pager adapter instance */
 	PagerAdapter pad;
@@ -352,6 +360,8 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	    	refreshComplete (ldd);
 	    	if (ldd.isIncomplete ())
 	    		refreshOptional ();
+			pager.setCurrentItem (bundle.getInt (CURRENT_TAB));
+
 	    } else
 	    	refresh ();
 	}
@@ -369,6 +379,7 @@ public class MainActivity extends FragmentActivity implements Runnable {
 		if (dd != null) {
 			dd.serialize (bundle);
 			bundle.putBoolean (BUNDLE_VALID, true);
+			bundle.putInt (CURRENT_TAB, pager.getCurrentItem ());
 		}
 	}
 	
@@ -592,7 +603,6 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	{
 		SharedPreferences prefs;
 		long delay, refresh;
-		ViewPager pager;
 
 		pad.spin (false);
 
