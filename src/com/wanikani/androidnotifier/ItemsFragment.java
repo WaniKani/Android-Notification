@@ -7,10 +7,8 @@ import java.util.List;
 import java.util.Vector;
 
 import android.content.res.Resources;
-import android.graphics.Color;
-import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
-import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -18,10 +16,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.wanikani.wklib.Connection;
 import com.wanikani.wklib.Item;
 import com.wanikani.wklib.ItemLibrary;
 import com.wanikani.wklib.Kanji;
@@ -47,6 +47,72 @@ import com.wanikani.wklib.Vocabulary;
  */
 
 public class ItemsFragment extends Fragment implements Tab {
+
+	private class LoadLevelTask extends AsyncTask<Level, ItemLibrary<Item>, Boolean > {
+		
+		Connection conn;
+		
+		public LoadLevelTask (Connection conn)
+		{
+			this.conn = conn;
+		}
+		
+		@Override
+		protected void onPreExecute ()
+		{
+			/* empty */
+		}
+		
+		@Override
+		protected Boolean doInBackground (Level... level)
+		{
+			ItemLibrary<Item> lib;
+				
+			boolean ok;
+			
+			ok = true;
+			lib = new ItemLibrary<Item> ();
+			try {
+				lib.addAll (conn.getRadicals (level [0].level));
+				publishProgress (new ItemLibrary<Item> (lib));
+			} catch (IOException e) {
+				ok = false;
+			}
+			
+			lib = new ItemLibrary<Item> ();
+			try {
+				lib.addAll (conn.getKanji (level [0].level));
+				publishProgress (lib);
+			} catch (IOException e) {
+				ok = false;
+			}
+			
+			lib = new ItemLibrary<Item> ();
+			try {
+				lib.addAll (conn.getVocabulary (level [0].level));
+				publishProgress (lib);
+			} catch (IOException e) {
+				ok = false;
+			}			
+
+			return ok;
+		}	
+		
+		@Override
+		protected void onProgressUpdate (ItemLibrary<Item>... lib)
+		{
+			if (llt == this) {
+				iad.addAll (lib [0].list);
+				iad.notifyDataSetChanged ();
+			}
+		}
+						
+		@Override
+		protected void onPostExecute (Boolean ok)
+		{
+		
+		}
+	}
 
 	static class Level {
 		
@@ -97,12 +163,45 @@ public class ItemsFragment extends Fragment implements Tab {
 		}		
 	}
 	
-	class ItemListAdapter extends ArrayAdapter<Item> {
+	class ItemListAdapter extends BaseAdapter {
 
-		public ItemListAdapter (List<Item> data)
+		LayoutInflater inflater;
+
+		Vector<Item> items;		
+
+		public ItemListAdapter ()
 		{
-			super (main, R.layout.items_radical, data);
+			items = new Vector<Item> ();
+			inflater = main.getLayoutInflater ();
 		}		
+
+		@Override
+		public int getCount ()
+		{
+			return items.size ();
+		}
+		
+		@Override
+		public Item getItem (int position)
+		{
+			return items.elementAt (position);
+		}
+		
+		@Override
+		public long getItemId (int position)
+		{
+			return position;			
+		}
+	
+		public void clear ()
+		{
+			items.clear ();
+		}
+		
+		public void addAll (List<Item> newItems)
+		{
+			items.addAll (newItems);
+		}
 		
 		protected void fillRadical (View row, Radical radical)
 		{
@@ -165,12 +264,10 @@ public class ItemsFragment extends Fragment implements Tab {
 		@Override
 		public View getView (int position, View row, ViewGroup parent) 
 		{
-			LayoutInflater inflater;
 			ImageView iw;
 			TextView tw;
 			Item item;
 
-			inflater = main.getLayoutInflater ();
 			item = getItem (position);
 			switch (item.type) {
 			case RADICAL:
@@ -215,7 +312,9 @@ public class ItemsFragment extends Fragment implements Tab {
 	
 	Hashtable<Integer, ItemLibrary<Item>> ht;
 	
-	EnumMap<SRSLevel, Drawable> srsht; 
+	EnumMap<SRSLevel, Drawable> srsht;
+	
+	LoadLevelTask llt;
 	
 	int normalColor;
 	
@@ -282,19 +381,19 @@ public class ItemsFragment extends Fragment implements Tab {
 		lw = (ListView) parent.findViewById (R.id.lv_levels);
 		lw.setAdapter (lad);
 		lw.setOnItemClickListener (lcl);
-	}
+
+		iad = new ItemListAdapter ();
+		lw = (ListView) parent.findViewById (R.id.lv_items);
+		lw.setAdapter (iad);
+}
 	
 	protected void select (Level level)
 	{
-		ItemLibrary<Item> lib;
-		ListView lw;
+		iad.clear ();
+		iad.notifyDataSetChanged ();
 		
-		lib = getLibrary (level);
-		if (lib != null) {
-			iad = new ItemListAdapter (lib.list);
-			lw = (ListView) parent.findViewById (R.id.lv_items);
-			lw.setAdapter (iad);
-		}
+		llt = new LoadLevelTask (main.getConnection ());
+		llt.execute (level);
 	}
 	
 	protected ItemLibrary<Item> getLibrary (Level level)
