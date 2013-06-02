@@ -22,9 +22,13 @@ public class ItemLibrary<T extends Item> {
 	
 	public ItemLibrary (ItemLibrary<? extends T>... libs)
 	{
+		addAll (libs);
+	}
+	
+	public void addAll (ItemLibrary<? extends T>... libs)
+	{
 		list = new Vector<T> ();
 		for (ItemLibrary<? extends T> lib : libs)
 			list.addAll (lib.list);
 	}
-	
 }
