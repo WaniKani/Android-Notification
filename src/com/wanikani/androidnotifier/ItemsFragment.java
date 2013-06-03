@@ -250,24 +250,24 @@ public class ItemsFragment extends Fragment implements Tab {
 
 		protected void fillKanji (View row, Kanji kanji)
 		{
-			TextView ktw, ytw;
+			TextView ktw, otw;
 			TextView tw;
 			
-			ktw = (TextView) row.findViewById (R.id.it_onyomi);
-			ktw.setText (kanji.onyomi);
+			otw = (TextView) row.findViewById (R.id.it_onyomi);
+			otw.setText (kanji.onyomi);
 
-			ytw = (TextView) row.findViewById (R.id.it_kunyomi);
-			ytw.setText (kanji.kunyomi);
+			ktw = (TextView) row.findViewById (R.id.it_kunyomi);
+			ktw.setText (kanji.kunyomi);
 			
 			switch (kanji.importantReading) {
 			case ONYOMI:
-				ytw.setTextColor (importantColor);
+				otw.setTextColor (importantColor);
 				ktw.setTextColor (normalColor);
 				break;
 
 			case KUNYOMI:
-				ktw.setTextColor (importantColor);
-				ytw.setTextColor (normalColor);
+				otw.setTextColor (importantColor);
+				ktw.setTextColor (normalColor);
 				break;
 			}
 
