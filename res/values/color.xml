@@ -7,4 +7,6 @@
     <color name="burned">#555</color>
     <color name="important">#ff0</color>
     <color name="normal">#fff</color>
+    <color name="selected">#f87217</color>
+    <color name="unselected">#000</color>
 </resources>

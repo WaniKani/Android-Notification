@@ -8,6 +8,12 @@
          style="@style/ListLevel"
          android:layout_width="fill_parent"
          android:layout_height="fill_parent"/>
+     <ProgressBar
+         android:id="@+id/pb_level"
+         android:layout_width="fill_parent"
+         android:layout_height="fill_parent"
+         android:visibility="gone"/>
+         
              
 </LinearLayout>
 
