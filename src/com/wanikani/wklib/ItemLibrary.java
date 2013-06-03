@@ -20,9 +20,21 @@ public class ItemLibrary<T extends Item> {
 			list.add (f.deserialize (array.getJSONObject (i)));
 	}
 	
+	public ItemLibrary ()
+	{
+		list = new Vector<T> ();
+	}
+	
 	public ItemLibrary (ItemLibrary<? extends T>... libs)
 	{
 		addAll (libs);
+	}
+	
+	public ItemLibrary (T... items)
+	{
+		list = new Vector<T> ();
+		for (T item : items)
+			list.add (item);
 	}
 	
 	public void addAll (ItemLibrary<? extends T>... libs)

@@ -146,6 +146,31 @@ public class Connection {
 			throw new ParseException ();
 		}
 	}
+	
+	public void loadImage (Radical r)
+		throws IOException
+	{
+		HttpURLConnection conn;
+		InputStream is;
+		URL url;
+		int code;
+		
+		conn = null;
+
+		try {
+			url = new URL (r.image);
+			conn = (HttpURLConnection) url.openConnection ();
+			code = conn.getResponseCode ();
+			if (code == 200) {
+				is = conn.getInputStream ();
+				r.bitmap = BitmapFactory.decodeStream (is);
+			} 
+		} finally {
+			if (conn != null)
+				conn.disconnect ();
+		}
+}
+
 
 	public ItemLibrary<Kanji> getKanji (int level)
 		throws IOException

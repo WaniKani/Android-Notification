@@ -3,10 +3,10 @@ package com.wanikani.androidnotifier;
 import java.io.IOException;
 import java.util.EnumMap;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
-import android.app.Activity;
 import android.content.res.Resources;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
@@ -73,16 +73,38 @@ public class ItemsFragment extends Fragment implements Tab {
 		protected Boolean doInBackground (Void... v)
 		{
 			ItemLibrary<Item> lib;
-				
+			List<Radical> imgrad;
+			Radical rad;
+			Iterator<Item> i;
+			
 			boolean ok;
 			
 			ok = true;
 			lib = new ItemLibrary<Item> ();
+			imgrad = new Vector<Radical> ();
 			try {
 				lib.addAll (conn.getRadicals (level.level));
+				i = lib.list.iterator ();
+				while (i.hasNext ()) {
+					rad = (Radical) i.next ();
+					if (rad.character == null) {
+						imgrad.add (rad);
+						i.remove ();
+					}
+				}
 				publishProgress (new ItemLibrary<Item> (lib));
 			} catch (IOException e) {
 				ok = false;
+			}
+			
+			for (Radical r : imgrad) {
+				try {
+					conn.loadImage (r);
+				} catch (IOException e) {
+					r.character = "?";
+					ok = false;
+				}				
+				publishProgress (new ItemLibrary<Item> (r));
 			}
 			
 			lib = new ItemLibrary<Item> ();
@@ -218,11 +240,11 @@ public class ItemsFragment extends Fragment implements Tab {
 				tw.setText (radical.character);
 				tw.setVisibility (View.VISIBLE);
 				iw.setVisibility (View.GONE);
-			} else {
-				/* Need to set image URI */
+			} else if (radical.bitmap != null) {		
+				iw.setImageBitmap (radical.bitmap);
 				tw.setVisibility (View.GONE);
 				iw.setVisibility (View.VISIBLE);				
-			}
+			} /* else { should never happen! } */
 
 		}
 

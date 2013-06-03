@@ -9,12 +9,12 @@
         style="@style/ItemProgressLevel" />
     
     <TextView
-        android:id="@+id/it_glyph"
-        style="@style/ItemGlyph"
-        android:textSize="@dimen/m_glyph" />
+        	android:id="@+id/it_glyph"
+        	style="@style/ItemGlyph"
+        	android:textSize="@dimen/m_glyph" />
     <ImageView
-        android:id="@+id/img_glyph"
-        style="@style/ItemGlyph" />
+        	android:id="@+id/img_glyph"
+        	style="@style/ItemGlyphImage" />
     
     <RelativeLayout style="@style/ItemDescription" >
 

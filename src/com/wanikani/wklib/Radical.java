@@ -1,9 +1,9 @@
 package com.wanikani.wklib;
 
-import java.net.URL;
-
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import android.graphics.Bitmap;
 
 public class Radical extends Item {
 
@@ -18,6 +18,8 @@ public class Radical extends Item {
 
 	public final static Factory FACTORY = new Factory ();
 
+	public Bitmap bitmap;
+	
 	public String image;
 	
 	public Radical (JSONObject obj)
