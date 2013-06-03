@@ -47,7 +47,7 @@ public class MainActivity extends FragmentActivity implements Runnable {
 		public PagerAdapter (FragmentManager fm, List<Tab> tabs) 
 		{
 			super(fm);
-			
+						
 			this.tabs = tabs;
 			
 			for (Tab tab : tabs)
@@ -87,7 +87,7 @@ public class MainActivity extends FragmentActivity implements Runnable {
 			 for (Tab tab : tabs)
 				 tab.refreshComplete (dd);
 		 }
-	 }
+    }
 
 	/**
 	 * A receiver that gets notifications on several occasions:
@@ -196,7 +196,7 @@ public class MainActivity extends FragmentActivity implements Runnable {
 				dd.wail ();
 				
 				refreshComplete (dd);
-
+				
 				new RefreshTaskPartII ().execute (conn);
 			} catch (AuthenticationException e) {
 				error (R.string.status_msg_unauthorized);
@@ -376,6 +376,8 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	@Override
 	public void onSaveInstanceState (Bundle bundle)
 	{
+		super.onSaveInstanceState (bundle);
+		
 		if (dd != null) {
 			dd.serialize (bundle);
 			bundle.putBoolean (BUNDLE_VALID, true);
@@ -393,7 +395,7 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	{
 		super.onResume ();
 				
-	    alarm.screenOn ();
+		alarm.screenOn ();
 	}
 	
 	/**
@@ -725,6 +727,11 @@ public class MainActivity extends FragmentActivity implements Runnable {
 		}
 		
 		startActivity (intent);
+	}
+
+	public DashboardData getDashboardData ()
+	{
+		return dd;
 	}
 	
 	public Connection getConnection ()

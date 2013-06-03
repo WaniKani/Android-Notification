@@ -50,6 +50,64 @@ import com.wanikani.wklib.Vocabulary;
 
 public class ItemsFragment extends Fragment implements Tab {
 
+	protected class SpinManager {
+		
+		Level level;
+		
+		boolean spinning;
+		
+		public void setSelected (Level level, boolean spinning)
+		{
+			if (this.level != null && this.level != level)
+				spin (this.level, false, false);
+			
+			this.level = level;
+			this.spinning = spinning;
+			spin (level, true, spinning);
+		}
+
+		public void levelAdded (int position, View row)
+		{
+			if (level != null && level.position == position)
+				spin (row, true, spinning);
+			else
+				spin (row, false, false);
+		}
+		
+		private void spin (Level level, boolean select, boolean spin)
+		{
+			View row;
+			
+			row = lview.getChildAt (level.position);
+			if (row != null) 	/* May happen if the level is not visible */
+				spin (row, select, spin);
+		}
+
+		private void spin (View row, boolean select, boolean spin)
+		{
+			TextView tw;
+			View sw;
+			
+			tw = (TextView) row.findViewById (R.id.tgr_level);
+			sw = row.findViewById (R.id.pb_level);
+			if (spin) {
+				tw.setVisibility (View.GONE);
+				sw.setVisibility (View.VISIBLE);
+			} else {
+				tw.setVisibility (View.VISIBLE);
+				sw.setVisibility (View.GONE);
+			}
+			if (select) {
+				tw.setTextColor (selectedColor);
+				tw.setTypeface (null, Typeface.BOLD);
+			} else {
+				tw.setTextColor (unselectedColor);
+				tw.setTypeface (null, Typeface.NORMAL);			
+			}
+		}
+		
+	}
+	
 	private class LoadLevelTask extends AsyncTask<Void, ItemLibrary<Item>, Boolean > {
 		
 		Connection conn;
@@ -66,7 +124,7 @@ public class ItemsFragment extends Fragment implements Tab {
 		@Override
 		protected void onPreExecute ()
 		{
-			spin (level, true, false);
+			spinm.setSelected (level, true);
 		}
 		
 		@Override
@@ -138,8 +196,10 @@ public class ItemsFragment extends Fragment implements Tab {
 		@Override
 		protected void onPostExecute (Boolean ok)
 		{
-			if (llt == this)
-				spin (level, false, true);
+			if (llt == this) {
+				taskCompleted (ok);
+				spinm.setSelected (level, false);
+			}
 		}
 	}
 
@@ -166,13 +226,44 @@ public class ItemsFragment extends Fragment implements Tab {
 		
 	}
 	
-	class LevelListAdapter extends ArrayAdapter<Level> {
+	class LevelListAdapter extends BaseAdapter {
 
-		public LevelListAdapter (List<Level> data)
-		{
-			super (main, R.layout.items_level, data);
-		}		
+		List<Level> levels;
 		
+		public LevelListAdapter ()
+		{
+			levels = new Vector<Level> ();
+		}
+		
+		@Override
+		public int getCount ()
+		{
+			return levels.size ();
+		}
+		
+		@Override
+		public Level getItem (int position)
+		{
+			return levels.get (position);
+		}
+		
+		public void clear ()
+		{
+			levels = new Vector<Level> ();
+		}
+		
+		public void replace (List<Level> levels)
+		{
+			clear ();
+			this.levels.addAll (levels);
+		}
+				
+		@Override
+		public long getItemId (int position)
+		{
+			return position;			
+		}
+	
 		@Override
 		public View getView (int position, View row, ViewGroup parent) 
 		{
@@ -183,6 +274,8 @@ public class ItemsFragment extends Fragment implements Tab {
 			row = inflater.inflate (R.layout.items_level, parent, false);
 			view = (TextView) row.findViewById (R.id.tgr_level);
 			view.setText (Integer.toString (getItem (position).level));
+			
+			spinm.levelAdded (position, row);
 			
 			return row;
 		}		
@@ -323,8 +416,6 @@ public class ItemsFragment extends Fragment implements Tab {
 		}		
 	}
 
-	DashboardData dd;
-	
 	MainActivity main;
 
 	View parent;
@@ -339,11 +430,15 @@ public class ItemsFragment extends Fragment implements Tab {
 	
 	LevelClickListener lcl;
 	
-	Hashtable<Integer, ItemLibrary<Item>> ht;
+	Hashtable<Integer, List<Item>> ht;
 	
 	EnumMap<SRSLevel, Drawable> srsht;
 	
 	LoadLevelTask llt;
+	
+	SpinManager spinm;
+	
+	int levels;
 	
 	int normalColor;
 	
@@ -352,30 +447,28 @@ public class ItemsFragment extends Fragment implements Tab {
 	int selectedColor;
 	
 	int unselectedColor;
-
-	Level oldLevel;
-	
+		
 	public void setMainActivity (MainActivity main)
 	{
 		this.main = main;
 	}
 	
 	@Override
-    public View onCreateView (LayoutInflater inflater, ViewGroup container,
-            				  Bundle savedInstanceState) 
-    {
+	public void onCreate (Bundle bundle)
+	{
 		Resources res;
-		
-		ht = new Hashtable<Integer, ItemLibrary<Item>> ();
-		srsht = new EnumMap<SRSLevel, Drawable> (SRSLevel.class); 
 
-		parent = inflater.inflate(R.layout.items, container, false);
-    	lcl = new LevelClickListener ();
-    	
-    	if (dd != null)
-    		refreshComplete (dd);
-    	
-    	res = getResources ();
+		super.onCreate (bundle);
+
+		setRetainInstance (true);
+		
+		ht = new Hashtable<Integer, List<Item>> ();
+		spinm = new SpinManager ();
+
+		lcl = new LevelClickListener ();
+
+		res = getResources ();
+		srsht = new EnumMap<SRSLevel, Drawable> (SRSLevel.class);
     	srsht.put (SRSLevel.APPRENTICE, res.getDrawable (R.drawable.apprentice));
     	srsht.put (SRSLevel.GURU, res.getDrawable (R.drawable.guru));
     	srsht.put (SRSLevel.MASTER, res.getDrawable (R.drawable.master));
@@ -386,33 +479,17 @@ public class ItemsFragment extends Fragment implements Tab {
     	importantColor = res.getColor (R.color.important);
     	selectedColor = res.getColor (R.color.selected);
     	unselectedColor = res.getColor (R.color.unselected);
-    	    	    	
-    	return parent;
-    }
-		
-	public void refreshComplete (DashboardData dd)
-	{
-		DashboardData ldd;
-		
-		ldd = this.dd;
-		this.dd = dd;
-		if (parent == null)
-			return;	
-		
-		if (lad == null || ldd == null || ldd.level != dd.level)
-			updateLevelsList ();
 	}
 	
-	protected void updateLevelsList ()
-	{
-		List<Level> l;
-		int i, j;
+	@Override
+    public View onCreateView (LayoutInflater inflater, ViewGroup container,
+            				  Bundle bundle) 
+    {
+		super.onCreateView (inflater, container, bundle);
 		
-		l = new Vector<Level> (dd.level);		
-		for (i = dd.level, j = 0; i > 0; i--)
-			l.add (new Level (j++, i));
+		parent = inflater.inflate(R.layout.items, container, false);
 		
-		lad = new LevelListAdapter (l);
+		lad = new LevelListAdapter ();
 		lview = (ListView) parent.findViewById (R.id.lv_levels);
 		lview.setAdapter (lad);
 		lview.setOnItemClickListener (lcl);
@@ -420,8 +497,42 @@ public class ItemsFragment extends Fragment implements Tab {
 		iad = new ItemListAdapter ();
 		iview = (ListView) parent.findViewById (R.id.lv_items);
 		iview.setAdapter (iad);
+		
+    	return parent;
+    }
+	
+	@Override
+	public void onResume ()
+	{
+		super.onResume ();
+
+		refreshComplete (main.getDashboardData ());
 	}
 	
+	public void refreshComplete (DashboardData dd)
+	{
+		List<Level> l;
+		Level level;
+		int i, j, clevel;
+		
+		if (!isResumed ())
+			return;
+		
+		clevel = spinm.level != null ? spinm.level.level : dd.level;
+		spinm = new SpinManager ();
+		
+		l = new Vector<Level> (dd.level);		
+		for (i = dd.level, j = 0; i > 0; i--) {
+			level = new Level (j++, i);
+			if (i == clevel)
+				spinm.setSelected (level, false);
+			l.add (level);
+		}
+		lad.replace (l);
+		lad.notifyDataSetChanged ();
+		
+		select (clevel);
+	}
 	
 	@Override
 	public void onDetach ()
@@ -430,38 +541,38 @@ public class ItemsFragment extends Fragment implements Tab {
 		
 		llt = null;
 	}
-
+	
+	protected void select (int level)
+	{
+		select (new Level (lad.getCount () - level, level));
+	}
+	
 	protected void select (Level level)
 	{
-		if (oldLevel != null)
-			spin (oldLevel, false, false);
-		
-		oldLevel = level;
-
-		iad.clear ();
-		iad.notifyDataSetChanged ();
-		
-		llt = new LoadLevelTask (main.getConnection (), level);
-		llt.execute ();
-	}
-	
-	protected ItemLibrary<Item> getLibrary (Level level)
-	{
-		ItemLibrary<Item> ans;
+		List<Item> ans;
 		
 		ans = ht.get (level.level);
-		if (ans == null) {
-			try {
-				ans = main.getConnection ().getItems (level.level);				
-			} catch (IOException e) {
-				return null;
-			}
-			ht.put (level.level, ans);
-		}
+		if (ans != null) {
+			iad.clear ();
+			iad.addAll (ans);
+			iad.notifyDataSetChanged ();
+			spinm.setSelected (level, false);
+			llt = null;
+		} else {
+			iad.clear ();
+			iad.notifyDataSetChanged ();
 		
-		return ans;
+			llt = new LoadLevelTask (main.getConnection (), level);
+			llt.execute ();
+		}
 	}
 	
+	protected void taskCompleted (boolean ok)
+	{
+		if (ok)
+			ht.put (spinm.level.level, new Vector<Item> (iad.items));
+	}
+		
 	/**
 	 * Show or hide the spinner.
 	 * @param enable true if should be shown
@@ -476,29 +587,5 @@ public class ItemsFragment extends Fragment implements Tab {
 		return R.string.tag_items;
 	}
 	
-	protected void spin (Level level, boolean enable, boolean select)
-	{
-		TextView tw;
-		View row, sw;
-		
-		row = lview.getChildAt (level.position);
-		
-		tw = (TextView) row.findViewById (R.id.tgr_level);
-		sw = row.findViewById (R.id.pb_level);
-		if (enable) {
-			tw.setVisibility (View.GONE);
-			sw.setVisibility (View.VISIBLE);
-		} else {
-			tw.setVisibility (View.VISIBLE);
-			sw.setVisibility (View.GONE);
-		}
-		if (select) {
-			tw.setTextColor (selectedColor);
-			tw.setTypeface (null, Typeface.BOLD);
-		} else {
-			tw.setTextColor (unselectedColor);
-			tw.setTypeface (null, Typeface.NORMAL);			
-		}
-	}
 	
 }

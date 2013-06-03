@@ -71,7 +71,7 @@ public class DashboardFragment extends Fragment implements Tab {
 	
 	View parent;
 	
-	DashboardData dd;
+	boolean spinning;
 	
 	public void setMainActivity (MainActivity main)
 	{
@@ -82,6 +82,8 @@ public class DashboardFragment extends Fragment implements Tab {
 	public void onCreate (Bundle bundle)
 	{
 		super.onCreate (bundle);
+
+    	setRetainInstance (true);
 	}
 
 	/**
@@ -104,14 +106,22 @@ public class DashboardFragment extends Fragment implements Tab {
     public View onCreateView (LayoutInflater inflater, ViewGroup container,
             				  Bundle savedInstanceState) 
     {
-    	parent = inflater.inflate(R.layout.dashboard, container, false);
-    	registerListeners ();
-    	
-    	if (dd != null)
-    		refreshComplete (dd);
-    	
+		super.onCreateView (inflater, container, savedInstanceState);
+
+		parent = inflater.inflate(R.layout.dashboard, container, false);
+		registerListeners ();
+        
     	return parent;
     }
+	
+	@Override
+	public void onResume ()
+	{
+		super.onResume ();
+		
+		refreshComplete (main.getDashboardData ());
+		spin (spinning);
+	}
 		
 	protected void setText (int id, String text)
 	{
@@ -149,9 +159,7 @@ public class DashboardFragment extends Fragment implements Tab {
 		TextView tw;
 		String s;
 
-		this.dd = dd;
-		
-		if (parent == null || getActivity () == null)
+		if (!isResumed ())
 			return;
 		
 		iw = (ImageView) parent.findViewById (R.id.iv_gravatar);
@@ -300,7 +308,8 @@ public class DashboardFragment extends Fragment implements Tab {
 	public void spin (boolean enable)
 	{
 		ProgressBar pb;
-		
+
+		spinning = enable;
 		if (parent != null) {
 			pb = (ProgressBar) parent.findViewById (R.id.pb_status);
 			pb.setVisibility (enable ? ProgressBar.VISIBLE : ProgressBar.INVISIBLE);
