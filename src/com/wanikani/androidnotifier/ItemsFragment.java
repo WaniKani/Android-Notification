@@ -273,10 +273,17 @@ public class ItemsFragment extends Fragment implements Tab {
 				break;
 			}
 
-			if (item.stats != null) {
-				iw = (ImageView) row.findViewById (R.id.img_srs);
-				iw.setImageDrawable (srsht.get (item.stats.srs));
+			if (currentFilter != levelf) {
+				tw = (TextView) row.findViewById (R.id.it_level);
+				tw.setText (Integer.toString (item.level));				
 			}
+			
+			iw = (ImageView) row.findViewById (R.id.img_srs);
+			if (item.stats != null) {
+				iw.setImageDrawable (srsht.get (item.stats.srs));
+				iw.setVisibility (View.VISIBLE);
+			} else
+				iw.setVisibility (View.GONE);				
 			
 			tw = (TextView) row.findViewById (R.id.it_meaning);
 			tw.setText (item.meaning);

@@ -255,8 +255,11 @@ public class DashboardFragment extends Fragment implements Tab {
 		
 		delta = date.getTime () - new Date ().getTime ();
 		forward = delta > 0;
+		/* forward may be < 0 even if lessons are not available yet
+		 * (may due to clock disalignment)
+		 */
 		if (!forward)
-			return res.getString (R.string.tag_available_now);
+			delta = 1;
 		
 		minutes = delta / (60 * 1000);
 		hours = minutes / 60;

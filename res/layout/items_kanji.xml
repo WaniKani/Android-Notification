@@ -3,15 +3,27 @@
     style="@style/KanjiItem"
     android:layout_width="match_parent"
     android:orientation="horizontal" >
-    
-    <ImageView
-        android:id="@+id/img_srs" 
-        style="@style/ItemProgressLevel" />
+
+	<RelativeLayout
+    	android:layout_width="wrap_content"
+    	android:layout_height="match_parent">
+    	<ImageView
+        	android:id="@+id/img_srs"
+        	android:layout_alignParentTop="true" 
+        	style="@style/ItemProgressLevel" />
+
+       	<TextView
+       	    android:id="@+id/it_level"
+       	    style="@style/ItemLevel"
+       	    android:layout_alignParentBottom="true"
+       	    android:text="" />
+    </RelativeLayout>
     
     <TextView
         android:id="@+id/it_glyph"
         style="@style/ItemGlyph"
-        android:textSize="@dimen/m_glyph" />
+        android:textSize="@dimen/m_glyph"
+        android:text="M" />
 
     <RelativeLayout style="@style/ItemDescription" >
 
