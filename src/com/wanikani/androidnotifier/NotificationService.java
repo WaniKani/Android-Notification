@@ -97,8 +97,7 @@ public class NotificationService
 	    }
 	}
 	
-	public static final String REVIEW_URL = "http://www.wanikani.com/review";
-	
+	/// Local prefix
 	private static final String PREFIX = "com.wanikani.wanikaninotifier.NotificationService.";
 	
 	/// FSM bundle key;
@@ -407,10 +406,9 @@ public class NotificationService
 		if (SettingsActivity.getUseIntegratedBrowser (prefs)) {
 			intent = new Intent (this, WebReviewActivity.class);
 			intent.setAction (WebReviewActivity.OPEN_ACTION);
-		} else {
+		} else
 			intent = new Intent (Intent.ACTION_VIEW);
-			intent.setData (Uri.parse (REVIEW_URL));
-		}
+		intent.setData (Uri.parse (WebReviewActivity.WKConfig.REVIEW_START));
 		intent.setFlags (Intent.FLAG_ACTIVITY_NEW_TASK);
 		
 		startActivity (intent);

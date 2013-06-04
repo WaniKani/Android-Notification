@@ -311,6 +311,12 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	/** Private prefix */
 	private static final String PREFIX = "com.wanikani.androidnotifier.DashboardData";
 	
+	/** Compiler flag, enabling integrated lessons. Currently they are disabled
+	 *  because javascript here is a lot different and it is quite hard to debug
+	 *  (lessons are not quite as frequent as reviews)
+	 */
+	private static final boolean INTEGRATED_LESSONS = false;
+
 	/** An action that should be invoked to force refresh. This is used typically
 	 *  when reviews complete
 	 */
@@ -712,20 +718,35 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	{
 		SharedPreferences prefs;
 		Intent intent;
-	
+		
 		intent = new Intent (MainActivity.this, NotificationService.class);			
 		intent.setAction (NotificationService.ACTION_HIDE_NOTIFICATION);			
 		startService (intent);
-
+		
 		prefs = PreferenceManager.getDefaultSharedPreferences (MainActivity.this);
 		if (SettingsActivity.getUseIntegratedBrowser (prefs)) {
 			intent = new Intent (MainActivity.this, WebReviewActivity.class);
 			intent.setAction (WebReviewActivity.OPEN_ACTION);
-		} else {
+		} else
 			intent = new Intent (Intent.ACTION_VIEW);
-			intent.setData (Uri.parse (NotificationService.REVIEW_URL));
-		}
+
+		intent.setData (Uri.parse (WebReviewActivity.WKConfig.REVIEW_START));
+		startActivity (intent);
+	}
+	
+	public void lessons ()
+	{
+		SharedPreferences prefs;
+		Intent intent;
+			
+		prefs = PreferenceManager.getDefaultSharedPreferences (MainActivity.this);
+		if (SettingsActivity.getUseIntegratedBrowser (prefs) && INTEGRATED_LESSONS) {
+			intent = new Intent (MainActivity.this, WebReviewActivity.class);
+			intent.setAction (WebReviewActivity.OPEN_ACTION);
+		} else
+			intent = new Intent (Intent.ACTION_VIEW);
 		
+		intent.setData (Uri.parse (WebReviewActivity.WKConfig.LESSON_START));
 		startActivity (intent);
 	}
 
@@ -739,4 +760,3 @@ public class MainActivity extends FragmentActivity implements Runnable {
 		return conn;
 	}
 }
-	

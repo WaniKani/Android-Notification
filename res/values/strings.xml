@@ -49,14 +49,16 @@
 
     <string name="fmt_level">Level %d</string>
     <string name="fmt_title">Sect of %s</string>
-    <string name="fmt_lessons">
-  You can &lt;a href=http://www.wanikani.com/lesson"&gt;unlock&lt;/a&gt; %d items</string>
-    <string name="fmt_one_lesson">
-  You can &lt;a href=http://www.wanikani.com/lesson"&gt;unlock&lt;/a&gt; one item</string>
-  
+    <string name="fmt_lessons">You can unlock %d items</string>
+    <string name="fmt_one_lesson">You can unlock one item</string>
+	<string name="tag_unlock">Unlock!</string>
+    
     <string name="fmt_web_review_connecting">Connecting to WaniKani&#8230;</string>
     <string name="fmt_web_review_error">Connection failed: %s</string>
     
+    <string name="key_meta">123</string>
+    <string name="key_show">Show</string>
+
     <string name="tag_dashboard">Dashboard</string>
     <string name="tag_items">Items</string>
     

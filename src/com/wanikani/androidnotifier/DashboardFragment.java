@@ -67,6 +67,15 @@ public class DashboardFragment extends Fragment implements Tab {
 		}	
 	}
 
+	private class LessonsClickListener implements View.OnClickListener {
+		
+		@Override
+		public void onClick (View v)
+		{
+			main.lessons ();
+		}	
+	}
+
 	MainActivity main;
 	
 	View parent;
@@ -100,7 +109,10 @@ public class DashboardFragment extends Fragment implements Tab {
 		
 		view = parent.findViewById (R.id.btn_review);
 		view.setOnClickListener (new ReviewClickListener ());
-	}
+
+		view = parent.findViewById (R.id.btn_lessons_available);
+		view.setOnClickListener (new LessonsClickListener ());
+}
 	
 	@Override
     public View onCreateView (LayoutInflater inflater, ViewGroup container,
@@ -184,16 +196,14 @@ public class DashboardFragment extends Fragment implements Tab {
 			setVisibility (R.id.btn_review, View.GONE);
 		}
 		
-		tw = (TextView) parent.findViewById (R.id.lessons_available);
 		if (dd.lessonsAvailable > 1) {
 			s = String.format (getString (R.string.fmt_lessons), dd.lessonsAvailable);
-			tw.setText (Html.fromHtml (s));
-			tw.setMovementMethod (LinkMovementMethod.getInstance ());
-		} else if (dd.lessonsAvailable == 1) {
-			tw.setText (Html.fromHtml (getString (R.string.fmt_one_lesson)));
-			tw.setMovementMethod (LinkMovementMethod.getInstance ());
-		}		
-		tw.setVisibility (dd.lessonsAvailable > 0 ? View.VISIBLE : View.GONE);
+			setText (R.id.lessons_available, s);
+		} else if (dd.lessonsAvailable == 1)
+			setText (R.id.lessons_available, getString (R.string.fmt_one_lesson));
+		
+		setVisibility (R.id.lay_lessons_available,
+					   dd.lessonsAvailable > 0 ? View.VISIBLE : View.GONE);
 		
 		setText (R.id.next_hour_val, Integer.toString (dd.reviewsAvailableNextHour));
 		setText (R.id.next_day_val, Integer.toString (dd.reviewsAvailableNextDay));
