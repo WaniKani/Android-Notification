@@ -31,8 +31,19 @@ public class Vocabulary extends Item {
 		}
 	}
 
-	public final static Factory FACTORY = new Factory ();
+	private static class ItemFactory implements Item.Factory<Item> {
+
+		public Vocabulary deserialize (JSONObject obj)
+			throws JSONException
+		{
+			return new Vocabulary (obj);
+		}
+	}
+
+	public final static Item.Factory<Vocabulary> FACTORY = new Factory ();
 	
+	public final static Item.Factory<Item> ITEM_FACTORY = new ItemFactory ();
+
 	public String kana;
 	
 	public Vocabulary (JSONObject obj)

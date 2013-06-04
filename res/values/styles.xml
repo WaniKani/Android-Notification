@@ -117,8 +117,13 @@
         <item name="android:listSelector">@xml/items_level_selector</item>
     </style>     
     
+    <style parent="AppTheme" name="ItemButton">
+        <item name="android:layout_width">@dimen/m_rythm</item>
+        <item name="android:layout_height">@dimen/m_rythm</item>        
+    </style>
+    
     <style parent="AppTheme" name="LevelRow">
-        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_width">fill_parent</item>
         <item name="android:layout_height">@dimen/m_rythm</item>
         <item name="android:layout_gravity">center</item>
         <item name="android:background">@xml/items_level_selector</item>
@@ -201,5 +206,20 @@
     <style name="ItemImportantReading" parent="ItemReading">
         <item name="android:textStyle">bold</item>                
     </style>
-
+    
+    <style name="Popup" parent="AppTheme">
+        <item name="android:background">@drawable/menu_background</item>
+    </style>
+    
+    <style name="MenuTitle" parent="AppTheme">
+		<item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
+		<item name="android:background">#fff</item>
+        <item name="android:textStyle">italic</item>
+        <item name="android:padding">@dimen/m_gap</item>                
+    </style>
+    
+    <style name="MenuPane">
+		<item name="android:background">#ccc</item>
+        <item name="android:padding">@dimen/m_gap</item>                
+	</style>
 </resources>

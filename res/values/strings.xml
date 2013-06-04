@@ -60,4 +60,16 @@
     <string name="tag_dashboard">Dashboard</string>
     <string name="tag_items">Items</string>
     
+    <string name="tag_filter_by">Show</string>
+    <string name="tag_filter_all">all</string>
+    <string name="tag_filter_missing">apprentice</string>
+    <string name="tag_filter_unlocks">recent unlocks</string>
+    <string name="tag_filter_critical">critical items</string>
+    
+    <string name="tag_sort_by">Sort by</string>
+    <string name="tag_sort_type">type</string>
+    <string name="tag_sort_srs">SRS</string>
+    <string name="tag_sort_errors">errors</string>
+    <string name="tag_sort_time">unlock date</string>
+    
 </resources>

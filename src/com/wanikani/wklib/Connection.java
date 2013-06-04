@@ -169,7 +169,7 @@ public class Connection {
 			if (conn != null)
 				conn.disconnect ();
 		}
-}
+	}
 
 
 	public ItemLibrary<Kanji> getKanji (int level)
@@ -200,6 +200,35 @@ public class Connection {
 		} catch (JSONException e) {
 			throw new ParseException ();
 		}
+	}
+	
+	public ItemLibrary<Item> getRecentUnlocks (int count)
+		throws IOException
+	{
+		Response res;
+		
+		try {
+			res = call ("recent-unlocks", true, Integer.toString (count));
+
+			return new ItemLibrary<Item> (Item.FACTORY, res.infoAsArray);
+			
+		} catch (JSONException e) {
+			throw new ParseException ();
+		}		
+	}
+
+	public ItemLibrary<Item> getCriticalItems ()
+			throws IOException
+	{
+		Response res;
+			
+		try {
+			res = call ("critical-items", true);
+				return new ItemLibrary<Item> (Item.FACTORY, res.infoAsArray);
+			
+		} catch (JSONException e) {
+			throw new ParseException ();
+		}		
 	}
 
 	public ItemLibrary<Item> getItems (int level)

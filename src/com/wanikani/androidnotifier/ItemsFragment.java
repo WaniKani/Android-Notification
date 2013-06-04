@@ -1,26 +1,29 @@
 package com.wanikani.androidnotifier;
 
-import java.io.IOException;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.EnumMap;
-import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
+import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
-import android.os.AsyncTask;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
+import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 
 import com.wanikani.wklib.Connection;
@@ -50,169 +53,14 @@ import com.wanikani.wklib.Vocabulary;
 
 public class ItemsFragment extends Fragment implements Tab {
 
-	protected class SpinManager {
-		
-		Level level;
-		
-		boolean spinning;
-		
-		public void setSelected (Level level, boolean spinning)
-		{
-			if (this.level != null && this.level != level)
-				spin (this.level, false, false);
-			
-			this.level = level;
-			this.spinning = spinning;
-			spin (level, true, spinning);
-		}
-
-		public void levelAdded (int position, View row)
-		{
-			if (level != null && level.position == position)
-				spin (row, true, spinning);
-			else
-				spin (row, false, false);
-		}
-		
-		private void spin (Level level, boolean select, boolean spin)
-		{
-			View row;
-			
-			row = lview.getChildAt (level.position);
-			if (row != null) 	/* May happen if the level is not visible */
-				spin (row, select, spin);
-		}
-
-		private void spin (View row, boolean select, boolean spin)
-		{
-			TextView tw;
-			View sw;
-			
-			tw = (TextView) row.findViewById (R.id.tgr_level);
-			sw = row.findViewById (R.id.pb_level);
-			if (spin) {
-				tw.setVisibility (View.GONE);
-				sw.setVisibility (View.VISIBLE);
-			} else {
-				tw.setVisibility (View.VISIBLE);
-				sw.setVisibility (View.GONE);
-			}
-			if (select) {
-				tw.setTextColor (selectedColor);
-				tw.setTypeface (null, Typeface.BOLD);
-			} else {
-				tw.setTextColor (unselectedColor);
-				tw.setTypeface (null, Typeface.NORMAL);			
-			}
-		}
-		
-	}
 	
-	private class LoadLevelTask extends AsyncTask<Void, ItemLibrary<Item>, Boolean > {
-		
-		Connection conn;
-		
-		Level level;
-		
-		public LoadLevelTask (Connection conn, Level level)
-		{
-			this.conn = conn;
-			this.level = level;
-
-		}
-		
-		@Override
-		protected void onPreExecute ()
-		{
-			spinm.setSelected (level, true);
-		}
-		
-		@Override
-		protected Boolean doInBackground (Void... v)
-		{
-			ItemLibrary<Item> lib;
-			List<Radical> imgrad;
-			Radical rad;
-			Iterator<Item> i;
-			
-			boolean ok;
-			
-			ok = true;
-			lib = new ItemLibrary<Item> ();
-			imgrad = new Vector<Radical> ();
-			try {
-				lib.addAll (conn.getRadicals (level.level));
-				i = lib.list.iterator ();
-				while (i.hasNext ()) {
-					rad = (Radical) i.next ();
-					if (rad.character == null) {
-						imgrad.add (rad);
-						i.remove ();
-					}
-				}
-				publishProgress (new ItemLibrary<Item> (lib));
-			} catch (IOException e) {
-				ok = false;
-			}
-			
-			for (Radical r : imgrad) {
-				try {
-					conn.loadImage (r);
-				} catch (IOException e) {
-					r.character = "?";
-					ok = false;
-				}				
-				publishProgress (new ItemLibrary<Item> (r));
-			}
-			
-			lib = new ItemLibrary<Item> ();
-			try {
-				lib.addAll (conn.getKanji (level.level));
-				publishProgress (lib);
-			} catch (IOException e) {
-				ok = false;
-			}
-			
-			lib = new ItemLibrary<Item> ();
-			try {
-				lib.addAll (conn.getVocabulary (level.level));
-				publishProgress (lib);
-			} catch (IOException e) {
-				ok = false;
-			}			
-
-			return ok;
-		}	
-		
-		@Override
-		protected void onProgressUpdate (ItemLibrary<Item>... lib)
-		{
-			if (llt == this) {
-				iad.addAll (lib [0].list);
-				iad.notifyDataSetChanged ();
-			}
-		}
-						
-		@Override
-		protected void onPostExecute (Boolean ok)
-		{
-			if (llt == this) {
-				taskCompleted (ok);
-				spinm.setSelected (level, false);
-			}
-		}
-	}
-
-	static class Level {
+	private static class Level {
 		
 		public int level;
 		
-		public int position;
-		
-		public Level (int position, int level)
+		public Level (int level)
 		{
 			this.level = level;
-			this.position = position;
 		}
 		
 	}
@@ -221,7 +69,10 @@ public class ItemsFragment extends Fragment implements Tab {
 	
 		public void onItemClick (AdapterView<?> adapter, View view, int position, long id)
 		{
-			select ((Level) adapter.getItemAtPosition (position));
+			Level l;
+			
+			l = (Level) adapter.getItemAtPosition (position);
+			setLevelFilter (l.level);
 		}
 		
 	}
@@ -275,7 +126,7 @@ public class ItemsFragment extends Fragment implements Tab {
 			view = (TextView) row.findViewById (R.id.tgr_level);
 			view.setText (Integer.toString (getItem (position).level));
 			
-			spinm.levelAdded (position, row);
+			levelAdded (getItem (position).level, row);
 			
 			return row;
 		}		
@@ -285,14 +136,24 @@ public class ItemsFragment extends Fragment implements Tab {
 
 		LayoutInflater inflater;
 
-		Vector<Item> items;		
+		List<Item> items;
+		
+		Comparator<Item> cmp;
 
-		public ItemListAdapter ()
+		public ItemListAdapter (Comparator<Item> cmp)
 		{
+			this.cmp = cmp;
+			
 			items = new Vector<Item> ();
-			inflater = main.getLayoutInflater ();
+			inflater = main.getLayoutInflater ();			
 		}		
 
+		public void setComparator (Comparator<Item> cmp)
+		{
+			this.cmp = cmp;
+			invalidate ();
+		}
+		
 		@Override
 		public int getCount ()
 		{
@@ -302,7 +163,7 @@ public class ItemsFragment extends Fragment implements Tab {
 		@Override
 		public Item getItem (int position)
 		{
-			return items.elementAt (position);
+			return items.get (position);
 		}
 		
 		@Override
@@ -314,11 +175,19 @@ public class ItemsFragment extends Fragment implements Tab {
 		public void clear ()
 		{
 			items.clear ();
+			items.clear ();
 		}
 		
 		public void addAll (List<Item> newItems)
 		{
 			items.addAll (newItems);
+			invalidate ();
+		}
+		
+		public void invalidate ()
+		{		
+			Collections.sort (items, cmp);
+			notifyDataSetChanged ();
 		}
 		
 		protected void fillRadical (View row, Radical radical)
@@ -359,8 +228,8 @@ public class ItemsFragment extends Fragment implements Tab {
 				break;
 
 			case KUNYOMI:
-				otw.setTextColor (importantColor);
-				ktw.setTextColor (normalColor);
+				otw.setTextColor (normalColor);
+				ktw.setTextColor (importantColor);
 				break;
 			}
 
@@ -415,12 +284,129 @@ public class ItemsFragment extends Fragment implements Tab {
 			return row;
 		}		
 	}
+	
+	class ItemClickListener implements AdapterView.OnItemClickListener {
+		
+		public void onItemClick (AdapterView<?> adapter, View view, int position, long id)
+		{
+			Intent intent;
+			String url;
+			Item i;
+			
+			i = (Item) adapter.getItemAtPosition (position);
+			url = null;
+			switch (i.type) {
+			case RADICAL:
+				url = "http://www.wanikani.com/vocabulary/" + i.character;
+				break;
+				
+			case KANJI:
+				url = "http://www.wanikani.com/kanji/" + i.character;
+				break;
+				
+			case VOCABULARY:
+				url = "http://www.wanikani.com/vocabulary/" + i.character;
+				break;
+			}
+			
+			if (url == null)
+				return;	/* That's strange for sure */
+			
+			intent = new Intent (Intent.ACTION_VIEW);
+			intent.setData (Uri.parse (url));
+			
+			startActivity (intent);
+		}
+		
+	}
+
+	class MenuPopupListener implements View.OnClickListener {
+		
+		public void onClick (View view)
+		{
+			boolean filterV, sortV;
+			View filterW, sortW;
+			
+			filterW = parent.findViewById (R.id.menu_filter);
+			filterV = filterW.getVisibility () == View.VISIBLE;
+
+			sortW = parent.findViewById (R.id.menu_order);			
+			sortV = sortW.getVisibility () == View.VISIBLE;
+			
+			filterW.setVisibility (View.GONE);
+			sortW.setVisibility (View.GONE);
+			
+			switch (view.getId ()) {
+			case R.id.btn_item_filter:
+				if (!filterV)
+					filterW.setVisibility (View.VISIBLE);
+				break;
+
+			case R.id.btn_item_sort:
+				if (!sortV)
+					sortW.setVisibility (View.VISIBLE);
+				break;
+				
+			}
+		}
+	}
+	
+	class RadioGroupListener implements Button.OnClickListener {
+		
+		public void onClick (View view)
+		{
+			View filterW, sortW;
+			
+			filterW = parent.findViewById (R.id.menu_filter);
+			sortW = parent.findViewById (R.id.menu_order);			
+			
+			filterW.setVisibility (View.GONE);
+			sortW.setVisibility (View.GONE);
+			
+			switch (view.getId ()) {
+			case R.id.btn_filter_all:
+				setLevelFilter (currentLevel);
+				break;
+
+			case R.id.btn_filter_missing:
+				setLevelFilter (currentLevel, true);
+				break;
+				
+			case R.id.btn_filter_critical:
+				setCriticalFilter ();
+				break;
+
+			case R.id.btn_filter_unlocks:
+				setUnlockFilter ();
+				break;
+
+			case R.id.btn_sort_errors:
+				iad.setComparator (Item.SortByErrors.INSTANCE);
+				break;
+
+			case R.id.btn_sort_srs:
+				iad.setComparator (Item.SortBySRS.INSTANCE);
+				break;
+				
+			case R.id.btn_sort_time:
+				iad.setComparator (Item.SortByTime.INSTANCE);
+				break;
+
+			case R.id.btn_sort_type:
+				iad.setComparator (Item.SortByType.INSTANCE);
+			}			
+		}
+	}
 
 	MainActivity main;
 
 	View parent;
 	
 	LevelListAdapter lad;
+	
+	int currentLevel;
+	
+	boolean spinning;
 	
 	ListView lview;
 	
@@ -430,16 +416,30 @@ public class ItemsFragment extends Fragment implements Tab {
 	
 	LevelClickListener lcl;
 	
-	Hashtable<Integer, List<Item>> ht;
+	ItemClickListener icl;
+	
+	MenuPopupListener mpl;
+	
+	RadioGroupListener rgl;
+	
+	ItemLibrary<Item> critical;
+
+	ItemLibrary<Item> unlocks;
 	
 	EnumMap<SRSLevel, Drawable> srsht;
+
+	LevelFilter levelf;	
+
+	CriticalFilter criticalf;	
 	
-	LoadLevelTask llt;
+	UnlockFilter unlockf;
 	
-	SpinManager spinm;
-	
+	private Filter currentFilter;
+
 	int levels;
 	
+	boolean apprentice;
+
 	int normalColor;
 	
 	int importantColor;
@@ -447,7 +447,7 @@ public class ItemsFragment extends Fragment implements Tab {
 	int selectedColor;
 	
 	int unselectedColor;
-		
+	
 	public void setMainActivity (MainActivity main)
 	{
 		this.main = main;
@@ -461,11 +461,18 @@ public class ItemsFragment extends Fragment implements Tab {
 		super.onCreate (bundle);
 
 		setRetainInstance (true);
-		
-		ht = new Hashtable<Integer, List<Item>> ();
-		spinm = new SpinManager ();
 
+		currentLevel = -1;
+		levelf = new LevelFilter (this);
+		criticalf = new CriticalFilter (this);
+		unlockf = new UnlockFilter (this);
+		currentFilter = null;
+		
 		lcl = new LevelClickListener ();
+		icl = new ItemClickListener ();
+		
+		mpl = new MenuPopupListener ();
+		rgl = new RadioGroupListener ();
 
 		res = getResources ();
 		srsht = new EnumMap<SRSLevel, Drawable> (SRSLevel.class);
@@ -485,6 +492,10 @@ public class ItemsFragment extends Fragment implements Tab {
     public View onCreateView (LayoutInflater inflater, ViewGroup container,
             				  Bundle bundle) 
     {
+		RadioGroup rg;
+		ImageButton btn;
+		int i;
+		
 		super.onCreateView (inflater, container, bundle);
 		
 		parent = inflater.inflate(R.layout.items, container, false);
@@ -494,9 +505,25 @@ public class ItemsFragment extends Fragment implements Tab {
 		lview.setAdapter (lad);
 		lview.setOnItemClickListener (lcl);
 
-		iad = new ItemListAdapter ();
+		iad = new ItemListAdapter (Item.SortByType.INSTANCE);
 		iview = (ListView) parent.findViewById (R.id.lv_items);
 		iview.setAdapter (iad);
+		iview.setOnItemClickListener (icl);
+		
+		btn = (ImageButton) parent.findViewById (R.id.btn_item_filter);
+		btn.setOnClickListener (mpl);
+		btn = (ImageButton) parent.findViewById (R.id.btn_item_sort);
+		btn.setOnClickListener (mpl);
+		
+		rg = (RadioGroup) parent.findViewById (R.id.rg_filter);
+		for (i = 0; i < rg.getChildCount (); i++)
+			rg.getChildAt (i).setOnClickListener (rgl);
+		rg.check (R.id.btn_filter_all);
+		
+		rg = (RadioGroup) parent.findViewById (R.id.rg_order);
+		for (i = 0; i < rg.getChildCount (); i++)
+			rg.getChildAt (i).setOnClickListener (rgl);
+		rg.check (R.id.btn_sort_type);
 		
     	return parent;
     }
@@ -513,25 +540,25 @@ public class ItemsFragment extends Fragment implements Tab {
 	{
 		List<Level> l;
 		Level level;
-		int i, j, clevel;
+		int i, clevel;
+		
+		/* This must be done as soon as possible */
+		levels = dd.level;
 		
 		if (!isResumed ())
 			return;
 		
-		clevel = spinm.level != null ? spinm.level.level : dd.level;
-		spinm = new SpinManager ();
+		clevel = currentLevel > 0 ? currentLevel : dd.level;
 		
 		l = new Vector<Level> (dd.level);		
-		for (i = dd.level, j = 0; i > 0; i--) {
-			level = new Level (j++, i);
-			if (i == clevel)
-				spinm.setSelected (level, false);
+		for (i = dd.level; i > 0; i--) {
+			level = new Level (i);
 			l.add (level);
 		}
 		lad.replace (l);
 		lad.notifyDataSetChanged ();
 		
-		select (clevel);
+		setLevelFilter (clevel);
 	}
 	
 	@Override
@@ -539,40 +566,75 @@ public class ItemsFragment extends Fragment implements Tab {
 	{
 		super.onDetach ();
 		
-		llt = null;
+		currentFilter = null;
+		
+		levelf.stopTask ();
+		criticalf.stopTask ();
+		unlockf.stopTask ();
+}
+	
+	void setData (List<Item> list, boolean ok)
+	{
+		iad.clear ();
+		iad.addAll (list);
+		iad.notifyDataSetChanged ();
+	}
+
+	private void setLevelFilter (int level)
+	{
+		if (currentFilter != levelf)
+			apprentice = false;
+		setLevelFilter (level, apprentice);
+	}
+
+	private void setLevelFilter (int level, boolean apprentice)
+	{
+		RadioGroup fg;
+		
+		fg = (RadioGroup) parent.findViewById (R.id.rg_filter);
+		fg.check (apprentice ? R.id.btn_filter_missing : R.id.btn_filter_all); 
+		
+		this.apprentice = apprentice;
+		currentFilter = levelf;
+		levelf.select (level, apprentice);
 	}
 	
-	protected void select (int level)
+	private void setCriticalFilter ()
 	{
-		select (new Level (lad.getCount () - level, level));
+		RadioButton btn;
+		
+		btn = (RadioButton) parent.findViewById (R.id.btn_filter_critical); 
+		btn.setSelected (true);
+
+		currentFilter = criticalf;
+		criticalf.select ();
+	}
+
+	private void setUnlockFilter ()
+	{
+		RadioButton btn;
+		
+		btn = (RadioButton) parent.findViewById (R.id.btn_filter_unlocks); 
+		btn.setSelected (true);
+
+		currentFilter = unlockf;
+		unlockf.select (unlockf);
+	}
+
+	void addData (Filter sfilter, List<Item> list)
+	{
+		if (sfilter != currentFilter)
+			return;
+		iad.addAll (list);
+		iad.notifyDataSetChanged ();
+	}
+
+	void clearData ()
+	{
+		iad.clear ();
+		iad.notifyDataSetChanged ();
 	}
 	
-	protected void select (Level level)
-	{
-		List<Item> ans;
-		
-		ans = ht.get (level.level);
-		if (ans != null) {
-			iad.clear ();
-			iad.addAll (ans);
-			iad.notifyDataSetChanged ();
-			spinm.setSelected (level, false);
-			llt = null;
-		} else {
-			iad.clear ();
-			iad.notifyDataSetChanged ();
-		
-			llt = new LoadLevelTask (main.getConnection (), level);
-			llt.execute ();
-		}
-	}
-	
-	protected void taskCompleted (boolean ok)
-	{
-		if (ok)
-			ht.put (spinm.level.level, new Vector<Item> (iad.items));
-	}
-		
 	/**
 	 * Show or hide the spinner.
 	 * @param enable true if should be shown
@@ -582,10 +644,91 @@ public class ItemsFragment extends Fragment implements Tab {
 		/* empty */
 	}
 	
+	void selectOtherFilter (Filter filter, boolean selected, boolean spinning)
+	{
+		View filterPB, filterBtn, levels;
+		
+		if (filter != currentFilter)
+			return;
+		
+		filterBtn = parent.findViewById (R.id.btn_item_filter);
+		filterPB = parent.findViewById (R.id.pb_item_filter);
+		levels = parent.findViewById (R.id.lv_levels);
+		
+		if (spinning) {
+			filterBtn.setVisibility (View.GONE);
+			filterPB.setVisibility (View.VISIBLE);
+		} else {
+			filterBtn.setVisibility (View.VISIBLE);
+			filterPB.setVisibility (View.GONE);			
+		}
+		
+		levels.setVisibility (selected ? View.GONE : View.VISIBLE);
+	}
+	
+	void selectLevel (Filter filter, int level, boolean spinning)
+	{
+		if (filter != currentFilter)
+			return;
+		
+		if (currentLevel != level && currentLevel > 0)
+			spin (filter, currentLevel, false, false);
+		
+		currentLevel = level;
+		this.spinning = spinning;
+		
+		spin (filter, level, true, spinning);
+	}
+
+	public void levelAdded (int level, View row)
+	{
+		if (currentLevel == level)
+			spin (currentFilter, row, true, spinning);
+		else
+			spin (currentFilter, row, false, false);
+	}
+	
+	protected void spin (Filter filter, int level, boolean select, boolean spin)
+	{
+		View row;
+		
+		row = lview.getChildAt (levels - level);
+		if (row != null) 	/* May happen if the level is not visible */
+			spin (filter, row, select, spin);
+	}
+
+	private void spin (Filter filter, View row, boolean select, boolean spin)
+	{
+		TextView tw;
+		View sw;
+		
+		selectOtherFilter (filter, false, false);
+		
+		tw = (TextView) row.findViewById (R.id.tgr_level);
+		sw = row.findViewById (R.id.pb_level);
+		if (spin) {
+			tw.setVisibility (View.GONE);
+			sw.setVisibility (View.VISIBLE);
+		} else {
+			tw.setVisibility (View.VISIBLE);
+			sw.setVisibility (View.GONE);
+		}
+		if (select) {
+			tw.setTextColor (selectedColor);
+			tw.setTypeface (null, Typeface.BOLD);
+		} else {
+			tw.setTextColor (unselectedColor);
+			tw.setTypeface (null, Typeface.NORMAL);			
+		}
+	}
+
+	Connection getConnection ()
+	{
+		return main.getConnection ();				
+	}
+	
 	public int getName ()
 	{
 		return R.string.tag_items;
 	}
-	
-	
 }

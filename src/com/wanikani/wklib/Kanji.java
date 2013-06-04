@@ -22,7 +22,7 @@ import org.json.JSONObject;
 
 public class Kanji extends Item {
 
-	private static class Factory implements Item.Factory<Kanji> {
+	static class Factory implements Item.Factory<Kanji> {
 
 		public Kanji deserialize (JSONObject obj)
 			throws JSONException
@@ -31,7 +31,18 @@ public class Kanji extends Item {
 		}
 	}
 	
-	public static final Factory FACTORY = new Factory ();
+	static class ItemFactory implements Item.Factory<Item> {
+
+		public Item deserialize (JSONObject obj)
+			throws JSONException
+		{
+			return new Kanji (obj);
+		}
+	}
+
+	public static final Item.Factory<Kanji> FACTORY = new Factory ();
+
+	public static final Item.Factory<Item> ITEM_FACTORY = new ItemFactory ();
 
 	public static enum Reading {
 		
