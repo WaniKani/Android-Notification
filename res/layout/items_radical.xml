@@ -29,10 +29,18 @@
     
     <RelativeLayout style="@style/ItemDescription" >
 
+        <LinearLayout
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:orientation="vertical">
+        <TextView
+            android:id="@+id/it_info"
+            style="@style/ItemInfo"/>
         <TextView
             android:id="@+id/it_meaning"
-            style="@style/ItemMeaning"
-            android:layout_alignParentBottom="true" />
+            style="@style/ItemMeaning"/>
+        </LinearLayout>
     </RelativeLayout>
 
 </LinearLayout>

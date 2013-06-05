@@ -2,6 +2,7 @@ package com.wanikani.androidnotifier;
 
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Vector;
@@ -53,6 +54,61 @@ import com.wanikani.wklib.Vocabulary;
 
 public class ItemsFragment extends Fragment implements Tab {
 
+	enum ItemInfo {
+		AGE {
+			public String getInfo (Resources res, Item i)
+			{
+				Date unlock;
+				long now, age;
+
+				unlock = i.getUnlockedDate ();
+				if (unlock == null)
+					return ""; /* Not unlocked, or not available */
+				
+				now = System.currentTimeMillis ();
+				age = now - unlock.getTime ();
+
+				/* Express age in minutes */
+				age /= 60 * 1000;
+				if (age < 60)
+					return res.getString (R.string.fmt_ii_less_than_one_hour);
+				
+				/* Express age in hours */
+				age = Math.round (((float) age) / 60);
+				if (age == 1) 
+					return res.getString (R.string.fmt_ii_one_hour);
+				if (age < 24) 
+					return String.format (res.getString (R.string.fmt_ii_hours), age);
+				
+				/* Express age in days */
+				age = Math.round (((float) age) / 24);
+				if (age == 1) 
+					return res.getString (R.string.fmt_ii_one_day);
+
+				return String.format (res.getString (R.string.fmt_ii_days), age);
+			}
+		},
+		
+		ERRORS {
+			public String getInfo (Resources res, Item i)
+			{
+				int pmean, pread;
+				
+				if (i.stats == null)
+					return String.format (res.getString (R.string.fmt_ii_percent, i.percentage));
+				
+				pmean = i.stats.meaning.correct * 100 / 
+						(i.stats.meaning.correct + i.stats.meaning.incorrect);
+				pread = i.stats.reading.correct * 100 / 
+						(i.stats.reading.correct + i.stats.reading.incorrect);
+				
+				return String.format (res.getString (R.string.fmt_ii_percent_full, 
+													 i.percentage, pmean, pread));
+			}
+		};
+		
+		public abstract String getInfo (Resources res, Item i);		
+	}
 	
 	private static class Level {
 		
@@ -139,18 +195,23 @@ public class ItemsFragment extends Fragment implements Tab {
 		List<Item> items;
 		
 		Comparator<Item> cmp;
+		
+		ItemInfo iinfo;
 
-		public ItemListAdapter (Comparator<Item> cmp)
+		public ItemListAdapter (Comparator<Item> cmp, ItemInfo iinfo)
 		{
 			this.cmp = cmp;
+			this.iinfo = iinfo;
 			
 			items = new Vector<Item> ();
 			inflater = main.getLayoutInflater ();			
 		}		
 
-		public void setComparator (Comparator<Item> cmp)
+		public void setComparator (Comparator<Item> cmp, ItemInfo iinfo)
 		{
 			this.cmp = cmp;
+			this.iinfo = iinfo;
+
 			invalidate ();
 		}
 		
@@ -283,7 +344,10 @@ public class ItemsFragment extends Fragment implements Tab {
 				iw.setImageDrawable (srsht.get (item.stats.srs));
 				iw.setVisibility (View.VISIBLE);
 			} else
-				iw.setVisibility (View.GONE);				
+				iw.setVisibility (View.GONE);
+			
+			tw = (TextView) row.findViewById (R.id.it_info);
+			tw.setText (iinfo.getInfo (getResources (), item));
 			
 			tw = (TextView) row.findViewById (R.id.it_meaning);
 			tw.setText (item.meaning);
@@ -388,19 +452,19 @@ public class ItemsFragment extends Fragment implements Tab {
 				break;
 
 			case R.id.btn_sort_errors:
-				iad.setComparator (Item.SortByErrors.INSTANCE);
+				iad.setComparator (Item.SortByErrors.INSTANCE, ItemInfo.ERRORS);
 				break;
 
 			case R.id.btn_sort_srs:
-				iad.setComparator (Item.SortBySRS.INSTANCE);
+				iad.setComparator (Item.SortBySRS.INSTANCE, ItemInfo.AGE);
 				break;
 				
 			case R.id.btn_sort_time:
-				iad.setComparator (Item.SortByTime.INSTANCE);
+				iad.setComparator (Item.SortByTime.INSTANCE, ItemInfo.AGE);
 				break;
 
 			case R.id.btn_sort_type:
-				iad.setComparator (Item.SortByType.INSTANCE);
+				iad.setComparator (Item.SortByType.INSTANCE, ItemInfo.AGE);
 			}			
 		}
 	}
@@ -512,7 +576,7 @@ public class ItemsFragment extends Fragment implements Tab {
 		lview.setAdapter (lad);
 		lview.setOnItemClickListener (lcl);
 
-		iad = new ItemListAdapter (Item.SortByType.INSTANCE);
+		iad = new ItemListAdapter (Item.SortByType.INSTANCE, ItemInfo.AGE);
 		iview = (ListView) parent.findViewById (R.id.lv_items);
 		iview.setAdapter (iad);
 		iview.setOnItemClickListener (icl);

@@ -74,4 +74,13 @@
     <string name="tag_sort_errors">errors</string>
     <string name="tag_sort_time">unlock date</string>
     
+    <string name="fmt_ii_less_than_one_hour">&lt; 1 hour ago</string>
+    <string name="fmt_ii_one_hour">1 hour ago</string>
+    <string name="fmt_ii_hours">%d hours ago</string>
+    <string name="fmt_ii_one_day">1 day ago</string>
+    <string name="fmt_ii_days">%d days</string>
+    
+    <string name="fmt_ii_percent">%d%% correct</string>
+    <string name="fmt_ii_percent_full">%1$d%% correct (%2$d%% meaning, %3$d%% reading)</string>
+    
 </resources>
