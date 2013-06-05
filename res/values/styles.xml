@@ -183,6 +183,7 @@
     
     <style parent="Item" name="VocabItem">
         <item name="android:background">@drawable/violet</item>
+        <item name="android:paddingRight">@dimen/m_half_gap</item>
     </style>
     
     <style parent="AppTheme" name="ItemDescription">
@@ -194,16 +195,20 @@
         <item name="android:layout_width">@dimen/m_srs_size</item>
         <item name="android:layout_height">@dimen/m_srs_size</item>
     </style>
+    
+    <style name="ItemStrings" parent="AppTheme">
+        <item name="android:maxLines">1</item>
+    </style>
         
-    <style name="ItemMeaning" parent="AppTheme">
+    <style name="ItemMeaning" parent="ItemStrings">
 		<item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
         <item name="android:textColor">#fff</item>
         <item name="android:textStyle">italic</item>                
-        <item name="android:layout_width">fill_parent</item>
+        <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
    </style>
     	
-    <style name="ItemReading" parent="AppTheme">
+    <style name="ItemReading" parent="ItemStrings">
 		<item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
         <item name="android:textColor">#fff</item>
         <item name="android:layout_width">wrap_content</item>

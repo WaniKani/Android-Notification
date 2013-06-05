@@ -399,4 +399,13 @@ public class DashboardFragment extends Fragment implements Tab {
 	{
 		/* empty */
 	}
+	
+	/**
+	 * This item has no scroll view.
+	 * @return false
+	 */
+	public boolean hasScroll ()
+	{
+		 return false;
+	}
 }

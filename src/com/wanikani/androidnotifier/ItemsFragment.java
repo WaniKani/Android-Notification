@@ -15,6 +15,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -27,9 +28,7 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 
-import com.wanikani.wklib.Connection;
 import com.wanikani.wklib.Item;
-import com.wanikani.wklib.ItemLibrary;
 import com.wanikani.wklib.Kanji;
 import com.wanikani.wklib.Radical;
 import com.wanikani.wklib.SRSLevel;
@@ -1168,5 +1167,14 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 			levelf.select (main.getConnection (), currentLevel, apprentice);
 		else if (currentFilter == unlockf)
 			unlockf.select (main.getConnection ());		
+	}
+
+	/**
+	 * This item has a scroll view.
+	 * @return true
+	 */
+	public boolean hasScroll ()
+	{
+		 return true;
 	}
 }

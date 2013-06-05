@@ -26,8 +26,10 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager;
+import android.util.AttributeSet;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.widget.TextView;
 
 import com.wanikani.wklib.AuthenticationException;
@@ -361,7 +363,7 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	Alarm alarm;
 	
 	/** The pager */
-	ViewPager pager;
+	LowPriorityViewPager pager;
 	
 	/** Pager adapter instance */
 	PagerAdapter pad;
@@ -680,7 +682,8 @@ public class MainActivity extends FragmentActivity implements Runnable {
 
 		if (this.dd == null) {
 			setContentView (R.layout.main);
-	        pager = (ViewPager) findViewById (R.id.pager);
+	        pager = (LowPriorityViewPager) findViewById (R.id.pager);
+	        pager.setMain (this);
 	        pager.setAdapter (pad);
 		}
 		
@@ -842,5 +845,14 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	public Connection getConnection ()
 	{
 		return conn;
+	}
+
+	/**
+	 * Tells whether if a given tab contains an horizontal scroll.
+	 * @return true if it does
+	 */
+	public boolean hasScroll (int item)
+	{
+		return pad.tabs.get (item).hasScroll (); 
 	}
 }

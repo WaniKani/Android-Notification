@@ -52,4 +52,11 @@ public interface Tab {
 	 * Called when caches need to be flushed.
 	 */
 	public void flush ();
+	
+	/**
+	 * Tells whether the tab contains an horizontal scroll.
+	 * If so, we disable the tab scrolling gesture.
+	 * @return true if it does
+	 */
+	 public boolean hasScroll ();
 }
