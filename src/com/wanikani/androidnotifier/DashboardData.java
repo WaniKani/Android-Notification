@@ -358,7 +358,7 @@ class DashboardData {
 	
 	/**
 	 * Tells whether some optional data is still missing.
-	 * @return true if a refresh of optional data is adivsable
+	 * @return true if a refresh of optional data is advisable
 	 */
 	public boolean isIncomplete ()
 	{

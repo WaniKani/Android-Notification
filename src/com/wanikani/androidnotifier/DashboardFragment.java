@@ -43,23 +43,28 @@ import android.widget.TextView;
  */
 
 /**
- * The main activity, which is displayed on application launch.  We
- * display a simple GUI that show some stats (need some work on here)
- * and (most important) allow the user change his/her preferences.
+ * The home fragment, which is displayed on application launch.  We
+ * display a simple GUI that show some stats, and allows to perform reviews
+ * or study lessons, if some is pending.
  * <p> 
- * The stats are refreshed automatically every 
- * {@link #T_INT_AUTOREFRESH} milliseconds.  This value should be kept quite
- * large to avoid needless traffic and power consumption; if the user
- * really needs to update the stats, we provide also a "refresh" menu.
+ * The stats are refreshed automatically, after a configurable timeout.  
+ * This value should be kept quite large to avoid needless traffic and 
+ * power consumption; if the user really needs to update the stats, we 
+ * provide also a "refresh" menu.
  */
 public class DashboardFragment extends Fragment implements Tab { 
 
 	/**
 	 * A listener that intercepts review button clicks.
-	 * It starts the {@link WebReviewActivity}.
+	 * It simply informs the main activity, which will choose what
+	 * to do next
 	 */
 	private class ReviewClickListener implements View.OnClickListener {
 		
+		/**
+		 * Called when the button is clicked.
+		 * @param v the button 
+		 */
 		@Override
 		public void onClick (View v)
 		{
@@ -67,8 +72,17 @@ public class DashboardFragment extends Fragment implements Tab {
 		}	
 	}
 
+	/**
+	 * A listener that intercepts lesson button clicks.
+	 * It simply informs the main activity, which will choose what
+	 * to do next
+	 */
 	private class LessonsClickListener implements View.OnClickListener {
 		
+		/**
+		 * Called when the button is clicked.
+		 * @param v the button 
+		 */
 		@Override
 		public void onClick (View v)
 		{
@@ -76,17 +90,28 @@ public class DashboardFragment extends Fragment implements Tab {
 		}	
 	}
 
+	/// The main activity
 	MainActivity main;
 	
+	/// The root view of the fragment
 	View parent;
 	
+	/// True if the spinner is (also virtually) visible
 	boolean spinning;
 	
+	/**
+	 * Constructor.
+	 * 	@param main the main activity
+	 */
 	public void setMainActivity (MainActivity main)
 	{
 		this.main = main;
 	}
 	
+	/**
+	 * Called at fragment creation. Since it keeps valuable information
+	 * we enable retain instance flag.
+	 */
 	@Override
 	public void onCreate (Bundle bundle)
 	{
@@ -112,8 +137,14 @@ public class DashboardFragment extends Fragment implements Tab {
 
 		view = parent.findViewById (R.id.btn_lessons_available);
 		view.setOnClickListener (new LessonsClickListener ());
-}
+	}
 	
+	/**
+	 * Builds the GUI.
+	 * @param inflater the inflater
+	 * @param container the parent view
+	 * @param savedInstance an (unused) bundle
+	 */
 	@Override
     public View onCreateView (LayoutInflater inflater, ViewGroup container,
             				  Bundle savedInstanceState) 
@@ -126,6 +157,10 @@ public class DashboardFragment extends Fragment implements Tab {
     	return parent;
     }
 	
+	/**
+	 * Called when the view is resumed. We refresh the GUI, and start
+	 * the spinner, if it should be visible.
+	 */
 	@Override
 	public void onResume ()
 	{
@@ -135,6 +170,11 @@ public class DashboardFragment extends Fragment implements Tab {
 		spin (spinning);
 	}
 		
+	/**
+	 * Convenience method that changes the contents of a text view.
+	 * @param id the text view id
+	 * @param text the text to be displayed
+	 */
 	protected void setText (int id, String text)
 	{
 		TextView view;
@@ -143,6 +183,11 @@ public class DashboardFragment extends Fragment implements Tab {
 		view.setText (text);
 	}
 	
+	/**
+	 * Convenience method that changes the contents of a text view.
+	 * @param id the text view id
+	 * @param sid the string ID to be retrieved from the resources
+	 */
 	protected void setText (int id, int sid)
 	{
 		TextView view;
@@ -151,6 +196,12 @@ public class DashboardFragment extends Fragment implements Tab {
 		view.setText (sid);
 	}
 	
+	/**
+	 * Convenience method that changes the visibility of a view.
+	 * @param id the view id
+	 * @param flag any of {@link View#VISIBLE}, 
+	 * {@link View#INVISIBLE} or {@link View#GONE}
+	 */
 	protected void setVisibility (int id, int flag)
 	{
 		View view;
@@ -160,8 +211,10 @@ public class DashboardFragment extends Fragment implements Tab {
 	}
 	
 	/**
-	 * Called by {@link RefreshTask} when asynchronous data 
-	 * retrieval is completed.
+	 * Called by @link MainActivity when asynchronous data
+	 * retrieval is completed. If we already have a view on which
+	 * to display it, we update the GUI. Otherwise we cache the info
+	 * and display it when the fragment is resumed.
 	 * @param dd the retrieved data
 	 */
 	public void refreshComplete (DashboardData dd)
@@ -179,8 +232,8 @@ public class DashboardFragment extends Fragment implements Tab {
 			iw.setImageBitmap (mask (dd.gravatar));
 
 		setText (R.id.tv_username, dd.username);
-		setText (R.id.tv_level, String.format (getString (R.string.fmt_level), dd.level));
-		setText (R.id.tv_title, String.format (getString (R.string.fmt_title), dd.title));
+		setText (R.id.tv_level, getString (R.string.fmt_level, dd.level));
+		setText (R.id.tv_title, getString (R.string.fmt_title, dd.title));
 		setText (R.id.reviews_val, Integer.toString (dd.reviewsAvailable));
 		setVisibility (R.id.tr_r_now, dd.reviewsAvailable > 0 ? View.VISIBLE : View.GONE);
 		setText (R.id.tv_next_review, R.string.tag_next_review);
@@ -197,7 +250,7 @@ public class DashboardFragment extends Fragment implements Tab {
 		}
 		
 		if (dd.lessonsAvailable > 1) {
-			s = String.format (getString (R.string.fmt_lessons), dd.lessonsAvailable);
+			s = getString (R.string.fmt_lessons, dd.lessonsAvailable);
 			setText (R.id.lessons_available, s);
 		} else if (dd.lessonsAvailable == 1)
 			setText (R.id.lessons_available, getString (R.string.fmt_one_lesson));
@@ -267,23 +320,23 @@ public class DashboardFragment extends Fragment implements Tab {
 		
 		x = Math.round (days);
 		if (x > 1)
-			return String.format (res.getString (R.string.fmt_X_days), x);
+			return res.getString (R.string.fmt_X_days, x);
 		else if (x == 1)
-			return String.format (res.getString (R.string.fmt_one_day));
+			return res.getString (R.string.fmt_one_day);
 
 		x = Math.round (hours);
 		if (x > 1)
-			return String.format (res.getString (R.string.fmt_X_hours), x);
+			return res.getString (R.string.fmt_X_hours, x);
 		else if (x == 1 && hours >= 1)
-			return String.format (res.getString (R.string.fmt_one_hour));
+			return res.getString (R.string.fmt_one_hour);
 
 		x = Math.round (minutes);
 		if (x > 1)
-			return String.format (res.getString (R.string.fmt_X_minutes), x);
+			return res.getString (R.string.fmt_X_minutes, x);
 		else if (x == 1)
-			return String.format (res.getString (R.string.fmt_one_minute));
+			return res.getString (R.string.fmt_one_minute);
 		
-		return String.format (res.getString (R.string.fmt_seconds));	
+		return res.getString (R.string.fmt_seconds);	
 	}
 
 	/**
@@ -329,9 +382,21 @@ public class DashboardFragment extends Fragment implements Tab {
 		}
 	}
 	
+	/**
+	 * Returns the tab name ID.
+	 * @param the <code>tag_dashboard</code> ID
+	 */
 	public int getName ()
 	{
 		return R.string.tag_dashboard;
 	}
-}
 	
+	/**
+	 * Does nothing. Needed just to implement the @link Tab interface, but
+	 * we don't keep any cache.
+	 */
+	public void flush ()
+	{
+		/* empty */
+	}
+}

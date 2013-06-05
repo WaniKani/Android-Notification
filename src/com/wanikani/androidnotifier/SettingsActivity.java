@@ -136,9 +136,9 @@ public class SettingsActivity
 			if (timeout <= 0)
 				timeout = 1;
 			if (timeout > 1)
-				s = String.format (res.getString (R.string.pref_refresh_descr), timeout);
+				s = res.getString (R.string.pref_refresh_descr, timeout);
 			else
-				s = String.format (res.getString (R.string.pref_refresh_one_min_descr));
+				s = res.getString (R.string.pref_refresh_one_min_descr);
 			pref.setSummary (s);
 		}
 		

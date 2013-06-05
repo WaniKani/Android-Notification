@@ -14,27 +14,71 @@ import com.wanikani.wklib.ItemLibrary;
 import com.wanikani.wklib.Radical;
 import com.wanikani.wklib.SRSLevel;
 
+/* 
+ *  Copyright (c) 2013 Alberto Cuda
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/**
+ * A filter that shows all the items belonging to a specific level.
+ * This is done through the "Radicals/Kanji/Vocab" WK API, 
+ * so all the information should be available.
+ * Items are published following these steps:
+ * <ul>
+ * <li>One single chunk, containing all the radicals that have an unicode character
+ * <li>Each radical that has no unicode (one at a time, as they are "resolved")
+ * <li>One single chunk, containing all the kanji
+ * <li>One single chunk, containing all the vocab words
+ * </ul>
+ * Caching is enabled, so if two consecutive requests are issued, the second
+ * one will be almost immediate.
+ */
 public class LevelFilter implements Filter {
 	
+	/**
+	 * The asynchronous task that performs the real job. 
+	 */
 	private class Task extends AsyncTask<Void, ItemLibrary<Item>, Boolean > {
 		
+		/// The connection
 		Connection conn;
-		
+
+		/// The level to fetch
 		int level;
 		
+		/// List of all the items collected so far
 		List<Item> allItems;
 		
-		boolean apprentice;
-		
-		public Task (Connection conn, int level, boolean apprentice)
+		/**
+		 * Constructor.
+		 * @param conn WKLib connection
+		 * @param level the level to fetch
+		 */
+		public Task (Connection conn, int level)
 		{
 			this.conn = conn;
 			this.level = level;
-			this.apprentice = apprentice;
 			
 			allItems = new Vector<Item> ();
 		}
 		
+		/**
+		 * The method that performs the actual work. We invoke the WK api,
+		 * and push each item as soon as possible. 
+		 * @param true if everything goes smoothly
+		 */
 		@Override
 		protected Boolean doInBackground (Void... v)
 		{
@@ -91,29 +135,66 @@ public class LevelFilter implements Filter {
 			return ok;
 		}	
 		
+		/**
+		 * Called when some new item becomes available. We inform the GUI
+		 * and add them to @link {@link #allItems}.
+		 * @param lib the new items
+		 */		
 		@Override
 		protected void onProgressUpdate (ItemLibrary<Item>... lib)
 		{
 			allItems.addAll (lib [0].list);
-			update (this, lib [0].list, apprentice);
+			update (this, lib [0].list);
 		}
 						
+		/**
+		 * Informs the GUI that no more items are expected
+		 * @param ok if everything went smoothly
+		 */
 		@Override
 		protected void onPostExecute (Boolean ok)
 		{
 			done (this, allItems, level, ok);
 		}
+
+		/**
+		 * Called when the fragment requests the information again
+		 * <i>and</i> this instance has not completed its task yet.
+		 * This happens if the user has switched from this filter to
+		 * another one, and then came back here. We need to
+		 * republish the data collected so far.
+		 */
+		public void reissue ()
+		{
+			update (this, allItems);
+		}
 	}
 
-	ItemsFragment itemf;
-	
+	/// The fragment which will receive updates
+	Filter.Callback itemf;
+
+	/// List of pending tasks. In addition to the current task (i.e. the task
+	/// that is allowed to push items to the fragment) this hashtable holds
+	/// all the other "cancelled" tasks that have not completed yet.
+	/// This way, if the fragment becomes interested to one of those at
+	/// a later stage, we don't have to create a new one and wait for
+	/// the result.
 	Hashtable<Integer, Task> pending;
-	
+
+	/// Items cache
 	Hashtable<Integer, List<Item>> ht;
 	
+	/// The task currently going on
 	Task task;
 	
-	public LevelFilter (ItemsFragment itemf)	
+	/// Apprentice flag of the last request
+	boolean apprentice;
+	
+	/**
+	 * Constructor.
+	 * @param itemf the fragment that will be notified
+	 */
+	public LevelFilter (Filter.Callback itemf)	
 	{
 		this.itemf = itemf;
 		
@@ -121,48 +202,95 @@ public class LevelFilter implements Filter {
 		ht = new Hashtable<Integer, List<Item>> ();		
 	}
 	
-	public void select (int level, boolean apprentice)
+	/**
+	 * Requests information, according to the {@link Filter} pattern.
+	 * If data is already available, it is pushed immediately to the fragment.
+	 * If a task is alreay running, we wait for it to complete, republishing
+	 * the data collected so far.
+	 * Otherwise a new task is created, and data will be published as soon
+	 * as possible.
+	 * @param conn a WKLib Connection
+	 * @param level the level
+	 * @param apprentice the apprentice flag 
+	 */
+	public void select (Connection conn, int level, boolean apprentice)
 	{
 		List<Item> ans;
 		Task ptask;
+	
+		this.apprentice = apprentice;
 		
 		ptask = pending.get (level);
 		ans = ht.get (level);
 		if (ans != null) {
-			itemf.setData (filter (ans, apprentice), true);
+			itemf.setData (this, filter (ans, apprentice), true);
 			itemf.selectLevel (this, level, false);
+			task = null;
 		} else if (ptask == null) {
-			itemf.clearData ();
+			itemf.clearData (this);
 			itemf.selectLevel (this, level, true);
 
-			task = new Task (itemf.getConnection (), level, apprentice);
+			task = new Task (conn, level);
 			task.execute ();
 			pending.put (level, task);
-		} else
-			ptask = task;
+		} else {
+			itemf.clearData (this);
+			itemf.selectLevel (this, level, true);
+			task = ptask;
+			task.reissue ();
+		}
 	}
 	
-	private void update (Task stask, List<Item> items, boolean apprentice)
+	/**
+	 * Called by the task when some new data becomes available.
+	 * @param stask the source task
+	 * @param items the new items
+	 */
+	private void update (Task stask, List<Item> items)
 	{
 		if (stask == task)
 			itemf.addData (this, filter (items, apprentice));
 	}
 	
+	/**
+	 * Called by the task when no more data is available.
+	 * We store the list of items into the cache and stop the spinner.
+	 * @param stask the source task
+	 * @param items all the itmes published
+	 * @param ok set if everything went smoothly
+	 */
 	private void done (Task stask, List<Item> allItems, int level, boolean ok)
 	{
 		if (ok)
 			ht.put (level, allItems);
 		pending.remove (level);
 		
-		if (stask == task) 
+		if (stask == task) {
+			itemf.noMoreData (this, ok);
 			itemf.selectLevel (this, level, false);
+		}
 	}
 	
+	/**
+	 * Called when the fragment does not want to be notified of
+	 * items any more. This does not cancel possible pending tasks,
+	 * but it simply makes its callbacks ineffective.
+	 */
 	public void stopTask ()
 	{
 		task = null;
 	}
-	
+
+	/**
+	 * Used to filter away all the non-apprentice items, if the fragment
+	 * requires that. This method may return the same collection, 
+	 * but it will never alter its contents: if items must be discarded,
+	 * a new List is created.
+	 * @param items the input collection
+	 * @param apprentice <code>true</code> if non-apprentice items should be
+	 * 	discarded
+	 * @return the filtered collection
+	 */
 	private static List<Item> filter (List<Item> items, boolean apprentice)
 	{
 		Iterator<Item> i;
@@ -179,5 +307,14 @@ public class LevelFilter implements Filter {
 		}
 		
 		return items;
+	}
+
+	/**
+	 * Clears the cache. Pending tasks are not cancelled, because
+	 * they are providing fresh data anyway.
+	 */
+	public void flush ()
+	{
+		ht.clear ();
 	}
 }

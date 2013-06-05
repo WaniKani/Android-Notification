@@ -38,15 +38,47 @@ import com.wanikani.wklib.StudyQueue;
 import com.wanikani.wklib.UserInformation;
 import com.wanikani.wklib.UserLogin;
 
+/* 
+ *  Copyright (c) 2013 Alberto Cuda
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/**
+ * The main activity, started when the app is launched.
+ * This class' responsibilities are mostly related to dashboard data
+ * retrieval, since all the core tasks are implemented at fragment level.
+ */
 public class MainActivity extends FragmentActivity implements Runnable {
-		
+	
+	/**
+	 * The pager model. It also broadcasts requests to all the
+	 * tabs throught the @link Tab interface.
+	 */
 	public class PagerAdapter extends FragmentPagerAdapter {
         
+		/// The tabs
 		List<Tab> tabs;
 		
+		/**
+		 * Constructor.
+		 * @param fm the fragment manager
+		 * @param tabs the list of tabs
+		 */
 		public PagerAdapter (FragmentManager fm, List<Tab> tabs) 
 		{
-			super(fm);
+			super (fm);
 						
 			this.tabs = tabs;
 			
@@ -76,16 +108,38 @@ public class MainActivity extends FragmentActivity implements Runnable {
 			return res.getString (tabs.get (position).getName ());
 		 }
 		 
+		 /**
+		  * Broadcasts the spin event, which is sent when data refresh
+		  * is started or completed
+		  * @see Tab#spin(boolean)
+		  * @param enable if <code>true</code>, refresh is started
+		  */
 		 public void spin (boolean enable)
 		 {
 			 for (Tab tab : tabs)
 				 tab.spin (enable);
 		 }
 		 
+		 /**
+		  * Broadcasts the refresh-complete event, which is sent to the
+		  * tabs, providing fresh dashboard data
+		  * @see Tab#refreshComplete(DashboardData)
+		  * @param dd dashboard data
+		  */
 		 public void refreshComplete (DashboardData dd)
 		 {
 			 for (Tab tab : tabs)
 				 tab.refreshComplete (dd);
+		 }
+		 
+		 /**
+		  * Broadcasts the flush request, to clear all the tabs' caches 
+		  * @see Tab#flush()
+		  */
+		 public void flush ()
+		 {
+			 for (Tab tab : tabs)
+				 tab.flush ();			 
 		 }
     }
 
@@ -97,7 +151,10 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	 * 			screen, and to enable notifications if the user chose so.
 	 * 	<li>@link {@link SettingsActivity#ACT_NOTIFY}: Enable the notification
 	 * 			flag
-	 * 	<li>@link {@link #ACTION_REFRESH}: force a refresh onto the dashboard
+	 * 	<li>@link {@link #ACTION_REFRESH}: force a refresh onto the dashboard.
+	 * </ul>
+	 * All the events that cause a refresh of dashboard data, will also
+	 * trigger a cache flush.
 	 */
 	private class Receiver extends BroadcastReceiver {
 		
@@ -121,17 +178,18 @@ public class MainActivity extends FragmentActivity implements Runnable {
 			} else if (action.equals (SettingsActivity.ACT_NOTIFY))
 				enableNotifications (i.getBooleanExtra (SettingsActivity.E_ENABLED, true));			
 			else if (action.equals (ACTION_REFRESH))
-				refresh ();
+				refresh (true);
 		}
 		
 	}
 	
 	/**
-	 * A task that gets called whenever the stats need to be refreshed.
+	 * A task that gets called whenever stats need to be refreshed.
 	 * In order to keep the GUI responsive, we do this through an AsyncTask
 	 */
 	private class RefreshTask extends AsyncTask<Connection, Void, DashboardData > {
 		
+		/// The default "turtle" avatar
 		Bitmap defAvatar;
 		
 		/**
@@ -369,7 +427,7 @@ public class MainActivity extends FragmentActivity implements Runnable {
 			pager.setCurrentItem (bundle.getInt (CURRENT_TAB));
 
 	    } else
-	    	refresh ();
+	    	refresh (false);
 	}
 	
 	/**
@@ -474,7 +532,7 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	{
 		switch (item.getItemId ()) {
 		case R.id.em_refresh:
-			refresh ();
+			refresh (true);
 			break;
 			
 		case R.id.em_settings:
@@ -509,26 +567,32 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	{
 		conn = new Connection (login);
 		
-		refresh ();
+		refresh (true);
 	}
 
 	/**
 	 * Called when the refresh timeout expires.
-	 * We call {@link #refresh()}.
+	 * We call {@link #refresh()}, but we keep caches.
 	 */
 	public void run ()
 	{
-		refresh ();
+		refresh (false);
 	}
 
 	/**
 	 * Called when the GUI needs to be refreshed. 
-	 * It starts an asynchrous task that actually performs the job.
+	 * It starts an asynchrous task that actually performs the job and
+	 * optionally clears the cache any fragment may hold.
+	 * 	@param hard if set, any cache is discarded. May be expensive
 	 */
-	private void refresh ()
+	private void refresh (boolean hard)
 	{
 			if (rtask != null)
 				rtask.cancel (false);
+			
+			if (hard)
+				pad.flush ();
+			
 			rtask = new RefreshTask ();
 			rtask.execute (conn);			
 	}
@@ -714,6 +778,11 @@ public class MainActivity extends FragmentActivity implements Runnable {
 			tw.setText (s);
 	}
 
+	/**
+	 * Called when the "Review" button is clicked. According
+	 * to user preferences, it sill start either an integrated WebView
+	 * or an external browser.
+	 */
 	public void review ()
 	{
 		SharedPreferences prefs;
@@ -734,6 +803,13 @@ public class MainActivity extends FragmentActivity implements Runnable {
 		startActivity (intent);
 	}
 	
+	/**
+	 * Called when the "Unlock" button is clicked. According
+	 * to user preferences, it sill start either an integrated WebView
+	 * or an external browser. This feature is currently disabled
+	 * because the lessons' javascript is tougher to customize.
+	 * To enable it, set @link {@link #INTEGRATED_LESSONS} to true.
+	 */
 	public void lessons ()
 	{
 		SharedPreferences prefs;
@@ -750,11 +826,19 @@ public class MainActivity extends FragmentActivity implements Runnable {
 		startActivity (intent);
 	}
 
+	/**
+	 * Returns the latest version of the dashboard data. Used by tabs.
+	 * @return the dashboard data 
+	 */
 	public DashboardData getDashboardData ()
 	{
 		return dd;
 	}
 	
+	/**
+	 * Returns the WKLib connection
+	 * @return the connection 
+	 */
 	public Connection getConnection ()
 	{
 		return conn;

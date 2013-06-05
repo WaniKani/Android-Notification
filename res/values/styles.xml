@@ -144,7 +144,7 @@
     <style parent="AppTheme" name="ListLevel">
 		<item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
 	    <item name="android:gravity">center</item>	
-	    <item name="android:textColor">#000</item>    	    	
+	    <item name="android:textColor">#fff</item>    	    	
 	</style>
     	
     <style parent="AppTheme" name="Item">
@@ -211,7 +211,7 @@
     </style>
 
     <style name="ItemInfo" parent="ItemReading">
-        <item name="android:textColor">#000</item>
+        <item name="android:textColor">#fff</item>
         <item name="android:textStyle">bold</item>
         </style>
     

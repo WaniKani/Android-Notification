@@ -80,7 +80,6 @@
     <string name="fmt_ii_one_day">1 day ago</string>
     <string name="fmt_ii_days">%d days</string>
     
-    <string name="fmt_ii_percent">%d%% correct</string>
-    <string name="fmt_ii_percent_full">%1$d%% correct (%2$d%% meaning, %3$d%% reading)</string>
-    
-</resources>
+    <string name="fmt_ii_percent">%d%%</string>
+    <string name="fmt_ii_percent_full">%1$d%% (%2$d%%M, %3$d%%R)</string>
+  </resources>

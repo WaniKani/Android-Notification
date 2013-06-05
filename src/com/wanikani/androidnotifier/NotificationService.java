@@ -339,8 +339,8 @@ public class NotificationService
 		builder = new NotificationCompat.Builder (this);
 		builder.setSmallIcon (R.drawable.not_icon);
 		
-		text = String.format (getString (reviews == 1 ? 
-						 R.string.new_review : R.string.new_reviews), reviews);
+		text = getString (reviews == 1 ? 
+						 R.string.new_review : R.string.new_reviews, reviews);
 		builder.setContentTitle (getString (R.string.app_name));
 								 
 		builder.setContentText (text);

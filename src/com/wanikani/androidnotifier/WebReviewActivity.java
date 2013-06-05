@@ -120,7 +120,7 @@ public class WebReviewActivity extends Activity {
 	    {
 	    	String s;
 	    	
-	    	s = String.format (getResources ().getString (R.string.fmt_web_review_error), description);
+	    	s = getResources ().getString (R.string.fmt_web_review_error, description);
 	    	splashScreen (s);
 	    	bar.setVisibility (View.GONE);
 	    }

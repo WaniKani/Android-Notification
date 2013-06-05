@@ -52,9 +52,30 @@ import com.wanikani.wklib.Vocabulary;
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-public class ItemsFragment extends Fragment implements Tab {
+/**
+ * This fragment shows item lists. The user can choose how to filter
+ * and how to sort them. Sorting is done through a simple comparator;
+ * stock comparators provided by WKLib are enough for our purposes.
+ * Filters is slightly more complex, and we use an implementation 
+ * of a specific interface (@link Filter) for each of them. 
+ */
+public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 
+	/**
+	 * This enum represents the kind of additional information to display on
+	 * each item's description. Since this app should run on small handests
+	 * too, the room is not much, so the kind of string returned depends
+	 * a lot on the kind of ordering the user chose.
+	 * Note also that the string may depend on the filter, since they
+	 * use different WK APIs, returning different subsets of the data schema.
+	 */
 	enum ItemInfo {
+		
+		/**
+		 * Display days elapsed since unlock date. If the item has not
+		 * been unlocked yet (or if unlock date is not available), 
+		 * it returns an empty string.
+		 */
 		AGE {
 			public String getInfo (Resources res, Item i)
 			{
@@ -78,42 +99,64 @@ public class ItemsFragment extends Fragment implements Tab {
 				if (age == 1) 
 					return res.getString (R.string.fmt_ii_one_hour);
 				if (age < 24) 
-					return String.format (res.getString (R.string.fmt_ii_hours), age);
+					return res.getString (R.string.fmt_ii_hours, age);
 				
 				/* Express age in days */
 				age = Math.round (((float) age) / 24);
 				if (age == 1) 
 					return res.getString (R.string.fmt_ii_one_day);
 
-				return String.format (res.getString (R.string.fmt_ii_days), age);
+				return res.getString (R.string.fmt_ii_days, age);
 			}
 		},
 		
+		/**
+		 * Displays the percentage of correct answers.
+		 * If intermediate (meaning & reading) stats are available, they
+		 * are displayed too.
+		 */
 		ERRORS {
 			public String getInfo (Resources res, Item i)
 			{
 				int pmean, pread;
 				
-				if (i.stats == null)
-					return String.format (res.getString (R.string.fmt_ii_percent, i.percentage));
+				if (i.stats == null || 
+					i.stats.reading == null || i.stats.meaning == null)
+					return res.getString (R.string.fmt_ii_percent, i.percentage);
 				
 				pmean = i.stats.meaning.correct * 100 / 
 						(i.stats.meaning.correct + i.stats.meaning.incorrect);
 				pread = i.stats.reading.correct * 100 / 
 						(i.stats.reading.correct + i.stats.reading.incorrect);
 				
-				return String.format (res.getString (R.string.fmt_ii_percent_full, 
-													 i.percentage, pmean, pread));
+				return res.getString (R.string.fmt_ii_percent_full,
+									  i.percentage, pmean, pread);
 			}
 		};
 		
+		/**
+		 * Returns a string which describes the item.
+		 * @param res the resource container
+		 * @param i the item to be described
+		 * @return a description
+		 */
 		public abstract String getInfo (Resources res, Item i);		
 	}
-	
+
+	/**
+	 * A simple wrapper of a level item, to be associated to the ListView. 
+	 * Currently only the level number is used, so this structure is 
+	 * almost pointless... 
+	 */
 	private static class Level {
-		
+
+		/// The level number
 		public int level;
 		
+		/**
+		 * Constructor
+		 * @param level the level number
+		 */
 		public Level (int level)
 		{
 			this.level = level;
@@ -121,6 +164,12 @@ public class ItemsFragment extends Fragment implements Tab {
 		
 	}
 	
+	/**
+	 * This listener is registered to the level's ListView.
+	 * When an item is clicked, all the items of that level are displayed.
+	 * So far, the "apprentice" filter and the ordering is kept as it was
+	 * beforehand (don't know if it's a good idea).
+	 */
 	class LevelClickListener implements AdapterView.OnItemClickListener {
 	
 		public void onItemClick (AdapterView<?> adapter, View view, int position, long id)
@@ -132,11 +181,21 @@ public class ItemsFragment extends Fragment implements Tab {
 		}
 		
 	}
-	
+
+	/**
+	 * The implementation of the levels' ViewList. Pretty straightforward.
+	 * No sorting or filtering.
+	 * Levels are instances of the {@link Level} class (though I guess 
+	 * Integers could have been used as well.
+	 */
 	class LevelListAdapter extends BaseAdapter {
 
+		/// The current level set
 		List<Level> levels;
 		
+		/**
+		 * Constructor.
+		 */
 		public LevelListAdapter ()
 		{
 			levels = new Vector<Level> ();
@@ -154,15 +213,24 @@ public class ItemsFragment extends Fragment implements Tab {
 			return levels.get (position);
 		}
 		
+		/**
+		 * Deletes all the items in the list
+		 */
 		public void clear ()
 		{
 			levels = new Vector<Level> ();
+			notifyDataSetChanged ();
 		}
-		
+
+		/**
+		 * Replaces the items in the list with a new set.
+		 * @param levels the new list
+		 */
 		public void replace (List<Level> levels)
 		{
 			clear ();
 			this.levels.addAll (levels);
+			notifyDataSetChanged ();
 		}
 				
 		@Override
@@ -188,25 +256,41 @@ public class ItemsFragment extends Fragment implements Tab {
 		}		
 	}
 	
+	/**
+	 * The implementation of the items' ViewList. Items are instances
+	 * of the WKLib {@link Item} class. This class implements sorting
+	 * but no filtering.
+	 */
 	class ItemListAdapter extends BaseAdapter {
 
-		LayoutInflater inflater;
-
+		/// The current list of items. It is always sorted.
 		List<Item> items;
-		
+
+		/// The current comparator
 		Comparator<Item> cmp;
 		
+		/// What to put into the "extra info" textview
 		ItemInfo iinfo;
 
+		/**
+		 * Constructor
+		 * @param cmp the comparator
+		 * @param iinfo what to put into the "extra info" textview
+		 */
 		public ItemListAdapter (Comparator<Item> cmp, ItemInfo iinfo)
 		{
 			this.cmp = cmp;
 			this.iinfo = iinfo;
 			
 			items = new Vector<Item> ();
-			inflater = main.getLayoutInflater ();			
 		}		
 
+		/**
+		 * Changes the comparator. Ordinarily the extra info is strictly
+		 * bound to the comparator, so we give a chance to update it as well.
+		 * @param cmp the comparator
+		 * @param iinfo what to put into the "extra info" textview
+		 */
 		public void setComparator (Comparator<Item> cmp, ItemInfo iinfo)
 		{
 			this.cmp = cmp;
@@ -233,24 +317,40 @@ public class ItemsFragment extends Fragment implements Tab {
 			return position;			
 		}
 	
+		/**
+		 * Empties the list
+		 */
 		public void clear ()
 		{
 			items.clear ();
 			items.clear ();
+			notifyDataSetChanged ();
 		}
-		
+
+		/**
+		 * Appends the items to the list. Afterward the list is sorted again.
+		 * @param newItems the additional items to show
+		 */
 		public void addAll (List<Item> newItems)
 		{
 			items.addAll (newItems);
 			invalidate ();
 		}
 		
-		public void invalidate ()
+		/**
+		 * Sorts the collection again, also refreshing the list.
+		 */
+		private void invalidate ()
 		{		
 			Collections.sort (items, cmp);
 			notifyDataSetChanged ();
 		}
 		
+		/**
+		 * Fills the specific fields for a radical layout.
+		 * @param row the view to fill
+		 * @param radical the radical to describe
+		 */
 		protected void fillRadical (View row, Radical radical)
 		{
 			ImageView iw;
@@ -271,6 +371,11 @@ public class ItemsFragment extends Fragment implements Tab {
 
 		}
 
+		/**
+		 * Fills the specific fields for a kanji layout.
+		 * @param row the view to fill
+		 * @param radical the kanji to describe
+		 */
 		protected void fillKanji (View row, Kanji kanji)
 		{
 			TextView ktw, otw;
@@ -298,6 +403,11 @@ public class ItemsFragment extends Fragment implements Tab {
 			tw.setText (kanji.character);
 		}
 		
+		/**
+		 * Fills the specific fields for a vocab layout.
+		 * @param row the view to fill
+		 * @param radical the vocab to describe
+		 */
 		protected void fillVocab (View row, Vocabulary vocab)
 		{
 			TextView tw;
@@ -312,9 +422,12 @@ public class ItemsFragment extends Fragment implements Tab {
 		@Override
 		public View getView (int position, View row, ViewGroup parent) 
 		{
+			LayoutInflater inflater;
 			ImageView iw;
 			TextView tw;
 			Item item;
+
+			inflater = main.getLayoutInflater ();			
 
 			item = getItem (position);
 			switch (item.type) {
@@ -356,6 +469,11 @@ public class ItemsFragment extends Fragment implements Tab {
 		}		
 	}
 	
+	/**
+	 * This listener is registered to the items' ListView.
+	 * When an item is clicked we open the specific page on the WK website.
+	 * May become a longclick listener.. don't want it to be too annoying
+	 */
 	class ItemClickListener implements AdapterView.OnItemClickListener {
 		
 		public void onItemClick (AdapterView<?> adapter, View view, int position, long id)
@@ -391,6 +509,11 @@ public class ItemsFragment extends Fragment implements Tab {
 		
 	}
 
+	/**
+	 * The listener registered to the filter and sort buttons.
+	 * It shows or hide the menu, according to the well-known
+	 * menu pattern. 
+	 */
 	class MenuPopupListener implements View.OnClickListener {
 		
 		public void onClick (View view)
@@ -422,12 +545,16 @@ public class ItemsFragment extends Fragment implements Tab {
 		}
 	}
 	
+	/**
+	 * The listener registered to the filter/sort radio group buttons.
+	 * When an item is clicked, it updates the list accordingly.
+	 */
 	class RadioGroupListener implements Button.OnClickListener {
 		
 		public void onClick (View view)
 		{
 			View filterW, sortW;
-			
+
 			filterW = parent.findViewById (R.id.menu_filter);
 			sortW = parent.findViewById (R.id.menu_order);			
 			
@@ -436,94 +563,181 @@ public class ItemsFragment extends Fragment implements Tab {
 			
 			switch (view.getId ()) {
 			case R.id.btn_filter_all:
-				setLevelFilter (currentLevel);
+				sortBySRS ();
+				setLevelFilter (currentLevel, false);
 				break;
 
 			case R.id.btn_filter_missing:
+				sortBySRS ();
 				setLevelFilter (currentLevel, true);
 				break;
 				
 			case R.id.btn_filter_critical:
+				sortByErrors ();
 				setCriticalFilter ();
 				break;
 
 			case R.id.btn_filter_unlocks:
+				sortByTime ();
 				setUnlockFilter ();
 				break;
 
 			case R.id.btn_sort_errors:
-				iad.setComparator (Item.SortByErrors.INSTANCE, ItemInfo.ERRORS);
+				sortByErrors ();
 				break;
 
 			case R.id.btn_sort_srs:
-				iad.setComparator (Item.SortBySRS.INSTANCE, ItemInfo.AGE);
+				sortBySRS ();
 				break;
 				
 			case R.id.btn_sort_time:
-				iad.setComparator (Item.SortByTime.INSTANCE, ItemInfo.AGE);
+				sortByTime ();
 				break;
 
 			case R.id.btn_sort_type:
-				iad.setComparator (Item.SortByType.INSTANCE, ItemInfo.AGE);
-			}			
+				sortByType ();
+			}
 		}
+		
+		/**
+		 * Switches to SRS sort order, fixing both ListView and radio buttons.
+		 */
+		private void sortBySRS ()
+		{
+			RadioGroup rg;
+			
+			rg = (RadioGroup) parent.findViewById (R.id.rg_order);
+			rg.check (R.id.btn_sort_srs);
+			iad.setComparator (Item.SortBySRS.INSTANCE, ItemInfo.AGE);				
+		}
+		
+		/**
+		 * Switches to age sort order, fixing both ListView and radio buttons.
+		 */
+		private void sortByTime ()
+		{
+			RadioGroup rg;
+			
+			rg = (RadioGroup) parent.findViewById (R.id.rg_order);
+			rg.check (R.id.btn_sort_time);
+			iad.setComparator (Item.SortByType.INSTANCE, ItemInfo.AGE);				
+		}
+
+		/**
+		 * Switches to errors sort order, fixing both ListView and radio buttons.
+		 */
+		private void sortByErrors ()
+		{
+			RadioGroup rg;
+			
+			rg = (RadioGroup) parent.findViewById (R.id.rg_order);
+			rg.check (R.id.btn_sort_errors);
+			iad.setComparator (Item.SortByErrors.INSTANCE, ItemInfo.ERRORS);
+		}
+
+		/**
+		 * Switches to type sort order, fixing both ListView and radio buttons.
+		 */
+		private void sortByType ()
+		{
+			RadioGroup rg;
+			
+			rg = (RadioGroup) parent.findViewById (R.id.rg_order);
+			rg.check (R.id.btn_sort_type);
+			iad.setComparator (Item.SortByType.INSTANCE, ItemInfo.AGE);
+		}
+
 	}
 
+	//	/// The main activity
 	MainActivity main;
-
-	View parent;
 	
+	/// The root view of the fragment
+	View parent;
+
+	/* ---------- Levels stuff ---------- */
+	
+	/// The list adapter of the levels' list
 	LevelListAdapter lad;
 	
-	int currentLevel;
-	
-	boolean spinning;
-	
+	/// The levels' list view
 	ListView lview;
-	
-	ItemListAdapter iad;
-	
-	ListView iview;
-	
+
+	/// The levels' list click listener
 	LevelClickListener lcl;
 	
-	ItemClickListener icl;
+	/// The last level clicked so far
+	int currentLevel;
 	
-	MenuPopupListener mpl;
-	
-	RadioGroupListener rgl;
-	
-	ItemLibrary<Item> critical;
-
-	ItemLibrary<Item> unlocks;
-	
-	EnumMap<SRSLevel, Drawable> srsht;
-
-	LevelFilter levelf;	
-
-	CriticalFilter criticalf;	
-	
-	UnlockFilter unlockf;
-	
-	private Filter currentFilter;
-
+	/// The number of levels
 	int levels;
-	
-	boolean apprentice;
 
+	/// Normal reading color
 	int normalColor;
 	
+	/// Important reading color
 	int importantColor;
 	
+	/// Selected level color
 	int selectedColor;
 	
+	/// Unselected level color
 	int unselectedColor;
 	
+	/* ---------- Items stuff ---------- */
+
+	/// The list adapter of the items' list
+	ItemListAdapter iad;
+	
+	/// The items' list view
+	ListView iview;
+	
+	/// The items' list click listener
+	ItemClickListener icl;
+	
+	/* ---------- Sort/filter stuff ---------- */
+
+	/// The popup menu listener
+	MenuPopupListener mpl;
+	
+	/// The menu buttons' listener
+	RadioGroupListener rgl;
+	
+	/// True if the "other filters" button is spinning
+	boolean spinning;
+
+	/// A SRS level to turtle icon map
+	EnumMap<SRSLevel, Drawable> srsht;
+
+	/// True if the apprentice filter is set (i.e. we are displaying only apprentice
+	/// items
+	boolean apprentice;
+
+	/* ---------- Filters ---------- */
+	
+	/// The level filter instance
+	LevelFilter levelf;	
+
+	/// The critical items filter instance
+	CriticalFilter criticalf;	
+	
+	/// The recent unlocks items filter instance
+	UnlockFilter unlockf;
+
+	/// The current filter
+	private Filter currentFilter;
+	
+	@Override
 	public void setMainActivity (MainActivity main)
 	{
 		this.main = main;
 	}
 	
+	/**
+	 * Creation of the fragment. We build up all the singletons, leaving the
+	 * bundle alone, because we set the retain instance flag to <code>true</code>.
+	 * 	@param bundle the saved instance state
+	 */
 	@Override
 	public void onCreate (Bundle bundle)
 	{
@@ -559,6 +773,13 @@ public class ItemsFragment extends Fragment implements Tab {
     	unselectedColor = res.getColor (R.color.unselected);
 	}
 	
+	/**
+	 * Builds the GUI and create the default item listing. Which is
+	 * by item type, sorted by time.
+	 * @param inflater the inflater
+	 * @param container the parent view
+	 * @param savedInstance an (unused) bundle
+	 */
 	@Override
     public View onCreateView (LayoutInflater inflater, ViewGroup container,
             				  Bundle bundle) 
@@ -607,6 +828,12 @@ public class ItemsFragment extends Fragment implements Tab {
 		refreshComplete (main.getDashboardData ());
 	}
 	
+	/**
+	 * Called when data has been refreshed. Actually the only field we
+	 * are intested in is the user's level, so we store it even if it
+	 * the view has not been created yet. On the other hand, if the
+	 * gui exists, we also update the level list. 
+	 */
 	public void refreshComplete (DashboardData dd)
 	{
 		List<Level> l;
@@ -619,21 +846,32 @@ public class ItemsFragment extends Fragment implements Tab {
 		if (!isResumed ())
 			return;
 		
-		clevel = currentLevel > 0 ? currentLevel : dd.level;
+		/* Again, try not to be annoying. We only refresh the levels'
+		 * list if it already dispayed (i.e. currentFilter==levelf) 
+		 * or we are at app startup (i.e. currentFilter==null).
+		 * The item list is updated only at all startup (currentLevel<0) */
+		if (currentFilter == null || currentFilter == levelf) {
+			clevel = currentLevel > 0 ? currentLevel : dd.level;
 		
-		l = new Vector<Level> (dd.level);		
-		for (i = dd.level; i > 0; i--) {
-			level = new Level (i);
-			l.add (level);
+			l = new Vector<Level> (dd.level);		
+			for (i = dd.level; i > 0; i--) {
+				level = new Level (i);
+				l.add (level);
+			}
+			lad.replace (l);
+			lad.notifyDataSetChanged ();
+		
+			if (currentLevel < 0)
+				setLevelFilter (clevel);
 		}
-		lad.replace (l);
-		lad.notifyDataSetChanged ();
-		
-		setLevelFilter (clevel);
 	}
 	
+	/**
+	 * Called when the view is destroyed. We take this chance to stop all
+	 * the threads that may attempt to update a dead view. 
+	 */
 	@Override
-	public void onDetach ()
+	public void onDestroyView ()
 	{
 		super.onDetach ();
 		
@@ -642,15 +880,15 @@ public class ItemsFragment extends Fragment implements Tab {
 		levelf.stopTask ();
 		criticalf.stopTask ();
 		unlockf.stopTask ();
-}
-	
-	void setData (List<Item> list, boolean ok)
-	{
-		iad.clear ();
-		iad.addAll (list);
-		iad.notifyDataSetChanged ();
 	}
 
+	/**
+	 * Switches to level list filter. The apprentice filter is kept
+	 * only if we are just switching from a level to another level.
+	 * If we are switching e.g. from unlock filter to level filter,
+	 * it is cleared.
+	 * @param level the level to display 
+	 */
 	private void setLevelFilter (int level)
 	{
 		if (currentFilter != levelf)
@@ -658,6 +896,11 @@ public class ItemsFragment extends Fragment implements Tab {
 		setLevelFilter (level, apprentice);
 	}
 
+	/**
+	 * Switches to level list filter. 
+	 * @param level the level to display
+	 * @param apprentice the apprentice flag 
+	 */
 	private void setLevelFilter (int level, boolean apprentice)
 	{
 		RadioGroup fg;
@@ -667,9 +910,12 @@ public class ItemsFragment extends Fragment implements Tab {
 		
 		this.apprentice = apprentice;
 		currentFilter = levelf;
-		levelf.select (level, apprentice);
+		levelf.select (main.getConnection (), level, apprentice);
 	}
 	
+	/**
+	 * Switches to critical items filter. 
+	 */
 	private void setCriticalFilter ()
 	{
 		RadioButton btn;
@@ -678,9 +924,12 @@ public class ItemsFragment extends Fragment implements Tab {
 		btn.setSelected (true);
 
 		currentFilter = criticalf;
-		criticalf.select ();
+		criticalf.select (main.getConnection ());
 	}
 
+	/**
+	 * Switches to recent unlocks filter. 
+	 */
 	private void setUnlockFilter ()
 	{
 		RadioButton btn;
@@ -689,10 +938,37 @@ public class ItemsFragment extends Fragment implements Tab {
 		btn.setSelected (true);
 
 		currentFilter = unlockf;
-		unlockf.select (unlockf);
+		unlockf.select (main.getConnection ());
 	}
 
-	void addData (Filter sfilter, List<Item> list)
+	/**
+	 * Replaces the contents of the items' list view contents with a new list.
+	 * @param sfilter the source filter 
+	 * @param list the new list
+	 * @param ok if this is the complete list or something went wrong while
+	 * loading data
+	 */
+	@Override
+	public void setData (Filter sfilter, List<Item> list, boolean ok)
+	{
+		if (sfilter != currentFilter)
+			return;
+
+		iad.clear ();
+		iad.addAll (list);
+		iad.notifyDataSetChanged ();
+	}
+
+	/**
+	 * Updates the contents of the items' list view contents, by adding
+	 * new items.
+	 * @param sfilter the source filter 
+	 * @param list the new list
+	 * @param ok if this is the complete list or something went wrong while
+	 * loading data
+	 */
+	@Override
+	public void addData (Filter sfilter, List<Item> list)
 	{
 		if (sfilter != currentFilter)
 			return;
@@ -700,80 +976,92 @@ public class ItemsFragment extends Fragment implements Tab {
 		iad.notifyDataSetChanged ();
 	}
 
-	void clearData ()
+	@Override
+	public void clearData (Filter sfilter)
 	{
+		if (sfilter != currentFilter)
+			return;
+
 		iad.clear ();
 		iad.notifyDataSetChanged ();
 	}
 	
 	/**
-	 * Show or hide the spinner.
+	 * Does nothing. Actually we may display a small "warning" icon.
+	 * @param sfilter the filter which is publishing these items
+	 * @param ok tells if this is the complete list or something went wrong while
+	 * loading data
+	 */
+	@Override
+	public void noMoreData (Filter sfilter, boolean ok)
+	{
+		/* empty */
+	}
+	
+	/**
+	 * Show or hide the dashboard data spinner. 
+	 * Needed to implement the @param Tab interface, but we actually ignore this.
 	 * @param enable true if should be shown
 	 */
 	public void spin (boolean enable)
 	{
 		/* empty */
 	}
-	
-	void selectOtherFilter (Filter filter, boolean selected, boolean spinning)
-	{
-		View filterPB, filterBtn, levels;
-		
-		if (filter != currentFilter)
-			return;
-		
-		filterBtn = parent.findViewById (R.id.btn_item_filter);
-		filterPB = parent.findViewById (R.id.pb_item_filter);
-		levels = parent.findViewById (R.id.lv_levels);
-		
-		if (spinning) {
-			filterBtn.setVisibility (View.GONE);
-			filterPB.setVisibility (View.VISIBLE);
-		} else {
-			filterBtn.setVisibility (View.VISIBLE);
-			filterPB.setVisibility (View.GONE);			
-		}
-		
-		levels.setVisibility (selected ? View.GONE : View.VISIBLE);
-	}
-	
-	void selectLevel (Filter filter, int level, boolean spinning)
+
+	@Override
+	public void selectLevel (Filter filter, int level, boolean spinning)
 	{
 		if (filter != currentFilter)
 			return;
 		
 		if (currentLevel != level && currentLevel > 0)
-			spin (filter, currentLevel, false, false);
+			selectLevel (currentLevel, false, false);
 		
 		currentLevel = level;
 		this.spinning = spinning;
 		
-		spin (filter, level, true, spinning);
+		selectLevel (level, true, spinning);
 	}
 
-	public void levelAdded (int level, View row)
-	{
-		if (currentLevel == level)
-			spin (currentFilter, row, true, spinning);
-		else
-			spin (currentFilter, row, false, false);
-	}
-	
-	protected void spin (Filter filter, int level, boolean select, boolean spin)
+	/**
+	 * Internal implementation of the {@link #selectLevel(Filter, int, boolean)}
+	 * logic. This gets called when it is certain that we are being called
+	 * by the correct filter, or no filter is involved, so checks are skipped.
+	 * In addition, this method may be called also to <i>unselect</i> a level.
+	 * @param level the level on which to act
+	 * @param select <code>true</code> if the level should be selected.
+	 * 	Otherwise it is unselected
+	 * @param spin <code>true</code> if the spinner should be displayed.
+	 * 	Otherwise it is hidden. Makes sense only if <code>select</code>
+	 *  is <code>true</code> too
+	 */
+	protected void selectLevel (int level, boolean select, boolean spin)
 	{
 		View row;
 		
 		row = lview.getChildAt (levels - level);
 		if (row != null) 	/* May happen if the level is not visible */
-			spin (filter, row, select, spin);
+			selectLevel (row, select, spin);
 	}
 
-	private void spin (Filter filter, View row, boolean select, boolean spin)
+	/**
+	 * Internal implementation of the {@link #selectLevel(Filter, int, boolean)}
+	 * logic. This gets called when it is certain that we are being called
+	 * by the correct filter, or no filter is involved, so checks are skipped.
+	 * In addition, this method may be called also to <i>unselect</i> a level.
+	 * @param row the level row on which to act
+	 * @param select <code>true</code> if the level should be selected.
+	 * 	Otherwise it is unselected
+	 * @param spin <code>true</code> if the spinner should be displayed.
+	 * 	Otherwise it is hidden. Makes sense only if <code>select</code>
+	 *  is <code>true</code> too
+	 */
+	private void selectLevel (View row, boolean select, boolean spin)
 	{
 		TextView tw;
 		View sw;
 		
-		selectOtherFilter (filter, false, false);
+		selectOtherFilter (false, false);
 		
 		tw = (TextView) row.findViewById (R.id.tgr_level);
 		sw = row.findViewById (R.id.pb_level);
@@ -793,13 +1081,92 @@ public class ItemsFragment extends Fragment implements Tab {
 		}
 	}
 
-	Connection getConnection ()
+	@Override
+	public void selectOtherFilter (Filter filter, boolean spinning)
 	{
-		return main.getConnection ();				
+		if (filter != currentFilter)
+			return;
+		
+		selectOtherFilter (true, spinning);
 	}
 	
+	/**
+	 * Internal implementation of the {@link #selectOtherFilter(Filter, boolean)}
+	 * logic. This gets called when it is certain that we are being called
+	 * by the correct filter, or no filter is involved, so checks are skipped.
+	 * In addition, this method may be called also to <i>exit</i> filter mode.
+	 * When entering filter mode, the level list is hidden.
+	 * @param select <code>true</code> if the level should be selected.
+	 * 	Otherwise it is unselected
+	 * @param spin <code>true</code> if the spinner should be displayed.
+	 * 	Otherwise it is hidden. Makes sense only if <code>select</code>
+	 *  is <code>true</code> too
+	 */
+	public void selectOtherFilter (boolean selected, boolean spinning)
+	{
+		View filterPB, filterBtn, levels;
+		
+		filterBtn = parent.findViewById (R.id.btn_item_filter);
+		filterPB = parent.findViewById (R.id.pb_item_filter);
+		levels = parent.findViewById (R.id.lv_levels);
+		
+		if (spinning) {
+			filterBtn.setVisibility (View.GONE);
+			filterPB.setVisibility (View.VISIBLE);
+		} else {
+			filterBtn.setVisibility (View.VISIBLE);
+			filterPB.setVisibility (View.GONE);			
+		}
+		
+		levels.setVisibility (selected ? View.GONE : View.VISIBLE);
+	}
+
+	/**
+	 * This methods is called by the levels' list adapter, right before
+	 * displaying a new row. It is needed to make sure that the spinner
+	 * is displayed on the newly created row if it should.
+	 * @param level the level being created
+	 * @param row the row being created
+	 */
+	public void levelAdded (int level, View row)
+	{
+		if (currentLevel == level)
+			selectLevel (row, true, spinning);
+		else
+			selectLevel (row, false, false);
+	}
+	
+	/**
+	 * Returns the tab name ID.
+	 * @param the <code>tag_items</code> ID
+	 */
 	public int getName ()
 	{
 		return R.string.tag_items;
+	}
+
+	/**
+	 * Clears the cache and redisplays data. This may be called quite early,
+	 * so we check the null pointers. 
+	 */
+	public void flush ()
+	{
+		/* Actually we could just bail out at the first
+		 * if.. however it looks nicer this way... */
+		if (criticalf != null)
+			criticalf.flush ();
+		
+		if (levelf != null)
+			levelf.flush ();
+		
+		if (unlockf != null)
+			unlockf.flush ();
+		
+		if (currentFilter == criticalf)
+			criticalf.select (main.getConnection ());
+		else if (currentFilter == levelf && currentLevel > 0)
+			levelf.select (main.getConnection (), currentLevel, apprentice);
+		else if (currentFilter == unlockf)
+			unlockf.select (main.getConnection ());		
 	}
 }
