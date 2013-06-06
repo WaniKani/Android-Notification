@@ -111,7 +111,8 @@
     
     <style parent="AppTheme" name="LevelTable">
         <item name="android:layout_width">@dimen/m_rythm</item>
-        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_height">0dip</item>
+        <item name="android:layout_weight">1</item>
         <item name="android:divider">#b5b5b5</item>
         <item name="android:dividerHeight">1dip</item>
         <item name="android:listSelector">@xml/items_level_selector</item>

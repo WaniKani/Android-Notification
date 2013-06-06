@@ -1103,11 +1103,12 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 	 */
 	public void selectOtherFilter (boolean selected, boolean spinning)
 	{
-		View filterPB, filterBtn, levels;
+		View filterPB, filterBtn, levels, filler;
 		
 		filterBtn = parent.findViewById (R.id.btn_item_filter);
 		filterPB = parent.findViewById (R.id.pb_item_filter);
 		levels = parent.findViewById (R.id.lv_levels);
+		filler = parent.findViewById (R.id.lv_filler);
 		
 		if (spinning) {
 			filterBtn.setVisibility (View.GONE);
@@ -1117,7 +1118,14 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 			filterPB.setVisibility (View.GONE);			
 		}
 		
-		levels.setVisibility (selected ? View.GONE : View.VISIBLE);
+		if (selected) {
+			levels.setVisibility (View.GONE);
+			filler.setVisibility (View.VISIBLE);
+		} else {
+			levels.setVisibility (View.VISIBLE);
+			filler.setVisibility (View.GONE);
+		} 
+		}
 	}
 
 	/**
