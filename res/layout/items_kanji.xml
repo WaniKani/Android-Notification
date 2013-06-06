@@ -3,14 +3,16 @@
     style="@style/KanjiItem"
     android:layout_width="match_parent"
     android:orientation="horizontal" >
-  <HorizontalScrollView 
+  <com.wanikani.androidnotifier.HiPriorityScrollView
+      android:id="@+id/hsv_item" 
       android:layout_width="wrap_content"
-      android:layout_height="match_parent">    
+      android:layout_height="match_parent"
+      android:layout_margin="@dimen/m_half_gap">    
 	<LinearLayout 
     	android:layout_width="wrap_content"
     	android:layout_height="match_parent"
     	android:orientation="horizontal" >
-      	<RelativeLayout
+      <RelativeLayout
     	android:layout_width="wrap_content"
     	android:layout_height="match_parent">
     	<ImageView
@@ -44,6 +46,9 @@
             <TextView
                 android:id="@+id/it_kunyomi"
                 style="@style/ItemReading"/>
+           <TextView
+                android:id="@+id/it_info"
+                style="@style/ItemInfo"/>
         </LinearLayout>
 
         <LinearLayout
@@ -52,13 +57,10 @@
             android:layout_alignParentBottom="true"
             android:orientation="vertical">
         <TextView
-            android:id="@+id/it_info"
-            style="@style/ItemInfo"/>
-        <TextView
             android:id="@+id/it_meaning"
             style="@style/ItemMeaning"/>
         </LinearLayout>
     </RelativeLayout>
     </LinearLayout>
-  </HorizontalScrollView>
+  </com.wanikani.androidnotifier.HiPriorityScrollView>
 </LinearLayout>

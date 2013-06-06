@@ -404,7 +404,7 @@ public class DashboardFragment extends Fragment implements Tab {
 	 * This item has no scroll view.
 	 * @return false
 	 */
-	public boolean hasScroll ()
+	public boolean scrollLock ()
 	{
 		 return false;
 	}

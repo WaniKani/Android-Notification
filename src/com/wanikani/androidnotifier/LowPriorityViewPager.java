@@ -58,7 +58,7 @@ public class LowPriorityViewPager extends ViewPager {
 	 */
 	public boolean onInterceptTouchEvent (MotionEvent ev)
 	{		
-		return (main == null || !main.hasScroll (getCurrentItem ())) && 
+		return (main == null || !main.scrollLock (getCurrentItem ())) && 
 					super.onInterceptTouchEvent (ev);
 	}
 }

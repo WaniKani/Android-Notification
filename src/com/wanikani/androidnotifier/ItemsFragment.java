@@ -260,7 +260,7 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 	 * of the WKLib {@link Item} class. This class implements sorting
 	 * but no filtering.
 	 */
-	class ItemListAdapter extends BaseAdapter {
+	class ItemListAdapter extends BaseAdapter implements HiPriorityScrollView.Callback {
 
 		/// The current list of items. It is always sorted.
 		List<Item> items;
@@ -270,7 +270,11 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 		
 		/// What to put into the "extra info" textview
 		ItemInfo iinfo;
-
+		
+		/// If set, tabs should be locked, because the user is swiping
+		/// a row larger than screen size
+		boolean lock;
+		
 		/**
 		 * Constructor
 		 * @param cmp the comparator
@@ -421,6 +425,7 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 		@Override
 		public View getView (int position, View row, ViewGroup parent) 
 		{
+			HiPriorityScrollView hpsw;
 			LayoutInflater inflater;
 			ImageView iw;
 			TextView tw;
@@ -463,9 +468,35 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 			
 			tw = (TextView) row.findViewById (R.id.it_meaning);
 			tw.setText (item.meaning);
+
+			hpsw = (HiPriorityScrollView) row.findViewById (R.id.hsv_item);
+			hpsw.setCallback (this);
 			
 			return row;
 		}		
+
+		/**
+		 * Called when a motion on an item starts. If the item is actually
+		 * larger than the screen, we lock the tabs
+		 * @param hpsw the item's scroll view
+		 * @param childIsLarger set if the item is actually too large 
+		 */
+		@Override
+		public void down (HiPriorityScrollView hpsw, boolean childIsLarger) 
+		{
+			lock = childIsLarger;
+		}
+		
+		/**
+		 * Called when a motion on an item stops. We unlock.
+		 * @param hpsw the item's scroll view
+		 * @param childIsLarger set if the item is actually too large 
+		 */
+		@Override
+		public void up (HiPriorityScrollView hpsw, boolean childIsLarger)
+		{
+			lock = false;
+		}
 	}
 	
 	/**
@@ -567,7 +598,7 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 				break;
 
 			case R.id.btn_filter_missing:
-				sortBySRS ();
+				sortByType ();
 				setLevelFilter (currentLevel, true);
 				break;
 				
@@ -750,7 +781,7 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 		levelf = new LevelFilter (this);
 		criticalf = new CriticalFilter (this);
 		unlockf = new UnlockFilter (this);
-		currentFilter = null;
+		currentFilter = levelf;
 		
 		lcl = new LevelClickListener ();
 		icl = new ItemClickListener ();
@@ -819,50 +850,50 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
     	return parent;
     }
 	
-	@Override
+	/**
+	 * Called when the app is resumed. We need to (re?)build the list views.
+	 */
 	public void onResume ()
 	{
 		super.onResume ();
 
-		refreshComplete (main.getDashboardData ());
+		redrawAll ();
+	}
+	
+	private void redrawAll ()
+	{
+		List<Level> l;
+		Level level;
+		int i;
+		
+		/* Very first resume. Need to set current level == to the user's level */
+		if (currentLevel < 0)
+			currentLevel = levels;
+		
+		l = new Vector<Level> (levels);		
+		for (i = levels; i > 0; i--) {
+			level = new Level (i);
+			l.add (level);
+		}
+		lad.replace (l);
+		lad.notifyDataSetChanged ();
+		
+		if (currentFilter == levelf)
+			setLevelFilter (currentLevel);
+		else if (currentFilter == criticalf)
+			setCriticalFilter ();
+		else if (currentFilter == unlockf)
+			setUnlockFilter ();
 	}
 	
 	/**
 	 * Called when data has been refreshed. Actually the only field we
 	 * are intested in is the user's level, so we store it even if it
-	 * the view has not been created yet. On the other hand, if the
-	 * gui exists, we also update the level list. 
+	 * the view has not been created yet.  
 	 */
 	public void refreshComplete (DashboardData dd)
 	{
-		List<Level> l;
-		Level level;
-		int i, clevel;
-		
-		/* This must be done as soon as possible */
 		levels = dd.level;
-		
-		if (!isResumed ())
-			return;
-		
-		/* Again, try not to be annoying. We only refresh the levels'
-		 * list if it already dispayed (i.e. currentFilter==levelf) 
-		 * or we are at app startup (i.e. currentFilter==null).
-		 * The item list is updated only at all startup (currentLevel<0) */
-		if (currentFilter == null || currentFilter == levelf) {
-			clevel = currentLevel > 0 ? currentLevel : dd.level;
-		
-			l = new Vector<Level> (dd.level);		
-			for (i = dd.level; i > 0; i--) {
-				level = new Level (i);
-				l.add (level);
-			}
-			lad.replace (l);
-			lad.notifyDataSetChanged ();
-		
-			if (currentLevel < 0)
-				setLevelFilter (clevel);
-		}
 	}
 	
 	/**
@@ -873,8 +904,6 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 	public void onDestroyView ()
 	{
 		super.onDetach ();
-		
-		currentFilter = null;
 		
 		levelf.stopTask ();
 		criticalf.stopTask ();
@@ -1125,7 +1154,6 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 			levels.setVisibility (View.VISIBLE);
 			filler.setVisibility (View.GONE);
 		} 
-		}
 	}
 
 	/**
@@ -1178,11 +1206,12 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 	}
 
 	/**
-	 * This item has a scroll view.
-	 * @return true
+	 * Tells if we are interested in scroll events. We do, if the user is swiping
+	 * an item list
+	 * @return true if the user is swiping
 	 */
-	public boolean hasScroll ()
+	public boolean scrollLock ()
 	{
-		 return true;
+		 return iad != null && iad.lock;
 	}
 }

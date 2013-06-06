@@ -3,8 +3,8 @@
     style="@style/VocabItem"
     android:layout_width="match_parent"
     android:orientation="horizontal" >
-    
-  <HorizontalScrollView 
+   <com.wanikani.androidnotifier.HiPriorityScrollView 
+      android:id="@+id/hsv_item" 
       android:layout_width="wrap_content"
       android:layout_height="match_parent"
       android:fillViewport="true"
@@ -61,5 +61,5 @@
         </LinearLayout>
     </RelativeLayout>
 </LinearLayout>
-</HorizontalScrollView>
+</com.wanikani.androidnotifier.HiPriorityScrollView>
 </LinearLayout>

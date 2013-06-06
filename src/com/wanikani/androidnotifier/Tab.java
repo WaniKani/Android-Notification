@@ -54,9 +54,9 @@ public interface Tab {
 	public void flush ();
 	
 	/**
-	 * Tells whether the tab contains an horizontal scroll.
+	 * Tells whether the tab is interested in scroll events.
 	 * If so, we disable the tab scrolling gesture.
 	 * @return true if it does
 	 */
-	 public boolean hasScroll ();
+	 public boolean scrollLock ();
 }

@@ -848,11 +848,11 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	}
 
 	/**
-	 * Tells whether if a given tab contains an horizontal scroll.
+	 * Tells whether if a given tab is intercepting scroll events
 	 * @return true if it does
 	 */
-	public boolean hasScroll (int item)
+	public boolean scrollLock (int item)
 	{
-		return pad.tabs.get (item).hasScroll (); 
+		return pad.tabs.get (item).scrollLock (); 
 	}
 }
