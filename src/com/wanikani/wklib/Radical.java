@@ -36,17 +36,32 @@ public class Radical extends Item {
 	
 	public String image;
 	
+	private String hyphenatedMeaning;
+	
 	public Radical (JSONObject obj)
 		throws JSONException
 	{
 		super (obj, Item.Type.RADICAL);
 		
 		image = Util.getString (obj, "image");
+		
+		hyphenatedMeaning = meaning;
+		meaning = meaning.replace ('-', ' ');
 	}	
 
 	@Override
 	protected boolean hasReading ()
 	{
 		return false;
+	}
+
+	protected String getItemURLComponent ()
+	{
+		return hyphenatedMeaning;
+	}
+
+	protected String getClassURLComponent ()
+	{
+		return "radicals";
 	}
 }

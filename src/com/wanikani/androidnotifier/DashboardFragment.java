@@ -221,7 +221,6 @@ public class DashboardFragment extends Fragment implements Tab {
 	{
 		ProgressBar pb;
 		ImageView iw;
-		TextView tw;
 		String s;
 
 		if (!isResumed ())

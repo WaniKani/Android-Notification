@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     style="@style/RadicalItem"
     android:layout_width="match_parent"
@@ -6,7 +5,7 @@
   <com.wanikani.androidnotifier.HiPriorityScrollView 
       android:id="@+id/hsv_item" 
       android:layout_width="wrap_content"
-      android:layout_height="match_parent">    
+      android:layout_height="match_parent">
 	<LinearLayout 
     	android:layout_width="wrap_content"
     	android:layout_height="match_parent"
@@ -17,8 +16,7 @@
     	<ImageView
         	android:id="@+id/img_srs"
         	android:layout_alignParentTop="true" 
-        	style="@style/ItemProgressLevel" />
-
+        	style="@style/ItemProgressLevel" />        
        	<TextView
        	    android:id="@+id/it_level"
        	    style="@style/ItemLevel"
@@ -30,25 +28,36 @@
         	android:id="@+id/it_glyph"
         	style="@style/ItemGlyph"
         	android:textSize="@dimen/m_glyph" />
-    <ImageView
+	   <FrameLayout
+	        android:id="@+id/f_glyph"
+	       	android:layout_width="wrap_content"
+	       	android:layout_height="wrap_content"
+	       	android:layout_gravity="center"
+	       	android:paddingTop="@dimen/m_glyph_image_margin"
+	       	android:paddingBottom="@dimen/m_glyph_image_margin">
+        <ImageView
         	android:id="@+id/img_glyph"
         	style="@style/ItemGlyphImage" />
-    
-    <RelativeLayout style="@style/ItemDescription" >
-
+    	</FrameLayout>
         <LinearLayout
-            android:layout_height="wrap_content"
-            android:layout_width="match_parent"
-            android:layout_alignParentBottom="true"
-            android:orientation="vertical">
-        <TextView
-            android:id="@+id/it_info"
-            style="@style/ItemInfo"/>
-        <TextView
-            android:id="@+id/it_meaning"
-            style="@style/ItemMeaning"/>
+            android:id="@+id/it_description"
+            style="@style/ItemDescription"
+            android:orientation="vertical" >
+
+            <TextView
+                style="@style/ItemImportantReading" />
+
+            <TextView
+                style="@style/ItemReading"/>
+
+            <TextView
+                android:id="@+id/it_info"
+                style="@style/ItemInfo"/>
+
+           <TextView
+            	android:id="@+id/it_meaning"
+            	style="@style/ItemMeaning"/>
         </LinearLayout>
-    </RelativeLayout>
   </LinearLayout>
   </com.wanikani.androidnotifier.HiPriorityScrollView>
 </LinearLayout>

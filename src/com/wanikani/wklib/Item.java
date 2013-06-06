@@ -343,4 +343,17 @@ public abstract class Item {
 	{
 		return true;
 	}
+	
+	protected String getItemURLComponent ()
+	{
+		return character;
+	}
+	
+	protected abstract String getClassURLComponent ();
+	
+	public String getURL ()
+	{
+		return "http://www.wanikani.com/" + 
+				getClassURLComponent () + "/" + getItemURLComponent ();
+	}
 }

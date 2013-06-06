@@ -34,8 +34,6 @@
         style="@style/ItemGlyph"
         android:textSize="@dimen/m_glyph" />
 
-    <RelativeLayout style="@style/ItemDescription" >
-
         <LinearLayout
             android:id="@+id/it_description"
             style="@style/ItemDescription"
@@ -45,21 +43,17 @@
                 android:id="@+id/it_reading"
                 style="@style/ItemImportantReading" />
 
-        </LinearLayout>
+            <TextView
+                style="@style/ItemReading"/>
 
-        <LinearLayout
-            android:layout_height="wrap_content"
-            android:layout_width="match_parent"
-            android:layout_alignParentBottom="true"
-            android:orientation="vertical">
-        <TextView
-            android:id="@+id/it_info"
-            style="@style/ItemInfo"/>
-        <TextView
-            android:id="@+id/it_meaning"
-            style="@style/ItemMeaning"/>
+            <TextView
+                android:id="@+id/it_info"
+                style="@style/ItemInfo"/>
+
+           <TextView
+            	android:id="@+id/it_meaning"
+            	style="@style/ItemMeaning"/>
         </LinearLayout>
-    </RelativeLayout>
 </LinearLayout>
 </com.wanikani.androidnotifier.HiPriorityScrollView>
 </LinearLayout>

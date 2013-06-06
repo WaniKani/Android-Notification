@@ -54,4 +54,8 @@ public class Vocabulary extends Item {
 		kana = Util.getString (obj, "kana");
 	}
 	
+	protected String getClassURLComponent ()
+	{
+		return "vocabulary";
+	}
 }

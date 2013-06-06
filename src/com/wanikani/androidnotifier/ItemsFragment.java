@@ -7,15 +7,15 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Vector;
 
-import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.text.Html;
+import android.text.Spanned;
+import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -275,6 +275,9 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 		/// a row larger than screen size
 		boolean lock;
 		
+		/// URL format
+		static final String URL_FORMAT = "<a href=\"%s\">%s</a>";
+		
 		/**
 		 * Constructor
 		 * @param cmp the comparator
@@ -358,18 +361,20 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 		{
 			ImageView iw;
 			TextView tw;
+			View fw;
 			
 			tw = (TextView) row.findViewById (R.id.it_glyph);
 			iw = (ImageView) row.findViewById (R.id.img_glyph);
+			fw = row.findViewById (R.id.f_glyph);
 			if (radical.character != null) {
 				tw = (TextView) row.findViewById (R.id.it_glyph);
 				tw.setText (radical.character);
 				tw.setVisibility (View.VISIBLE);
-				iw.setVisibility (View.GONE);
+				fw.setVisibility (View.GONE);
 			} else if (radical.bitmap != null) {		
 				iw.setImageBitmap (radical.bitmap);
 				tw.setVisibility (View.GONE);
-				iw.setVisibility (View.VISIBLE);				
+				fw.setVisibility (View.VISIBLE);				
 			} /* else { should never happen! } */
 
 		}
@@ -429,6 +434,7 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 			LayoutInflater inflater;
 			ImageView iw;
 			TextView tw;
+			String link;
 			Item item;
 
 			inflater = main.getLayoutInflater ();			
@@ -461,13 +467,15 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 				iw.setImageDrawable (srsht.get (item.stats.srs));
 				iw.setVisibility (View.VISIBLE);
 			} else
-				iw.setVisibility (View.GONE);
+				iw.setVisibility (View.INVISIBLE);
 			
 			tw = (TextView) row.findViewById (R.id.it_info);
 			tw.setText (iinfo.getInfo (getResources (), item));
 			
 			tw = (TextView) row.findViewById (R.id.it_meaning);
-			tw.setText (item.meaning);
+			link = String.format (URL_FORMAT, item.getURL (), item.meaning);
+			tw.setText (Html.fromHtml (link));
+			tw.setMovementMethod (LinkMovementMethod.getInstance ());
 
 			hpsw = (HiPriorityScrollView) row.findViewById (R.id.hsv_item);
 			hpsw.setCallback (this);
@@ -499,46 +507,6 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 		}
 	}
 	
-	/**
-	 * This listener is registered to the items' ListView.
-	 * When an item is clicked we open the specific page on the WK website.
-	 * May become a longclick listener.. don't want it to be too annoying
-	 */
-	class ItemClickListener implements AdapterView.OnItemClickListener {
-		
-		public void onItemClick (AdapterView<?> adapter, View view, int position, long id)
-		{
-			Intent intent;
-			String url;
-			Item i;
-			
-			i = (Item) adapter.getItemAtPosition (position);
-			url = null;
-			switch (i.type) {
-			case RADICAL:
-				url = "http://www.wanikani.com/vocabulary/" + i.character;
-				break;
-				
-			case KANJI:
-				url = "http://www.wanikani.com/kanji/" + i.character;
-				break;
-				
-			case VOCABULARY:
-				url = "http://www.wanikani.com/vocabulary/" + i.character;
-				break;
-			}
-			
-			if (url == null)
-				return;	/* That's strange for sure */
-			
-			intent = new Intent (Intent.ACTION_VIEW);
-			intent.setData (Uri.parse (url));
-			
-			startActivity (intent);
-		}
-		
-	}
-
 	/**
 	 * The listener registered to the filter and sort buttons.
 	 * It shows or hide the menu, according to the well-known
@@ -722,9 +690,6 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 	/// The items' list view
 	ListView iview;
 	
-	/// The items' list click listener
-	ItemClickListener icl;
-	
 	/* ---------- Sort/filter stuff ---------- */
 
 	/// The popup menu listener
@@ -784,7 +749,6 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 		currentFilter = levelf;
 		
 		lcl = new LevelClickListener ();
-		icl = new ItemClickListener ();
 		
 		mpl = new MenuPopupListener ();
 		rgl = new RadioGroupListener ();
@@ -830,7 +794,6 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 		iad = new ItemListAdapter (Item.SortByType.INSTANCE, ItemInfo.AGE);
 		iview = (ListView) parent.findViewById (R.id.lv_items);
 		iview.setAdapter (iad);
-		iview.setOnItemClickListener (icl);
 		
 		btn = (ImageButton) parent.findViewById (R.id.btn_item_filter);
 		btn.setOnClickListener (mpl);

@@ -149,7 +149,7 @@
 	</style>
     	
     <style parent="AppTheme" name="Item">
-        <item name="android:layout_height">@dimen/m_item</item>
+        <item name="android:layout_height">wrap_content</item>
     </style>
     
     <style parent="AppTheme" name="ItemLevel">
@@ -172,7 +172,9 @@
    	<style parent="ItemGlyph" name="ItemGlyphImage">
        <item name="android:layout_width">@dimen/m_glyph</item>
        <item name="android:layout_height">@dimen/m_glyph</item>
-    </style>
+       <item name="android:layout_marginTop">@dimen/m_glyph_image_margin</item>    
+       <item name="android:layout_marginBottom">@dimen/m_glyph_image_margin</item>    
+       </style>
     
     <style parent="Item" name="RadicalItem">
         <item name="android:background">@drawable/blue</item>
@@ -203,8 +205,8 @@
         
     <style name="ItemMeaning" parent="ItemStrings">
 		<item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
+        <item name="android:textColorLink">#fff</item>
         <item name="android:textColor">#fff</item>
-        <item name="android:textStyle">italic</item>                
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
    </style>
@@ -219,7 +221,8 @@
     <style name="ItemInfo" parent="ItemReading">
         <item name="android:textColor">#fff</item>
         <item name="android:textStyle">bold</item>
-        </style>
+		<item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
+    </style>
     
     <style name="ItemImportantReading" parent="ItemReading">
         <item name="android:textStyle">bold</item>                

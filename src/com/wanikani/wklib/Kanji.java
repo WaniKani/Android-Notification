@@ -87,5 +87,11 @@ public class Kanji extends Item {
 	{
 		return new Kanji (obj);
 	}
+
+	@Override
+	protected String getClassURLComponent ()
+	{
+		return "kanji";
+	}
 }
 ;
