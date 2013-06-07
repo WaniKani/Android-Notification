@@ -223,7 +223,7 @@ public class DashboardFragment extends Fragment implements Tab {
 		ImageView iw;
 		String s;
 
-		if (!isResumed ())
+		if (!isResumed () || dd == null)
 			return;
 		
 		iw = (ImageView) parent.findViewById (R.id.iv_gravatar);
