@@ -1068,8 +1068,7 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 		View row;
 
 		row = lad.getViewByLevel (level);
-		if (row != null) 	/* May happen if the level is not visible */
-			selectLevel (row, select, spin);
+		selectLevel (row, select, spin);
 	}
 
 	/**
@@ -1077,7 +1076,9 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 	 * logic. This gets called when it is certain that we are being called
 	 * by the correct filter, or no filter is involved, so checks are skipped.
 	 * In addition, this method may be called also to <i>unselect</i> a level.
-	 * @param row the level row on which to act
+	 * @param row the level row on which to act. This parameter may be <code>null</code>,
+	 *  if the label is not visible. Calling the method is still important, to
+	 *  show the levels list, if hidden
 	 * @param select <code>true</code> if the level should be selected.
 	 * 	Otherwise it is unselected
 	 * @param spin <code>true</code> if the spinner should be displayed.
@@ -1090,6 +1091,9 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 		View sw;
 		
 		selectOtherFilter (false, false);
+		
+		if (row == null)
+			return;
 		
 		tw = (TextView) row.findViewById (R.id.tgr_level);
 		sw = row.findViewById (R.id.pb_level);
