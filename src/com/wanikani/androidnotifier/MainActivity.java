@@ -79,7 +79,7 @@ public class MainActivity extends FragmentActivity implements Runnable {
 		public PagerAdapter (FragmentManager fm, List<Tab> tabs) 
 		{
 			super (fm);
-						
+			
 			this.tabs = tabs;
 			
 			for (Tab tab : tabs)
@@ -367,7 +367,19 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	PagerAdapter pad;
 	
 	/** Private prefix */
-	private static final String PREFIX = "com.wanikani.androidnotifier.DashboardData";
+	private static final String PREFIX = "com.wanikani.androidnotifier.DashboardData.";
+	
+	/** Dashboard fragment bundle key */
+	private static final String DASHBOARD_FRAGMENT = PREFIX + "DASHBOARD_FRAGMENT";
+
+	/** Items fragment bundle key */
+	private static final String ITEMS_FRAGMENT = PREFIX + "ITEMS_FRAGMENT";
+	
+	/** The dashboard fragment */
+	DashboardFragment dashboardf;
+	
+	/** The items fragment */
+	ItemsFragment itemsf;
 	
 	/** Compiler flag, enabling integrated lessons. Currently they are disabled
 	 *  because javascript here is a lot different and it is quite hard to debug
@@ -397,6 +409,7 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	@Override
 	public void onCreate (Bundle bundle) 
 	{	
+		FragmentManager mgr;
 		SharedPreferences prefs;
 		DashboardData ldd;
 		List<Tab> tabs;
@@ -406,9 +419,19 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	    receiver = new Receiver ();
 	    alarm = new Alarm ();
 	    
+	    mgr = getSupportFragmentManager ();
 	    tabs = new Vector<Tab> ();
-	    tabs.add (new DashboardFragment ());
-	    tabs.add (new ItemsFragment ());
+	    if (bundle != null) {
+	    	dashboardf = (DashboardFragment) mgr.getFragment (bundle, DASHBOARD_FRAGMENT);
+	    	itemsf = (ItemsFragment) mgr.getFragment (bundle, ITEMS_FRAGMENT);
+	    }
+	    
+	    if (dashboardf == null)
+	    	dashboardf = new DashboardFragment ();
+	    if (itemsf == null)
+	    	itemsf = new ItemsFragment ();
+	    tabs.add (dashboardf);
+	    tabs.add (itemsf);
 	    
         pad = new PagerAdapter (getSupportFragmentManager (), tabs);
 		setContentView (R.layout.main);
@@ -446,12 +469,17 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	@Override
 	public void onSaveInstanceState (Bundle bundle)
 	{
+		FragmentManager mgr;
+		
 		super.onSaveInstanceState (bundle);
 		
+	    mgr = getSupportFragmentManager ();
 		if (dd != null) {
 			dd.serialize (bundle);
 			bundle.putBoolean (BUNDLE_VALID, true);
 			bundle.putInt (CURRENT_TAB, pager.getCurrentItem ());
+			mgr.putFragment (bundle, DASHBOARD_FRAGMENT, dashboardf);
+			mgr.putFragment (bundle, ITEMS_FRAGMENT, itemsf);
 		}
 	}
 	
