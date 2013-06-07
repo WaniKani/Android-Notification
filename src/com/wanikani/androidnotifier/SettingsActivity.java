@@ -122,7 +122,7 @@ public class SettingsActivity
 			subpref.setEnabled (getEnabled (prefs));
 		} else if (key.equals (KEY_PREF_USE_INTEGRATED_BROWSER)) {
 			pref.setSummary (getUseIntegratedBrowser (prefs) ? 
-							 R.string.pref_use_integrated_browser :
+							 R.string.pref_use_integrated_browser_desc :
 							 R.string.pref_use_external_browser_desc);
 		} else if (key.equals (KEY_PREF_USERKEY)) {
 			s = prefs.getString (KEY_PREF_USERKEY, "").trim ();
