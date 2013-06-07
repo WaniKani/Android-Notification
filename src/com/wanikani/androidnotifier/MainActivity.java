@@ -25,11 +25,9 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.content.LocalBroadcastManager;
-import android.support.v4.view.ViewPager;
-import android.util.AttributeSet;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MotionEvent;
+import android.view.View;
 import android.widget.TextView;
 
 import com.wanikani.wklib.AuthenticationException;
@@ -413,6 +411,12 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	    tabs.add (new ItemsFragment ());
 	    
         pad = new PagerAdapter (getSupportFragmentManager (), tabs);
+		setContentView (R.layout.main);
+		switchTo (R.id.f_splash);
+
+		pager = (LowPriorityViewPager) findViewById (R.id.pager);
+        pager.setMain (this);
+        pager.setAdapter (pad);
 
         registerIntents ();
 	    
@@ -680,12 +684,8 @@ public class MainActivity extends FragmentActivity implements Runnable {
 
 		pad.spin (false);
 
-		if (this.dd == null) {
-			setContentView (R.layout.main);
-	        pager = (LowPriorityViewPager) findViewById (R.id.pager);
-	        pager.setMain (this);
-	        pager.setAdapter (pad);
-		}
+		if (this.dd == null)
+			switchTo (R.id.f_main);
 		
 		if (this.dd != null)
 			dd.merge (this.dd);
@@ -741,7 +741,7 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	private void startRefresh ()
 	{
 		if (dd == null)
-			setContentView (R.layout.splash);
+			switchTo (R.id.f_splash);
 		else
 			pad.spin (true);
 	}
@@ -765,7 +765,7 @@ public class MainActivity extends FragmentActivity implements Runnable {
 			dd = null;
 		
 		if (dd == null)
-			setContentView (R.layout.error);
+			switchTo (R.id.f_error);
 		else
 			pad.spin (false);
 		
@@ -854,5 +854,23 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	public boolean scrollLock (int item)
 	{
 		return pad.tabs.get (item).scrollLock (); 
+	}
+	
+	/**
+	 * Switches to one of the three screeens (main, dashboard or error)
+	 * @param id the id to switch to
+	 */
+	public void switchTo (int id)
+	{
+		View view;
+		
+		view = findViewById (R.id.f_main);
+		view.setVisibility (id == R.id.f_main ? View.VISIBLE : View.INVISIBLE);
+
+		view = findViewById (R.id.f_splash);
+		view.setVisibility (id == R.id.f_splash ? View.VISIBLE : View.INVISIBLE);
+
+		view = findViewById (R.id.f_error);
+		view.setVisibility (id == R.id.f_error ? View.VISIBLE : View.INVISIBLE);
 	}
 }

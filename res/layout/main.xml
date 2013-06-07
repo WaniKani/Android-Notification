@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+    <FrameLayout 
+        android:id="@+id/f_main"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="invisible">
+		<include layout="@layout/f_main"/>	       
+    </FrameLayout>
+
+    <FrameLayout 
+        android:id="@+id/f_splash"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="visible">
+		<include layout="@layout/f_splash"/>	       
+    </FrameLayout>
+
+    <FrameLayout 
+        android:id="@+id/f_error"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="invisible">
+		<include layout="@layout/f_error"/>	       
+    </FrameLayout>
+
+</RelativeLayout>

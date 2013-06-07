@@ -4,7 +4,9 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.EnumMap;
+import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 
 import android.content.res.Resources;
@@ -13,7 +15,6 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.text.Html;
-import android.text.Spanned;
 import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -192,12 +193,16 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 		/// The current level set
 		List<Level> levels;
 		
+		/// A position to view dictionary
+		Map<Integer, View> l2v;
+		
 		/**
 		 * Constructor.
 		 */
 		public LevelListAdapter ()
 		{
 			levels = new Vector<Level> ();
+			l2v = new Hashtable<Integer, View> ();
 		}
 		
 		@Override
@@ -243,16 +248,41 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 		{
 			LayoutInflater inflater;
 			TextView view;
+			Level l;
 
+			l = getItem (position);
 			inflater = main.getLayoutInflater ();
-			row = inflater.inflate (R.layout.items_level, parent, false);
+			row = inflater.inflate (R.layout.items_level, parent, false);			
 			view = (TextView) row.findViewById (R.id.tgr_level);
-			view.setText (Integer.toString (getItem (position).level));
+			view.setText (Integer.toString (l.level));
+			
+			row.setTag (l);
+			l2v.put (l.level, row);
 			
 			levelAdded (getItem (position).level, row);
 			
 			return row;
-		}		
+		}
+		
+		/**
+		 * Return the view associated to a given level
+		 * @param level the level
+		 * @return a view, or <tt>null</tt> if no view is (currently) associated
+		 */
+		public View getViewByLevel (int level)
+		{
+			View view;
+			Level l;
+			
+			view = l2v.get (level);
+			if (view != null) {
+				l = (Level) view.getTag ();
+				if (l.level != level)
+					view = null;
+			}
+			
+			return view;
+		}
 	}
 	
 	/**
@@ -820,9 +850,14 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 	{
 		super.onResume ();
 
-		redrawAll ();
+		/* Make sure that refreshCompleted has been called at least once */
+		if (levels > 0)
+			redrawAll ();
 	}
 	
+	/**
+	 * Redraws the entire GUI. Called when resuming, to build the new view.
+	 */
 	private void redrawAll ()
 	{
 		List<Level> l;
@@ -855,8 +890,10 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 	 * the view has not been created yet.  
 	 */
 	public void refreshComplete (DashboardData dd)
-	{
+	{		
 		levels = dd.level;
+		if (currentLevel < 0)
+			redrawAll ();
 	}
 	
 	/**
@@ -1029,8 +1066,8 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 	protected void selectLevel (int level, boolean select, boolean spin)
 	{
 		View row;
-		
-		row = lview.getChildAt (levels - level);
+
+		row = lad.getViewByLevel (level);
 		if (row != null) 	/* May happen if the level is not visible */
 			selectLevel (row, select, spin);
 	}
@@ -1149,16 +1186,13 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 	 */
 	public void flush ()
 	{
-		/* Actually we could just bail out at the first
-		 * if.. however it looks nicer this way... */
-		if (criticalf != null)
-			criticalf.flush ();
+		/* Might be called really early! */
+		if (criticalf == null)
+			return;
 		
-		if (levelf != null)
-			levelf.flush ();
-		
-		if (unlockf != null)
-			unlockf.flush ();
+		criticalf.flush ();
+		levelf.flush ();
+		unlockf.flush ();
 		
 		if (currentFilter == criticalf)
 			criticalf.select (main.getConnection ());
