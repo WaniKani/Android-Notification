@@ -476,8 +476,10 @@ public class MainActivity extends FragmentActivity implements Runnable {
 			bundle.putBoolean (BUNDLE_VALID, true);
 			bundle.putInt (CURRENT_TAB, pager.getCurrentItem ());
 		}
-		mgr.putFragment (bundle, DASHBOARD_FRAGMENT, dashboardf);
-		mgr.putFragment (bundle, ITEMS_FRAGMENT, itemsf);
+		if (dashboardf.isAdded ())
+			mgr.putFragment (bundle, DASHBOARD_FRAGMENT, dashboardf);
+		if (itemsf.isAdded ())
+			mgr.putFragment (bundle, ITEMS_FRAGMENT, itemsf);
 	}
 	
 	/**
