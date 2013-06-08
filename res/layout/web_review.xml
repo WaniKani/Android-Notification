@@ -27,7 +27,7 @@
             android:layout_height="fill_parent"
             android:layout_alignParentBottom="true"
             android:scaleType="centerCrop"
-            android:src="@drawable/wrsplash" />
+            android:src="@drawable/error" />
 
     </LinearLayout>
 
