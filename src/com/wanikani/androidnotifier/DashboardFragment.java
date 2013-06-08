@@ -2,8 +2,7 @@ package com.wanikani.androidnotifier;
 
 import java.util.Date;
 
-import android.content.Intent;
-import android.content.SharedPreferences;
+import android.app.Activity;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -12,12 +11,8 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.net.Uri;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
-import android.text.Html;
-import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -99,13 +94,12 @@ public class DashboardFragment extends Fragment implements Tab {
 	/// True if the spinner is (also virtually) visible
 	boolean spinning;
 	
-	/**
-	 * Constructor.
-	 * 	@param main the main activity
-	 */
-	public void setMainActivity (MainActivity main)
+	@Override
+	public void onAttach (Activity main)
 	{
-		this.main = main;
+		super.onAttach (main);
+		
+		this.main = (MainActivity) main;
 	}
 	
 	/**

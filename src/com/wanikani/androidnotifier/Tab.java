@@ -24,13 +24,6 @@ package com.wanikani.androidnotifier;
 public interface Tab {
 
 	/**
-	 * Called at startup to give the tab a reference to the
-	 * main activity
-	 * @param main the main activity
-	 */
-	public void setMainActivity (MainActivity main);
-	
-	/**
 	 * Returns the tab name
 	 * @return the resource id of the string
 	 */

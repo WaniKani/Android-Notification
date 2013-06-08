@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
+import android.app.Activity;
 import android.content.res.Resources;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
@@ -752,10 +753,17 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 	/// The current filter
 	private Filter currentFilter;
 	
-	@Override
-	public void setMainActivity (MainActivity main)
+	public ItemsFragment ()
 	{
-		this.main = main;
+		currentLevel = -1;		
+	}
+	
+	@Override
+	public void onAttach (Activity main)
+	{
+		super.onAttach (main);
+		
+		this.main = (MainActivity) main;
 	}
 	
 	/**
@@ -772,7 +780,6 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 
 		setRetainInstance (true);
 
-		currentLevel = -1;
 		levelf = new LevelFilter (this);
 		criticalf = new CriticalFilter (this);
 		unlockf = new UnlockFilter (this);
@@ -795,6 +802,9 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
     	importantColor = res.getColor (R.color.important);
     	selectedColor = res.getColor (R.color.selected);
     	unselectedColor = res.getColor (R.color.unselected);
+
+    	lad = new LevelListAdapter ();
+		iad = new ItemListAdapter (Item.SortByType.INSTANCE, ItemInfo.AGE);
 	}
 	
 	/**
@@ -816,12 +826,10 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 		
 		parent = inflater.inflate(R.layout.items, container, false);
 		
-		lad = new LevelListAdapter ();
 		lview = (ListView) parent.findViewById (R.id.lv_levels);
 		lview.setAdapter (lad);
 		lview.setOnItemClickListener (lcl);
 
-		iad = new ItemListAdapter (Item.SortByType.INSTANCE, ItemInfo.AGE);
 		iview = (ListView) parent.findViewById (R.id.lv_items);
 		iview.setAdapter (iad);
 		
@@ -892,7 +900,7 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 	public void refreshComplete (DashboardData dd)
 	{		
 		levels = dd.level;
-		if (currentLevel < 0)
+		if (currentLevel < 0 && lad != null)
 			redrawAll ();
 	}
 	

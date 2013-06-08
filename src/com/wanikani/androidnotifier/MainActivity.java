@@ -81,9 +81,6 @@ public class MainActivity extends FragmentActivity implements Runnable {
 			super (fm);
 			
 			this.tabs = tabs;
-			
-			for (Tab tab : tabs)
-				tab.setMainActivity (MainActivity.this);
 	    }
 
 		 @Override
@@ -478,9 +475,9 @@ public class MainActivity extends FragmentActivity implements Runnable {
 			dd.serialize (bundle);
 			bundle.putBoolean (BUNDLE_VALID, true);
 			bundle.putInt (CURRENT_TAB, pager.getCurrentItem ());
-			mgr.putFragment (bundle, DASHBOARD_FRAGMENT, dashboardf);
-			mgr.putFragment (bundle, ITEMS_FRAGMENT, itemsf);
 		}
+		mgr.putFragment (bundle, DASHBOARD_FRAGMENT, dashboardf);
+		mgr.putFragment (bundle, ITEMS_FRAGMENT, itemsf);
 	}
 	
 	/**
