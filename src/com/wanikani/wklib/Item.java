@@ -50,9 +50,18 @@ public abstract class Item {
 		
 		public int compare (Item a, Item b)
 		{
-			int ans;
+			int ans, ap, bp;
 			
-			ans = b.percentage - a.percentage;
+			/* Klooge to make sure that when percentage is unknown,
+			 * items go at the end of the list */
+			ap = a.percentage;
+			if (ap < 0 && !ascending)
+				ap = 101;
+			bp = b.percentage;
+			if (bp < 0 && !ascending)
+				bp = 101;
+			
+			ans = bp - ap;
 	
 			ans = ascending ? ans : -ans;
 
