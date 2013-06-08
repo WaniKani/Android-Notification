@@ -121,6 +121,9 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 			{
 				int pmean, pread;
 				
+				if (i.percentage < 0)
+					return "";
+				
 				if (i.stats == null || 
 					i.stats.reading == null || i.stats.meaning == null)
 					return res.getString (R.string.fmt_ii_percent, i.percentage);

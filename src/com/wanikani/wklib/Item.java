@@ -326,7 +326,7 @@ public abstract class Item {
 			}
 			percentage = den != 0 ? num * 100 / den : 100; 
 		} else
-			percentage = 100;	/* Want to be optimist :) */
+			percentage = -1;	/* No info */
 			
 		
 		/* Only for recent unlocks */
