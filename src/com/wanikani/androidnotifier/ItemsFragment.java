@@ -903,7 +903,7 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 	public void refreshComplete (DashboardData dd)
 	{		
 		levels = dd.level;
-		if (currentLevel < 0 && lad != null)
+		if (currentLevel < 0 && lad != null && parent != null)
 			redrawAll ();
 	}
 	
