@@ -25,8 +25,11 @@
     <string name="tag_loading">Loading&#8230;</string>
     <string name="tag_btn_review">Review</string>
     
-    <string name="tag_radicals_progression">Radicals Progression</string>
-    <string name="tag_kanji_progression">Kanji Progression</string>
+    <string name="tag_radicals_progression">Radicals</string>
+    <string name="tag_kanji_progression">Kanji</string>
+    
+    <string name="fmt_remaining">%d remaining</string>
+    <string name="fmt_to_go">%1$d/%2$d to go</string>
     
     <string name="em_refresh">Refresh</string>
     <string name="em_settings">Settings</string>

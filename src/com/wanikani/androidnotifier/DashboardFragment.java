@@ -205,6 +205,45 @@ public class DashboardFragment extends Fragment implements Tab {
 	}
 	
 	/**
+	 * Update level progression info. The information to be displayed comprises:
+	 * <ul>
+	 * 	<li>Completion percentage
+	 *  <li>Number of items to complete level
+	 *  <li>Number of apprentice items
+	 * </ul>
+	 * This method is called twice (one for radicals progression, one for 
+	 * kanji progression)
+	 * @param pbid progess bar ID
+	 * @param rid remaining items text view ID
+	 * @param prog number of non-apprentice items 
+	 * @param total total number of items
+	 */
+	protected void setProgress (int pbid, int rid, int prog, int total)
+	{
+		TextView tw;
+		ProgressBar pb;
+		int percent, rem, grace;
+
+		percent = prog * 100 / total;
+		
+		pb = (ProgressBar) parent.findViewById (pbid);
+		pb.setProgress (percent);
+		
+		tw = (TextView) parent.findViewById (rid);
+		rem = total - prog;
+		grace = total / 10;
+		if (percent < 90) {
+			tw.setText (getString (R.string.fmt_to_go, rem - grace, rem));
+			tw.setVisibility (View.VISIBLE);
+		} else if (prog < total) {
+			tw.setText (getString (R.string.fmt_remaining, rem));
+			tw.setVisibility (View.VISIBLE);
+		} else
+			tw.setVisibility (View.GONE);
+		
+	}
+	
+	/**
 	 * Called by @link MainActivity when asynchronous data
 	 * retrieval is completed. If we already have a view on which
 	 * to display it, we update the GUI. Otherwise we cache the info
@@ -213,7 +252,6 @@ public class DashboardFragment extends Fragment implements Tab {
 	 */
 	public void refreshComplete (DashboardData dd)
 	{
-		ProgressBar pb;
 		ImageView iw;
 		String s;
 
@@ -259,24 +297,24 @@ public class DashboardFragment extends Fragment implements Tab {
 		case RETRIEVING:
 			if (dd.od.lpStatus != DashboardData.OptionalDataStatus.RETRIEVING)
 				setVisibility (R.id.pb_w_section, View.VISIBLE);
-			setVisibility (R.id.progress_w_section, View.VISIBLE);
 			break;
 			
 		case RETRIEVED:
-			pb = (ProgressBar) parent.findViewById (R.id.pb_radicals);
-			pb.setProgress (100 * dd.od.lp.radicalsProgress / dd.od.lp.radicalsTotal);
+			setProgress (R.id.pb_radicals, R.id.radicals_remaining,
+						 dd.od.lp.radicalsProgress, dd.od.lp.radicalsTotal);
+			
+			setProgress (R.id.pb_kanji, R.id.kanji_remaining,
+						 dd.od.lp.kanjiProgress, dd.od.lp.kanjiTotal);
 
-			pb = (ProgressBar) parent.findViewById (R.id.pb_kanji);
-			pb.setProgress (100 * dd.od.lp.kanjiProgress / dd.od.lp.kanjiTotal);
-
-			setVisibility (R.id.progress_w_section,View.GONE);
+			setVisibility (R.id.pb_w_section,View.GONE);
 			setVisibility (R.id.progress_section, View.VISIBLE);
+			
 			break;
 			
 		case FAILED:
 			/* Just hide the spinner. 
 			 * If we already have some data, it is displayed anyway */
-			setVisibility (R.id.progress_w_section, View.GONE);			
+			setVisibility (R.id.pb_w_section, View.GONE);			
 		}
 	}
 	
