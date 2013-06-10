@@ -901,9 +901,9 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 	 * the view has not been created yet.  
 	 */
 	public void refreshComplete (DashboardData dd)
-	{		
+	{				
 		levels = dd.level;
-		if (currentLevel < 0 && lad != null && parent != null)
+		if (currentLevel < 0 && isResumed ())
 			redrawAll ();
 	}
 	
