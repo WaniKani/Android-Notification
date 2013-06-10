@@ -32,6 +32,7 @@ import android.widget.TextView;
 
 import com.wanikani.wklib.AuthenticationException;
 import com.wanikani.wklib.Connection;
+import com.wanikani.wklib.Item;
 import com.wanikani.wklib.LevelProgression;
 import com.wanikani.wklib.SRSDistribution;
 import com.wanikani.wklib.StudyQueue;
@@ -137,6 +138,21 @@ public class MainActivity extends FragmentActivity implements Runnable {
 		 {
 			 for (Tab tab : tabs)
 				 tab.flush ();			 
+		 }
+		 
+		 /**
+		  * Returns the index of a tab.
+		  * @param class the class
+		  */
+		 public int getTabIndex (Tab tab)
+		 {
+			 int i;
+			 
+			 for (i = 0; i < tabs.size (); i++)
+				 if (tabs.get (i) == tab)
+					 return i;
+			 
+			 return -1;
 		 }
     }
 
@@ -854,6 +870,19 @@ public class MainActivity extends FragmentActivity implements Runnable {
 		
 		intent.setData (Uri.parse (WebReviewActivity.WKConfig.LESSON_START));
 		startActivity (intent);
+	}
+	
+	/**
+	 * Shows the items tab, and applies a filter to displays only the apprentice items
+	 * of a given kind. Needed for the dashboard to implement the "remaining items"
+	 * feature
+	 * @param type the type to display. Theorically it could be null, but
+	 * 	do we really want to?
+	 */
+	public void showRemaining (Item.Type type)
+	{
+		pager.setCurrentItem (pad.getTabIndex (dashboardf));
+		itemsf.setLevelFilter (dd.level, true, type);
 	}
 
 	/**

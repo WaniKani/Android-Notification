@@ -2,6 +2,8 @@ package com.wanikani.androidnotifier;
 
 import java.util.Date;
 
+import com.wanikani.wklib.Item;
+
 import android.app.Activity;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -85,6 +87,22 @@ public class DashboardFragment extends Fragment implements Tab {
 		}	
 	}
 
+	private class RemainingClickListener implements View.OnClickListener {
+				
+		private Item.Type type;
+		
+		public RemainingClickListener (Item.Type type)
+		{
+			this.type = type;
+		}
+		
+		@Override
+		public void onClick (View v)
+		{
+			main.showRemaining (type);
+		}	
+	}
+	
 	/// The main activity
 	MainActivity main;
 	
@@ -120,10 +138,11 @@ public class DashboardFragment extends Fragment implements Tab {
 	 * <ul>
 	 * 	<li>The listener that handles "Available now" web link
 	 *  <li>The listener of the "Review button"
+	 *  <li>Kanji and radicals left "hyperlink"
 	 * </ul>
 	 */
 	private void registerListeners ()
-	{
+	{		
 		View view;
 		
 		view = parent.findViewById (R.id.btn_review);
@@ -131,6 +150,14 @@ public class DashboardFragment extends Fragment implements Tab {
 
 		view = parent.findViewById (R.id.btn_lessons_available);
 		view.setOnClickListener (new LessonsClickListener ());
+		
+		view = parent.findViewById (R.id.radicals_remaining);
+		view.setClickable (true);
+		view.setOnClickListener (new RemainingClickListener (Item.Type.RADICAL));
+
+		view = parent.findViewById (R.id.kanji_remaining);
+		view.setClickable (true);
+		view.setOnClickListener (new RemainingClickListener (Item.Type.KANJI));
 	}
 	
 	/**

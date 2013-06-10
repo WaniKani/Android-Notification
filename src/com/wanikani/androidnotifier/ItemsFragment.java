@@ -940,7 +940,18 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 	 * @param level the level to display
 	 * @param apprentice the apprentice flag 
 	 */
-	private void setLevelFilter (int level, boolean apprentice)
+	public void setLevelFilter (int level, boolean apprentice)
+	{
+		setLevelFilter (level, apprentice, null);
+	}
+	
+	/**
+	 * Switches to level list filter. 
+	 * @param level the level to display
+	 * @param apprentice the apprentice flag
+	 * @param type item type to be displayed 
+	 */
+	public void setLevelFilter (int level, boolean apprentice, Item.Type type)
 	{
 		RadioGroup fg;
 		
@@ -949,9 +960,9 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 		
 		this.apprentice = apprentice;
 		currentFilter = levelf;
-		levelf.select (main.getConnection (), level, apprentice);
+		levelf.select (main.getConnection (), level, apprentice, type);
 	}
-	
+
 	/**
 	 * Switches to critical items filter. 
 	 */
@@ -969,7 +980,7 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 	/**
 	 * Switches to recent unlocks filter. 
 	 */
-	private void setUnlockFilter ()
+	public void setUnlockFilter ()
 	{
 		RadioButton btn;
 		
@@ -1209,10 +1220,11 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 		levelf.flush ();
 		unlockf.flush ();
 		
+		/* Note that this resets the kanji vs radical filter */
 		if (currentFilter == criticalf)
 			criticalf.select (main.getConnection ());
 		else if (currentFilter == levelf && currentLevel > 0)
-			levelf.select (main.getConnection (), currentLevel, apprentice);
+			levelf.select (main.getConnection (), currentLevel, apprentice, null);
 		else if (currentFilter == unlockf)
 			unlockf.select (main.getConnection ());		
 	}
