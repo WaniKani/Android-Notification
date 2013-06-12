@@ -316,9 +316,6 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 		/// a row larger than screen size
 		boolean lock;
 		
-		/// URL format
-		static final String URL_FORMAT = "<a href=\"%s\">%s</a>";
-		
 		/**
 		 * Constructor
 		 * @param cmp the comparator
@@ -514,9 +511,9 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 			tw.setText (iinfo.getInfo (getResources (), item));
 			
 			tw = (TextView) row.findViewById (R.id.it_meaning);
-			link = String.format (URL_FORMAT, item.getURL (), item.meaning);
+			link = String.format (URL_FORMAT, item.meaning);
 			tw.setText (Html.fromHtml (link));
-			tw.setMovementMethod (LinkMovementMethod.getInstance ());
+			tw.setOnClickListener (new ItemClickListener (item.getURL ()));
 
 			hpsw = (HiPriorityScrollView) row.findViewById (R.id.hsv_item);
 			hpsw.setCallback (this);
@@ -688,7 +685,27 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 
 	}
 
-	//	/// The main activity
+	/**
+	 * The listener registered to each item's hyperlink. It opens
+	 * the page, through @link {@link MainActivity#item()}, so
+	 * it uses the internal browser if the user chose so. 
+	 */
+	class ItemClickListener implements View.OnClickListener {
+		
+		private String url;
+		
+		public ItemClickListener (String url)
+		{
+			this.url = url;
+		}
+		
+		public void onClick (View view)
+		{
+			main.item (url);
+		}
+	}
+
+	/// The main activity
 	MainActivity main;
 	
 	/// The root view of the fragment
@@ -762,6 +779,9 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 
 	/// The current filter
 	private Filter currentFilter;
+	
+	/// URL format
+	private String URL_FORMAT = "<u>%s</u>";
 	
 	public ItemsFragment ()
 	{

@@ -215,10 +215,10 @@
         
     <style name="ItemMeaning" parent="ItemStrings">
 		<item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
-        <item name="android:textColorLink">#fff</item>
         <item name="android:textColor">#fff</item>
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
+        <item name="android:clickable">true</item>
    </style>
     	
     <style name="ItemReading" parent="ItemStrings">

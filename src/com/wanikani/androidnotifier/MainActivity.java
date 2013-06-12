@@ -412,12 +412,6 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	/** The items fragment */
 	ItemsFragment itemsf;
 	
-	/** Compiler flag, enabling integrated lessons. Currently they are disabled
-	 *  because javascript here is a lot different and it is quite hard to debug
-	 *  (lessons are not quite as frequent as reviews)
-	 */
-	private static final boolean INTEGRATED_LESSONS = false;
-
 	/** An action that should be invoked to force refresh. This is used typically
 	 *  when reviews complete
 	 */
@@ -853,45 +847,53 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	 */
 	public void review ()
 	{
-		SharedPreferences prefs;
 		Intent intent;
 		
 		intent = new Intent (MainActivity.this, NotificationService.class);			
 		intent.setAction (NotificationService.ACTION_HIDE_NOTIFICATION);			
 		startService (intent);
 		
+		open (WebReviewActivity.WKConfig.REVIEW_START);
+	}
+	
+	/**
+	 * Called when the "Unlock" button is clicked. According
+	 * to user preferences, it sill start either an integrated WebView
+	 * or an external browser. 
+	 */
+	public void lessons ()
+	{
+		open (WebReviewActivity.WKConfig.LESSON_START);
+	}
+	
+	/**
+	 * Called to open an item page.
+	 * @param url the url page
+	 */
+	public void item (String url)
+	{
+		open (url);
+	}
+	
+	/**
+	 * Open an URL. Depending on the integrated browser key, it chooses
+	 * whether to use the internal or the external browser.
+	 * 	@param url the URL to open
+	 */
+	protected void open (String url)
+	{
+		SharedPreferences prefs;
+		Intent intent;
+			
 		prefs = PreferenceManager.getDefaultSharedPreferences (MainActivity.this);
 		if (SettingsActivity.getUseIntegratedBrowser (prefs)) {
 			intent = new Intent (MainActivity.this, WebReviewActivity.class);
 			intent.setAction (WebReviewActivity.OPEN_ACTION);
 		} else
 			intent = new Intent (Intent.ACTION_VIEW);
-
-		intent.setData (Uri.parse (WebReviewActivity.WKConfig.REVIEW_START));
-		startActivity (intent);
-	}
-	
-	/**
-	 * Called when the "Unlock" button is clicked. According
-	 * to user preferences, it sill start either an integrated WebView
-	 * or an external browser. This feature is currently disabled
-	 * because the lessons' javascript is tougher to customize.
-	 * To enable it, set @link {@link #INTEGRATED_LESSONS} to true.
-	 */
-	public void lessons ()
-	{
-		SharedPreferences prefs;
-		Intent intent;
-			
-		prefs = PreferenceManager.getDefaultSharedPreferences (MainActivity.this);
-		if (SettingsActivity.getUseIntegratedBrowser (prefs) && INTEGRATED_LESSONS) {
-			intent = new Intent (MainActivity.this, WebReviewActivity.class);
-			intent.setAction (WebReviewActivity.OPEN_ACTION);
-		} else
-			intent = new Intent (Intent.ACTION_VIEW);
 		
-		intent.setData (Uri.parse (WebReviewActivity.WKConfig.LESSON_START));
-		startActivity (intent);
+		intent.setData (Uri.parse (url));
+		startActivity (intent);		
 	}
 	
 	/**
