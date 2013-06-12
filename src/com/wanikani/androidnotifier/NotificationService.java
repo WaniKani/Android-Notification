@@ -326,10 +326,13 @@ public class NotificationService
 	{
 		NotificationManager nmanager;
 		NotificationCompat.Builder builder;
+		SharedPreferences prefs;
 		Notification not;
 		PendingIntent pint;
 		Intent intent;
 		String text;
+
+		prefs = PreferenceManager.getDefaultSharedPreferences (this); 
 			
 		intent = new Intent (this, NotificationService.class);
 		intent.setAction (ACTION_TAP);
@@ -339,8 +342,11 @@ public class NotificationService
 		builder = new NotificationCompat.Builder (this);
 		builder.setSmallIcon (R.drawable.not_icon);
 		
-		text = getString (reviews == 1 ? 
-						 R.string.new_review : R.string.new_reviews, reviews);
+		if (SettingsActivity.get42plus (prefs) && reviews > DashboardFragment.LESSONS_42P)
+			text = getString (R.string.new_reviews_42plus, reviews);
+		else
+			text = getString (reviews == 1 ? 
+						      R.string.new_review : R.string.new_reviews, reviews);
 		builder.setContentTitle (getString (R.string.app_name));
 								 
 		builder.setContentText (text);

@@ -2,9 +2,8 @@ package com.wanikani.androidnotifier;
 
 import java.util.Date;
 
-import com.wanikani.wklib.Item;
-
 import android.app.Activity;
+import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -14,6 +13,7 @@ import android.graphics.PorterDuffXfermode;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.text.Html;
 import android.view.LayoutInflater;
@@ -22,6 +22,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+
+import com.wanikani.wklib.Item;
 
 /* 
  *  Copyright (c) 2013 Alberto Cuda
@@ -112,6 +114,9 @@ public class DashboardFragment extends Fragment implements Tab {
 	
 	/// True if the spinner is (also virtually) visible
 	boolean spinning;
+	
+	/// Number of reviews/lessons before switching to 42+ mode
+	public static final int LESSONS_42P = 42;
 	
 	@Override
 	public void onAttach (Activity main)
@@ -285,11 +290,14 @@ public class DashboardFragment extends Fragment implements Tab {
 	 */
 	public void refreshComplete (DashboardData dd)
 	{
+		SharedPreferences prefs;
 		ImageView iw;
 		String s;
 
 		if (!isResumed () || dd == null)
 			return;
+		
+		prefs = PreferenceManager.getDefaultSharedPreferences (main);
 		
 		iw = (ImageView) parent.findViewById (R.id.iv_gravatar);
 		if (dd.gravatar != null)
@@ -298,7 +306,11 @@ public class DashboardFragment extends Fragment implements Tab {
 		setText (R.id.tv_username, dd.username);
 		setText (R.id.tv_level, getString (R.string.fmt_level, dd.level));
 		setText (R.id.tv_title, getString (R.string.fmt_title, dd.title));
-		setText (R.id.reviews_val, Integer.toString (dd.reviewsAvailable));
+		
+		if (SettingsActivity.get42plus (prefs) && dd.reviewsAvailable > LESSONS_42P)
+			setText (R.id.reviews_val, LESSONS_42P + "+");
+		else
+			setText (R.id.reviews_val, Integer.toString (dd.reviewsAvailable));
 		setVisibility (R.id.tr_r_now, dd.reviewsAvailable > 0 ? View.VISIBLE : View.GONE);
 		setText (R.id.tv_next_review, R.string.tag_next_review);
 		
@@ -313,6 +325,9 @@ public class DashboardFragment extends Fragment implements Tab {
 			setVisibility (R.id.btn_review, View.GONE);
 		}
 		
+		if (SettingsActivity.get42plus (prefs) && dd.lessonsAvailable > LESSONS_42P)
+			setText (R.id.lessons_available, 
+					 getString (R.string.fmt_lessons_42p, LESSONS_42P));
 		if (dd.lessonsAvailable > 1) {
 			s = getString (R.string.fmt_lessons, dd.lessonsAvailable);
 			setText (R.id.lessons_available, s);

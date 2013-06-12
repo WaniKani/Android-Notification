@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+    <EditTextPreference android:key="pref_userkey" 
+        	android:title="@string/pref_userkey" android:summary="@string/pref_userkey_descr"/>
     <CheckBoxPreference 
         	android:key="pref_enabled" 
         	android:title="@string/pref_enabled" 
@@ -8,11 +10,19 @@
         	android:key="pref_use_integrated_browser"
         	android:title="@string/pref_use_integrated_browser"
         	android:defaultValue="true" />
-    <EditTextPreference android:key="pref_userkey" 
-        	android:title="@string/pref_userkey" android:summary="@string/pref_userkey_descr"/>
     <EditTextPreference  
         	android:title="@string/pref_refresh_timeout" 
         	android:key="pref_refresh_timeout"
         	android:inputType="number"
         	android:defaultValue="5"/>    
+    <CheckBoxPreference
+        	android:key="pref_enter"
+        	android:title="@string/pref_enter"
+        	android:summary="@string/pref_enter_descr"
+        	android:defaultValue="true" />
+    <CheckBoxPreference
+        	android:key="pref_42plus"
+        	android:title="@string/pref_42plus"
+        	android:summary="@string/pref_42plus_descr"
+        	android:defaultValue="false" />
 </PreferenceScreen>

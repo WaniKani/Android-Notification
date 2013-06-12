@@ -2,14 +2,13 @@ package com.wanikani.androidnotifier;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.view.KeyEvent;
 import android.view.View;
-import android.webkit.ConsoleMessage;
-import android.webkit.CookieManager;
-import android.webkit.CookieSyncManager;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
@@ -306,6 +305,23 @@ public class WebReviewActivity extends Activity {
 		}
 	};
 	
+	private class PreferencesListener 
+		implements SharedPreferences.OnSharedPreferenceChangeListener {
+		
+		/**
+		 * Called when the user changes the settings. We handle the event
+		 * to update the enable state of the enter key. 
+		 * @param prefs the preferences
+		 * @param key the settings key just changed
+		 */
+		@Override
+		public void onSharedPreferenceChanged (SharedPreferences prefs, String key)
+		{
+			updateLayout (prefs);
+		}
+
+	};
+	
 	/**
 	 * Keyboard visiblity status.
 	 */
@@ -424,6 +440,8 @@ public class WebReviewActivity extends Activity {
 	public void onCreate (Bundle bundle) 
 	{
 		super.onCreate (bundle);
+
+		SharedPreferences prefs;
 		
 		setContentView (R.layout.web_review);
 		
@@ -446,9 +464,11 @@ public class WebReviewActivity extends Activity {
 		wv.setWebViewClient (new WebViewClientImpl ());
 		wv.setWebChromeClient (new WebChromeClientImpl ());		
 		
-		System.out.println ("XXX" + getIntent ().getData ());
-		String s = getIntent ().getData ().toString ();
 		wv.loadUrl (getIntent ().getData ().toString ());
+		
+		prefs = PreferenceManager.getDefaultSharedPreferences (this);
+		prefs.registerOnSharedPreferenceChangeListener (new PreferencesListener ());
+		updateLayout (prefs);
 	}
 	
 	@Override
@@ -487,6 +507,18 @@ public class WebReviewActivity extends Activity {
 			key = findViewById (meta_table [i]);
 			key.setOnClickListener (mlist);
 		}					
+	}
+	
+	/**
+	 * Updates the layout, according to the current preferences
+	 * @param prefs the preferences
+	 */
+	private void updateLayout (SharedPreferences prefs)
+	{
+		View key;
+		
+		key = findViewById (R.id.kb_enter);
+		key.setEnabled (SettingsActivity.getEnter (prefs));
 	}
 	
 	/**

@@ -63,7 +63,25 @@ import com.wanikani.wklib.UserLogin;
  */
 public class MainActivity extends FragmentActivity implements Runnable {
 	
-	/**
+	private class PreferencesListener 
+		implements SharedPreferences.OnSharedPreferenceChangeListener {
+
+		/**
+		 * Called when the user changes the settings. We handle the event
+		 * to update the enable state of the enter key. 
+		 * @param prefs the preferences
+		 * @param key the settings key just changed
+	 	 */
+		@Override
+		public void onSharedPreferenceChanged (SharedPreferences prefs, String key)
+		{
+			if (dd != null)
+				refreshComplete (dd);
+		}
+	};
+
+
+/**
 	 * The pager model. It also broadcasts requests to all the
 	 * tabs throught the @link Tab interface.
 	 */
@@ -539,6 +557,7 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	{
 		IntentFilter filter;
 		LocalBroadcastManager lbm;
+		SharedPreferences prefs;
 				
 		lbm = LocalBroadcastManager.getInstance (this);
 		
@@ -546,6 +565,9 @@ public class MainActivity extends FragmentActivity implements Runnable {
 		filter.addAction (SettingsActivity.ACT_NOTIFY);
 		filter.addAction (ACTION_REFRESH);
 		lbm.registerReceiver (receiver, filter);
+		
+		prefs = PreferenceManager.getDefaultSharedPreferences (this);
+		prefs.registerOnSharedPreferenceChangeListener (new PreferencesListener ());		
 	}
 	
 	/**

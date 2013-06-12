@@ -46,13 +46,16 @@ public class SettingsActivity
 	private static final String KEY_PREF_USERKEY = "pref_userkey";
 	/** Refresh timeout. Must match preferences.xml */
 	private static final String KEY_PREF_REFRESH_TIMEOUT = "pref_refresh_timeout";
+	/** Enable enter keyboard key. Must match preferences.xml */
+	private static final String KEY_PREF_ENTER = "pref_enter";
+	/** Enable 42+ mode. Must match preferences.xml */
+	private static final String KEY_PREF_42PLUS = "pref_42plus";
 	
 	/** The correct length of the API key (as far as we know) */
 	private static final int EXPECTED_KEYLEN = 32;
 	
 	/** Default timeout */
 	private static final int DEFAULT_REFRESH_TIMEOUT = 5;
-	
 	
 	/** The current login. Used to check whether something gets changed */
 	private UserLogin login;
@@ -110,17 +113,14 @@ public class SettingsActivity
 	public void onSharedPreferenceChanged (SharedPreferences prefs, String key)
 	{
 		Resources res;
-		Preference pref, subpref;
+		Preference pref;
 		int timeout;
 		String s;
 		
 		pref = findPreference (key);
 		res = getResources ();
 		
-		if (key.equals (KEY_PREF_ENABLED)) {
-			subpref = findPreference (KEY_PREF_USE_INTEGRATED_BROWSER);
-			subpref.setEnabled (getEnabled (prefs));
-		} else if (key.equals (KEY_PREF_USE_INTEGRATED_BROWSER)) {
+		if (key.equals (KEY_PREF_USE_INTEGRATED_BROWSER)) {
 			pref.setSummary (getUseIntegratedBrowser (prefs) ? 
 							 R.string.pref_use_integrated_browser_desc :
 							 R.string.pref_use_external_browser_desc);
@@ -199,6 +199,16 @@ public class SettingsActivity
 	public static int getRefreshTimeout (SharedPreferences prefs)
 	{
 		return getInt (prefs, KEY_PREF_REFRESH_TIMEOUT, DEFAULT_REFRESH_TIMEOUT);
+	}
+	
+	public static boolean getEnter (SharedPreferences prefs)
+	{
+		return prefs.getBoolean (KEY_PREF_ENTER, true);
+	}
+	
+	public static boolean get42plus (SharedPreferences prefs)
+	{
+		return prefs.getBoolean (KEY_PREF_42PLUS, false);
 	}
 	
 	private static int getInt (SharedPreferences prefs, String key, int defval)
