@@ -246,14 +246,14 @@
               android:maxWidth="24dp"
               android:minHeight="24dip"
               android:minWidth="24dip"
-              android:visibility="gone"/>            
+              android:visibility="visible"/>            
                   
         <TableLayout
             android:id="@+id/progress_section"
             style="@style/ProgressTable"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:visibility="visible" >
+            android:visibility="invisible" >
 
         <TableRow
             android:layout_width="fill_parent"
