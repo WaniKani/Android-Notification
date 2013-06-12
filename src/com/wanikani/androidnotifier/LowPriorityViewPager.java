@@ -17,6 +17,8 @@ package com.wanikani.androidnotifier;
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import java.lang.reflect.Method;
+
 import android.content.Context;
 import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
@@ -32,6 +34,9 @@ public class LowPriorityViewPager extends ViewPager {
 	/// The main activity
 	MainActivity main;
 	
+	/// A package private setCurrentItem method we use to perform smooth scrolling
+	Method setCurrentItemInternalMethod;
+	
 	/**
 	 * Constructor.
 	 * @param ctxt context
@@ -40,6 +45,16 @@ public class LowPriorityViewPager extends ViewPager {
 	public LowPriorityViewPager (Context ctxt, AttributeSet attrs)
 	{
 		super (ctxt, attrs);
+		
+		try {
+			setCurrentItemInternalMethod = getClass ().
+					getDeclaredMethod ("setCurrentItemInternal", 
+							           Integer.class, Boolean.class, 
+							           Boolean.class, Integer.class);
+			setCurrentItemInternalMethod.setAccessible (true);
+		} catch (Exception e) {
+			/* Any exception is ok, after all. We simply disable the mechanism */
+		}
 	}
 	
 	/**
@@ -60,5 +75,28 @@ public class LowPriorityViewPager extends ViewPager {
 	{		
 		return (main == null || !main.scrollLock (getCurrentItem ())) && 
 					super.onInterceptTouchEvent (ev);
+	}
+	
+	/**
+	 * Called to switch to another tab. The superclass implementation
+	 * is not good enough because velocity is set to zero (don't know why).
+	 * So if we managed to fetch the package-private worker method,
+	 * we use it directly. Otherwise, we simply move to the next page
+	 * in the ordinary way, it's not the end of the world... 
+	 * @param pos the new position
+	 */
+	@Override
+	public void setCurrentItem (int pos, boolean smooth)
+	{
+		if (smooth && setCurrentItemInternalMethod != null) {
+			try {
+				setCurrentItemInternalMethod.invoke (this, pos, smooth, false, 1);
+				return;
+			} catch (Exception e) {
+				/* Fall back */
+			}
+		}
+			
+		super.setCurrentItem (pos, smooth);		
 	}
 }
