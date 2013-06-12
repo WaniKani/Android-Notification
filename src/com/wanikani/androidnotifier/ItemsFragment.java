@@ -120,13 +120,20 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 			public String getInfo (Resources res, Item i)
 			{
 				int pmean, pread;
+				String simple;
 				
 				if (i.percentage < 0)
 					return "";
 				
+				simple = res.getString (R.string.fmt_ii_percent, i.percentage);
 				if (i.stats == null || 
 					i.stats.reading == null || i.stats.meaning == null)
-					return res.getString (R.string.fmt_ii_percent, i.percentage);
+					return simple;
+				
+				if ((i.stats.meaning.correct + i.stats.meaning.incorrect) == 0)
+					return simple;
+				if ((i.stats.reading.correct + i.stats.reading.incorrect) == 0)
+					return simple;
 				
 				pmean = i.stats.meaning.correct * 100 / 
 						(i.stats.meaning.correct + i.stats.meaning.incorrect);
