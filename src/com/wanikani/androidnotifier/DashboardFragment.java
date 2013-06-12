@@ -15,6 +15,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -250,6 +251,7 @@ public class DashboardFragment extends Fragment implements Tab {
 		TextView tw;
 		ProgressBar pb;
 		int percent, rem, grace;
+		String s;
 
 		percent = prog * 100 / total;
 		
@@ -259,15 +261,19 @@ public class DashboardFragment extends Fragment implements Tab {
 		tw = (TextView) parent.findViewById (rid);
 		rem = total - prog;
 		grace = total / 10;
-		if (percent < 90) {
-			tw.setText (getString (R.string.fmt_to_go, rem - grace, rem));
-			tw.setVisibility (View.VISIBLE);
-		} else if (prog < total) {
-			tw.setText (getString (R.string.fmt_remaining, rem));
+		if (percent < 90)
+			s = getString (R.string.fmt_to_go, rem - grace, rem);
+		else if (prog < total)
+			s = getString (R.string.fmt_remaining, rem);
+		else
+			s = null;
+			
+		if (s != null) {
+			s = String.format ("<font color=\"blue\"><u>%s</u></font>", s);
+			tw.setText (Html.fromHtml (s));
 			tw.setVisibility (View.VISIBLE);
 		} else
-			tw.setVisibility (View.GONE);
-		
+			tw.setVisibility (View.GONE);			
 	}
 	
 	/**
