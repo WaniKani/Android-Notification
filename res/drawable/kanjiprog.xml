@@ -19,7 +19,7 @@
         </item>
         </layer-list>
     </item>
-    <item android:id="@android:id/secondaryProgress">
+    <item android:id="@android:id/progress">
         <clip>
             <shape>
                 <gradient
@@ -30,7 +30,7 @@
             </shape>
         </clip>
     </item>	
-    <item android:id="@android:id/progress">
+    <item android:id="@android:id/secondaryProgress">
         <clip>
             <shape>
                 <gradient
