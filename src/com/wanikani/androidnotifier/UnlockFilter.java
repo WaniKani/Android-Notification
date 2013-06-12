@@ -176,6 +176,7 @@ public class UnlockFilter implements Filter {
 	 */
 	public void select (Connection conn)
 	{
+		itemf.enableSorting (false, true);
 		if (citems != null) {
 			itemf.setData (this, citems, true);
 			itemf.selectOtherFilter (this, false);

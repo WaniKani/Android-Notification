@@ -881,7 +881,7 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	 */
 	public void showRemaining (Item.Type type)
 	{
-		pager.setCurrentItem (pad.getTabIndex (dashboardf));
+		pager.setCurrentItem (pad.getTabIndex (itemsf), true);
 		itemsf.setLevelFilter (dd.level, true, type);
 	}
 

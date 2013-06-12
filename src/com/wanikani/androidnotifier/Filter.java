@@ -105,6 +105,16 @@ public interface Filter {
 		 * @param spinning set if data retrieval is in progress
 		 */
 		void selectOtherFilter (Filter filter, boolean spinning);
+		
+		/**
+		 * Enables or disables sort orders, according to the info this
+		 * filter is capable to offer. For instance recent unlocks
+		 * do not provide statistical information, so sorting by
+		 * errors is not possible.
+		 * @param errors enables or disables sort by errors
+		 * @param unlock enables or disables unlock date
+		 */
+		void enableSorting (boolean errors, boolean unlock);
 	}
 
 	/** 

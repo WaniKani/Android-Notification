@@ -961,6 +961,7 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 		this.apprentice = apprentice;
 		currentFilter = levelf;
 		levelf.select (main.getConnection (), level, apprentice, type);
+		iview.setSelection (0);
 	}
 
 	/**
@@ -975,6 +976,7 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 
 		currentFilter = criticalf;
 		criticalf.select (main.getConnection ());
+		iview.setSelection (0);
 	}
 
 	/**
@@ -989,6 +991,7 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 
 		currentFilter = unlockf;
 		unlockf.select (main.getConnection ());
+		iview.setSelection (0);
 	}
 
 	/**
@@ -1180,6 +1183,18 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 			levels.setVisibility (View.VISIBLE);
 			filler.setVisibility (View.GONE);
 		} 
+	}
+	
+	@Override
+	public void enableSorting (boolean errors, boolean unlock)
+	{
+		View view;
+		
+		view = parent.findViewById (R.id.btn_sort_errors);
+		view.setEnabled (errors);
+
+		view = parent.findViewById (R.id.btn_sort_time);
+		view.setEnabled (unlock);
 	}
 
 	/**
