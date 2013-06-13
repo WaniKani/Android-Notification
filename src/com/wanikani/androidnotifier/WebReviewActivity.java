@@ -72,8 +72,11 @@ public class WebReviewActivity extends Activity {
 		static final String ANSWER_BOX = "user_response";
 
 		/** HTML id of the textbox the user types its answer in (lessons) */
-		static final String LESSON_ANSWER_BOX = "lesson_user_response";
+		static final String LESSON_ANSWER_BOX_JP = "translit";
 		
+		/** HTML id of the textbox the user types its answer in (lessons) */
+		static final String LESSON_ANSWER_BOX_EN = "lesson_user_response";
+
 		/** HTML id of the submit button */
 		static final String SUBMIT_BUTTON = "option-submit";
 
@@ -195,6 +198,10 @@ public class WebReviewActivity extends Activity {
 			case VISIBLE:
 				show ();
 				break;
+
+			case VISIBLE_LESSONS:
+				showLessons ();
+				break;
 				
 			case HIDDEN:
 				hide ();
@@ -221,6 +228,16 @@ public class WebReviewActivity extends Activity {
 		public void show ()
 		{
 			new ShowHideKeyboard (KeyboardStatus.VISIBLE);
+		}
+
+		/**
+		 * Called by javascript when the keyboard should be shown, using
+		 * lessons layout.
+		 */
+		@JavascriptInterface
+		public void showLessons ()
+		{
+			new ShowHideKeyboard (KeyboardStatus.VISIBLE_LESSONS);
 		}
 
 		/**
@@ -329,6 +346,9 @@ public class WebReviewActivity extends Activity {
 		/** Keyboard visible, all keys visible */
 		VISIBLE, 
 		
+		/** Keyboard visible, all keys but ENTER visible */
+		VISIBLE_LESSONS, 
+
 		/** Keyboard invisible */
 		HIDDEN, 
 		
@@ -362,18 +382,32 @@ public class WebReviewActivity extends Activity {
 	
 	/** Javascript to be called each time an HTML page is loaded. It hides or shows the keyboard */
 	private static final String JS_INIT = 
-			"var textbox = document.getElementById (\"" + WKConfig.ANSWER_BOX + "\"); " +
-		    "if (textbox == null) {" +
-		    "    textbox = document.getElementById (\"" + WKConfig.LESSON_ANSWER_BOX + "\"); " +
-		    "       if (textbox != null) {" +
-		    "           textbox.focus ();" +
-		    "    }" +
-		    "} " +
+			"var textbox, ltextbox;" +
+			"textbox = document.getElementById (\"" + WKConfig.ANSWER_BOX + "\"); " +
+			"ltextbox = document.getElementById (\"" + WKConfig.LESSON_ANSWER_BOX_JP + "\"); " +
+			"if (ltextbox == null) {" +
+			"   ltextbox = document.getElementById (\"" + WKConfig.LESSON_ANSWER_BOX_EN + "\"); " +
+			"}" +
 			"if (textbox != null && !textbox.disabled) {" +
 			"	wknKeyboard.show ();" +
-			"} else {" +
+			"} else if (ltextbox != null) {" +
+			"   wknKeyboard.showLessons ();" +
+			"} else {" +			
 			"	wknKeyboard.hide ();" +
 			"}";
+	
+	/** Javascript to be called right before striking a key. It is needed
+	 * to focus on the answer lesson box, if not done yet. */
+	private final static String JS_FOCUS =
+			"var ltextbox;" +
+			"ltextbox = document.getElementById (\"" + WKConfig.LESSON_ANSWER_BOX_JP + "\"); " +
+			"if (ltextbox == null) {" +
+			"   ltextbox = document.getElementById (\"" + WKConfig.LESSON_ANSWER_BOX_EN + "\"); " +
+			"}" +
+		    "if (ltextbox != null && document.activeElement != ltextbox && " +
+		    "    document.activeElement != ltextbox) {" +
+		    "       ltextbox.focus ();" +
+		    "}";
 
 	/** Javascript to be invoked to simulate a click on the submit (heart-shaped) button.
 	 *  It also handles keyboard show/iconize logic. If the textbox is enabled, then this
@@ -565,6 +599,7 @@ public class WebReviewActivity extends Activity {
 		} else if (keycode == KeyEvent.KEYCODE_ENTER)
 			js (JS_ENTER);
 		else {
+			js (JS_FOCUS);
 			kdown = new KeyEvent (KeyEvent.ACTION_DOWN, keycode);
 			wv.dispatchKeyEvent (kdown);				
 			kup = new KeyEvent (KeyEvent.ACTION_UP, keycode);
@@ -658,7 +693,20 @@ public class WebReviewActivity extends Activity {
 
 		view = findViewById (R.id.keyboard);
 		view.setVisibility (View.VISIBLE);					
-}
+	}
+
+	/**
+	 * Shows the keyboard, hiding the enter key, which is problematic
+	 * on lessons. 
+	 */
+	protected void showLessons ()
+	{
+		View key;
+		
+		show ();
+		key = findViewById (R.id.kb_enter);
+		key.setVisibility (View.INVISIBLE);
+	}
 
 	/**
 	 * Iconize the keyboard. This method hides all the keys except
