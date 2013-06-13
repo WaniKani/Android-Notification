@@ -396,19 +396,6 @@ public class WebReviewActivity extends Activity {
 			"	wknKeyboard.hide ();" +
 			"}";
 	
-	/** Javascript to be called right before striking a key. It is needed
-	 * to focus on the answer lesson box, if not done yet. */
-	private final static String JS_FOCUS =
-			"var ltextbox;" +
-			"ltextbox = document.getElementById (\"" + WKConfig.LESSON_ANSWER_BOX_JP + "\"); " +
-			"if (ltextbox == null) {" +
-			"   ltextbox = document.getElementById (\"" + WKConfig.LESSON_ANSWER_BOX_EN + "\"); " +
-			"}" +
-		    "if (ltextbox != null && document.activeElement != ltextbox && " +
-		    "    document.activeElement != ltextbox) {" +
-		    "       ltextbox.focus ();" +
-		    "}";
-
 	/** Javascript to be invoked to simulate a click on the submit (heart-shaped) button.
 	 *  It also handles keyboard show/iconize logic. If the textbox is enabled, then this
 	 *  is an answer, so we iconize the keyboard. Otherwise we are entering the new question,
@@ -422,11 +409,7 @@ public class WebReviewActivity extends Activity {
 			"	   wknKeyboard.iconize ();" +
 			"   }" +
 			"   $(\"#" + WKConfig.SUBMIT_BUTTON + "\").click();" + 
-			"} " +
-			"var form = document.getElementById (\"" + WKConfig.LESSONS_REVIEW_FORM + "\"); " +
-		    "if (form != null) {" +
-		    "   form.submit ();" +
-		    "}";
+			"}";
 
 	/** The default keyboard. This is the sequence of keys from left to right, from top to bottom */
 	private static final String KB_LATIN = "qwertyuiopasdfghjkl'zxcvbnm";
@@ -599,7 +582,6 @@ public class WebReviewActivity extends Activity {
 		} else if (keycode == KeyEvent.KEYCODE_ENTER)
 			js (JS_ENTER);
 		else {
-			js (JS_FOCUS);
 			kdown = new KeyEvent (KeyEvent.ACTION_DOWN, keycode);
 			wv.dispatchKeyEvent (kdown);				
 			kup = new KeyEvent (KeyEvent.ACTION_UP, keycode);
