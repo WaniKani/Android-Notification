@@ -104,6 +104,9 @@
 		<item name="android:gravity">right</item>
     </style>
 		
+	<style parent="Table" name="AlertsTable">	    
+	</style>
+	
     <style parent="Table" name="ProgressTable">
 	</style>
 	

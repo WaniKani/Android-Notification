@@ -211,31 +211,66 @@
         </TableLayout>
 
         <!-- Unlock/Lessons message -->
-
-
-		<LinearLayout
-            android:id="@+id/lay_lessons_available"
-            style="@style/LessonsAvailable"
-            android:layout_width="fill_parent"
-            android:orientation="horizontal"
-            android:visibility="gone">            
-        <TextView
-            android:id="@+id/lessons_available"
-            style="@style/LessonsAvailable"
-            android:layout_width="wrap_content"
-            android:textIsSelectable="true"/>
-        <Button
-            android:id="@+id/btn_lessons_available"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/tag_unlock"/>
-		</LinearLayout>
 		
+		<!-- Lessons available/Critical -->
+		<LinearLayout 
+		    android:orientation="vertical"
+		    android:layout_width="match_parent"
+		    android:layout_height="wrap_content"
+		    style="@style/AlertsTable">
+		    <LinearLayout 
+		        android:orientation="horizontal"
+		    	android:layout_width="wrap_content"
+		    	android:layout_height="wrap_content">
+		    	<ImageButton
+		    	    style="@style/ItemButton"
+		    	    android:id="@+id/btn_critical" 
+		    	    android:src="@drawable/critical"/>
+		    	<ImageButton
+		    	    style="@style/ItemButton"
+		    	    android:id="@+id/btn_lessons" 
+		    	    android:src="@drawable/lessons"/>
+		    </LinearLayout>
+		    <LinearLayout
+		        android:id="@+id/lay_critical_items" 
+		        android:orientation="horizontal"
+		    	android:layout_width="wrap_content"
+		    	android:layout_height="wrap_content">
+        		<TextView
+            		android:id="@+id/critical_items"
+            		style="@style/LessonsAvailable"
+            		android:layout_width="wrap_content"
+            		android:textIsSelectable="true"/>
+        		<Button
+            		android:id="@+id/btn_critical_items"
+            		android:layout_width="wrap_content"
+            		android:layout_height="wrap_content"
+            		android:text="@string/tag_unlock"/>
+		    </LinearLayout>
+		    <LinearLayout
+		        android:id="@+id/lay_lessons_available" 
+		        android:orientation="horizontal"
+		    	android:layout_width="wrap_content"
+		    	android:layout_height="wrap_content">
+        		<TextView
+            		android:id="@+id/lessons_available"
+            		style="@style/LessonsAvailable"
+            		android:layout_width="wrap_content"
+            		android:textIsSelectable="true"/>
+        		<Button
+            		android:id="@+id/btn_lessons_available"
+            		android:layout_width="wrap_content"
+            		android:layout_height="wrap_content"
+            		android:text="@string/tag_unlock"/>
+		    </LinearLayout>
+		  </LinearLayout>
+		  		
         <!-- Progress -->
 
 		<RelativeLayout
 		    android:layout_width="fill_parent"
-		    android:layout_height="wrap_content">
+		    android:layout_height="wrap_content"
+		    style="@style/ProgressTable">
          <ProgressBar
               android:id="@+id/pb_w_section"
               android:layout_width="wrap_content"
@@ -250,7 +285,6 @@
                   
         <TableLayout
             android:id="@+id/progress_section"
-            style="@style/ProgressTable"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:visibility="invisible" >
