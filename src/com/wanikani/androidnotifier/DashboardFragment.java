@@ -90,10 +90,19 @@ public class DashboardFragment extends Fragment implements Tab {
 		}	
 	}
 
+	/**
+	 * Listener for clicks on remaining items link. Causes the pager to 
+	 * switch to the item tab, and sets the apprentice items filter.
+	 */
 	private class RemainingClickListener implements View.OnClickListener {
-				
+
+		/// The item type (typically radicals or kanji)
 		private Item.Type type;
 		
+		/**
+		 * Constructor
+		 * @param type the item type (typically radicals or kanji) 
+		 */
 		public RemainingClickListener (Item.Type type)
 		{
 			this.type = type;
@@ -106,6 +115,48 @@ public class DashboardFragment extends Fragment implements Tab {
 		}	
 	}
 	
+	/**
+	 * Listener for clicks on critical items link. Causes the pager to 
+	 * switch to the item tab, and sets the critical items filter.
+	 */
+	private class CriticalClickListener implements View.OnClickListener {
+
+		@Override
+		public void onClick (View v)
+		{
+			main.showCritical ();
+		}	
+	}
+	
+	/**
+	 * Listener for clicks on the critical/lessons popup button. Istances
+	 * of this class show or hide the view.
+	 */
+	private class AlertsClickListener implements View.OnClickListener {
+		
+		/// The view to show or hide
+		private int id;
+		
+		/**
+		 * Constructor.
+		 * @param id the view to show or hide
+		 */
+		AlertsClickListener (int id)
+		{
+			this.id = id;
+		}
+
+		@Override
+		public void onClick (View v)
+		{
+			View rw;
+			
+			rw = parent.findViewById (id);
+			rw.setVisibility (rw.getVisibility () == View.VISIBLE ?
+							  View.GONE : View.VISIBLE);
+		}	
+	}
+
 	/// The main activity
 	MainActivity main;
 	
@@ -157,6 +208,9 @@ public class DashboardFragment extends Fragment implements Tab {
 		view = parent.findViewById (R.id.btn_lessons_available);
 		view.setOnClickListener (new LessonsClickListener ());
 		
+		view = parent.findViewById (R.id.btn_view_critical);
+		view.setOnClickListener (new CriticalClickListener ());
+		
 		view = parent.findViewById (R.id.radicals_remaining);
 		view.setClickable (true);
 		view.setOnClickListener (new RemainingClickListener (Item.Type.RADICAL));
@@ -164,7 +218,13 @@ public class DashboardFragment extends Fragment implements Tab {
 		view = parent.findViewById (R.id.kanji_remaining);
 		view.setClickable (true);
 		view.setOnClickListener (new RemainingClickListener (Item.Type.KANJI));
-	}
+		
+		view = parent.findViewById (R.id.btn_critical);
+		view.setOnClickListener (new AlertsClickListener (R.id.lay_critical_items));
+
+		view = parent.findViewById (R.id.btn_lessons);
+		view.setOnClickListener (new AlertsClickListener (R.id.lay_lessons_available));
+}
 	
 	/**
 	 * Builds the GUI.
@@ -261,7 +321,7 @@ public class DashboardFragment extends Fragment implements Tab {
 		percent = prog * 100 / total;
 		
 		pb = (ProgressBar) parent.findViewById (pbid);
-		pb.setProgress (percent);
+		pb.setSecondaryProgress (percent);
 		
 		tw = (TextView) parent.findViewById (rid);
 		rem = total - prog;
@@ -299,6 +359,9 @@ public class DashboardFragment extends Fragment implements Tab {
 		
 		prefs = PreferenceManager.getDefaultSharedPreferences (main);
 		
+		/* Will be enabled later */
+		setVisibility (R.id.lay_alerts, View.GONE);
+		
 		iw = (ImageView) parent.findViewById (R.id.iv_gravatar);
 		if (dd.gravatar != null)
 			iw.setImageBitmap (mask (dd.gravatar));
@@ -334,8 +397,10 @@ public class DashboardFragment extends Fragment implements Tab {
 		} else if (dd.lessonsAvailable == 1)
 			setText (R.id.lessons_available, getString (R.string.fmt_one_lesson));
 		
-		setVisibility (R.id.lay_lessons_available,
+		setVisibility (R.id.btn_lessons,
 					   dd.lessonsAvailable > 0 ? View.VISIBLE : View.GONE);
+		if (dd.lessonsAvailable > 0)
+			setVisibility (R.id.lay_alerts, View.VISIBLE);
 		
 		setText (R.id.next_hour_val, Integer.toString (dd.reviewsAvailableNextHour));
 		setText (R.id.next_day_val, Integer.toString (dd.reviewsAvailableNextDay));
@@ -356,6 +421,18 @@ public class DashboardFragment extends Fragment implements Tab {
 
 			setVisibility (R.id.pb_w_section,View.GONE);
 			setVisibility (R.id.progress_section, View.VISIBLE);
+
+			if (dd.od.criticalItems > 1) {
+				s = getString (R.string.fmt_critical_items, dd.od.criticalItems);
+				setText (R.id.critical_items, s);
+			} else if (dd.od.criticalItems == 1)
+				setText (R.id.critical_items, getString (R.string.fmt_one_critical_item));
+			
+			setVisibility (R.id.btn_critical,
+						   dd.od.criticalItems > 0 ? View.VISIBLE : View.GONE);
+			if (dd.od.criticalItems > 0)
+				setVisibility (R.id.lay_alerts, View.VISIBLE);
+			
 			
 			break;
 			

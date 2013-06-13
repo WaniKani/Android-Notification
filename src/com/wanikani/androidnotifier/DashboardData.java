@@ -73,6 +73,9 @@ class DashboardData {
 		/** Level progression status */
 		public DashboardData.OptionalDataStatus lpStatus;
 		
+		/** Number of critical items */
+		public int criticalItems;
+		
 		/**
 		 * Constructor. Input parameters may be null.
 		 * In order to provide consistent behaviour:
@@ -88,15 +91,19 @@ class DashboardData {
 		 * @param srsStatus SRS Distribution status
 		 * @param lp the level progression
 		 * @param lpStatus level progression status
+		 * @param criticalItems number of critical items
 		 */
 		public OptionalData (SRSDistribution srs, DashboardData.OptionalDataStatus srsStatus, 
-							 LevelProgression lp, DashboardData.OptionalDataStatus lpStatus)
+							 LevelProgression lp, DashboardData.OptionalDataStatus lpStatus,
+							 int criticalItems)
 		{
 			this.srs = srs;
 			this.lp = lp;
 			
 			this.srsStatus = srsStatus;
 			this.lpStatus = lpStatus;
+			
+			this.criticalItems = criticalItems;
 		}
 		
 		/**

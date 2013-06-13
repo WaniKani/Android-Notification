@@ -61,7 +61,10 @@
     <string name="fmt_lessons_42p">You can unlock %d+ items</string>
     <string name="fmt_one_lesson">You can unlock one item</string>
 	<string name="tag_unlock">Unlock!</string>
-    
+    <string name="fmt_critical_items">You have %d critical items</string>
+    <string name="fmt_one_critical_item">You have one critical item</string>
+	<string name="tag_which_critical">Which?</string>
+    	
     <string name="fmt_web_review_connecting">Connecting to WaniKani&#8230;</string>
     <string name="fmt_web_review_error">Connection failed: %s</string>
     

@@ -210,14 +210,14 @@
             </TableRow>
         </TableLayout>
 
-        <!-- Unlock/Lessons message -->
-		
 		<!-- Lessons available/Critical -->
 		<LinearLayout 
+		    android:id="@+id/lay_alerts"
 		    android:orientation="vertical"
 		    android:layout_width="match_parent"
 		    android:layout_height="wrap_content"
-		    style="@style/AlertsTable">
+		    style="@style/AlertsTable"
+		    android:visibility="gone">
 		    <LinearLayout 
 		        android:orientation="horizontal"
 		    	android:layout_width="wrap_content"
@@ -225,37 +225,39 @@
 		    	<ImageButton
 		    	    style="@style/ItemButton"
 		    	    android:id="@+id/btn_critical" 
-		    	    android:src="@drawable/critical"/>
+		    	    android:src="@drawable/critical"
+		    	    android:visibility="gone"/>
 		    	<ImageButton
 		    	    style="@style/ItemButton"
 		    	    android:id="@+id/btn_lessons" 
-		    	    android:src="@drawable/lessons"/>
+		    	    android:src="@drawable/lessons"
+		    	    android:visibility="gone"/>
 		    </LinearLayout>
 		    <LinearLayout
 		        android:id="@+id/lay_critical_items" 
 		        android:orientation="horizontal"
-		    	android:layout_width="wrap_content"
-		    	android:layout_height="wrap_content">
+		    	android:layout_width="match_parent"
+		    	android:layout_height="wrap_content"
+		    	android:visibility="gone">
         		<TextView
             		android:id="@+id/critical_items"
             		style="@style/LessonsAvailable"
-            		android:layout_width="wrap_content"
             		android:textIsSelectable="true"/>
         		<Button
-            		android:id="@+id/btn_critical_items"
+            		android:id="@+id/btn_view_critical"
             		android:layout_width="wrap_content"
             		android:layout_height="wrap_content"
-            		android:text="@string/tag_unlock"/>
-		    </LinearLayout>
+            		android:text="@string/tag_which_critical"/>
+            </LinearLayout>
 		    <LinearLayout
 		        android:id="@+id/lay_lessons_available" 
 		        android:orientation="horizontal"
-		    	android:layout_width="wrap_content"
-		    	android:layout_height="wrap_content">
+		    	android:layout_width="match_parent"
+		    	android:layout_height="wrap_content"
+		    	android:visibility="gone">
         		<TextView
             		android:id="@+id/lessons_available"
             		style="@style/LessonsAvailable"
-            		android:layout_width="wrap_content"
             		android:textIsSelectable="true"/>
         		<Button
             		android:id="@+id/btn_lessons_available"

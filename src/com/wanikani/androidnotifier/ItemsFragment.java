@@ -994,7 +994,7 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 	/**
 	 * Switches to critical items filter. 
 	 */
-	private void setCriticalFilter ()
+	public void setCriticalFilter ()
 	{
 		RadioButton btn;
 		

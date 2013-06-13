@@ -33,6 +33,7 @@ import android.widget.TextView;
 import com.wanikani.wklib.AuthenticationException;
 import com.wanikani.wklib.Connection;
 import com.wanikani.wklib.Item;
+import com.wanikani.wklib.ItemLibrary;
 import com.wanikani.wklib.LevelProgression;
 import com.wanikani.wklib.SRSDistribution;
 import com.wanikani.wklib.StudyQueue;
@@ -324,6 +325,8 @@ public class MainActivity extends FragmentActivity implements Runnable {
 			DashboardData.OptionalDataStatus srsStatus, lpStatus;
 			SRSDistribution srs;
 			LevelProgression lp;
+			ItemLibrary<Item> critical;
+			int cis;
 			
 			try {
 				srs = conn [0].getSRSDistribution();
@@ -341,8 +344,17 @@ public class MainActivity extends FragmentActivity implements Runnable {
 				lpStatus = DashboardData.OptionalDataStatus.FAILED;
 			}
 
+			try {
+				critical = conn [0].getCriticalItems ();
+				lpStatus = DashboardData.OptionalDataStatus.RETRIEVED;
+				cis = critical.list.size ();
+			} catch (IOException e) {
+				lp = null;
+				lpStatus = DashboardData.OptionalDataStatus.FAILED;
+				cis = 0;
+			}
 			
-			return new DashboardData.OptionalData (srs, srsStatus, lp, lpStatus);
+			return new DashboardData.OptionalData (srs, srsStatus, lp, lpStatus, cis);
 		}	
 						
 		/**
@@ -898,7 +910,7 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	
 	/**
 	 * Shows the items tab, and applies a filter to displays only the apprentice items
-	 * of a given kind. Needed for the dashboard to implement the "remaining items"
+	 * of a given kind. Needed by the dashboard to implement the "remaining items"
 	 * feature
 	 * @param type the type to display. Theorically it could be null, but
 	 * 	do we really want to?
@@ -907,6 +919,16 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	{
 		pager.setCurrentItem (pad.getTabIndex (itemsf), true);
 		itemsf.setLevelFilter (dd.level, true, type);
+	}
+
+	/**
+	 * Shows the items tab, and applies a filter to displays only the critical items.
+	 * Needed by the dashboard to implement the "critical items" feature
+	 */
+	public void showCritical ()
+	{
+		pager.setCurrentItem (pad.getTabIndex (itemsf), true);
+		itemsf.setCriticalFilter ();
 	}
 
 	/**
