@@ -90,7 +90,7 @@ public class LowPriorityViewPager extends ViewPager {
 	{
 		if (smooth && setCurrentItemInternalMethod != null) {
 			try {
-				setCurrentItemInternalMethod.invoke (this, pos, smooth, false, 1);
+				setCurrentItemInternalMethod.invoke (this, pos, smooth, false, 2);
 				return;
 			} catch (Exception e) {
 				/* Fall back */
