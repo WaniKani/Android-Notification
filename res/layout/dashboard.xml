@@ -310,7 +310,7 @@
          	android:layout_gravity="center"
          	android:max="100"
          	style="@android:style/Widget.ProgressBar.Horizontal"
-         	android:secondaryProgress="90"
+         	android:progress="90"
          	android:progressDrawable="@drawable/radicalsprog"
          	android:layout_marginBottom="@dimen/m_gap"/>
             
@@ -334,7 +334,7 @@
          	android:layout_height="wrap_content"
          	android:layout_gravity="center"
          	android:max="100"
-         	android:secondaryProgress="90"
+         	android:progress="90"
          	style="@android:style/Widget.ProgressBar.Horizontal"
          	android:progressDrawable="@drawable/kanjiprog"
          	android:layout_marginBottom="@dimen/m_gap"/>
