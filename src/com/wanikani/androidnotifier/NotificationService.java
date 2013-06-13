@@ -343,7 +343,7 @@ public class NotificationService
 		builder.setSmallIcon (R.drawable.not_icon);
 		
 		if (SettingsActivity.get42plus (prefs) && reviews > DashboardFragment.LESSONS_42P)
-			text = getString (R.string.new_reviews_42plus, reviews);
+			text = getString (R.string.new_reviews_42plus, DashboardFragment.LESSONS_42P);
 		else
 			text = getString (reviews == 1 ? 
 						      R.string.new_review : R.string.new_reviews, reviews);
@@ -362,7 +362,8 @@ public class NotificationService
 	}
 	
 	/**
-	 * Hides the notification icon and resets the state machine.
+	 * Hides the notifi
+	 * cation icon and resets the state machine.
 	 */
 	public void hideNotification ()
 	{
