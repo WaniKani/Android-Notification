@@ -73,6 +73,7 @@
 
     <string name="tag_dashboard">Dashboard</string>
     <string name="tag_items">Items</string>
+    <string name="tag_stats">Stats</string>
     
     <string name="tag_filter_by">Show</string>
     <string name="tag_filter_all">all</string>

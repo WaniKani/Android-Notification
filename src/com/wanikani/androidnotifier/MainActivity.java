@@ -418,11 +418,17 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	/** Items fragment bundle key */
 	private static final String ITEMS_FRAGMENT = PREFIX + "ITEMS_FRAGMENT";
 	
+	/** Stats fragment bundle key */
+	private static final String STATS_FRAGMENT = PREFIX + "STATS_FRAGMENT";
+
 	/** The dashboard fragment */
 	DashboardFragment dashboardf;
 	
 	/** The items fragment */
 	ItemsFragment itemsf;
+	
+	/** The stats fragment */
+	StatsFragment statsf;
 	
 	/** An action that should be invoked to force refresh. This is used typically
 	 *  when reviews complete
@@ -461,12 +467,16 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	    if (bundle != null) {
 	    	dashboardf = (DashboardFragment) mgr.getFragment (bundle, DASHBOARD_FRAGMENT);
 	    	itemsf = (ItemsFragment) mgr.getFragment (bundle, ITEMS_FRAGMENT);
+	    	statsf = (StatsFragment) mgr.getFragment (bundle, STATS_FRAGMENT);
 	    }
 	    
 	    if (dashboardf == null)
 	    	dashboardf = new DashboardFragment ();
 	    if (itemsf == null)
 	    	itemsf = new ItemsFragment ();
+	    if (statsf == null)
+	    	statsf = new StatsFragment ();
+	    tabs.add (statsf);
 	    tabs.add (dashboardf);
 	    tabs.add (itemsf);
 	    
@@ -492,8 +502,10 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	    		refreshOptional ();
 			pager.setCurrentItem (bundle.getInt (CURRENT_TAB));
 
-	    } else
+	    } else {
+	    	pager.setCurrentItem (pad.getTabIndex (dashboardf), false);
 	    	refresh (false);
+	    }
 	}
 	
 	/**
