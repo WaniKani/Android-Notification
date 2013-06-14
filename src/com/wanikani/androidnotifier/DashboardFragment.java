@@ -263,14 +263,16 @@ public class DashboardFragment extends Fragment implements Tab {
 			break;
 			
 		case RETRIEVED:
-			pb = (ProgressBar) parent.findViewById (R.id.pb_radicals);
-			pb.setProgress (100 * dd.od.lp.radicalsProgress / dd.od.lp.radicalsTotal);
+			if (dd.od.lp != null) {
+				pb = (ProgressBar) parent.findViewById (R.id.pb_radicals);
+				pb.setProgress (100 * dd.od.lp.radicalsProgress / dd.od.lp.radicalsTotal);
 
-			pb = (ProgressBar) parent.findViewById (R.id.pb_kanji);
-			pb.setProgress (100 * dd.od.lp.kanjiProgress / dd.od.lp.kanjiTotal);
+				pb = (ProgressBar) parent.findViewById (R.id.pb_kanji);
+				pb.setProgress (100 * dd.od.lp.kanjiProgress / dd.od.lp.kanjiTotal);
 
-			setVisibility (R.id.progress_w_section,View.GONE);
-			setVisibility (R.id.progress_section, View.VISIBLE);
+				setVisibility (R.id.progress_w_section,View.GONE);
+				setVisibility (R.id.progress_section, View.VISIBLE);
+			}
 			break;
 			
 		case FAILED:
