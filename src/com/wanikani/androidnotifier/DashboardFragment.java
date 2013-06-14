@@ -413,14 +413,16 @@ public class DashboardFragment extends Fragment implements Tab {
 			break;
 			
 		case RETRIEVED:
-			setProgress (R.id.pb_radicals, R.id.radicals_remaining,
-						 dd.od.lp.radicalsProgress, dd.od.lp.radicalsTotal);
-			
-			setProgress (R.id.pb_kanji, R.id.kanji_remaining,
-						 dd.od.lp.kanjiProgress, dd.od.lp.kanjiTotal);
-
 			setVisibility (R.id.pb_w_section,View.GONE);
-			setVisibility (R.id.progress_section, View.VISIBLE);
+			if (dd.od.lp != null) {
+				setProgress (R.id.pb_radicals, R.id.radicals_remaining,
+						 	 dd.od.lp.radicalsProgress, dd.od.lp.radicalsTotal);
+			
+				setProgress (R.id.pb_kanji, R.id.kanji_remaining,
+						     dd.od.lp.kanjiProgress, dd.od.lp.kanjiTotal);
+
+				setVisibility (R.id.progress_section, View.VISIBLE);
+			}
 
 			if (dd.od.criticalItems > 1) {
 				s = getString (R.string.fmt_critical_items, dd.od.criticalItems);
@@ -432,7 +434,6 @@ public class DashboardFragment extends Fragment implements Tab {
 						   dd.od.criticalItems > 0 ? View.VISIBLE : View.GONE);
 			if (dd.od.criticalItems > 0)
 				setVisibility (R.id.lay_alerts, View.VISIBLE);
-			
 			
 			break;
 			
