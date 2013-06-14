@@ -200,7 +200,10 @@ public class WebReviewActivity extends Activity {
 				break;
 
 			case VISIBLE_LESSONS:
-				showLessons ();
+				/* Not tested yet, so disabled:
+				 *  showLessons (); 
+				 */
+				hide ();
 				break;
 				
 			case HIDDEN:
