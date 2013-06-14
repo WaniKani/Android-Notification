@@ -26,6 +26,8 @@ public class PiePlot extends View {
 		Path hpath;
 		
 		Paint fpaint;
+		
+		Paint spaint;
 
 		public DataSet (int color, float value)
 		{
@@ -42,7 +44,7 @@ public class PiePlot extends View {
 	
 	private static final float RATIO = 2F;
 	
-	private static final float HRATIO = 20;
+	private static final float HRATIO = 10;
 		
 	/**
 	 * Constructor.
@@ -109,10 +111,9 @@ public class PiePlot extends View {
 		for (DataSet ds : dsets) {
 			canvas.drawPath (ds.tpath, ds.fpaint);
 			if (ds.hpath != null)
-				canvas.drawPath (ds.hpath, ds.fpaint);
+				canvas.drawPath (ds.hpath, ds.spaint);
 		}
 		
-		canvas.rotate (15);
 	}
 	
 	@Override
@@ -163,12 +164,12 @@ public class PiePlot extends View {
 		float total;
 		float h;
 		
+		if (dsets.isEmpty () || rect == null)
+			return;
+		
 		h = rect.width () / HRATIO * (1 - 1F / RATIO);
 		topr = new RectF (0, 0, rect.width (), rect.height () - h);
 		
-		if (dsets.isEmpty () || rect == null)
-			return;
-
 		total = 0;
 		for (DataSet ds : dsets)
 			total += ds.value;
@@ -190,8 +191,24 @@ public class PiePlot extends View {
 			ds.fpaint.setColor (ds.color);
 			ds.fpaint.setAntiAlias (true);
 			
+			ds.spaint = new Paint ();
+			ds.spaint.setStyle (Style.FILL);
+			ds.spaint.setColor (shadow (ds.color));
+			ds.spaint.setAntiAlias (true);
+
 			angle += sweep;			
 		}
+	}
+	
+	protected int shadow (int color)
+	{
+		float hsv [];
+
+		hsv = new float [3];
+		Color.colorToHSV (color, hsv);
+		hsv [2] /= 2;
+		
+		return Color.HSVToColor (hsv);
 	}
 	
 	public void setData (List<DataSet> dsets)
