@@ -100,8 +100,11 @@ public class NotificationService
 	/// Local prefix
 	private static final String PREFIX = "com.wanikani.wanikaninotifier.NotificationService.";
 	
-	/// FSM bundle key;
-	private static final String KEY_FSM = PREFIX + "fsm"; 
+	/// FSM bundle key
+	private static final String KEY_FSM = PREFIX + "fsm";
+	
+	/// Dashboard data key
+	public static final String KEY_DD = PREFIX + "dd";
 	
 	/* The actions this class supports. We keep the same name of
 	 * the standard actions, when a mapping is possible. However we
@@ -133,6 +136,13 @@ public class NotificationService
 	 *  does not start the browser, because this is done at activity level  */
 	public static final String ACTION_HIDE_NOTIFICATION = 
 			PREFIX + "HIDE_NOTIFICATION";
+
+	/** Called by @link DashboardActivity when it has obtained some fresh
+	 *  dashboard data. This avoids having the dashboard displaying different
+	 *  information from notification bar. 
+	 */
+	public static final String ACTION_NEW_DATA = 
+			PREFIX + "NEW_DATA";
 
 	/** The ID associated to the notification icon. Since we can
 	 *  only display one notification at a time, this is a
@@ -188,6 +198,8 @@ public class NotificationService
 			connectivityChange (intent);
 		else if (action.equals (ACTION_ALARM))
 			alarm (intent);
+		else if (action.equals (ACTION_NEW_DATA))
+			newData (intent);
 	}
 	
 	/**
@@ -269,6 +281,25 @@ public class NotificationService
 	 * that was saved into the intent by @link #schedule(NotifierStateMachine, Date). 
 	 * @param intent the intent
 	 */
+	protected void newData (Intent intent)
+	{
+		NotifierStateMachine fsm;
+		DashboardData dd;
+		
+		fsm = new NotifierStateMachine (this);
+		dd = new DashboardData (intent.getBundleExtra (KEY_DD));
+
+		fsm.next (NotifierStateMachine.Event.E_UNSOLICITED, dd);
+	}
+	
+	/**
+	 * Handler of the {@link #ACTION_NEW_DATA} intent, called when
+	 * the dashboard data would like us to update the information.
+	 * Attached to the intent we can find an (incomplete) 
+	 * @link DashboardData object, so we deserialize it and pretend that
+	 * an alarm has gone off. 
+	 * @param intent the intent
+	 */
 	protected void alarm (Intent intent)
 	{
 		NotifierStateMachine fsm;
@@ -280,7 +311,7 @@ public class NotificationService
 		
 		feed (fsm, NotifierStateMachine.Event.E_SOLICITED);
 	}
-	
+
 	/**
 	 * Called when it is time to feed the state machine with
 	 * fresh state information. This happens either because

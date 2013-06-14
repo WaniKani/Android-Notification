@@ -763,6 +763,8 @@ public class MainActivity extends FragmentActivity implements Runnable {
 
 		this.dd = dd;
 		
+		shareData (dd);
+		
 		rtask = null;
 
 		if (dd.gravatar == null)
@@ -802,6 +804,27 @@ public class MainActivity extends FragmentActivity implements Runnable {
 			intent.setAction (NotificationService.ACTION_BOOT_COMPLETED);
 			startService (intent);
 		}
+	}
+
+	/**
+	 * Sends fresh dashboard data to the notification service.
+	 * @param dd the data
+	 */
+	private void shareData (DashboardData dd)
+	{
+		Intent intent;
+		Bundle b;
+		
+		if (dd != null) {
+			intent = new Intent (this, NotificationService.class);
+			intent.setAction (NotificationService.ACTION_NEW_DATA);
+			b = new Bundle ();
+			dd.serialize (b);
+			intent.putExtra (NotificationService.KEY_DD, b);
+			
+			startService (intent);
+		}
+		
 	}
 
 	/**
