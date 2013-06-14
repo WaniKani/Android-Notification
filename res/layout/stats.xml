@@ -5,8 +5,8 @@
     android:layout_height="match_parent"
     android:orientation="vertical" >
 
-    <com.wanikani.androidnotifier.graph.PiePlot
-        android:id="@+id/pp_srs"
+    <com.wanikani.androidnotifier.graph.PieChart
+        android:id="@+id/pc_srs"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
 

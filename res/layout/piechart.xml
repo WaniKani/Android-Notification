@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+    <TextView
+        android:id="@+id/pc_title" 
+        style="@style/ChartTitle"/>
+    <com.wanikani.androidnotifier.graph.PiePlot
+        android:id="@+id/pc_plot"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>    
+	<LinearLayout 
+	    android:id="@+id/pc_legend"
+    	style="@style/ChartLegend"
+    	android:layout_width="match_parent"
+    	android:layout_height="match_parent"
+    	android:orientation="vertical" />
+
+</LinearLayout>

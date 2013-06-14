@@ -11,7 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.wanikani.androidnotifier.graph.PiePlot;
+import com.wanikani.androidnotifier.graph.PieChart;
 import com.wanikani.androidnotifier.graph.PiePlot.DataSet;
 import com.wanikani.wklib.SRSDistribution;
 
@@ -74,14 +74,14 @@ public class StatsFragment extends Fragment implements Tab {
 	
 	public void refreshComplete (DashboardData dd)
 	{
-		PiePlot srsPie;
+		PieChart srs;
 
 		if (dd == null || !isResumed ())
 			return;
 		
 		if (dd.od != null && dd.od.srs != null) {
-			srsPie = (PiePlot) parent.findViewById (R.id.pp_srs);
-			srsPie.setData (getDataSets (dd.od.srs));
+			srs = (PieChart) parent.findViewById (R.id.pc_srs);
+			srs.setData (getDataSets (dd.od.srs));
 		}
 	}
 	

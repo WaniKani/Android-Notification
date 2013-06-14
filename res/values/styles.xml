@@ -254,8 +254,18 @@
         <item name="android:padding">@dimen/m_gap</item>                
     </style>
     
-    <style name="MenuPane">
+    <style name="MenuPane" parent="AppTheme">
 		<item name="android:background">#ccc</item>
         <item name="android:padding">@dimen/m_gap</item>                
 	</style>
+	
+    <style name="ChartTitle" parent ="AppTheme">
+        <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">@dimen/m_rythm</item>
+        <item name="android:gravity">center</item>        
+    </style>
+    <style name="ChartLegend" parent ="AppTheme">
+        <item name="android:gravity">top</item>        
+    </style>
 </resources>
