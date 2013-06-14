@@ -414,6 +414,7 @@ public class DashboardFragment extends Fragment implements Tab {
 			
 		case RETRIEVED:
 			setVisibility (R.id.pb_w_section,View.GONE);
+			setVisibility (R.id.lay_progress, dd.od.lp != null ? View.VISIBLE : View.GONE);
 			if (dd.od.lp != null) {
 				setProgress (R.id.pb_radicals, R.id.radicals_remaining,
 						 	 dd.od.lp.radicalsProgress, dd.od.lp.radicalsTotal);
