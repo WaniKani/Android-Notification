@@ -70,7 +70,8 @@
     
     <string name="key_meta">123</string>
     <string name="key_show">Show</string>
-
+    <string name="key_hide">Hide</string>
+    
     <string name="tag_dashboard">Dashboard</string>
     <string name="tag_items">Items</string>
     

@@ -82,6 +82,9 @@ public class WebReviewActivity extends Activity {
 
 		/** HTML id of the lessons review form */
 		static final String LESSONS_REVIEW_FORM = "new_lesson";
+		
+		/** Any object on the lesson pages */
+		static final String LESSONS_OBJ = "nav-lesson";
 	};
 
 	/**
@@ -200,10 +203,7 @@ public class WebReviewActivity extends Activity {
 				break;
 
 			case VISIBLE_LESSONS:
-				/* Not tested yet, so disabled:
-				 *  showLessons (); 
-				 */
-				hide ();
+				showLessons (); 
 				break;
 				
 			case HIDDEN:
@@ -211,7 +211,8 @@ public class WebReviewActivity extends Activity {
 				break;
 				
 			case ICONIZED:
-				iconize ();
+			case ICONIZED_LESSONS:
+				iconize (kbstatus);
 				break;
 			}
 		}
@@ -356,7 +357,10 @@ public class WebReviewActivity extends Activity {
 		HIDDEN, 
 		
 		/** Keyboard visible, just "Show" and "Enter" keys are visible */ 
-		ICONIZED
+		ICONIZED,
+
+		/** Keyboard visible, just "Show" and "Enter" keys are visible, in lessons mode */ 
+		ICONIZED_LESSONS
 	};
 
 	/** The web view, where the web contents are rendered */
@@ -385,18 +389,25 @@ public class WebReviewActivity extends Activity {
 	
 	/** Javascript to be called each time an HTML page is loaded. It hides or shows the keyboard */
 	private static final String JS_INIT = 
-			"var textbox, ltextbox;" +
+			"var textbox, lessobj;" +
 			"textbox = document.getElementById (\"" + WKConfig.ANSWER_BOX + "\"); " +
+			"lessobj = document.getElementById (\"" + WKConfig.LESSONS_OBJ + "\"); " +
+			"if (textbox != null && !textbox.disabled) {" +
+			"	wknKeyboard.show ();" +
+			"} else if (lessobj != null) {" +
+			"   wknKeyboard.showLessons ();" +
+			"} else {" +
+			"	wknKeyboard.hide ();" +			
+			"}";
+
+	private static final String JS_FOCUS = 
+			"var ltextbox;" +
 			"ltextbox = document.getElementById (\"" + WKConfig.LESSON_ANSWER_BOX_JP + "\"); " +
 			"if (ltextbox == null) {" +
 			"   ltextbox = document.getElementById (\"" + WKConfig.LESSON_ANSWER_BOX_EN + "\"); " +
 			"}" +
-			"if (textbox != null && !textbox.disabled) {" +
-			"	wknKeyboard.show ();" +
-			"} else if (ltextbox != null) {" +
-			"   wknKeyboard.showLessons ();" +
-			"} else {" +			
-			"	wknKeyboard.hide ();" +
+			"if (ltextbox != null) {" +
+			"    ltextbox.focus (); " +
 			"}";
 	
 	/** Javascript to be invoked to simulate a click on the submit (heart-shaped) button.
@@ -404,7 +415,13 @@ public class WebReviewActivity extends Activity {
 	 *  is an answer, so we iconize the keyboard. Otherwise we are entering the new question,
 	 *  so we need to show it  */
 	private static final String JS_ENTER =
-			"var textbox = document.getElementById (\"" + WKConfig.ANSWER_BOX + "\"); " +
+			"var textbox, ltextbox, form, submit;" +
+			"textbox = document.getElementById (\"" + WKConfig.ANSWER_BOX + "\"); " +
+		    "form = document.getElementById (\"new_lesson\"); " +
+			"ltextbox = document.getElementById (\"" + WKConfig.LESSON_ANSWER_BOX_JP + "\"); " +
+			"if (ltextbox == null) {" +
+			"   ltextbox = document.getElementById (\"" + WKConfig.LESSON_ANSWER_BOX_EN + "\"); " +
+			"}" +
 			"if (textbox != null) { " +
 			"   if (textbox.disabled) {" +
 			"	   wknKeyboard.show ();" +
@@ -435,14 +452,15 @@ public class WebReviewActivity extends Activity {
 	/** A table that maps key positions (left to right, top to bottom) to button IDs for the
 	 *  meta keys */
 	private static final int meta_table [] = new int [] {
-		R.id.kb_backspace, R.id.kb_meta, R.id.kb_space, R.id.kb_enter		
+		R.id.kb_backspace, R.id.kb_meta, R.id.kb_space, R.id.kb_enter, R.id.kb_hide		
 	};
 	
 	/** A table that maps key positions (left to right, top to bottom) to keycodes for the meta
 	 *  keys */
 	private static final int meta_codes [] = new int [] {
 		KeyEvent.KEYCODE_DEL, KeyEvent.KEYCODE_NUM,
-		KeyEvent.KEYCODE_SPACE, KeyEvent.KEYCODE_ENTER		
+		KeyEvent.KEYCODE_SPACE, KeyEvent.KEYCODE_ENTER,
+		KeyEvent.KEYCODE_DPAD_DOWN
 	};
 	
 	/** The current keyboard. It may be set to either {@link #KB_LATIN} or {@link #KB_ALT} */
@@ -450,7 +468,10 @@ public class WebReviewActivity extends Activity {
 	
 	/** The current keyboard status */
 	protected KeyboardStatus kbstatus;
-
+	
+	/** The "show enter key" setting */
+	protected boolean showEnterKey; 
+	
 	/**
 	 * Called when the action is initially displayed. It initializes the objects
 	 * and starts loading the review page.
@@ -465,6 +486,10 @@ public class WebReviewActivity extends Activity {
 		
 		setContentView (R.layout.web_review);
 		
+		prefs = PreferenceManager.getDefaultSharedPreferences (this);
+		prefs.registerOnSharedPreferenceChangeListener (new PreferencesListener ());
+		showEnterKey = SettingsActivity.getEnter (prefs);
+
 		initKeyboard ();
 		
 		bar = (ProgressBar) findViewById (R.id.pb_reviews);
@@ -485,10 +510,6 @@ public class WebReviewActivity extends Activity {
 		wv.setWebChromeClient (new WebChromeClientImpl ());		
 		
 		wv.loadUrl (getIntent ().getData ().toString ());
-		
-		prefs = PreferenceManager.getDefaultSharedPreferences (this);
-		prefs.registerOnSharedPreferenceChangeListener (new PreferencesListener ());
-		updateLayout (prefs);
 	}
 	
 	@Override
@@ -535,10 +556,9 @@ public class WebReviewActivity extends Activity {
 	 */
 	private void updateLayout (SharedPreferences prefs)
 	{
-		View key;
-		
-		key = findViewById (R.id.kb_enter);
-		key.setEnabled (SettingsActivity.getEnter (prefs));
+		showEnterKey = SettingsActivity.getEnter (prefs);
+		if (kbstatus == KeyboardStatus.VISIBLE)
+			show ();
 	}
 	
 	/**
@@ -580,11 +600,17 @@ public class WebReviewActivity extends Activity {
 			/* Num == meta -> if iconized, it means "Show"*/
 			if (kbstatus == KeyboardStatus.ICONIZED)
 				show ();
+			else if (kbstatus == KeyboardStatus.ICONIZED_LESSONS)
+				showLessons ();
 			else
 				loadKeyboard (keyboard == KB_ALT ? KB_LATIN : KB_ALT);
 		} else if (keycode == KeyEvent.KEYCODE_ENTER)
 			js (JS_ENTER);
+		else if (keycode == KeyEvent.KEYCODE_DPAD_DOWN)
+			iconize (KeyboardStatus.ICONIZED_LESSONS);
 		else {
+			if (kbstatus == KeyboardStatus.VISIBLE_LESSONS)
+				js (JS_FOCUS);
 			kdown = new KeyEvent (KeyEvent.ACTION_DOWN, keycode);
 			wv.dispatchKeyEvent (kdown);				
 			kup = new KeyEvent (KeyEvent.ACTION_UP, keycode);
@@ -659,10 +685,30 @@ public class WebReviewActivity extends Activity {
 	 */
 	protected void show ()
 	{
-		View key, view;
+		kbstatus = KeyboardStatus.VISIBLE;
+		showCommon (showEnterKey);
+	}
+
+	/**
+	 * Shows the keyboard, hiding the enter key, which is problematic
+	 * on lessons. 
+	 */
+	protected void showLessons ()
+	{
+		kbstatus = KeyboardStatus.VISIBLE_LESSONS;
+		showCommon (false);
+	}
+	
+	/**
+	 * This is the code shared between {@link #show} and {@link #showLessons}.
+	 * @param showEnter if true, the bottom right key is <code>Enter</code>, 
+	 * 		otherwise <code>Hide</code>.
+	 */
+	private void showCommon (boolean showEnter)
+	{
+		View view, key;
 		int i;
 		
-		kbstatus = KeyboardStatus.VISIBLE;
 		for (i = 0; i < key_table.length; i++) {
 			key = findViewById (key_table [i]);
 			key.setVisibility (View.VISIBLE);
@@ -677,32 +723,26 @@ public class WebReviewActivity extends Activity {
 		((Button) key).setText (R.string.key_meta);
 
 		view = findViewById (R.id.keyboard);
-		view.setVisibility (View.VISIBLE);					
-	}
-
-	/**
-	 * Shows the keyboard, hiding the enter key, which is problematic
-	 * on lessons. 
-	 */
-	protected void showLessons ()
-	{
-		View key;
+		view.setVisibility (View.VISIBLE);
 		
-		show ();
 		key = findViewById (R.id.kb_enter);
-		key.setVisibility (View.INVISIBLE);
+		key.setVisibility (showEnter ? View.VISIBLE : View.GONE);
+
+		key = findViewById (R.id.kb_hide);
+		key.setVisibility (showEnter ? View.GONE : View.VISIBLE);
 	}
 
 	/**
 	 * Iconize the keyboard. This method hides all the keys except
 	 * Enter and Meta (which is renamed to "Show").
+	 * @param kbs {@link KeboardStatus#ICONIZED} or {@link KeboardStatus#ICONIZED_LESSONS}
 	 */
-	protected void iconize ()
+	protected void iconize (KeyboardStatus kbs)
 	{
 		View view, key;
 		int i;
 		
-		kbstatus = KeyboardStatus.ICONIZED;
+		kbstatus = kbs;
 		for (i = 0; i < key_table.length; i++) {
 			key = findViewById (key_table [i]);
 			key.setVisibility (View.GONE);
@@ -714,7 +754,8 @@ public class WebReviewActivity extends Activity {
 		}
 		
 		key = findViewById (R.id.kb_enter);
-		key.setVisibility (View.VISIBLE);
+		/* If in ICONIZED_LESSON status, hide enter key (it does not work :) */
+		key.setVisibility (kbs == KeyboardStatus.ICONIZED ? View.VISIBLE : View.GONE);
 		
 		key = findViewById (R.id.kb_meta);
 		key.setVisibility (View.VISIBLE);
