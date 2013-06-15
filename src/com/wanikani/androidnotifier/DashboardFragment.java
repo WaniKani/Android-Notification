@@ -149,11 +149,22 @@ public class DashboardFragment extends Fragment implements Tab {
 		@Override
 		public void onClick (View v)
 		{
+			ViewGroup lay;
 			View rw;
+			int i;
 			
 			rw = parent.findViewById (id);
 			rw.setVisibility (rw.getVisibility () == View.VISIBLE ?
 							  View.GONE : View.VISIBLE);
+			
+			lay = (ViewGroup) parent.findViewById (R.id.lay_alerts);
+			lay.setVisibility (View.GONE);
+			for (i = 0; i < lay.getChildCount (); i++)
+				if (lay.getChildAt (i).getVisibility () == View.VISIBLE) {
+					lay.setVisibility (View.VISIBLE);
+					break;
+				}
+				
 		}	
 	}
 
@@ -359,9 +370,6 @@ public class DashboardFragment extends Fragment implements Tab {
 		
 		prefs = PreferenceManager.getDefaultSharedPreferences (main);
 		
-		/* Will be enabled later */
-		setVisibility (R.id.lay_alerts, View.GONE);
-		
 		iw = (ImageView) parent.findViewById (R.id.iv_gravatar);
 		if (dd.gravatar != null)
 			iw.setImageBitmap (mask (dd.gravatar));
@@ -378,7 +386,7 @@ public class DashboardFragment extends Fragment implements Tab {
 		setText (R.id.tv_next_review, R.string.tag_next_review);
 		
 		if (dd.reviewsAvailable > 0) {
-			setVisibility (R.id.tv_next_review, View.GONE);
+			setVisibility (R.id.tv_next_review, View.INVISIBLE);
 			setVisibility (R.id.tv_next_review_val, View.GONE);
 			setVisibility (R.id.btn_review, View.VISIBLE);
 		} else {
@@ -399,8 +407,6 @@ public class DashboardFragment extends Fragment implements Tab {
 		
 		setVisibility (R.id.btn_lessons,
 					   dd.lessonsAvailable > 0 ? View.VISIBLE : View.GONE);
-		if (dd.lessonsAvailable > 0)
-			setVisibility (R.id.lay_alerts, View.VISIBLE);
 		
 		setText (R.id.next_hour_val, Integer.toString (dd.reviewsAvailableNextHour));
 		setText (R.id.next_day_val, Integer.toString (dd.reviewsAvailableNextDay));
@@ -433,8 +439,6 @@ public class DashboardFragment extends Fragment implements Tab {
 			
 			setVisibility (R.id.btn_critical,
 						   dd.od.criticalItems > 0 ? View.VISIBLE : View.GONE);
-			if (dd.od.criticalItems > 0)
-				setVisibility (R.id.lay_alerts, View.VISIBLE);
 			
 			break;
 			
@@ -536,7 +540,7 @@ public class DashboardFragment extends Fragment implements Tab {
 		spinning = enable;
 		if (parent != null) {
 			pb = (ProgressBar) parent.findViewById (R.id.pb_status);
-			pb.setVisibility (enable ? ProgressBar.VISIBLE : ProgressBar.INVISIBLE);
+			pb.setVisibility (enable ? ProgressBar.VISIBLE : ProgressBar.GONE);
 		}
 	}
 	

@@ -89,18 +89,37 @@
                         android:text="" />
                 </RelativeLayout>
 
+		    <LinearLayout 
+		        android:orientation="horizontal"
+		    	android:layout_width="match_parent"
+		    	android:layout_height="wrap_content">
+				<TextView
+                	android:id="@+id/tv_next_review"
+                	style="@style/LabelNextReview"
+                	android:layout_width="0dip"
+                	android:layout_weight="1"
+               		android:layout_height="wrap_content"/>
+		    	<ImageButton
+		    	    style="@style/ItemButton"
+		    	    android:id="@+id/btn_critical" 
+		    	    android:src="@drawable/critical"
+		    	    android:visibility="gone"/>
+		    	<ImageButton
+		    	    style="@style/ItemButton"
+		    	    android:id="@+id/btn_lessons" 
+		    	    android:src="@drawable/lessons"
+		    	    android:visibility="gone"/>
                 <ProgressBar
                     android:id="@+id/pb_status"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="right"
-                    android:maxHeight="24dp"
-                    android:maxWidth="24dp"
-                    android:minHeight="24dip"
-                    android:minWidth="24dip"
-                    android:visibility="gone"/>
-                
+                    android:maxHeight="@dimen/m_dash_alerts"
+                    android:maxWidth="@dimen/m_dash_alerts"
+                    android:minHeight="@dimen/m_dash_alerts"
+                    android:minWidth="@dimen/m_dash_alerts"
+                    android:visibility="gone"/>                
                 </LinearLayout>
+            </LinearLayout>		   
         </LinearLayout>
         
                     
@@ -111,13 +130,7 @@
             style="@style/Row"
             android:layout_width="match_parent"
             android:orientation="vertical" >
-
-            <TextView
-                android:id="@+id/tv_next_review"
-                style="@style/LabelNextReview"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
-
+            
             <TextView
                 android:id="@+id/tv_next_review_val"
                 style="@style/LabelNextReviewVal"
@@ -218,21 +231,6 @@
 		    android:layout_height="wrap_content"
 		    style="@style/AlertsTable"
 		    android:visibility="gone">
-		    <LinearLayout 
-		        android:orientation="horizontal"
-		    	android:layout_width="wrap_content"
-		    	android:layout_height="wrap_content">
-		    	<ImageButton
-		    	    style="@style/ItemButton"
-		    	    android:id="@+id/btn_critical" 
-		    	    android:src="@drawable/critical"
-		    	    android:visibility="gone"/>
-		    	<ImageButton
-		    	    style="@style/ItemButton"
-		    	    android:id="@+id/btn_lessons" 
-		    	    android:src="@drawable/lessons"
-		    	    android:visibility="gone"/>
-		    </LinearLayout>
 		    <LinearLayout
 		        android:id="@+id/lay_critical_items" 
 		        android:orientation="horizontal"

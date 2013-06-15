@@ -134,8 +134,8 @@
     </style>     
     
     <style parent="AppTheme" name="ItemButton">
-        <item name="android:layout_width">@dimen/m_rythm</item>
-        <item name="android:layout_height">@dimen/m_rythm</item>        
+        <item name="android:layout_width">@dimen/m_dash_alerts</item>
+        <item name="android:layout_height">@dimen/m_dash_alerts</item>        
     </style>
     
     <style parent="AppTheme" name="LevelRow">
