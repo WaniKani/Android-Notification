@@ -261,6 +261,15 @@ public class WebReviewActivity extends Activity {
 		{
 			new ShowHideKeyboard (KeyboardStatus.ICONIZED);
 		}
+
+		/**
+		 * Called by javascript when the keyboard should be iconized (lessons mode).
+		 */
+		@JavascriptInterface
+		public void iconizeLessons ()
+		{
+			new ShowHideKeyboard (KeyboardStatus.ICONIZED_LESSONS);
+		}
 }
 	
 	/**
@@ -389,13 +398,19 @@ public class WebReviewActivity extends Activity {
 	
 	/** Javascript to be called each time an HTML page is loaded. It hides or shows the keyboard */
 	private static final String JS_INIT = 
-			"var textbox, lessobj;" +
+			"var textbox, lessobj, ltextbox;" +
 			"textbox = document.getElementById (\"" + WKConfig.ANSWER_BOX + "\"); " +
 			"lessobj = document.getElementById (\"" + WKConfig.LESSONS_OBJ + "\"); " +
+			"ltextbox = document.getElementById (\"" + WKConfig.LESSON_ANSWER_BOX_JP + "\"); " +
+			"if (ltextbox == null) {" +
+			"   ltextbox = document.getElementById (\"" + WKConfig.LESSON_ANSWER_BOX_EN + "\"); " +
+			"}" +
 			"if (textbox != null && !textbox.disabled) {" +
 			"	wknKeyboard.show ();" +
-			"} else if (lessobj != null) {" +
+			"} else if (ltextbox != null) {" +
 			"   wknKeyboard.showLessons ();" +
+			"} else if (lessobj != null) {" +
+			"   wknKeyboard.iconizeLessons ();" +
 			"} else {" +
 			"	wknKeyboard.hide ();" +			
 			"}";
