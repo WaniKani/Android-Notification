@@ -149,22 +149,13 @@ public class DashboardFragment extends Fragment implements Tab {
 		@Override
 		public void onClick (View v)
 		{
-			ViewGroup lay;
 			View rw;
-			int i;
 			
 			rw = parent.findViewById (id);
 			rw.setVisibility (rw.getVisibility () == View.VISIBLE ?
 							  View.GONE : View.VISIBLE);
 			
-			lay = (ViewGroup) parent.findViewById (R.id.lay_alerts);
-			lay.setVisibility (View.GONE);
-			for (i = 0; i < lay.getChildCount (); i++)
-				if (lay.getChildAt (i).getVisibility () == View.VISIBLE) {
-					lay.setVisibility (View.VISIBLE);
-					break;
-				}
-				
+			showAlertsLayout ();
 		}	
 	}
 
@@ -404,9 +395,13 @@ public class DashboardFragment extends Fragment implements Tab {
 			setText (R.id.lessons_available, s);
 		} else if (dd.lessonsAvailable == 1)
 			setText (R.id.lessons_available, getString (R.string.fmt_one_lesson));
-		
+			
 		setVisibility (R.id.btn_lessons,
 					   dd.lessonsAvailable > 0 ? View.VISIBLE : View.GONE);
+		
+		/* If no more lessons, hide the message */
+		if (dd.lessonsAvailable == 0)
+			setVisibility (R.id.lay_lessons_available, View.GONE);
 		
 		setText (R.id.next_hour_val, Integer.toString (dd.reviewsAvailableNextHour));
 		setText (R.id.next_day_val, Integer.toString (dd.reviewsAvailableNextDay));
@@ -439,6 +434,10 @@ public class DashboardFragment extends Fragment implements Tab {
 			
 			setVisibility (R.id.btn_critical,
 						   dd.od.criticalItems > 0 ? View.VISIBLE : View.GONE);
+
+			/* If no more lessons, hide the message */
+			if (dd.od.criticalItems == 0)
+				setVisibility (R.id.lay_critical_items, View.GONE);
 			
 			break;
 			
@@ -447,8 +446,28 @@ public class DashboardFragment extends Fragment implements Tab {
 			 * If we already have some data, it is displayed anyway */
 			setVisibility (R.id.pb_w_section, View.GONE);			
 		}
+		
+		/* Show the alerts panel only if there are still alerts to be shown */  
+		showAlertsLayout ();
 	}
-	
+
+	/**
+	 * Shows or hides the alerts layout, depending on the state of the visibility
+	 * of its children  
+	 */
+	protected void showAlertsLayout ()
+	{
+		ViewGroup lay;
+		int i;
+
+		lay = (ViewGroup) parent.findViewById (R.id.lay_alerts);
+		lay.setVisibility (View.GONE);
+		for (i = 0; i < lay.getChildCount (); i++)
+			if (lay.getChildAt (i).getVisibility () == View.VISIBLE) {
+				lay.setVisibility (View.VISIBLE);
+				break;
+			}
+	}	
 
 	/**
 	 * Pretty-prints a date. This implementation tries to mimic the WaniKani website,
