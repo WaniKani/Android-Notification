@@ -537,6 +537,11 @@ public class WebReviewActivity extends Activity {
 		lbm = LocalBroadcastManager.getInstance (this);
 		intent = new Intent (MainActivity.ACTION_REFRESH);
 		lbm.sendBroadcast (intent);
+
+		/* Alert the notification service too (the main action may not be active) */
+		intent = new Intent (this, NotificationService.class);
+		intent.setAction (NotificationService.ACTION_NEW_DATA);
+		startService (intent);
 	}
 	
 	/**
