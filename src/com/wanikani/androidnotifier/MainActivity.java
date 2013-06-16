@@ -429,6 +429,9 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	
 	/** The stats fragment */
 	StatsFragment statsf;
+
+	/** Is this activity visible? */
+	boolean visible;
 	
 	/** An action that should be invoked to force refresh. This is used typically
 	 *  when reviews complete
@@ -545,8 +548,21 @@ public class MainActivity extends FragmentActivity implements Runnable {
 		super.onResume ();
 				
 		alarm.screenOn ();
+		visible = true;
 	}
 	
+	/**
+	 * Called when the application pauses.
+	 * Update the @link #visible flag.
+	 */
+	@Override
+	public void onPause ()
+	{
+		super.onPause ();
+				
+		visible = false;
+	}
+
 	/**
 	 * Called on dashboard destruction. 
 	 * Destroys the listeners of the changes in the settings, and the 
@@ -827,7 +843,11 @@ public class MainActivity extends FragmentActivity implements Runnable {
 		Intent intent;
 		Bundle b;
 		
-		if (dd != null) {
+		/* If the current activity is not visible, leave the notification service
+		 * decide whether to update data or not (there's some code in it to avoid
+		 * displaying the icon while reviews are going on, and this call would
+		 * break it) */
+		if (visible && dd != null) {
 			intent = new Intent (this, NotificationService.class);
 			intent.setAction (NotificationService.ACTION_NEW_DATA);
 			b = new Bundle ();
@@ -835,8 +855,7 @@ public class MainActivity extends FragmentActivity implements Runnable {
 			intent.putExtra (NotificationService.KEY_DD, b);
 			
 			startService (intent);
-		}
-		
+		}		
 	}
 
 	/**

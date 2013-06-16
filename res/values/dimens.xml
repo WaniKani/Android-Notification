@@ -12,4 +12,5 @@
     <dimen name="m_srs_size">30sp</dimen>
     <dimen name="m_glyph">64sp</dimen>
 	<dimen name="m_glyph_image_margin">24sp</dimen>
+	<dimen name="m_dash_alerts">36dp</dimen>
 </resources>

@@ -52,7 +52,7 @@
     <string name="fmt_X_minutes">%d minutes</string>
     <string name="fmt_one_minute">~1 minute</string>
     <string name="fmt_seconds">&lt;1 minute</string>
-    <string name="tag_available_now">Available now</string>
+    <string name="tag_available_now">Review now</string>
     <string name="fmt_no_reviews">None yet!</string>
 
     <string name="fmt_level">Level %d</string>
@@ -70,7 +70,8 @@
     
     <string name="key_meta">123</string>
     <string name="key_show">Show</string>
-
+    <string name="key_hide">Hide</string>
+    
     <string name="tag_dashboard">Dashboard</string>
     <string name="tag_items">Items</string>
     <string name="tag_stats">Stats</string>

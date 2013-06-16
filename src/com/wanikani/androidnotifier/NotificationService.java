@@ -287,9 +287,11 @@ public class NotificationService
 		DashboardData dd;
 		
 		fsm = new NotifierStateMachine (this);
-		dd = new DashboardData (intent.getBundleExtra (KEY_DD));
-
-		fsm.next (NotifierStateMachine.Event.E_UNSOLICITED, dd);
+		if (intent.hasExtra (KEY_DD)) {
+			dd = new DashboardData (intent.getBundleExtra (KEY_DD));
+			fsm.next (NotifierStateMachine.Event.E_UNSOLICITED, dd);
+		} else
+			feed (fsm, NotifierStateMachine.Event.E_UNSOLICITED);
 	}
 	
 	/**
