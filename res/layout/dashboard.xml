@@ -113,10 +113,10 @@
                     android:id="@+id/pb_status"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:maxHeight="@dimen/m_dash_alerts"
-                    android:maxWidth="@dimen/m_dash_alerts"
-                    android:minHeight="@dimen/m_dash_alerts"
-                    android:minWidth="@dimen/m_dash_alerts"
+                    android:maxHeight="24dip"
+                    android:maxWidth="24dip"
+                    android:minHeight="24dip"
+                    android:minWidth="24dip"
                     android:visibility="gone"/>                
                 </LinearLayout>
             </LinearLayout>		   
