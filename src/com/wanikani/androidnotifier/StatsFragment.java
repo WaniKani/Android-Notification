@@ -93,17 +93,21 @@ public class StatsFragment extends Fragment implements Tab {
 		res = getResources ();
 		ans = new Vector<DataSet> ();
 		
-		ans.add (getDataSet (srs.apprentice, res.getColor (R.color.apprentice)));
-		ans.add (getDataSet (srs.guru, res.getColor (R.color.guru)));
-		ans.add (getDataSet (srs.master, res.getColor (R.color.master)));
-		ans.add (getDataSet (srs.enlighten, res.getColor (R.color.enlightened)));
+		ans.add (getDataSet (res.getString (R.string.tag_apprentice), 
+							 srs.apprentice, res.getColor (R.color.apprentice)));
+		ans.add (getDataSet (res.getString (R.string.tag_guru),
+							 srs.guru, res.getColor (R.color.guru)));
+		ans.add (getDataSet (res.getString (R.string.tag_master),
+							 srs.master, res.getColor (R.color.master)));
+		ans.add (getDataSet (res.getString (R.string.tag_enlightened),
+							 srs.enlighten, res.getColor (R.color.enlightened)));
 		
 		return ans;
 	}
 	
-	protected DataSet getDataSet (SRSDistribution.Level level, int color)
+	protected DataSet getDataSet (String tag, SRSDistribution.Level level, int color)
 	{
-		return new DataSet (color, level.total);
+		return new DataSet (tag, color, level.total);
 	}
 	
 	public void spin (boolean enable)

@@ -274,4 +274,17 @@
     <style name="ChartLegend" parent ="AppTheme">
         <item name="android:gravity">top</item>        
     </style>
+    
+    <style name="LegendItem" parent="AppTheme">
+        <item name="android:layout_width">@dimen/m_li_width</item>
+        <item name="android:layout_height">@dimen/m_li_height</item>
+        <item name="android:layout_margin">@dimen/m_gap</item>
+    </style>
+
+    <style name="LegendDescription" parent="AppTheme">
+		<item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
+    </style>
+
+    <style name="LegendValue" parent="LegendDescription">		
+    </style>
 </resources>

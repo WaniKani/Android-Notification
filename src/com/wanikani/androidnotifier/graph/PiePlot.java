@@ -17,6 +17,8 @@ public class PiePlot extends View {
 
 	public static class DataSet {
 		
+		public String description;
+		
 		public int color;
 		
 		public float value;
@@ -29,8 +31,9 @@ public class PiePlot extends View {
 		
 		Paint spaint;
 
-		public DataSet (int color, float value)
+		public DataSet (String description, int color, float value)
 		{
+			this.description = description;
 			this.color = color;
 			this.value = value;
 		}
