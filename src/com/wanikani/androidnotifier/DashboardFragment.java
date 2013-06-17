@@ -425,7 +425,20 @@ public class DashboardFragment extends Fragment implements Tab {
 
 				setVisibility (R.id.progress_section, View.VISIBLE);
 			}
-
+			
+			break;
+			
+		case FAILED:
+			/* Just hide the spinner. 
+			 * If we already have some data, it is displayed anyway */
+			setVisibility (R.id.pb_w_section, View.GONE);			
+		}
+		
+		switch (dd.od.ciStatus) {
+		case RETRIEVING:
+			break;
+			
+		case RETRIEVED:
 			if (dd.od.criticalItems > 1) {
 				s = getString (R.string.fmt_critical_items, dd.od.criticalItems);
 				setText (R.id.critical_items, s);
@@ -442,11 +455,9 @@ public class DashboardFragment extends Fragment implements Tab {
 			break;
 			
 		case FAILED:
-			/* Just hide the spinner. 
-			 * If we already have some data, it is displayed anyway */
-			setVisibility (R.id.pb_w_section, View.GONE);			
+			break;
 		}
-		
+
 		/* Show the alerts panel only if there are still alerts to be shown */  
 		showAlertsLayout ();
 	}

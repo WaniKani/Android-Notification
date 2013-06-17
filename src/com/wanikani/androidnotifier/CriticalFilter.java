@@ -180,6 +180,7 @@ public class CriticalFilter implements Filter {
 			itemf.setData (this, citems, true);
 			itemf.selectOtherFilter (this, false);
 		} else if (task != null) {
+			itemf.clearData (this);
 			itemf.selectOtherFilter (this, true);			
 			task.reissue ();
 		} else {
@@ -214,8 +215,10 @@ public class CriticalFilter implements Filter {
 		if (ok)
 			citems = allItems;
 
-		if (stask == task)
+		if (stask == task) {
+			task = null;
 			itemf.selectOtherFilter (this, false);
+		}
 	}
 	
 	/**

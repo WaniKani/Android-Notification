@@ -76,6 +76,9 @@ class DashboardData {
 		/** Number of critical items */
 		public int criticalItems;
 		
+		/** Critical items status */
+		public DashboardData.OptionalDataStatus ciStatus;
+		
 		/**
 		 * Constructor. Input parameters may be null.
 		 * In order to provide consistent behaviour:
@@ -92,18 +95,19 @@ class DashboardData {
 		 * @param lp the level progression
 		 * @param lpStatus level progression status
 		 * @param criticalItems number of critical items
+		 * @param ciStatus critical items status
 		 */
 		public OptionalData (SRSDistribution srs, DashboardData.OptionalDataStatus srsStatus, 
 							 LevelProgression lp, DashboardData.OptionalDataStatus lpStatus,
-							 int criticalItems)
+							 int criticalItems, DashboardData.OptionalDataStatus ciStatus)
 		{
 			this.srs = srs;
 			this.lp = lp;
+			this.criticalItems = criticalItems;
 			
 			this.srsStatus = srsStatus;
-			this.lpStatus = lpStatus;
-			
-			this.criticalItems = criticalItems;
+			this.lpStatus = lpStatus;			
+			this.ciStatus = ciStatus;
 		}
 		
 		/**
@@ -114,6 +118,7 @@ class DashboardData {
 		{
 			srsStatus = DashboardData.OptionalDataStatus.RETRIEVING;
 			lpStatus = DashboardData.OptionalDataStatus.RETRIEVING;
+			ciStatus = DashboardData.OptionalDataStatus.RETRIEVING;
 		}
 				
 		/**
@@ -133,6 +138,12 @@ class DashboardData {
 				od.lpStatus == DashboardData.OptionalDataStatus.RETRIEVED) {
 				lp = od.lp;
 				lpStatus = od.lpStatus;				
+			}
+
+			if (ciStatus != DashboardData.OptionalDataStatus.RETRIEVED &&
+				od.ciStatus == DashboardData.OptionalDataStatus.RETRIEVED) {
+				criticalItems = od.criticalItems;
+				ciStatus = od.ciStatus;				
 			}
 		}
 
@@ -170,6 +181,8 @@ class DashboardData {
 	private static final String KEY_RADICALS_TOTAL = PREFIX + "radicals_total";
 	private static final String KEY_KANJI_PROGRESS = PREFIX + "kanji_progress";
 	private static final String KEY_KANJI_TOTAL = PREFIX + "kanji_total";
+	
+	private static final String KEY_CRITICAL_ITEMS = PREFIX + "critical_items";
 	
 	public int lessonsAvailable;
 	
@@ -304,6 +317,9 @@ class DashboardData {
 			
 		}
 		
+		if (od.ciStatus == OptionalDataStatus.RETRIEVED)
+			bundle.putInt (KEY_CRITICAL_ITEMS, od.criticalItems);
+		
 		if (e != null)
 			bundle.putSerializable (KEY_EXCEPTION, e);
 	}
@@ -356,6 +372,16 @@ class DashboardData {
 			od.lp = null;
 		}
 		
+		if (bundle.containsKey (KEY_CRITICAL_ITEMS)) {
+			od.ciStatus = OptionalDataStatus.RETRIEVED;
+			od.criticalItems = bundle.getInt (KEY_CRITICAL_ITEMS);
+		} else {
+			/* RETRIEVING is correct, because this is what DashboardActivity
+			 * will do right after calling this method */
+			od.ciStatus = OptionalDataStatus.RETRIEVING;
+			od.criticalItems = 0;
+		}
+
 		if (bundle.containsKey (KEY_EXCEPTION))
 			e = (IOException) bundle.getSerializable (KEY_EXCEPTION);
 		else
