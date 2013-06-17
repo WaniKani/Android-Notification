@@ -322,7 +322,7 @@ public class MainActivity extends FragmentActivity implements Runnable {
 		@Override
 		protected DashboardData.OptionalData doInBackground (Connection... conn)
 		{
-			DashboardData.OptionalDataStatus srsStatus, lpStatus;
+			DashboardData.OptionalDataStatus srsStatus, lpStatus, ciStatus;
 			SRSDistribution srs;
 			LevelProgression lp;
 			ItemLibrary<Item> critical;
@@ -346,15 +346,16 @@ public class MainActivity extends FragmentActivity implements Runnable {
 
 			try {
 				critical = conn [0].getCriticalItems ();
-				lpStatus = DashboardData.OptionalDataStatus.RETRIEVED;
+				ciStatus = DashboardData.OptionalDataStatus.RETRIEVED;
 				cis = critical.list.size ();
 			} catch (IOException e) {
 				lp = null;
-				lpStatus = DashboardData.OptionalDataStatus.FAILED;
+				ciStatus = DashboardData.OptionalDataStatus.FAILED;
 				cis = 0;
 			}
 			
-			return new DashboardData.OptionalData (srs, srsStatus, lp, lpStatus, cis);
+			return new DashboardData.OptionalData (srs, srsStatus, lp, lpStatus, 
+												   cis, ciStatus);
 		}	
 						
 		/**
