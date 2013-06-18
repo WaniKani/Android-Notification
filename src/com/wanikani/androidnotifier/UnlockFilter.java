@@ -1,7 +1,6 @@
 package com.wanikani.androidnotifier;
 
 import java.io.IOException;
-import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
@@ -93,7 +92,7 @@ public class UnlockFilter implements Filter {
 						i.remove ();
 					}
 				}
-				publishProgress (new ItemLibrary<Item> (lib));
+				lpublishProgress (new ItemLibrary<Item> (lib));
 			} catch (IOException e) {
 				ok = false;
 			}
@@ -105,12 +104,24 @@ public class UnlockFilter implements Filter {
 					r.character = "?";
 					ok = false;
 				}				
-				publishProgress (new ItemLibrary<Item> (r));
+				lpublishProgress (new ItemLibrary<Item> (r));
 			}	
 			
 			return ok;
 		}	
 		
+		/**
+		 * Publishes a new library. This method is essentially equivalent
+		 * to {@link AsyncTask#publishProgress} but it masks the variadic/generic 
+		 * clash warning.
+		 * @param lib the library to publish
+		 */
+		@SuppressWarnings("unchecked")
+		protected void lpublishProgress (ItemLibrary<Item> lib)
+		{
+			publishProgress (lib);
+		}
+
 		/**
 		 * Called when some new item becomes available. We inform the GUI
 		 * and add them to @link {@link #allItems}.

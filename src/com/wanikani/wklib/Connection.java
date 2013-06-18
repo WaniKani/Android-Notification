@@ -242,7 +242,8 @@ public class Connection {
 		kanji = getKanji (level);
 		vocab = getVocabulary (level);
 		
-		return new ItemLibrary<Item> (radicals, kanji, vocab);
+		return new ItemLibrary<Item> ().
+					add (radicals).add (kanji).add(vocab);
 	}		
 
 	private static String readStream (InputStream is)

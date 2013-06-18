@@ -2,7 +2,6 @@ package com.wanikani.androidnotifier;
 
 import java.util.List;
 
-import com.wanikani.wklib.Connection;
 import com.wanikani.wklib.Item;
 
 /* 

@@ -92,7 +92,7 @@ public class LevelFilter implements Filter {
 			lib = new ItemLibrary<Item> ();
 			imgrad = new Vector<Radical> ();
 			try {
-				lib.addAll (conn.getRadicals (level));
+				lib.add (conn.getRadicals (level));
 				i = lib.list.iterator ();
 				while (i.hasNext ()) {
 					rad = (Radical) i.next ();
@@ -101,7 +101,7 @@ public class LevelFilter implements Filter {
 						i.remove ();
 					}
 				}
-				publishProgress (new ItemLibrary<Item> (lib));
+				lpublishProgress (new ItemLibrary<Item> ().add (lib));
 			} catch (IOException e) {
 				ok = false;
 			}
@@ -113,21 +113,21 @@ public class LevelFilter implements Filter {
 					r.character = "?";
 					ok = false;
 				}				
-				publishProgress (new ItemLibrary<Item> (r));
+				lpublishProgress (new ItemLibrary<Item> (r));
 			}
 			
 			lib = new ItemLibrary<Item> ();
 			try {
-				lib.addAll (conn.getKanji (level));
-				publishProgress (lib);
+				lib.add (conn.getKanji (level));
+				lpublishProgress (lib);
 			} catch (IOException e) {
 				ok = false;
 			}
 			
 			lib = new ItemLibrary<Item> ();
 			try {
-				lib.addAll (conn.getVocabulary (level));
-				publishProgress (lib);
+				lib.add (conn.getVocabulary (level));
+				lpublishProgress (lib);
 			} catch (IOException e) {
 				ok = false;
 			}			
@@ -135,6 +135,18 @@ public class LevelFilter implements Filter {
 			return ok;
 		}	
 		
+		/**
+		 * Publishes a new library. This method is essentially equivalent
+		 * to {@link AsyncTask#publishProgress} but it masks the variadic/generic 
+		 * clash warning.
+		 * @param lib the library to publish
+		 */
+		@SuppressWarnings("unchecked")
+		protected void lpublishProgress (ItemLibrary<Item> lib)
+		{
+			publishProgress (lib);
+		}
+
 		/**
 		 * Called when some new item becomes available. We inform the GUI
 		 * and add them to @link {@link #allItems}.

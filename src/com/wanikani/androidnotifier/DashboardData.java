@@ -6,7 +6,6 @@ import java.util.Date;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 
-import com.wanikani.androidnotifier.DashboardData.OptionalDataStatus;
 import com.wanikani.wklib.LevelProgression;
 import com.wanikani.wklib.SRSDistribution;
 import com.wanikani.wklib.StudyQueue;

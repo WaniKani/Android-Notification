@@ -3,9 +3,6 @@ package com.wanikani.wklib;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.wanikani.wklib.Kanji.Factory;
-import com.wanikani.wklib.Kanji.ItemFactory;
-
 import android.graphics.Bitmap;
 
 public class Radical extends Item {
