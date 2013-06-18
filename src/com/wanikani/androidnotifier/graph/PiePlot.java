@@ -3,7 +3,10 @@ package com.wanikani.androidnotifier.graph;
 import java.util.List;
 import java.util.Vector;
 
+import com.wanikani.androidnotifier.R;
+
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -43,11 +46,17 @@ public class PiePlot extends View {
 	
 	private RectF rect;
 	
-	private static final int START_ANGLE = -110;
+	private static final int DEFAULT_START_ANGLE = -110;
 	
-	private static final float RATIO = 2F;
+	private static final float DEFAULT_RATIO = 2F;
 	
-	private static final float HRATIO = 10;
+	private static final float DEFAULT_HRATIO = 10;
+	
+	private int startAngle;
+	
+	private float ratio;
+	
+	private float hratio;
 		
 	/**
 	 * Constructor.
@@ -59,6 +68,21 @@ public class PiePlot extends View {
 		super (ctxt, attrs);
 		
 		dsets = new Vector<DataSet> (0);
+		
+		loadAttributes (ctxt, attrs);
+	}
+	
+	void loadAttributes (Context ctxt, AttributeSet attrs)
+	{
+		TypedArray a;
+		
+		a = ctxt.obtainStyledAttributes (attrs, R.styleable.PieChart);
+			 
+		startAngle = a.getInteger (R.attr.start_angle, DEFAULT_START_ANGLE);
+		ratio = a.getFloat (R.attr.ratio, DEFAULT_RATIO);
+		hratio = a.getFloat (R.attr.hratio, DEFAULT_HRATIO);
+				
+		a.recycle ();				
 	}
 	
 	@Override
@@ -74,14 +98,14 @@ public class PiePlot extends View {
 		hMode = MeasureSpec.getMode (heightSpec);
 		
 		if (wMode == MeasureSpec.EXACTLY)
-			height = measureExact (width, height, hMode, RATIO);
+			height = measureExact (width, height, hMode, ratio);
 		else if (hMode == MeasureSpec.EXACTLY)
-			width = measureExact (height, width, wMode, 1F / RATIO);
+			width = measureExact (height, width, wMode, 1F / ratio);
 		else if (wMode == MeasureSpec.AT_MOST) {
-			height = measureExact (width, height, hMode, RATIO);
+			height = measureExact (width, height, hMode, ratio);
 			width = Math.min (width, height);
 		} else if (hMode == MeasureSpec.AT_MOST) {
-			width = measureExact (height, width, wMode, 1F / RATIO);
+			width = measureExact (height, width, wMode, 1F / ratio);
 			height = Math.min (width, height);
 		} else			
 			width = height = 100;
@@ -170,14 +194,14 @@ public class PiePlot extends View {
 		if (dsets.isEmpty () || rect == null)
 			return;
 		
-		h = rect.width () / HRATIO * (1 - 1F / RATIO);
+		h = rect.width () / hratio * (1 - 1F / ratio);
 		topr = new RectF (0, 0, rect.width (), rect.height () - h);
 		
 		total = 0;
 		for (DataSet ds : dsets)
 			total += ds.value;
 		
-		angle = START_ANGLE;
+		angle = startAngle;
 		for (DataSet ds : dsets) {
 			while (angle < 0)
 				angle += 360;

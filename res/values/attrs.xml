@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<declare-styleable name="PiePlot">
+	    <attr name="start_angle" format="integer" />
+	    <attr name="ratio" format="float" />
+   	    <attr name="hratio" format="float" />
+	</declare-styleable>    
+
+	<declare-styleable name="PieChart">
+	    <attr name="title" format="string" />
+	</declare-styleable>    
+</resources>
