@@ -14,13 +14,3 @@
         android:paddingTop="4dp"
         android:paddingBottom="4dp" />
 </com.wanikani.androidnotifier.LowPriorityViewPager>
-<!--                 <ProgressBar
-                    android:id="@+id/pb_status"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="right"
-                    android:maxHeight="24dp"
-                    android:maxWidth="24dp"
-                    android:minHeight="24dip"
-                    android:minWidth="24dip"/>
- -->
