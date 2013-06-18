@@ -1,16 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:custom="http://schemas.android.com/apk/res/com.wanikani.androidnotifier"
-    style="@style/Background"
+<ScrollView 
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:custom="http://schemas.android.com/apk/res/com.wanikani.androidnotifier"        
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical" >
-    
-    <com.wanikani.androidnotifier.graph.PieChart
-        android:id="@+id/pc_srs"
-        custom:title="@string/ct_srs_distribution"
-        style="@style/Table"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+    android:layout_height="match_parent">
 
-</LinearLayout>
+    <LinearLayout
+        style="@style/Background"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical" >
+
+        <com.wanikani.androidnotifier.graph.PieChart
+            android:id="@+id/pc_srs"
+            style="@style/Table"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            custom:title="@string/ct_srs_distribution" />
+    </LinearLayout>
+
+</ScrollView>
