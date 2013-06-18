@@ -266,7 +266,7 @@
 	</style>
 	
     <style name="ChartTitle" parent ="AppTheme">
-        <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
+        <item name="android:textAppearance">?android:attr/textAppearanceLarge</item>
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">@dimen/m_rythm</item>
         <item name="android:gravity">center</item>        
