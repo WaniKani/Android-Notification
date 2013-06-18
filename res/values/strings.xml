@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<resources xmlns:android="http://schemas.android.com/apk/res/android">
+<resources>
     <string name="app_name">WaniKani Notifier</string>
     <string name="new_reviews_42plus">You have %d+ pending reviews</string>
     <string name="new_reviews">You have %d pending reviews</string>
@@ -96,4 +96,6 @@
     
     <string name="fmt_ii_percent">%d%%</string>
     <string name="fmt_ii_percent_full">%1$d%% (%2$d%%M, %3$d%%R)</string>
+    
+    <string name="ct_srs_distribution">SRS Distribution</string>
   </resources>
