@@ -28,6 +28,9 @@ public class PieChart extends LinearLayout {
 	{
 		super (ctxt, attrs);
 			
+		inflater = (LayoutInflater) 
+				ctxt.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		
 		inflater.inflate (R.layout.piechart, this);
 		plot = (PiePlot) findViewById (R.id.pc_plot);
 		legend = (LinearLayout) findViewById (R.id.pc_legend);
@@ -42,7 +45,7 @@ public class PieChart extends LinearLayout {
 		
 		a = ctxt.obtainStyledAttributes (attrs, R.styleable.PieChart);
 			 
-		title.setText (a.getString (R.attr.title));
+		title.setText (a.getString (R.styleable.PieChart_title));
 				
 		a.recycle ();		
 		

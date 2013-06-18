@@ -76,13 +76,13 @@ public class PiePlot extends View {
 	{
 		TypedArray a;
 		
-		a = ctxt.obtainStyledAttributes (attrs, R.styleable.PieChart);
+		a = ctxt.obtainStyledAttributes (attrs, R.styleable.PiePlot);
 			 
-		startAngle = a.getInteger (R.attr.start_angle, DEFAULT_START_ANGLE);
-		ratio = a.getFloat (R.attr.ratio, DEFAULT_RATIO);
-		hratio = a.getFloat (R.attr.hratio, DEFAULT_HRATIO);
-				
-		a.recycle ();				
+		startAngle = a.getInteger (R.styleable.PiePlot_start_angle, DEFAULT_START_ANGLE);
+		ratio = a.getFloat (R.styleable.PiePlot_ratio, DEFAULT_RATIO);
+		hratio = a.getFloat (R.styleable.PiePlot_hratio, DEFAULT_HRATIO);
+		
+		a.recycle ();
 	}
 	
 	@Override
