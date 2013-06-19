@@ -981,13 +981,16 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 	{
 		RadioGroup fg;
 		
-		fg = (RadioGroup) parent.findViewById (R.id.rg_filter);
-		fg.check (apprentice ? R.id.btn_filter_missing : R.id.btn_filter_all); 
-		
 		this.apprentice = apprentice;
 		currentFilter = levelf;
-		levelf.select (main.getConnection (), level, apprentice, type);
-		iview.setSelection (0);
+
+		if (parent != null) {
+			fg = (RadioGroup) parent.findViewById (R.id.rg_filter);
+			fg.check (apprentice ? R.id.btn_filter_missing : R.id.btn_filter_all); 
+		
+			levelf.select (main.getConnection (), level, apprentice, type);
+			iview.setSelection (0);
+		}
 	}
 
 	/**
@@ -997,12 +1000,15 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 	{
 		RadioButton btn;
 		
-		btn = (RadioButton) parent.findViewById (R.id.btn_filter_critical); 
-		btn.setSelected (true);
-
 		currentFilter = criticalf;
-		criticalf.select (main.getConnection ());
-		iview.setSelection (0);
+
+		if (parent != null) {
+			btn = (RadioButton) parent.findViewById (R.id.btn_filter_critical); 
+			btn.setSelected (true);
+
+			criticalf.select (main.getConnection ());
+			iview.setSelection (0);
+		}
 	}
 
 	/**
@@ -1012,12 +1018,15 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 	{
 		RadioButton btn;
 		
-		btn = (RadioButton) parent.findViewById (R.id.btn_filter_unlocks); 
-		btn.setSelected (true);
-
 		currentFilter = unlockf;
-		unlockf.select (main.getConnection ());
-		iview.setSelection (0);
+
+		if (parent != null) {
+			btn = (RadioButton) parent.findViewById (R.id.btn_filter_unlocks); 
+			btn.setSelected (true);
+
+			unlockf.select (main.getConnection ());
+			iview.setSelection (0);
+		}
 	}
 
 	/**
