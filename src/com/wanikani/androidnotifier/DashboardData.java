@@ -177,9 +177,22 @@ class DashboardData {
 	private static final String KEY_BURNED = PREFIX + "burned";
 	
 	private static final String KEY_RADICALS_PROGRESS = PREFIX + "radicals_progress";
-	private static final String KEY_RADICALS_TOTAL = PREFIX + "radicals_total";
 	private static final String KEY_KANJI_PROGRESS = PREFIX + "kanji_progress";
+
+	private static final String KEY_RADICALS_TOTAL = PREFIX + "radicals_total";
 	private static final String KEY_KANJI_TOTAL = PREFIX + "kanji_total";
+
+	private static final String KEY_KANJI_APPRENTICE = PREFIX + "kanji_apprentice";
+	private static final String KEY_KANJI_GURU = PREFIX + "kanji_guru";
+	private static final String KEY_KANJI_MASTER = PREFIX + "kanji_master";
+	private static final String KEY_KANJI_ENLIGHTEN = PREFIX + "kanji_enlighten";
+	private static final String KEY_KANJI_BURNED = PREFIX + "kanji_burned";
+	
+	private static final String KEY_VOCAB_APPRENTICE = PREFIX + "vocab_apprentice";
+	private static final String KEY_VOCAB_GURU = PREFIX + "vocab_guru";
+	private static final String KEY_VOCAB_MASTER = PREFIX + "vocab_master";
+	private static final String KEY_VOCAB_ENLIGHTEN = PREFIX + "vocab_enlighten";
+	private static final String KEY_VOCAB_BURNED = PREFIX + "vocab_burned";
 	
 	private static final String KEY_CRITICAL_ITEMS = PREFIX + "critical_items";
 	
@@ -306,6 +319,18 @@ class DashboardData {
 			bundle.putInt (KEY_MASTER, od.srs.master.total);
 			bundle.putInt (KEY_ENLIGHTEN, od.srs.enlighten.total);
 			bundle.putInt (KEY_BURNED, od.srs.burned.total);
+
+			bundle.putInt (KEY_KANJI_APPRENTICE, od.srs.apprentice.kanji);
+			bundle.putInt (KEY_KANJI_GURU, od.srs.guru.kanji);
+			bundle.putInt (KEY_KANJI_MASTER, od.srs.master.kanji);
+			bundle.putInt (KEY_KANJI_ENLIGHTEN, od.srs.enlighten.kanji);
+			bundle.putInt (KEY_KANJI_BURNED, od.srs.burned.kanji);
+			
+			bundle.putInt (KEY_VOCAB_APPRENTICE, od.srs.apprentice.vocabulary);
+			bundle.putInt (KEY_VOCAB_GURU, od.srs.guru.vocabulary);
+			bundle.putInt (KEY_VOCAB_MASTER, od.srs.master.vocabulary);
+			bundle.putInt (KEY_VOCAB_ENLIGHTEN, od.srs.enlighten.vocabulary);
+			bundle.putInt (KEY_VOCAB_BURNED, od.srs.burned.vocabulary);
 		}		
 		
 		if (od.lp != null) {
@@ -349,6 +374,18 @@ class DashboardData {
 			od.srs.master.total = bundle.getInt (KEY_MASTER);
 			od.srs.enlighten.total = bundle.getInt (KEY_ENLIGHTEN);
 			od.srs.burned.total = bundle.getInt (KEY_BURNED);
+			
+			od.srs.apprentice.kanji = bundle.getInt (KEY_KANJI_APPRENTICE);
+			od.srs.guru.kanji = bundle.getInt (KEY_KANJI_GURU);
+			od.srs.master.kanji = bundle.getInt (KEY_KANJI_MASTER);
+			od.srs.enlighten.kanji = bundle.getInt (KEY_KANJI_ENLIGHTEN);
+			od.srs.burned.kanji = bundle.getInt (KEY_KANJI_BURNED);
+			
+			od.srs.apprentice.vocabulary = bundle.getInt (KEY_VOCAB_APPRENTICE);
+			od.srs.guru.vocabulary = bundle.getInt (KEY_VOCAB_GURU);
+			od.srs.master.vocabulary = bundle.getInt (KEY_VOCAB_MASTER);
+			od.srs.enlighten.vocabulary = bundle.getInt (KEY_VOCAB_ENLIGHTEN);
+			od.srs.burned.vocabulary = bundle.getInt (KEY_VOCAB_BURNED);
 		} else {
 			/* RETRIEVING is correct, because this is what DashboardActivity
 			 * will do right after calling this method */
