@@ -100,7 +100,7 @@ public class PiePlot extends View {
 			public void fillDataSet (DataSet ds, RectF rect, float h, 
 									 float angle1, float angle2)
 			{
-				if (coz (angle1) < coz (angle2)) {
+				if (coz (angle1) <= coz (angle2)) {
 					//     ______________
 					//    /              \
 					//    \____1____2____/
@@ -124,7 +124,7 @@ public class PiePlot extends View {
 			public void fillDataSet (DataSet ds, RectF rect, float h, 
 									 float angle1, float angle2)
 			{
-				if (coz (angle2) < coz (angle1))
+				if (coz (angle2) <= coz (angle1))
 					//     _____2___1____
 					//    /              \
 					//    \______________/
