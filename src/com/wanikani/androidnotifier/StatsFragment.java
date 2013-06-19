@@ -21,6 +21,10 @@ public class StatsFragment extends Fragment implements Tab {
 		
 	MainActivity main;
 	
+	private static final int ALL_THE_KANJI = 1700;
+	
+	private static final int ALL_THE_VOCAB = 5000;
+	
 	@Override
 	public void onAttach (Activity main)
 	{
@@ -74,40 +78,161 @@ public class StatsFragment extends Fragment implements Tab {
 	
 	public void refreshComplete (DashboardData dd)
 	{
-		PieChart srs;
+		PieChart pc;
 
 		if (dd == null || !isResumed ())
 			return;
 		
 		if (dd.od != null && dd.od.srs != null) {
-			srs = (PieChart) parent.findViewById (R.id.pc_srs);
-			srs.setData (getDataSets (dd.od.srs));
+			pc = (PieChart) parent.findViewById (R.id.pc_srs);			
+			pc.setData (getSRSDataSets (dd.od.srs));
+
+			pc = (PieChart) parent.findViewById (R.id.pc_kanji);			
+			pc.setData (getKanjiProgDataSets (dd.od.srs));
+			
+			pc = (PieChart) parent.findViewById (R.id.pc_vocab);			
+			pc.setData (getVocabProgDataSets (dd.od.srs));
 		}
 	}
 	
-	protected List<DataSet> getDataSets (SRSDistribution srs)
+	protected List<DataSet> getSRSDataSets (SRSDistribution srs)
 	{
 		List<DataSet> ans;
 		Resources res;
+		DataSet ds;
 		
 		res = getResources ();
 		ans = new Vector<DataSet> ();
+
+		ds = new DataSet (res.getString (R.string.tag_apprentice),
+						  res.getColor (R.color.apprentice),
+						  srs.apprentice.total);
+		ans.add (ds);
 		
-		ans.add (getDataSet (res.getString (R.string.tag_apprentice), 
-							 srs.apprentice, res.getColor (R.color.apprentice)));
-		ans.add (getDataSet (res.getString (R.string.tag_guru),
-							 srs.guru, res.getColor (R.color.guru)));
-		ans.add (getDataSet (res.getString (R.string.tag_master),
-							 srs.master, res.getColor (R.color.master)));
-		ans.add (getDataSet (res.getString (R.string.tag_enlightened),
-							 srs.enlighten, res.getColor (R.color.enlightened)));
+		ds = new DataSet (res.getString (R.string.tag_guru),
+				  		  res.getColor (R.color.guru),
+				  		  srs.guru.total);
+
+		ans.add (ds);
 		
+		ds = new DataSet (res.getString (R.string.tag_master),
+				   	      res.getColor (R.color.master),
+				   	      srs.master.total);
+		
+		ans.add (ds);
+		
+		ds = new DataSet (res.getString (R.string.tag_enlightened),
+						  res.getColor (R.color.enlightened),
+						  srs.enlighten.total);		
 		return ans;
 	}
 	
-	protected DataSet getDataSet (String tag, SRSDistribution.Level level, int color)
+	protected List<DataSet> getKanjiProgDataSets (SRSDistribution srs)
 	{
-		return new DataSet (tag, color, level.total);
+		List<DataSet> ans;
+		Resources res;
+		DataSet ds;
+		int locked;
+		
+		res = getResources ();
+		ans = new Vector<DataSet> ();
+
+		locked = ALL_THE_KANJI;
+		
+		locked -= srs.apprentice.kanji;
+		ds = new DataSet (res.getString (R.string.tag_apprentice),
+						  res.getColor (R.color.apprentice),
+						  srs.apprentice.kanji);
+		ans.add (ds);
+		
+		locked -= srs.guru.kanji;
+		ds = new DataSet (res.getString (R.string.tag_guru),
+				  		  res.getColor (R.color.guru),
+				  		  srs.guru.kanji);
+
+		ans.add (ds);
+		
+		locked -= srs.master.kanji;
+		ds = new DataSet (res.getString (R.string.tag_master),
+				   	      res.getColor (R.color.master),
+				   	      srs.master.kanji);
+		
+		ans.add (ds);
+		
+		locked -= srs.enlighten.kanji; 
+		ds = new DataSet (res.getString (R.string.tag_enlightened),
+						  res.getColor (R.color.enlightened),
+						  srs.enlighten.kanji);
+		ans.add (ds);
+		
+		locked -= srs.burned.kanji; 
+		ds = new DataSet (res.getString (R.string.tag_burned),
+						  res.getColor (R.color.burned),
+						  srs.burned.kanji);
+		ans.add (ds);
+		
+		if (locked < 0)
+			locked = 0;
+		ds = new DataSet (res.getString (R.string.tag_locked),
+						  res.getColor (R.color.locked),
+						  locked);
+		ans.add (ds);
+
+		return ans;
+	}
+
+	protected List<DataSet> getVocabProgDataSets (SRSDistribution srs)
+	{
+		List<DataSet> ans;
+		Resources res;
+		DataSet ds;
+		int locked;
+		
+		res = getResources ();
+		ans = new Vector<DataSet> ();
+
+		locked = ALL_THE_VOCAB;
+		
+		locked -= srs.apprentice.vocabulary;
+		ds = new DataSet (res.getString (R.string.tag_apprentice),
+						  res.getColor (R.color.apprentice),
+						  srs.apprentice.vocabulary);
+		ans.add (ds);
+		
+		locked -= srs.guru.vocabulary;
+		ds = new DataSet (res.getString (R.string.tag_guru),
+				  		  res.getColor (R.color.guru),
+				  		  srs.guru.vocabulary);
+
+		ans.add (ds);
+		
+		locked -= srs.master.vocabulary;
+		ds = new DataSet (res.getString (R.string.tag_master),
+				   	      res.getColor (R.color.master),
+				   	      srs.master.vocabulary);
+		
+		ans.add (ds);
+		
+		locked -= srs.enlighten.vocabulary; 
+		ds = new DataSet (res.getString (R.string.tag_enlightened),
+						  res.getColor (R.color.enlightened),
+						  srs.enlighten.vocabulary);
+		ans.add (ds);
+		
+		locked -= srs.burned.vocabulary; 
+		ds = new DataSet (res.getString (R.string.tag_burned),
+						  res.getColor (R.color.burned),
+						  srs.burned.vocabulary);
+		ans.add (ds);
+		
+		if (locked < 0)
+			locked = 0;
+		ds = new DataSet (res.getString (R.string.tag_locked),
+						  res.getColor (R.color.locked),
+						  locked);
+		ans.add (ds);
+
+		return ans;
 	}
 	
 	public void spin (boolean enable)

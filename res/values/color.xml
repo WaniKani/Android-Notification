@@ -4,9 +4,10 @@
     <color name="guru">#aa38c6</color>
     <color name="enlightened">#00aaff</color>
     <color name="master">#5571e2</color>
-    <color name="burned">#555</color>
     <color name="important">#ff0</color>
     <color name="normal">#fff</color>
     <color name="selected">#f87217</color>
     <color name="unselected">#000</color>
+    <color name="locked">#efefef</color>
+    <color name="burned">#555</color>
 </resources>

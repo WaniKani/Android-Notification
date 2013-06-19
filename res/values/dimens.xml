@@ -15,4 +15,5 @@
 	<dimen name="m_dash_alerts">36dp</dimen>
 	<dimen name="m_li_width">36dp</dimen>
 	<dimen name="m_li_height">24dp</dimen>
+	<dimen name="m_spinner">24dp</dimen>	
 </resources>

@@ -268,8 +268,8 @@
     <style name="ChartTitle" parent ="AppTheme">
         <item name="android:textAppearance">?android:attr/textAppearanceLarge</item>
         <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">@dimen/m_rythm</item>
-        <item name="android:gravity">center</item>        
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:gravity">top|center</item>        
     </style>
     <style name="ChartLegend" parent ="AppTheme">
         <item name="android:gravity">top</item>        
@@ -286,5 +286,12 @@
     </style>
 
     <style name="LegendValue" parent="LegendDescription">		
+    </style>
+
+    <style name="Spinner" parent="AppTheme">
+        <item name="android:minWidth">@dimen/m_spinner</item>
+        <item name="android:minHeight">@dimen/m_spinner</item>
+        <item name="android:maxWidth">@dimen/m_spinner</item>
+        <item name="android:maxHeight">@dimen/m_spinner</item>
     </style>
 </resources>

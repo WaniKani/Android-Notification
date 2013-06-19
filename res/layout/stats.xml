@@ -3,20 +3,32 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:custom="http://schemas.android.com/apk/res/com.wanikani.androidnotifier"        
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    style="@style/Background">
 
     <LinearLayout
-        style="@style/Background"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical" >
 
         <com.wanikani.androidnotifier.graph.PieChart
             android:id="@+id/pc_srs"
-            style="@style/Table"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             custom:title="@string/ct_srs_distribution" />
-    </LinearLayout>
+        
+        <com.wanikani.androidnotifier.graph.PieChart
+            android:id="@+id/pc_kanji"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            custom:title="@string/ct_kanji_progress" />
+        
+        <com.wanikani.androidnotifier.graph.PieChart
+            android:id="@+id/pc_vocab"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            custom:title="@string/ct_vocab_progress" />
+        
+        </LinearLayout>
 
 </ScrollView>

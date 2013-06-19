@@ -26,6 +26,7 @@
     <string name="tag_enlightened">Enlightened</string>
     <string name="tag_master">Master</string>
     <string name="tag_burned">Burned</string>
+    <string name="tag_locked">Locked</string>
     <string name="tag_gravatar">Gravatar</string>
     <string name="tag_loading">Loading&#8230;</string>
     <string name="tag_btn_review">Review</string>
@@ -98,4 +99,6 @@
     <string name="fmt_ii_percent_full">%1$d%% (%2$d%%M, %3$d%%R)</string>
     
     <string name="ct_srs_distribution">SRS Distribution</string>
+    <string name="ct_kanji_progress">Kanji Progress</string>
+    <string name="ct_vocab_progress">Vocab Progress</string>
   </resources>

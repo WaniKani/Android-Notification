@@ -21,24 +21,103 @@ public class PiePlot extends View {
 	public static class DataSet {
 		
 		public String description;
-		
 		public int color;
 		
 		public float value;
 		
 		Path tpath;
 
-		Path hpath;
+		Path hpath1;
+		
+		Path hpath2;
 		
 		Paint fpaint;
 		
 		Paint spaint;
-
+		
 		public DataSet (String description, int color, float value)
 		{
 			this.description = description;
 			this.color = color;
 			this.value = value;
+		}
+	}
+	
+	private enum Strip {
+		
+		FRONT {
+			public void fillDataSet (DataSet ds, RectF rect, float h, 
+									 float angle1, float angle2)
+			{
+				if (coz (angle1) < coz (angle2)) {
+					ds.hpath1 = strip (rect, h, angle1, 180);
+					ds.hpath2 = strip (rect, h, 0, angle2);
+				} else
+					ds.hpath1 = strip (rect, h, angle1, angle2);
+			}
+		},
+		
+		BACK {
+			
+			public void fillDataSet (DataSet ds, RectF rect, float h, 
+									 float angle1, float angle2)
+			{
+				if (coz (angle2) < coz (angle1))
+					ds.hpath1 = strip (rect, h, 0, 180);
+			}
+		},
+		
+		RIGHT {
+			public void fillDataSet (DataSet ds, RectF rect, float h, 
+									 float angle1, float angle2)
+			{
+				if (zin (angle2) < zin (angle1))
+					ds.hpath1 = strip (rect, h, 0, angle2);
+				else
+					ds.hpath1 = strip (rect, h, angle1, 180);
+			}			
+		},
+		
+		LEFT {
+			public void fillDataSet (DataSet ds, RectF rect, float h, 
+									 float angle1, float angle2)
+			{
+				if (zin (angle1) < zin (angle2))
+					ds.hpath1 = strip (rect, h, angle1, 180);
+				else
+					ds.hpath1 = strip (rect, h, 0, angle2);
+			}						
+		};
+		
+		public abstract void fillDataSet (DataSet ds, RectF rect, float h,
+										  float angle1, float angle2);		
+
+		private static float coz (float angle)
+		{
+			return angle < 180 ? 360 - angle : angle;
+		}	
+		
+		private static float zin (float angle)
+		{
+			if (angle < 90)
+				return 180 - angle;
+			else if (angle > 270)
+				return 540 - angle;
+			else
+				return angle;
+		}
+		
+		private static Path strip (RectF rect, float h, float angle1, float angle2)
+		{
+			Path path;
+			
+			path = new Path ();
+			path.arcTo (rect, angle2, angle1 - angle2);
+			path.offset (0, h);
+			path.arcTo (rect, angle1, angle2 - angle1);
+			path.close ();
+			
+			return path;
 		}
 	}
 	
@@ -137,8 +216,10 @@ public class PiePlot extends View {
 	{
 		for (DataSet ds : dsets) {
 			canvas.drawPath (ds.tpath, ds.fpaint);
-			if (ds.hpath != null)
-				canvas.drawPath (ds.hpath, ds.spaint);
+			if (ds.hpath1 != null)
+				canvas.drawPath (ds.hpath1, ds.spaint);
+			if (ds.hpath2 != null)
+				canvas.drawPath (ds.hpath1, ds.spaint);
 		}
 		
 	}
@@ -151,7 +232,7 @@ public class PiePlot extends View {
 		recalc ();
 	}
 	
-	protected Path getTopPath (RectF rect, float angle, float sweep)
+	protected void fillTopPath (DataSet ds, RectF rect, float angle, float sweep)
 	{
 		Path path;
 		
@@ -160,28 +241,32 @@ public class PiePlot extends View {
 		path.arcTo (rect, angle, sweep);
 		path.close ();
 		
-		return path;
+		ds.tpath = path;
 	}
 	
-	protected Path getHPath (RectF rect, float h, float angle, float sweep)
+	private static boolean isVisible (float angle)
 	{
-		Path path;
+		return angle < 180;
+	}
+	
+	protected void fillHPath (DataSet ds, RectF rect, float h, float angle, float sweep)
+	{
+		float angle2;
+		Strip s;
 		
-		if (angle < 180)
-			sweep = Math.min (sweep, 180 - angle);
-		else if (sweep > 360 - angle) {
-			sweep -= 360 - angle;
-			angle = 0;
-		} else
-			return null;
+		angle2 = (angle + sweep) % 360;
+		if (isVisible (angle))
+			if (isVisible (angle2))
+				s = Strip.FRONT;
+			else
+				s = Strip.LEFT;
+		else
+			if (isVisible (angle2))
+				s = Strip.RIGHT;
+			else
+				s = Strip.BACK;
 		
-		path = new Path ();
-		path.arcTo (rect, angle + sweep, -sweep);
-		path.offset (0, h);
-		path.arcTo (rect, angle, sweep);
-		path.close ();
-		
-		return path;
+		s.fillDataSet(ds, rect, h, angle, angle2);
 	}
 	
 	protected void recalc ()
@@ -210,8 +295,8 @@ public class PiePlot extends View {
 			
 			sweep = ds.value * 360 / total;
 			
-			ds.tpath = getTopPath (topr, angle, sweep);
-			ds.hpath = getHPath (topr, h, angle, sweep);
+			fillTopPath (ds, topr, angle, sweep);
+			fillHPath (ds, topr, h, angle, sweep);
 
 			ds.fpaint = new Paint ();
 			ds.fpaint.setStyle (Style.FILL);

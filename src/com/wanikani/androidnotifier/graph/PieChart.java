@@ -8,7 +8,9 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.wanikani.androidnotifier.R;
@@ -24,6 +26,8 @@ public class PieChart extends LinearLayout {
 	
 	LinearLayout legend;
 	
+	ProgressBar spinner;
+	
 	public PieChart (Context ctxt, AttributeSet attrs)
 	{
 		super (ctxt, attrs);
@@ -35,8 +39,11 @@ public class PieChart extends LinearLayout {
 		plot = (PiePlot) findViewById (R.id.pc_plot);
 		legend = (LinearLayout) findViewById (R.id.pc_legend);
 		title = (TextView) findViewById (R.id.pc_title);
+		spinner = (ProgressBar) findViewById (R.id.pc_spinner);
 		
 		loadAttributes (ctxt, attrs);
+		
+		spin (true);
 	}
 	
 	void loadAttributes (Context ctxt, AttributeSet attrs)
@@ -60,10 +67,14 @@ public class PieChart extends LinearLayout {
 		
 		legend.removeAllViews ();
 		for (DataSet ds : dsets) {
-			item = (LinearLayout) inflater.inflate (R.layout.legend, null); 
-			customizeItem (item, ds);
-			legend.addView (item);
+			if (ds.value > 0) {
+				item = (LinearLayout) inflater.inflate (R.layout.legend, null); 
+				customizeItem (item, ds);
+				legend.addView (item);
+			}
 		}
+		
+		spin (false);
 	}	
 	
 	@SuppressWarnings ("deprecation")
@@ -77,5 +88,12 @@ public class PieChart extends LinearLayout {
 			setText (ds.description);
 		((TextView) item.findViewById (R.id.leg_value)).
 			setText (Integer.toString (Math.round (ds.value)));		
+	}
+	
+	public void spin (boolean enabled)
+	{
+		spinner.setVisibility (enabled ? View.VISIBLE : View.GONE);
+		plot.setVisibility (enabled ? View.GONE : View.VISIBLE);
+		legend.setVisibility (enabled ? View.GONE : View.VISIBLE);
 	}
 }
