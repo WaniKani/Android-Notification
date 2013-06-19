@@ -247,14 +247,17 @@ public class StatsFragment extends Fragment implements Tab {
 	{
 		PieChart pc;
 		
-		pc = (PieChart) parent.findViewById (R.id.pc_srs);
-		pc.spin (true);
-
-		pc = (PieChart) parent.findViewById (R.id.pc_kanji);			
-		pc.spin (true);
+		if (parent != null) {
 		
-		pc = (PieChart) parent.findViewById (R.id.pc_vocab);			
-		pc.spin (true);
+			pc = (PieChart) parent.findViewById (R.id.pc_srs);
+			pc.spin (true);
+
+			pc = (PieChart) parent.findViewById (R.id.pc_kanji);			
+			pc.spin (true);
+		
+			pc = (PieChart) parent.findViewById (R.id.pc_vocab);			
+			pc.spin (true);
+		}
 	}
 	
 	 public boolean scrollLock ()
