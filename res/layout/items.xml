@@ -1,125 +1,170 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    style="@style/Background"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="horizontal" >
+    android:orientation="vertical" >
+
     <LinearLayout
-		android:layout_width="wrap_content"
-		android:layout_height="match_parent"
-		android:orientation="vertical">		
-    	<ListView
-	    	android:id="@+id/lv_levels"
-	    	style="@style/LevelTable"
-	    	android:visibility="visible"/>
-    	<!-- This is a filler to push the buttons to the bottom -->
-    	<View
-    	    android:id="@+id/lv_filler" 
-    	    android:layout_width="0dip"
-    	    android:layout_height="0dip"
-    	    android:layout_weight="1"
-    	    android:visibility="gone"/>
-   		<ImageButton 
-    	    android:id="@+id/btn_item_filter"
-    	    style="@style/ItemButton"
-    	    android:src="@drawable/filter"/>
-    	<ProgressBar 
-    	    android:id="@+id/pb_item_filter"
-    	    style="@style/ItemButton"
-    	    android:visibility="gone"/>
-    	<ImageButton 
-    	    android:id="@+id/btn_item_sort"
-    	    style="@style/ItemButton"
-    	    android:src="@drawable/sort"/>
+        android:id="@+id/it_lay_alert"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:visibility="gone" >
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/info" />
+
+        <TextView
+            android:id="@+id/it_alert"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
     </LinearLayout>
-    <RelativeLayout 
-       	style="@style/ItemTable">
-		<ListView
-	    	android:id="@+id/lv_items"
-	    	style="@style/ItemTable"/>
-   		<LinearLayout
-   		   		android:id="@+id/menu_filter"
-		        style="@style/Popup"
-   		    	android:layout_width="wrap_content"
-   		    	android:layout_height="wrap_content"
-				android:visibility="gone"
-				android:layout_alignParentBottom="true"
-				android:orientation="vertical">				
-    	<TextView
-    	    	style="@style/MenuTitle"
-    	    	android:layout_width="match_parent"
-    	    	android:layout_height="wrap_content"
-    	    	android:text="@string/tag_filter_by"/>   		    	
-	    <RadioGroup 
-		        android:id="@+id/rg_filter"
-		        style="@style/MenuPane"
-		        android:layout_width="wrap_content"
-		        android:layout_height="wrap_content"
-		        android:orientation="vertical">
-    	<RadioButton 
-    		    android:id="@+id/btn_filter_all"
-	    	    style="@style/ItemButton"	    	    
-	    	    android:layout_width="wrap_content"
-	    	    android:text="@string/tag_filter_all"/>
-    		<RadioButton 
-    		    android:id="@+id/btn_filter_missing"
-	    	    style="@style/ItemButton"
-	    	    android:layout_width="wrap_content"
-	    	    android:text="@string/tag_filter_missing"/>
-    		<RadioButton 
-    		    android:id="@+id/btn_filter_unlocks"
-	    	    style="@style/ItemButton"
-	    	    android:layout_width="wrap_content"
-	    	    android:text="@string/tag_filter_unlocks"/>
-    		<RadioButton 
-    		    android:id="@+id/btn_filter_critical"
-	    	    style="@style/ItemButton"
-	    	    android:layout_width="wrap_content"
-	    	    android:text="@string/tag_filter_critical"/>
-    		</RadioGroup>
-   		</LinearLayout>
-   		<LinearLayout
-		        android:id="@+id/menu_order"
-		        style="@style/Popup"
-   		    	android:layout_width="wrap_content"
-   		    	android:layout_height="wrap_content"
-				android:visibility="gone"
-				android:layout_alignParentBottom="true"
-				android:orientation="vertical">				
-    	<TextView
-    	    	style="@style/MenuTitle"
-    	    	android:layout_width="match_parent"
-    	    	android:layout_height="wrap_content"
-    	    	android:text="@string/tag_sort_by"/>   		    	
-	    <RadioGroup 
-		        android:id="@+id/rg_order"
-		        style="@style/MenuPane"
-		        android:layout_width="wrap_content"
-		        android:layout_height="wrap_content"
-		        android:orientation="vertical">
-		   <RadioButton 
-    		    android:id="@+id/btn_sort_type"
-	    	    style="@style/ItemButton"
-	    	    android:layout_width="wrap_content"
-	    	    android:text="@string/tag_sort_type"/>
-    		<RadioButton 
-    		    android:id="@+id/btn_sort_srs"
-	    	    style="@style/ItemButton"
-	    	    android:layout_width="wrap_content"
-	    	    android:text="@string/tag_sort_srs"/>
-    		<RadioButton 
-    		    android:id="@+id/btn_sort_errors"
-	    	    style="@style/ItemButton"
-	    	    android:layout_width="wrap_content"
-	    	    android:text="@string/tag_sort_errors"/>
-    		<RadioButton 
-    		    android:id="@+id/btn_sort_time"
-	    	    style="@style/ItemButton"
-	    	    android:layout_width="wrap_content"
-	    	    android:text="@string/tag_sort_time"/>
-    		</RadioGroup>
-    	</LinearLayout>
-	</RelativeLayout>
+
+    <LinearLayout
+        style="@style/Background"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal" >
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="vertical" >
+
+            <ListView
+                android:id="@+id/lv_levels"
+                style="@style/LevelTable"
+                android:visibility="visible" />
+            <!-- This is a filler to push the buttons to the bottom -->
+
+            <View
+                android:id="@+id/lv_filler"
+                android:layout_width="0dip"
+                android:layout_height="0dip"
+                android:layout_weight="1"
+                android:visibility="gone" />
+
+            <ImageButton
+                android:id="@+id/btn_item_filter"
+                style="@style/ItemButton"
+                android:src="@drawable/filter" />
+
+            <ProgressBar
+                android:id="@+id/pb_item_filter"
+                style="@style/ItemButton"
+                android:visibility="gone" />
+
+            <ImageButton
+                android:id="@+id/btn_item_sort"
+                style="@style/ItemButton"
+                android:src="@drawable/sort" />
+        </LinearLayout>
+
+        <RelativeLayout style="@style/ItemTable" >
+
+            <ListView
+                android:id="@+id/lv_items"
+                style="@style/ItemTable" />
+
+            <LinearLayout
+                android:id="@+id/menu_filter"
+                style="@style/Popup"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:orientation="vertical"
+                android:visibility="gone" >
+
+                <TextView
+                    style="@style/MenuTitle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/tag_filter_by" />
+
+                <RadioGroup
+                    android:id="@+id/rg_filter"
+                    style="@style/MenuPane"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical" >
+
+                    <RadioButton
+                        android:id="@+id/btn_filter_all"
+                        style="@style/ItemButton"
+                        android:layout_width="wrap_content"
+                        android:text="@string/tag_filter_all" />
+
+                    <RadioButton
+                        android:id="@+id/btn_filter_missing"
+                        style="@style/ItemButton"
+                        android:layout_width="wrap_content"
+                        android:text="@string/tag_filter_missing" />
+
+                    <RadioButton
+                        android:id="@+id/btn_filter_unlocks"
+                        style="@style/ItemButton"
+                        android:layout_width="wrap_content"
+                        android:text="@string/tag_filter_unlocks" />
+
+                    <RadioButton
+                        android:id="@+id/btn_filter_critical"
+                        style="@style/ItemButton"
+                        android:layout_width="wrap_content"
+                        android:text="@string/tag_filter_critical" />
+                </RadioGroup>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/menu_order"
+                style="@style/Popup"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:orientation="vertical"
+                android:visibility="gone" >
+
+                <TextView
+                    style="@style/MenuTitle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/tag_sort_by" />
+
+                <RadioGroup
+                    android:id="@+id/rg_order"
+                    style="@style/MenuPane"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical" >
+
+                    <RadioButton
+                        android:id="@+id/btn_sort_type"
+                        style="@style/ItemButton"
+                        android:layout_width="wrap_content"
+                        android:text="@string/tag_sort_type" />
+
+                    <RadioButton
+                        android:id="@+id/btn_sort_srs"
+                        style="@style/ItemButton"
+                        android:layout_width="wrap_content"
+                        android:text="@string/tag_sort_srs" />
+
+                    <RadioButton
+                        android:id="@+id/btn_sort_errors"
+                        style="@style/ItemButton"
+                        android:layout_width="wrap_content"
+                        android:text="@string/tag_sort_errors" />
+
+                    <RadioButton
+                        android:id="@+id/btn_sort_time"
+                        style="@style/ItemButton"
+                        android:layout_width="wrap_content"
+                        android:text="@string/tag_sort_time" />
+                </RadioGroup>
+            </LinearLayout>
+        </RelativeLayout>
+    </LinearLayout>
+
 </LinearLayout>
-
-

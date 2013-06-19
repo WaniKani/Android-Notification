@@ -229,6 +229,7 @@ public class UnlockFilter implements Filter {
 
 		if (stask == task) {
 			task = null;
+			itemf.noMoreData (this, ok);
 			itemf.selectOtherFilter (this, false);
 		}
 	}

@@ -1036,6 +1036,8 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 		iad.clear ();
 		iad.addAll (list);
 		iad.notifyDataSetChanged ();
+		
+		alert (ok);
 	}
 
 	/**
@@ -1066,7 +1068,7 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 	}
 	
 	/**
-	 * Does nothing. Actually we may display a small "warning" icon.
+	 * Called at the end of data retrieval. It shows or hides the alert info.  
 	 * @param sfilter the filter which is publishing these items
 	 * @param ok tells if this is the complete list or something went wrong while
 	 * loading data
@@ -1074,7 +1076,28 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 	@Override
 	public void noMoreData (Filter sfilter, boolean ok)
 	{
-		/* empty */
+		if (sfilter != currentFilter)
+			return;
+		
+		alert (ok);
+	}
+	
+	/**
+	 * Displays or hides an alert message.
+	 * @param ok if true, data retrieval was ok, otherwise is partial
+	 */
+	protected void alert (boolean ok)
+	{
+		TextView message;
+		View panel;
+		
+		panel = parent.findViewById (R.id.it_lay_alert);
+		if (!ok) {
+			panel.setVisibility (View.VISIBLE);
+			message = (TextView) parent.findViewById (R.id.it_alert);
+			message.setText (getResources ().getString (R.string.status_msg_partial));
+		} else
+			panel.setVisibility (View.GONE);
 	}
 	
 	/**
