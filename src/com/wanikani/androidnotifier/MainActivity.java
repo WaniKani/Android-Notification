@@ -349,7 +349,6 @@ public class MainActivity extends FragmentActivity implements Runnable {
 				ciStatus = DashboardData.OptionalDataStatus.RETRIEVED;
 				cis = critical.list.size ();
 			} catch (IOException e) {
-				lp = null;
 				ciStatus = DashboardData.OptionalDataStatus.FAILED;
 				cis = 0;
 			}
@@ -372,7 +371,6 @@ public class MainActivity extends FragmentActivity implements Runnable {
 			refreshComplete (dd);
 		}
 	}
-
 
 	/*** The avatar bitmap filename */
 	private static final String AVATAR_FILENAME = "avatar.png";
