@@ -16,18 +16,50 @@ import android.widget.TextView;
 import com.wanikani.androidnotifier.R;
 import com.wanikani.androidnotifier.graph.PiePlot.DataSet;
 
+/* 
+ *  Copyright (c) 2013 Alberto Cuda
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/**
+ * A simple 3-d pie chart, comprising of the plot itself, a title and 
+ * a legend. The look and feel tries to match the style of the dashboard.
+ */
 public class PieChart extends LinearLayout {
 
+	/// The inflater
 	LayoutInflater inflater;
 	
+	/// The chart title
 	TextView title;
 	
+	/// The real pie plot image
 	PiePlot plot;
 	
+	/// The legend
 	LinearLayout legend;
 	
+	/// A spinner, which is displayed when no data has been published yet
 	ProgressBar spinner;
 	
+	/**
+	 * Constructor. It only shows the spinner and the title, until 
+	 * {@link #setData(List)} gets called.
+	 * @param ctxt context
+	 * @param attrs attributes
+	 */
 	public PieChart (Context ctxt, AttributeSet attrs)
 	{
 		super (ctxt, attrs);
@@ -46,6 +78,12 @@ public class PieChart extends LinearLayout {
 		spin (true);
 	}
 	
+	/**
+	 * Performs the actual job of reading the attributes and updating 
+	 * the look. Meant for cascading (which is not done at this stage).
+	 * @param ctxt the context
+	 * @param attrs the attributes
+	 */
 	void loadAttributes (Context ctxt, AttributeSet attrs)
 	{
 		TypedArray a;
@@ -59,6 +97,10 @@ public class PieChart extends LinearLayout {
 		plot.loadAttributes (ctxt, attrs);
 	}
 	
+	/**
+	 * Updates the plot with fresh data. Stops the spinner, if shown.
+	 * @param dsets the data
+	 */
 	public void setData (List<DataSet> dsets)
 	{
 		LinearLayout item;		
@@ -77,6 +119,11 @@ public class PieChart extends LinearLayout {
 		spin (false);
 	}	
 	
+	/**
+	 * Fills a new legend item.
+	 * @param item the item to fill
+	 * @param ds the dataset the item shall describe
+	 */
 	@SuppressWarnings ("deprecation")
 	protected void customizeItem (LinearLayout item, DataSet ds)
 	{
@@ -90,6 +137,11 @@ public class PieChart extends LinearLayout {
 			setText (Integer.toString (Math.round (ds.value)));		
 	}
 	
+	/**
+	 * Shows or hides the spinner. Correspondingly, plot and legend are 
+	 * hidden or shown. 
+	 * @param enabled if the spinner should be shown
+	 */
 	public void spin (boolean enabled)
 	{
 		spinner.setVisibility (enabled ? View.VISIBLE : View.GONE);
