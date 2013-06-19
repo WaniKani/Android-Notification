@@ -123,7 +123,10 @@ public class StatsFragment extends Fragment implements Tab {
 		
 		ds = new DataSet (res.getString (R.string.tag_enlightened),
 						  res.getColor (R.color.enlightened),
-						  srs.enlighten.total);		
+						  srs.enlighten.total);
+		
+		ans.add (ds);
+		
 		return ans;
 	}
 	
