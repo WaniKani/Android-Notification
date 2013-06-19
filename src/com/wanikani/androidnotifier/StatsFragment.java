@@ -15,14 +15,41 @@ import com.wanikani.androidnotifier.graph.PieChart;
 import com.wanikani.androidnotifier.graph.PiePlot.DataSet;
 import com.wanikani.wklib.SRSDistribution;
 
+/* 
+ *  Copyright (c) 2013 Alberto Cuda
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/**
+ * A fragment that displays some charts that show the user's progress.
+ * Currently we show the overall SRS distribution and kanji/vocab
+ * progress. In a future release, we may also include historical data
+ * (we need to create and maintain a database, though).
+ */
 public class StatsFragment extends Fragment implements Tab {
 
-	View parent;
-		
+	/// The main activity
 	MainActivity main;
 	
+	/// The root view of the fragment
+	View parent;
+	
+	/// Overall number of kanji
 	private static final int ALL_THE_KANJI = 1700;
 	
+	/// Overall number of vocab items
 	private static final int ALL_THE_VOCAB = 5000;
 	
 	@Override
@@ -76,6 +103,7 @@ public class StatsFragment extends Fragment implements Tab {
 		return R.string.tag_stats;
 	}
 	
+	@Override
 	public void refreshComplete (DashboardData dd)
 	{
 		PieChart pc;
@@ -108,12 +136,22 @@ public class StatsFragment extends Fragment implements Tab {
 		}
 	}
 	
+	/**
+	 * Tells whether the SRS pie chart will contain at least one slice or not.
+	 * @param srs the SRS data
+	 * @return <tt>true</tt> if at least one item exists
+	 */
 	protected boolean hasSRSData (SRSDistribution srs)
 	{
 		return 	(srs.apprentice.total + srs.guru.total +
 				 srs.master.total + srs.enlighten.total) > 0;
 	}
 	
+	/**
+	 * Creates the datasets needed by the SRS distribution pie chart
+	 * @param srs the SRS data 
+	 * @return a list of dataset (one for each SRS level)
+	 */
 	protected List<DataSet> getSRSDataSets (SRSDistribution srs)
 	{
 		List<DataSet> ans;
@@ -149,6 +187,11 @@ public class StatsFragment extends Fragment implements Tab {
 		return ans;
 	}
 	
+	/**
+	 * Creates the datasets needed by the kanji progression pie chart
+	 * @param srs the SRS data 
+	 * @return a list of dataset (one for each SRS level, plus burned and unlocked)
+	 */
 	protected List<DataSet> getKanjiProgDataSets (SRSDistribution srs)
 	{
 		List<DataSet> ans;
@@ -203,6 +246,11 @@ public class StatsFragment extends Fragment implements Tab {
 		return ans;
 	}
 
+	/**
+	 * Creates the datasets needed by the kanji progression pie chart
+	 * @param srs the SRS data 
+	 * @return a list of dataset (one for each SRS level, plus burned and unlocked)
+	 */
 	protected List<DataSet> getVocabProgDataSets (SRSDistribution srs)
 	{
 		List<DataSet> ans;
@@ -256,12 +304,14 @@ public class StatsFragment extends Fragment implements Tab {
 
 		return ans;
 	}
-	
+
+	@Override
 	public void spin (boolean enable)
 	{
 		/* empty */
 	}
 	
+	@Override
 	public void flush ()
 	{
 		PieChart pc;
@@ -279,6 +329,9 @@ public class StatsFragment extends Fragment implements Tab {
 		}
 	}
 	
+	/**
+	 * Shows an error message on each pie chart, when something goes wrong.
+	 */
 	public void showAlerts ()
 	{
 		PieChart pc;
@@ -297,9 +350,10 @@ public class StatsFragment extends Fragment implements Tab {
 		}
 	}
 
+	@Override
 	public boolean scrollLock ()
-	 {
+	{
 		return false; 
-	 }
+	}
 
 }

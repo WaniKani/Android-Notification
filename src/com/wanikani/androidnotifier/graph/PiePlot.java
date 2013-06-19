@@ -344,6 +344,13 @@ public class PiePlot extends View {
 		recalc ();
 	}
 	
+	/**
+	 * Creates the path describing the top side of a slice.
+	 * @param ds the dataset to be filled
+	 * @param rect the enclosing rect
+	 * @param angle the start angle
+	 * @param sweep the clockwise sweep
+	 */
 	protected void fillTopPath (DataSet ds, RectF rect, float angle, float sweep)
 	{
 		Path path;
@@ -355,12 +362,25 @@ public class PiePlot extends View {
 		
 		ds.tpath = path;
 	}
-	
+
+	/**
+	 * Tells whether an angle is on the visible (foremost) side of the pie.
+	 * @param angle an angle
+	 * @param <tt>true</tt> if visible
+	 */
 	private static boolean isVisible (float angle)
 	{
 		return angle < 180;
 	}
 	
+	/**
+	 * Creates the paths describing the vertical side of a slice.
+	 * @param ds the dataset to be filled
+	 * @param rect the enclosing rect
+	 * @param h height of the slice
+	 * @param angle the start angle
+	 * @param sweep the clockwise sweep
+	 */
 	protected void fillHPath (DataSet ds, RectF rect, float h, float angle, float sweep)
 	{
 		float angle2;
@@ -381,6 +401,10 @@ public class PiePlot extends View {
 		s.fillDataSet(ds, rect, h, angle, angle2);
 	}
 	
+	/**
+	 * Recreates all the private fields of a dataset, to make the redraw operation
+	 * as quick as possible.
+	 */
 	protected void recalc ()
 	{
 		RectF topr;
@@ -424,6 +448,11 @@ public class PiePlot extends View {
 		}
 	}
 	
+	/**
+	 * Makes a color a little bit darker, to give a shadow effect
+	 * @param color a color
+	 * @return a darker nuance
+	 */
 	protected int shadow (int color)
 	{
 		float hsv [];
@@ -434,7 +463,11 @@ public class PiePlot extends View {
 		
 		return Color.HSVToColor (hsv);
 	}
-	
+
+	/**
+	 * Updates the dataset
+	 * @param dsets a data set
+	 */
 	public void setData (List<DataSet> dsets)
 	{
 		this.dsets = dsets;
