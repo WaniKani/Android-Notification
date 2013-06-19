@@ -415,22 +415,21 @@ public class DashboardFragment extends Fragment implements Tab {
 			
 		case RETRIEVED:
 			setVisibility (R.id.pb_w_section,View.GONE);
-			setVisibility (R.id.lay_progress, dd.od.lp != null ? View.VISIBLE : View.GONE);
-			if (dd.od.lp != null) {
-				setProgress (R.id.pb_radicals, R.id.radicals_remaining,
-						 	 dd.od.lp.radicalsProgress, dd.od.lp.radicalsTotal);
+			setVisibility (R.id.lay_progress, View.VISIBLE);
+			setProgress (R.id.pb_radicals, R.id.radicals_remaining,
+					 	 dd.od.lp.radicalsProgress, dd.od.lp.radicalsTotal);
 			
-				setProgress (R.id.pb_kanji, R.id.kanji_remaining,
-						     dd.od.lp.kanjiProgress, dd.od.lp.kanjiTotal);
+			setProgress (R.id.pb_kanji, R.id.kanji_remaining,
+					     dd.od.lp.kanjiProgress, dd.od.lp.kanjiTotal);
 
-				setVisibility (R.id.progress_section, View.VISIBLE);
-			}
-			
+			setVisibility (R.id.progress_section, View.VISIBLE);			
 			break;
 			
 		case FAILED:
 			/* Just hide the spinner. 
-			 * If we already have some data, it is displayed anyway */
+			 * If we already have some data, it is displayed anyway, otherwise hide it */
+			if (dd.od.lp == null)
+				setVisibility (R.id.lay_progress, View.GONE);
 			setVisibility (R.id.pb_w_section, View.GONE);			
 		}
 		
