@@ -13,14 +13,30 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
-
     <ProgressBar
         android:id="@+id/pc_spinner"
         style="@style/Spinner"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="right" />
-                
+
+	<LinearLayout
+	    android:id="@+id/pc_lay_alert"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	    android:gravity="center_vertical"
+	    android:orientation="horizontal" >
+
+	    <ImageView
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:src="@drawable/info"/>
+	    <TextView
+	        android:id="@+id/pc_alert"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"/>
+	</LinearLayout>
+    
     <com.wanikani.androidnotifier.graph.PiePlot
         android:id="@+id/pc_plot"
         android:layout_width="match_parent"

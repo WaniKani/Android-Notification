@@ -83,16 +83,35 @@ public class StatsFragment extends Fragment implements Tab {
 		if (dd == null || !isResumed ())
 			return;
 		
-		if (dd.od != null && dd.od.srs != null) {
-			pc = (PieChart) parent.findViewById (R.id.pc_srs);			
-			pc.setData (getSRSDataSets (dd.od.srs));
+		switch (dd.od.srsStatus) {
+		case RETRIEVING:
+			break;
+			
+		case RETRIEVED:
+			pc = (PieChart) parent.findViewById (R.id.pc_srs);
+			if (hasSRSData (dd.od.srs)) {
+				pc.setVisibility (View.VISIBLE);			
+				pc.setData (getSRSDataSets (dd.od.srs));
+			} else
+				pc.setVisibility (View.GONE);
 
 			pc = (PieChart) parent.findViewById (R.id.pc_kanji);			
 			pc.setData (getKanjiProgDataSets (dd.od.srs));
-			
+				
 			pc = (PieChart) parent.findViewById (R.id.pc_vocab);			
 			pc.setData (getVocabProgDataSets (dd.od.srs));
+			break;
+		
+		case FAILED:
+			if (dd.od.srs == null)
+				showAlerts ();
 		}
+	}
+	
+	protected boolean hasSRSData (SRSDistribution srs)
+	{
+		return 	(srs.apprentice.total + srs.guru.total +
+				 srs.master.total + srs.enlighten.total) > 0;
 	}
 	
 	protected List<DataSet> getSRSDataSets (SRSDistribution srs)
@@ -260,7 +279,25 @@ public class StatsFragment extends Fragment implements Tab {
 		}
 	}
 	
-	 public boolean scrollLock ()
+	public void showAlerts ()
+	{
+		PieChart pc;
+		String msg;
+
+		msg = getResources ().getString (R.string.status_msg_error);
+		if (parent != null) {		
+			pc = (PieChart) parent.findViewById (R.id.pc_srs);
+			pc.alert (msg);
+
+			pc = (PieChart) parent.findViewById (R.id.pc_kanji);			
+			pc.alert (msg);
+		
+			pc = (PieChart) parent.findViewById (R.id.pc_vocab);			
+			pc.alert (msg);
+		}
+	}
+
+	public boolean scrollLock ()
 	 {
 		return false; 
 	 }

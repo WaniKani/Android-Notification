@@ -54,6 +54,12 @@ public class PieChart extends LinearLayout {
 	/// A spinner, which is displayed when no data has been published yet
 	ProgressBar spinner;
 	
+	/// The alert layout
+	View alertPanel;
+	
+	/// The alert message
+	TextView alertMessage;
+	
 	/**
 	 * Constructor. It only shows the spinner and the title, until 
 	 * {@link #setData(List)} gets called.
@@ -72,6 +78,8 @@ public class PieChart extends LinearLayout {
 		legend = (LinearLayout) findViewById (R.id.pc_legend);
 		title = (TextView) findViewById (R.id.pc_title);
 		spinner = (ProgressBar) findViewById (R.id.pc_spinner);
+		alertPanel = findViewById (R.id.pc_lay_alert);
+		alertMessage = (TextView) findViewById (R.id.pc_alert);
 		
 		loadAttributes (ctxt, attrs);
 		
@@ -147,5 +155,18 @@ public class PieChart extends LinearLayout {
 		spinner.setVisibility (enabled ? View.VISIBLE : View.GONE);
 		plot.setVisibility (enabled ? View.GONE : View.VISIBLE);
 		legend.setVisibility (enabled ? View.GONE : View.VISIBLE);
+		alertPanel.setVisibility (View.GONE);
+	}
+	
+	/**
+	 * Shows an alert message
+	 */
+	public void alert (String msg)
+	{
+		spinner.setVisibility (View.GONE);
+		plot.setVisibility (View.GONE);
+		legend.setVisibility (View.GONE);
+		alertPanel.setVisibility (View.VISIBLE);
+		alertMessage.setText (msg);
 	}
 }
