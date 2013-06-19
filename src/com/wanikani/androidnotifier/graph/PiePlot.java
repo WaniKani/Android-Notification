@@ -16,25 +16,66 @@ import android.graphics.Paint.Style;
 import android.util.AttributeSet;
 import android.view.View;
 
+/* 
+ *  Copyright (c) 2013 Alberto Cuda
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/**
+ * A pie plot. The difference between this widget and {@link PieChart} is
+ * that this class just implements the image, without title and legend. 
+ */
 public class PiePlot extends View {
 
+	/**
+	 * One item to be displayed. This class contains both public fields
+	 * (filled by users of this widget) and private fields that are used
+	 * internally for rendering purposes.   
+	 */
 	public static class DataSet {
 		
+		/// The legend description
 		public String description;
+		
+		/// The color
 		public int color;
 		
+		/// The value
 		public float value;
 		
+		/// Path of the upper side of the slice
 		Path tpath;
 
+		/// Path of first vertical strip, if any 
 		Path hpath1;
 		
+		/// Path of second vertical script, if any
 		Path hpath2;
 		
+		/// Color context for the upper side of the slice
 		Paint fpaint;
 		
+		/// Color context of the vertical strip
 		Paint spaint;
 		
+		/**
+		 * Constructor.
+		 * @param description the legend description
+		 * @param color the color
+		 * @param value the value
+		 */
 		public DataSet (String description, int color, float value)
 		{
 			this.description = description;
@@ -43,70 +84,118 @@ public class PiePlot extends View {
 		}
 	}
 	
+	/**
+	 * An enum whose items reflect the different ways a slice may be displayed.
+	 * Depending on the size of a slice and its initial angle, its vertical strip
+	 * may be completely hidden, completely visible or partially visible.
+	 * The items describe the different possibilities and are used to 
+	 * create the correct paths.
+	 */
 	private enum Strip {
 		
+		/**
+		 * The two edges of the slice are at the near side.
+		 */
 		FRONT {
 			public void fillDataSet (DataSet ds, RectF rect, float h, 
 									 float angle1, float angle2)
 			{
 				if (coz (angle1) < coz (angle2)) {
+					//     ______________
+					//    /              \
+					//    \____1____2____/
+					//    ####|      |####
 					ds.hpath1 = strip (rect, h, angle1, 180);
 					ds.hpath2 = strip (rect, h, 0, angle2);
 				} else
+					//     ______________
+					//    /              \
+					//    \____2____1____/
+					//        |######|
 					ds.hpath1 = strip (rect, h, angle1, angle2);
 			}
 		},
 		
+		/**
+		 * The two edges of the slice are at the far side.
+		 */
 		BACK {
 			
 			public void fillDataSet (DataSet ds, RectF rect, float h, 
 									 float angle1, float angle2)
 			{
 				if (coz (angle2) < coz (angle1))
+					//     _____2___1____
+					//    /              \
+					//    \______________/
+					//    ####|      |####
 					ds.hpath1 = strip (rect, h, 0, 180);
 			}
 		},
 		
+		/**
+		 * The first edge is not visible, the other one is visible.
+		 */
 		RIGHT {
 			public void fillDataSet (DataSet ds, RectF rect, float h, 
 									 float angle1, float angle2)
 			{
-				if (zin (angle2) < zin (angle1))
-					ds.hpath1 = strip (rect, h, 0, angle2);
-				else
-					ds.hpath1 = strip (rect, h, angle1, 180);
+				//     _________1____
+				//    /              \
+				//    \_________2____/
+				//               |####
+				ds.hpath1 = strip (rect, h, 0, angle2);
 			}			
 		},
 		
+		/**
+		 * The first edge is visible, the other one is not visible.
+		 */
 		LEFT {
 			public void fillDataSet (DataSet ds, RectF rect, float h, 
 									 float angle1, float angle2)
 			{
-				if (zin (angle1) < zin (angle2))
-					ds.hpath1 = strip (rect, h, angle1, 180);
-				else
-					ds.hpath1 = strip (rect, h, 0, angle2);
+				//     _________2____
+				//    /              \
+				//    \_________1____/
+				//     #########|				
+				ds.hpath1 = strip (rect, h, angle1, 180);
 			}						
 		};
-		
+
+		/**
+		 * Udates a datased, by filling the {@link DataSet#hpath1} and
+		 * {@link DataSet#hpath2} fields. These are the paths that
+		 * describe the vertical strip.
+		 * @param ds the dataset to be filled
+		 * @param rect the pie chart enclosing rect
+		 * @param h the height of the pie plot
+		 * @param angle1 the (clockwise) start angle of the slice
+		 * @param angle2 the (clockwise) end angle of the slice
+		 */
 		public abstract void fillDataSet (DataSet ds, RectF rect, float h,
 										  float angle1, float angle2);		
 
+		/**
+		 * An fake cosine function. The returned values are in the same
+		 * relationship between the cosine of the respective arguments.  
+		 * @param angle the angle
+		 * @return the pseudo-cosine function
+		 */
 		private static float coz (float angle)
 		{
 			return angle < 180 ? 360 - angle : angle;
 		}	
 		
-		private static float zin (float angle)
-		{
-			if (angle < 90)
-				return 180 - angle;
-			else if (angle > 270)
-				return 540 - angle;
-			else
-				return angle;
-		}
-		
+		/**
+		 * Returns a path describing to a single vertical strip from a given
+		 * angle to another angle, in a clockwise direction 
+		 * @param rect the pie plot's enclosing rect
+		 * @param h the pie plot height
+		 * @param angle1 start angle
+		 * @param angle2 stop angle
+		 * @return the path
+		 */
 		private static Path strip (RectF rect, float h, float angle1, float angle2)
 		{
 			Path path;
@@ -121,20 +210,28 @@ public class PiePlot extends View {
 		}
 	}
 	
+	/// The current datasets
 	private List<DataSet> dsets;
 	
+	/// The enclosing rect
 	private RectF rect;
 	
+	/// Default angle of the first slice
 	private static final int DEFAULT_START_ANGLE = -110;
 	
+	/// Default width/height ratio of the ellipse
 	private static final float DEFAULT_RATIO = 2F;
 	
+	/// Default with/depth ratio
 	private static final float DEFAULT_HRATIO = 10;
 	
+	/// Angle of the first slice
 	private int startAngle;
 	
+	/// Width/height ratio of the ellipse
 	private float ratio;
 	
+	/// Width/depth ratio
 	private float hratio;
 		
 	/**
@@ -151,6 +248,12 @@ public class PiePlot extends View {
 		loadAttributes (ctxt, attrs);
 	}
 	
+	/**
+	 * Performs the actual job of reading the attributes and updating 
+	 * the look. Meant for cascading.
+	 * @param ctxt the context
+	 * @param attrs the attributes
+	 */
 	void loadAttributes (Context ctxt, AttributeSet attrs)
 	{
 		TypedArray a;
@@ -189,9 +292,18 @@ public class PiePlot extends View {
 		} else			
 			width = height = 100;
 		
-		setMeasuredDimension (width, height);
+		setMeasuredDimension (width, height);	
 	}
 	
+	/**
+	 * Given one of the dimensions of the pie, returns the other dimension,
+	 * making sure the constraint encoded in <code>bmode</code> is respected 
+	 * @param a one dimension
+	 * @param b the other dimension
+	 * @param bmode the constraint
+	 * @param ratio the ideal ratio between the two dimensions 
+	 * @return the best option for <code>b</code>
+	 */
 	protected int measureExact (float a, float b, int bmode, float ratio)
 	{
 		a /= ratio;
