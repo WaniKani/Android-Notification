@@ -436,7 +436,7 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	 *  when reviews complete
 	 */
 	public static final String ACTION_REFRESH = PREFIX + "REFRESH"; 
-		
+	
 	/** 
 	 * Called when the activity is first created.  We register the
 	 * listeners and create the 
@@ -462,7 +462,6 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	    receiver = new Receiver ();
 	    alarm = new Alarm ();
 	    
-	    mgr = getSupportFragmentManager ();
 	    tabs = new Vector<Tab> ();
 
 	    if (dashboardf == null)
