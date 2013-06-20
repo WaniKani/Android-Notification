@@ -793,6 +793,8 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 		super.onAttach (main);
 		
 		this.main = (MainActivity) main;
+
+		this.main.register (this);
 	}
 	
 	/**

@@ -177,6 +177,8 @@ public class DashboardFragment extends Fragment implements Tab {
 		super.onAttach (main);
 		
 		this.main = (MainActivity) main;
+		
+		this.main.register (this);
 	}
 	
 	/**

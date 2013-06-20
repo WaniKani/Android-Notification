@@ -125,6 +125,15 @@ public class MainActivity extends FragmentActivity implements Runnable {
 			return res.getString (tabs.get (position).getName ());
 		 }
 		 
+		 public void replace (Tab tab)
+		 {
+			 int i;
+			 
+			 for (i = 0; i < tabs.size (); i++)
+				 if (tabs.get (i).getClass ().equals (tab))
+					 tabs.set (i, tab);
+		 }
+		 
 		 /**
 		  * Broadcasts the spin event, which is sent when data refresh
 		  * is started or completed
@@ -411,15 +420,6 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	/** Private prefix */
 	private static final String PREFIX = "com.wanikani.androidnotifier.DashboardData.";
 	
-	/** Dashboard fragment bundle key */
-	private static final String DASHBOARD_FRAGMENT = PREFIX + "DASHBOARD_FRAGMENT";
-
-	/** Items fragment bundle key */
-	private static final String ITEMS_FRAGMENT = PREFIX + "ITEMS_FRAGMENT";
-	
-	/** Stats fragment bundle key */
-	private static final String STATS_FRAGMENT = PREFIX + "STATS_FRAGMENT";
-
 	/** The dashboard fragment */
 	DashboardFragment dashboardf;
 	
@@ -436,7 +436,7 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	 *  when reviews complete
 	 */
 	public static final String ACTION_REFRESH = PREFIX + "REFRESH"; 
-	
+		
 	/** 
 	 * Called when the activity is first created.  We register the
 	 * listeners and create the 
@@ -454,9 +454,7 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	@Override
 	public void onCreate (Bundle bundle) 
 	{	
-		FragmentManager mgr;
 		SharedPreferences prefs;
-		DashboardData ldd;
 		List<Tab> tabs;
 		
 	    super.onCreate (bundle);
@@ -466,12 +464,7 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	    
 	    mgr = getSupportFragmentManager ();
 	    tabs = new Vector<Tab> ();
-	    if (bundle != null) {
-	    	dashboardf = (DashboardFragment) mgr.getFragment (bundle, DASHBOARD_FRAGMENT);
-	    	itemsf = (ItemsFragment) mgr.getFragment (bundle, ITEMS_FRAGMENT);
-	    	statsf = (StatsFragment) mgr.getFragment (bundle, STATS_FRAGMENT);
-	    }
-	    
+
 	    if (dashboardf == null)
 	    	dashboardf = new DashboardFragment ();
 	    if (itemsf == null)
@@ -495,19 +488,43 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	    prefs = PreferenceManager.getDefaultSharedPreferences (this);
 	    if (!SettingsActivity.credentialsAreValid (prefs))
 	    	settings ();
-	    
+
 	    conn = new Connection (SettingsActivity.getLogin (prefs));
+
 	    if (bundle != null && bundle.containsKey (BUNDLE_VALID)) {
-	    	ldd = new DashboardData (bundle);
+	    	dd = new DashboardData (bundle);
+			pager.setCurrentItem (bundle.getInt (CURRENT_TAB));
+	    } else
+	    	pager.setCurrentItem (pad.getTabIndex (dashboardf), false);
+	}
+	
+	void register (Tab tab)
+	{
+		if (pad != null)
+			pad.replace (tab);
+		else if (tab instanceof DashboardFragment)
+			dashboardf = (DashboardFragment) tab;
+		else if (tab instanceof ItemsFragment)
+			itemsf = (ItemsFragment) tab;
+		else if (tab instanceof StatsFragment)
+			statsf = (StatsFragment) tab;
+	}
+	
+	@Override
+	public void onStart ()
+	{
+	    super.onStart ();
+	    
+	    DashboardData ldd;
+	    
+	    ldd = dd;
+	    dd = null;
+	    if (ldd != null) {
 	    	refreshComplete (ldd);
 	    	if (ldd.isIncomplete ())
 	    		refreshOptional ();
-			pager.setCurrentItem (bundle.getInt (CURRENT_TAB));
-
-	    } else {
-	    	pager.setCurrentItem (pad.getTabIndex (dashboardf), false);
+	    } else
 	    	refresh (false);
-	    }
 	}
 	
 	/**
@@ -530,10 +547,6 @@ public class MainActivity extends FragmentActivity implements Runnable {
 			bundle.putBoolean (BUNDLE_VALID, true);
 			bundle.putInt (CURRENT_TAB, pager.getCurrentItem ());
 		}
-		if (dashboardf.isAdded ())
-			mgr.putFragment (bundle, DASHBOARD_FRAGMENT, dashboardf);
-		if (itemsf.isAdded ())
-			mgr.putFragment (bundle, ITEMS_FRAGMENT, itemsf);
 	}
 	
 	/**
