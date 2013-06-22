@@ -310,25 +310,18 @@ public class StatsFragment extends Fragment implements Tab {
 	@Override
 	public void spin (boolean enable)
 	{
-		/* empty */
+		View pb;
+		
+		if (parent != null) {
+			pb = parent.findViewById (R.id.pb_status);
+			pb.setVisibility (enable ? View.VISIBLE : View.GONE);
+		}
 	}
 	
 	@Override
 	public void flush ()
 	{
-		PieChart pc;
-		
-		if (parent != null) {
-		
-			pc = (PieChart) parent.findViewById (R.id.pc_srs);
-			pc.spin (true);
-
-			pc = (PieChart) parent.findViewById (R.id.pc_kanji);			
-			pc.spin (true);
-		
-			pc = (PieChart) parent.findViewById (R.id.pc_vocab);			
-			pc.spin (true);
-		}
+		/* empty */
 	}
 	
 	/**

@@ -1,34 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView 
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:custom="http://schemas.android.com/apk/res/com.wanikani.androidnotifier"        
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:custom="http://schemas.android.com/apk/res/com.wanikani.androidnotifier"
+    style="@style/Background"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    style="@style/Background">
+    android:layout_height="match_parent" >
 
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical" >
+        android:layout_height="wrap_content" >
 
-        <com.wanikani.androidnotifier.graph.PieChart
-            android:id="@+id/pc_srs"
+        <ProgressBar
+            android:id="@+id/pb_status"
+            style="@style/Spinner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            android:visibility="gone" />
+
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            custom:title="@string/ct_srs_distribution" />
-        
-        <com.wanikani.androidnotifier.graph.PieChart
-            android:id="@+id/pc_kanji"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            custom:title="@string/ct_kanji_progress" />
-        
-        <com.wanikani.androidnotifier.graph.PieChart
-            android:id="@+id/pc_vocab"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            custom:title="@string/ct_vocab_progress" />
-        
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:orientation="vertical" >
+
+            <com.wanikani.androidnotifier.graph.PieChart
+                android:id="@+id/pc_srs"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                custom:title="@string/ct_srs_distribution" />
+
+            <com.wanikani.androidnotifier.graph.PieChart
+                android:id="@+id/pc_kanji"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                custom:title="@string/ct_kanji_progress" />
+
+            <com.wanikani.androidnotifier.graph.PieChart
+                android:id="@+id/pc_vocab"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                custom:title="@string/ct_vocab_progress" />
         </LinearLayout>
+    </RelativeLayout>
 
 </ScrollView>
