@@ -77,7 +77,7 @@ public class MainActivity extends FragmentActivity implements Runnable {
 		public void onSharedPreferenceChanged (SharedPreferences prefs, String key)
 		{
 			if (dd != null)
-				refreshComplete (dd);
+				refreshComplete (dd, false);
 		}
 	};
 
@@ -294,7 +294,7 @@ public class MainActivity extends FragmentActivity implements Runnable {
 			try {
 				dd.wail ();
 				
-				refreshComplete (dd);
+				refreshComplete (dd, true);
 				
 				new RefreshTaskPartII ().execute (conn);
 			} catch (AuthenticationException e) {
@@ -377,7 +377,7 @@ public class MainActivity extends FragmentActivity implements Runnable {
 		{
 			dd.setOptionalData (od);
 			
-			refreshComplete (dd);
+			refreshComplete (dd, false);
 		}
 	}
 
@@ -519,7 +519,7 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	    ldd = dd;
 	    dd = null;
 	    if (ldd != null) {
-	    	refreshComplete (ldd);
+	    	refreshComplete (ldd, false);
 	    	if (ldd.isIncomplete ())
 	    		refreshOptional ();
 	    } else
@@ -536,11 +536,8 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	@Override
 	public void onSaveInstanceState (Bundle bundle)
 	{
-		FragmentManager mgr;
-		
 		super.onSaveInstanceState (bundle);
 		
-	    mgr = getSupportFragmentManager ();
 		if (dd != null) {
 			dd.serialize (bundle);
 			bundle.putBoolean (BUNDLE_VALID, true);
@@ -786,13 +783,15 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	 * Called by {@link RefreshTask} when asynchronous data 
 	 * retrieval is completed.
 	 * @param dd the retrieved data
+	 * @param intermediate if this is an updated, and more will come
 	 */
-	private void refreshComplete (DashboardData dd)
+	private void refreshComplete (DashboardData dd, boolean intermediate)
 	{
 		SharedPreferences prefs;
 		long delay, refresh;
 
-		pad.spin (false);
+		if (!intermediate)
+			pad.spin (false);
 
 		if (this.dd == null)
 			switchTo (R.id.f_main);
