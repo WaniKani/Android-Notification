@@ -119,7 +119,7 @@ public class NotificationService
 	public static final String ACTION_CONNECTIVITY_CHANGE = 
 			PREFIX + "CONNECTIVITY_CHANGE";
 
-	/** Called when a state machine alarm goes off.
+	/** Called when a state machine or the chron alarm goes off.
 	 *  The state machine is reconstructed from intent extra data
 	 *  and we proceed to the next step */
 	public static final String ACTION_ALARM = 
@@ -148,6 +148,12 @@ public class NotificationService
 	 *  only display one notification at a time, this is a
 	 *  constant */
 	private static final int NOT_ID = 1;
+	
+	/** The chron schedule alarm time shared preferences key */
+	private static final String PREFS_CHRON_NEXT = PREFIX + "CHRON_NEXT";
+	
+	/** The chron interval. Default is one day */
+	private static final long CHRON_INTERVAL = 24 * 3600 * 1000;
 	
 	/**
 	 * Constructor. 
@@ -189,6 +195,8 @@ public class NotificationService
 			return;
 		}
 		
+		chronDaily (enabled);
+		
 		if (!enabled)
 			return;
 		
@@ -200,6 +208,30 @@ public class NotificationService
 			alarm (intent);
 		else if (action.equals (ACTION_NEW_DATA))
 			newData (intent);
+	}
+	
+	/**
+	 * Performs daily jobs. Admittedly, this has nothing to do with the notification service,
+	 * however this class already handles alarms and gets boot notifications, so 
+	 * it's quite natural to put it here. In addition, since alarms are somehow a precious
+	 * resource, we merge the FSM alarsm with the cron alarms.
+	 * @param enabled if notifications are enabled 
+	 */
+	private void chronDaily (boolean enabled)
+	{
+		SharedPreferences prefs;
+		long next, now;
+		
+		now = System.currentTimeMillis ();
+		prefs = PreferenceManager.getDefaultSharedPreferences (this);
+		next = prefs.getLong (PREFS_CHRON_NEXT, now);
+		
+		if (now >= next) {
+			next = now + CHRON_INTERVAL;
+			prefs.edit ().putLong (PREFS_CHRON_NEXT, next);
+			if (!enabled)
+				schedule (null, new Date (next));
+		}
 	}
 	
 	/**
@@ -307,9 +339,15 @@ public class NotificationService
 		NotifierStateMachine fsm;
 		Bundle b;
 		
-		b = intent.getBundleExtra (KEY_FSM);
-
-		fsm = new NotifierStateMachine (this, b);
+		/* Normally the ALARM event is equipped with a state machine. 
+		 * It is not, only if this is a chron event AND notifications are
+		 * disabled. In this case, however, this method should not have
+		 * been called. Better being tolerant, anyway */
+		if (intent.hasExtra (KEY_FSM)) {
+			b = intent.getBundleExtra (KEY_FSM);
+			fsm = new NotifierStateMachine (this, b);
+		} else
+			fsm = new NotifierStateMachine (this);
 		
 		feed (fsm, NotifierStateMachine.Event.E_SOLICITED);
 	}
@@ -412,26 +450,38 @@ public class NotificationService
 	 * Used by the state machine when it wants to be notified
 	 * at some time elapses. We serialize the contents of 
 	 * the FSM into an intent and set an alarm.
+	 * This method is also called to schedule the chron event
+	 * (and in that case the state machine parameter is null).
 	 *  @param fsm the state machine
 	 *	@param date when the timer should be tiggered
 	 */
 	public void schedule (NotifierStateMachine fsm, Date date)
 	{		
+		SharedPreferences prefs;
 		AlarmManager alarm;
 		PendingIntent pi;
+		long next, chron;
 		Bundle b;
 		Intent i;
 		
 		i = new Intent (this, getClass ());
 		i.setAction (ACTION_ALARM);
-		b = new Bundle ();
-		fsm.serialize (b);
-		i.putExtra (KEY_FSM, b);
+		if (fsm != null) {
+			b = new Bundle ();
+			fsm.serialize (b);
+			i.putExtra (KEY_FSM, b);
+		}
+		
+		next = date.getTime ();
+		prefs = PreferenceManager.getDefaultSharedPreferences (this);
+		chron = prefs.getLong (PREFS_CHRON_NEXT, next);
+		if (next > chron)
+			next = chron;
 		
 		pi = PendingIntent.getService (this, 0, i, PendingIntent.FLAG_CANCEL_CURRENT);
 		
 		alarm = (AlarmManager) getSystemService (Context.ALARM_SERVICE);
-		alarm.set (AlarmManager.RTC, date.getTime (), pi);
+		alarm.set (AlarmManager.RTC, next, pi);
 	}
 	
 	/**
