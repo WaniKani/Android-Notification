@@ -228,7 +228,7 @@ public class NotificationService
 		
 		if (now >= next) {
 			next = now + CHRON_INTERVAL;
-			prefs.edit ().putLong (PREFS_CHRON_NEXT, next);
+			prefs.edit ().putLong (PREFS_CHRON_NEXT, next).commit ();			
 			if (!enabled)
 				schedule (null, new Date (next));
 		}
