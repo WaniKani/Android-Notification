@@ -211,7 +211,8 @@ public class NotificationService
 	}
 	
 	/**
-	 * Performs daily jobs. Admittedly, this has nothing to do with the notification service,
+	 * Checks whether there it is time to run dailiy jobs.
+	 * Admittedly, this has nothing to do with the notification service,
 	 * however this class already handles alarms and gets boot notifications, so 
 	 * it's quite natural to put it here. In addition, since alarms are somehow a precious
 	 * resource, we merge the FSM alarsm with the cron alarms.
@@ -231,7 +232,18 @@ public class NotificationService
 			prefs.edit ().putLong (PREFS_CHRON_NEXT, next).commit ();			
 			if (!enabled)
 				schedule (null, new Date (next));
+			
+			runDailyJobs ();
 		}
+	}
+	
+	/**
+	 * This is the method that is guaranteed to be called exactly once a day, if 
+	 * the phone is turned on. If it is not turned on, it is called as soon as possible.
+	 */
+	protected void runDailyJobs ()
+	{
+		
 	}
 	
 	/**
