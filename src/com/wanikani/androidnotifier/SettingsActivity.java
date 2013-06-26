@@ -48,6 +48,8 @@ public class SettingsActivity
 	private static final String KEY_PREF_REFRESH_TIMEOUT = "pref_refresh_timeout";
 	/** Enable enter keyboard key. Must match preferences.xml */
 	private static final String KEY_PREF_SHOW_KEYBOARD = "pref_show_keyboard";
+	/** Enable tall keyboard. Must match preferences.xml */
+	private static final String KEY_PREF_LARGE_KEYBOARD = "pref_large_keyboard";
 	/** Enable enter keyboard key. Must match preferences.xml */
 	private static final String KEY_PREF_ENTER = "pref_enter";
 	/** Enable 42+ mode. Must match preferences.xml */
@@ -179,6 +181,9 @@ public class SettingsActivity
 		
 		pref = findPreference (KEY_PREF_ENTER);
 		pref.setEnabled (getShowKeyboard (prefs) && getUseIntegratedBrowser (prefs));	
+
+		pref = findPreference (KEY_PREF_LARGE_KEYBOARD);
+		pref.setEnabled (getShowKeyboard (prefs) && getUseIntegratedBrowser (prefs));	
 	}
 	
 	public static String diagnose (SharedPreferences prefs, Resources res)
@@ -231,6 +236,11 @@ public class SettingsActivity
 	public static boolean getShowKeyboard (SharedPreferences prefs)
 	{
 		return prefs.getBoolean (KEY_PREF_SHOW_KEYBOARD, true);
+	}
+	
+	public static boolean getLargeKeyboard (SharedPreferences prefs)
+	{
+		return prefs.getBoolean (KEY_PREF_LARGE_KEYBOARD, false);
 	}
 	
 	public static boolean getEnter (SharedPreferences prefs)

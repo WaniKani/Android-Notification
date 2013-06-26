@@ -14,6 +14,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.DisplayMetrics;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.ViewGroup.LayoutParams;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
@@ -532,7 +533,7 @@ public class WebReviewActivity extends Activity {
 		prefs.registerOnSharedPreferenceChangeListener (new PreferencesListener ());
 		showEnterKey = SettingsActivity.getEnter (prefs);
 
-		initKeyboard ();
+		initKeyboard (prefs);
 		
 		bar = (ProgressBar) findViewById (R.id.pb_reviews);
 		
@@ -607,11 +608,15 @@ public class WebReviewActivity extends Activity {
 	/**
 	 * Sets up listener and bindings of the initial keyboard.
 	 */
-	protected void initKeyboard ()
+	protected void initKeyboard (SharedPreferences prefs)
 	{
 		View.OnClickListener klist, mlist;
+		LayoutParams lp;
+		boolean tall;
 		View key;
 		int i;
+		
+		tall = SettingsActivity.getLargeKeyboard (prefs);
 		
 		kbstatus = KeyboardStatus.HIDDEN;
 		loadKeyboard (KB_LATIN);		
@@ -622,11 +627,21 @@ public class WebReviewActivity extends Activity {
 		for (i = 0; i < key_table.length; i++) {
 			key = findViewById (key_table [i]);
 			key.setOnClickListener (klist);
+			if (tall) {
+				lp = key.getLayoutParams ();
+				lp.height += lp.height / 2;
+				key.setLayoutParams(lp);
+			}
 		}					
 
 		for (i = 0; i < meta_table.length; i++) {
 			key = findViewById (meta_table [i]);
 			key.setOnClickListener (mlist);
+			if (tall) {
+				lp = key.getLayoutParams ();
+				lp.height += lp.height / 2;
+				key.setLayoutParams(lp);
+			}
 		}					
 	}
 	
