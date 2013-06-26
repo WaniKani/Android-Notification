@@ -13,6 +13,8 @@
 	<string name="pref_refresh_one_min_descr">Data will be refreshed every minute</string>
     <string name="pref_userkey_descr">Copy here the "Public API Key" from your Account Settings page</string>
     <string name="pref_userkey">User API Key</string>    
+    <string name="pref_show_keyboard">Embedded keyboard</string>
+    <string name="pref_show_keyboard_desc">Show custom keyboard when reviewing</string>
     <string name="pref_enter">Review keyboard Enter</string>
     <string name="pref_enter_descr">Enable enter key in embedded keyboard</string>
     <string name="pref_42plus">42+ mode</string>

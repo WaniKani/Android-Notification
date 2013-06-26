@@ -143,9 +143,17 @@ public class WebReviewActivity extends Activity {
 		@Override  
 	    public void onPageFinished(WebView view, String url)  
 	    {  
+			SharedPreferences prefs;
+			
+			prefs = PreferenceManager.getDefaultSharedPreferences (WebReviewActivity.this);
 			bar.setVisibility (View.GONE);
-			if (url.startsWith ("http"))
-				js (JS_INIT);
+
+			if (url.startsWith ("http")) {
+				if (SettingsActivity.getShowKeyboard (prefs))
+					js (JS_INIT_KBD);
+				else
+					js (JS_INIT_NOKBD);
+			}
 	    }
 	}
 	
@@ -397,7 +405,7 @@ public class WebReviewActivity extends Activity {
 	public static final String OPEN_ACTION = PREFIX + "OPEN";
 	
 	/** Javascript to be called each time an HTML page is loaded. It hides or shows the keyboard */
-	private static final String JS_INIT = 
+	private static final String JS_INIT_KBD = 
 			"var textbox, lessobj, ltextbox;" +
 			"textbox = document.getElementById (\"" + WKConfig.ANSWER_BOX + "\"); " +
 			"lessobj = document.getElementById (\"" + WKConfig.LESSONS_OBJ + "\"); " +
@@ -413,6 +421,20 @@ public class WebReviewActivity extends Activity {
 			"   wknKeyboard.iconizeLessons ();" +
 			"} else {" +
 			"	wknKeyboard.hide ();" +			
+			"}";
+
+	private static final String JS_INIT_NOKBD = 
+			"var textbox, lessobj, ltextbox;" +
+			"textbox = document.getElementById (\"" + WKConfig.ANSWER_BOX + "\"); " +
+			"lessobj = document.getElementById (\"" + WKConfig.LESSONS_OBJ + "\"); " +
+			"ltextbox = document.getElementById (\"" + WKConfig.LESSON_ANSWER_BOX_JP + "\"); " +
+			"if (ltextbox == null) {" +
+			"   ltextbox = document.getElementById (\"" + WKConfig.LESSON_ANSWER_BOX_EN + "\"); " +
+			"}" +
+			"if (textbox != null) {" +
+			"   textbox.focus ();" +
+			"} else if (ltextbox != null) {" +
+			"   ltextbox.focus ();" +
 			"}";
 
 	private static final String JS_FOCUS = 
