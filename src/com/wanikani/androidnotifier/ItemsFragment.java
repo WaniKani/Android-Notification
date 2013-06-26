@@ -655,7 +655,7 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 			
 			rg = (RadioGroup) parent.findViewById (R.id.rg_order);
 			rg.check (R.id.btn_sort_time);
-			iad.setComparator (Item.SortByType.INSTANCE, ItemInfo.AGE);				
+			iad.setComparator (Item.SortByTime.INSTANCE, ItemInfo.AGE);				
 		}
 
 		/**
