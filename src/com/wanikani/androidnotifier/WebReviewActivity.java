@@ -1,12 +1,17 @@
 package com.wanikani.androidnotifier;
 
+import java.util.Locale;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
+import android.util.DisplayMetrics;
 import android.view.KeyEvent;
 import android.view.View;
 import android.webkit.JavascriptInterface;
@@ -547,6 +552,39 @@ public class WebReviewActivity extends Activity {
 		wv.setWebChromeClient (new WebChromeClientImpl ());		
 		
 		wv.loadUrl (getIntent ().getData ().toString ());
+	}
+	
+	/**
+	 * Called when the application resumes.
+	 * We notify this the alarm to adjust its timers in case
+	 * they were tainted by a deep sleep mode transition.
+	 */
+	@Override
+	public void onResume ()
+	{
+		super.onResume ();
+				
+		setJapaneseLocale ();
+	}
+	
+	/**
+	 * Called on startup to set default locale.
+	 */
+	public void setJapaneseLocale ()
+	{
+		Configuration config;
+		DisplayMetrics dm;
+		Resources res;
+		Locale locale;
+				
+		locale = new Locale ("jp");
+		Locale.setDefault (locale);
+		
+		config = new Configuration ();
+		config.locale = locale;
+		res = getBaseContext ().getResources ();
+		dm = res.getDisplayMetrics ();
+		res.updateConfiguration (config, dm);		
 	}
 	
 	@Override

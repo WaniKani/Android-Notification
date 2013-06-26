@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
+import java.util.Locale;
 import java.util.Vector;
 
 import android.content.BroadcastReceiver;
@@ -11,6 +12,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -26,6 +28,7 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.content.LocalBroadcastManager;
+import android.util.DisplayMetrics;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -571,6 +574,28 @@ public class MainActivity extends FragmentActivity implements Runnable {
 				
 		alarm.screenOn ();
 		visible = true;
+		
+		setJapaneseLocale ();
+	}
+	
+	/**
+	 * Called on startup to set default locale.
+	 */
+	public void setJapaneseLocale ()
+	{
+		Configuration config;
+		DisplayMetrics dm;
+		Resources res;
+		Locale locale;
+				
+		locale = new Locale ("jp");
+		Locale.setDefault (locale);
+		
+		config = new Configuration ();
+		config.locale = locale;
+		res = getBaseContext ().getResources ();
+		dm = res.getDisplayMetrics ();
+		res.updateConfiguration (config, dm);		
 	}
 	
 	/**
