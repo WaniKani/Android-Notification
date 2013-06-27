@@ -62,7 +62,7 @@
     <string name="fmt_no_reviews">None yet!</string>
 
     <string name="fmt_level">Level %d</string>
-    <string name="fmt_title">Sect of %s</string>
+    <string name="fmt_title">Sect %s</string>
     <string name="fmt_lessons">You can unlock %d items</string>
     <string name="fmt_lessons_42p">You can unlock %d+ items</string>
     <string name="fmt_one_lesson">You can unlock one item</string>
