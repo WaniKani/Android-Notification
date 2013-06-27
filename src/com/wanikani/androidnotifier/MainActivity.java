@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
+import java.util.Locale;
 import java.util.Vector;
 
 import android.content.BroadcastReceiver;
@@ -11,6 +12,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -19,12 +21,14 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.content.LocalBroadcastManager;
+import android.util.DisplayMetrics;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -209,6 +213,16 @@ public class MainActivity extends FragmentActivity implements Runnable {
 		{
 			UserLogin ul;
 			String action;
+			
+			/* This check is meant to avoid a somehow strange race condition: 
+			 * if a WebReviewActivity is started by tapping on the notification (i.e. the app is
+			 * NOT active), and is closed right before starting the MainActivity, the ACTION_REFRESH
+			 * is delivered by the wrong (dying) thread. This causes a ViewRoot$CalledFromWrongThreadException 
+			 * It looks like an Android bug... but I'm not so sure. At any rate this check
+			 * does no harm
+			 */
+			if (!Looper.getMainLooper ().equals (Looper.myLooper ()))
+				return;
 			
 			action = i.getAction ();
 			if (action.equals (SettingsActivity.ACT_CREDENTIALS)) {

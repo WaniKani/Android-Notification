@@ -6,15 +6,25 @@
         	android:key="pref_enabled" 
         	android:title="@string/pref_enabled" 
         	android:defaultValue="true" android:summary="@string/pref_enabled_descr"/>
-    <CheckBoxPreference
-        	android:key="pref_use_integrated_browser"
-        	android:title="@string/pref_use_integrated_browser"
-        	android:defaultValue="true" />
     <EditTextPreference  
         	android:title="@string/pref_refresh_timeout" 
         	android:key="pref_refresh_timeout"
         	android:inputType="number"
         	android:defaultValue="5"/>    
+    <CheckBoxPreference
+        	android:key="pref_use_integrated_browser"
+        	android:title="@string/pref_use_integrated_browser"
+        	android:defaultValue="true" />
+    <CheckBoxPreference
+        	android:key="pref_show_keyboard"
+        	android:title="@string/pref_show_keyboard"
+        	android:summary="@string/pref_show_keyboard_desc"
+        	android:defaultValue="true" />
+    <CheckBoxPreference
+        	android:key="pref_large_keyboard"
+        	android:title="@string/pref_large_keyboard"
+        	android:summary="@string/pref_large_keyboard_desc"
+        	android:defaultValue="false" />
     <CheckBoxPreference
         	android:key="pref_enter"
         	android:title="@string/pref_enter"

@@ -1,14 +1,20 @@
 package com.wanikani.androidnotifier;
 
+import java.util.Locale;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
+import android.util.DisplayMetrics;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.ViewGroup.LayoutParams;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
@@ -143,9 +149,17 @@ public class WebReviewActivity extends Activity {
 		@Override  
 	    public void onPageFinished(WebView view, String url)  
 	    {  
+			SharedPreferences prefs;
+			
+			prefs = PreferenceManager.getDefaultSharedPreferences (WebReviewActivity.this);
 			bar.setVisibility (View.GONE);
-			if (url.startsWith ("http"))
-				js (JS_INIT);
+
+			if (url.startsWith ("http")) {
+				if (SettingsActivity.getShowKeyboard (prefs))
+					js (JS_INIT_KBD);
+				else
+					js (JS_INIT_NOKBD);
+			}
 	    }
 	}
 	
@@ -397,7 +411,7 @@ public class WebReviewActivity extends Activity {
 	public static final String OPEN_ACTION = PREFIX + "OPEN";
 	
 	/** Javascript to be called each time an HTML page is loaded. It hides or shows the keyboard */
-	private static final String JS_INIT = 
+	private static final String JS_INIT_KBD = 
 			"var textbox, lessobj, ltextbox;" +
 			"textbox = document.getElementById (\"" + WKConfig.ANSWER_BOX + "\"); " +
 			"lessobj = document.getElementById (\"" + WKConfig.LESSONS_OBJ + "\"); " +
@@ -413,6 +427,20 @@ public class WebReviewActivity extends Activity {
 			"   wknKeyboard.iconizeLessons ();" +
 			"} else {" +
 			"	wknKeyboard.hide ();" +			
+			"}";
+
+	private static final String JS_INIT_NOKBD = 
+			"var textbox, lessobj, ltextbox;" +
+			"textbox = document.getElementById (\"" + WKConfig.ANSWER_BOX + "\"); " +
+			"lessobj = document.getElementById (\"" + WKConfig.LESSONS_OBJ + "\"); " +
+			"ltextbox = document.getElementById (\"" + WKConfig.LESSON_ANSWER_BOX_JP + "\"); " +
+			"if (ltextbox == null) {" +
+			"   ltextbox = document.getElementById (\"" + WKConfig.LESSON_ANSWER_BOX_EN + "\"); " +
+			"}" +
+			"if (textbox != null) {" +
+			"   textbox.focus ();" +
+			"} else if (ltextbox != null) {" +
+			"   ltextbox.focus ();" +
 			"}";
 
 	private static final String JS_FOCUS = 
@@ -505,7 +533,7 @@ public class WebReviewActivity extends Activity {
 		prefs.registerOnSharedPreferenceChangeListener (new PreferencesListener ());
 		showEnterKey = SettingsActivity.getEnter (prefs);
 
-		initKeyboard ();
+		initKeyboard (prefs);
 		
 		bar = (ProgressBar) findViewById (R.id.pb_reviews);
 		
@@ -547,11 +575,15 @@ public class WebReviewActivity extends Activity {
 	/**
 	 * Sets up listener and bindings of the initial keyboard.
 	 */
-	protected void initKeyboard ()
+	protected void initKeyboard (SharedPreferences prefs)
 	{
 		View.OnClickListener klist, mlist;
+		LayoutParams lp;
+		boolean tall;
 		View key;
 		int i;
+		
+		tall = SettingsActivity.getLargeKeyboard (prefs);
 		
 		kbstatus = KeyboardStatus.HIDDEN;
 		loadKeyboard (KB_LATIN);		
@@ -562,11 +594,21 @@ public class WebReviewActivity extends Activity {
 		for (i = 0; i < key_table.length; i++) {
 			key = findViewById (key_table [i]);
 			key.setOnClickListener (klist);
+			if (tall) {
+				lp = key.getLayoutParams ();
+				lp.height += lp.height / 2;
+				key.setLayoutParams(lp);
+			}
 		}					
 
 		for (i = 0; i < meta_table.length; i++) {
 			key = findViewById (meta_table [i]);
 			key.setOnClickListener (mlist);
+			if (tall) {
+				lp = key.getLayoutParams ();
+				lp.height += lp.height / 2;
+				key.setLayoutParams(lp);
+			}
 		}					
 	}
 	

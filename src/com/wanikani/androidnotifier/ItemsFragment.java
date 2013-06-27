@@ -300,7 +300,7 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 	 * of the WKLib {@link Item} class. This class implements sorting
 	 * but no filtering.
 	 */
-	class ItemListAdapter extends BaseAdapter implements HiPriorityScrollView.Callback {
+	class ItemListAdapter extends BaseAdapter {
 
 		/// The current list of items. It is always sorted.
 		List<Item> items;
@@ -446,6 +446,8 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 
 			tw = (TextView) row.findViewById (R.id.it_glyph);
 			tw.setText (kanji.character);
+			if (jtf != null)
+				tw.setTypeface (jtf);
 		}
 		
 		/**
@@ -462,6 +464,9 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 
 			tw = (TextView) row.findViewById (R.id.it_glyph);
 			tw.setText (vocab.character);
+
+			if (jtf != null)
+				tw.setTypeface (jtf);
 		}
 
 		@Override
@@ -469,9 +474,9 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 		{
 			HiPriorityScrollView hpsw;
 			LayoutInflater inflater;
+			ItemClickListener icl;
 			ImageView iw;
 			TextView tw;
-			String link;
 			Item item;
 
 			inflater = main.getLayoutInflater ();			
@@ -510,38 +515,19 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 			tw.setText (iinfo.getInfo (getResources (), item));
 			
 			tw = (TextView) row.findViewById (R.id.it_meaning);
-			link = String.format (URL_FORMAT, item.meaning);
-			tw.setText (Html.fromHtml (link));
-			tw.setOnClickListener (new ItemClickListener (item.getURL ()));
-
+			tw.setText (item.meaning);
+			
+			icl = new ItemClickListener (this, item.getURL ());
+			
 			hpsw = (HiPriorityScrollView) row.findViewById (R.id.hsv_item);
-			hpsw.setCallback (this);
+			hpsw.setCallback (icl);
+			
+			/* The row may be larger that the scroller */
+			row.setClickable (true);
+			row.setOnClickListener (icl);
 			
 			return row;
 		}		
-
-		/**
-		 * Called when a motion on an item starts. If the item is actually
-		 * larger than the screen, we lock the tabs
-		 * @param hpsw the item's scroll view
-		 * @param childIsLarger set if the item is actually too large 
-		 */
-		@Override
-		public void down (HiPriorityScrollView hpsw, boolean childIsLarger) 
-		{
-			lock = childIsLarger;
-		}
-		
-		/**
-		 * Called when a motion on an item stops. We unlock.
-		 * @param hpsw the item's scroll view
-		 * @param childIsLarger set if the item is actually too large 
-		 */
-		@Override
-		public void up (HiPriorityScrollView hpsw, boolean childIsLarger)
-		{
-			lock = false;
-		}
 	}
 	
 	/**
@@ -584,7 +570,7 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 	 * The listener registered to the filter/sort radio group buttons.
 	 * When an item is clicked, it updates the list accordingly.
 	 */
-	class RadioGroupListener implements Button.OnClickListener {
+	class RadioGroupListener implements View.OnClickListener {
 		
 		public void onClick (View view)
 		{
@@ -655,7 +641,7 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 			
 			rg = (RadioGroup) parent.findViewById (R.id.rg_order);
 			rg.check (R.id.btn_sort_time);
-			iad.setComparator (Item.SortByType.INSTANCE, ItemInfo.AGE);				
+			iad.setComparator (Item.SortByTime.INSTANCE, ItemInfo.AGE);				
 		}
 
 		/**
@@ -687,20 +673,70 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 	/**
 	 * The listener registered to each item's hyperlink. It opens
 	 * the page, through @link {@link MainActivity#item()}, so
-	 * it uses the internal browser if the user chose so. 
+	 * it uses the internal browser if the user chose so.
+	 * It is both a {@link HiPriorityScrollView#Callback}, to intercept
+	 * clicks on the scroll view, and a {@link View#OnClickListener},
+	 * to intercept them when they fall out of the scroll view.
+	 * It also handles lock and unlock events. 
 	 */
-	class ItemClickListener implements View.OnClickListener {
+	class ItemClickListener implements HiPriorityScrollView.Callback, View.OnClickListener {
 		
+		/// The list adapter, that will receive lock and unlock events
+		ItemListAdapter ila;
+				
+		/// The URL to open
 		private String url;
 		
-		public ItemClickListener (String url)
+		/**
+		 * Constructor.
+		 * @param ila the item list adapter
+		 * @param url the url to open when clicked
+		 */
+		public ItemClickListener (ItemListAdapter ila, String url)
 		{
+			this.ila = ila;
 			this.url = url;
 		}
 		
+		@Override
 		public void onClick (View view)
 		{
 			main.item (url);
+		}
+		
+		/**
+		 * Called when a motion on an item starts. If the item is actually
+		 * larger than the screen, we lock the tabs
+		 * @param hpsw the item's scroll view
+		 * @param childIsLarger set if the item is actually too large 
+		 */
+		@Override
+		public void down (HiPriorityScrollView hpsw, boolean childIsLarger) 
+		{
+			ila.lock = childIsLarger;
+		}
+		
+		/**
+		 * Called when a motion on an item stops. We unlock.
+		 * @param hpsw the item's scroll view
+		 * @param childIsLarger set if the item is actually too large 
+		 */
+		@Override
+		public void up (HiPriorityScrollView hpsw, boolean childIsLarger)
+		{
+			ila.lock = false;
+			onClick (hpsw);
+		}
+
+		/**
+		 * Called when a motion on an item stops. We unlock.
+		 * @param hpsw the item's scroll view
+		 * @param childIsLarger set if the item is actually too large 
+		 */
+		@Override
+		public void cancel (HiPriorityScrollView hpsw, boolean childIsLarger)
+		{
+			ila.lock = false;
 		}
 	}
 
@@ -779,11 +815,20 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 	/// The current filter
 	private Filter currentFilter;
 	
-	/// URL format
-	private String URL_FORMAT = "<u>%s</u>";
+	/// The japanese typeface
+	private Typeface jtf;
+	
+	/// The japanese typeface path
+	private final String JAPANESE_TYPEFACE_FONT = "/system/fonts/MTLmr3m.ttf";
 	
 	public ItemsFragment ()
 	{
+		try {
+			jtf = Typeface.createFromFile (JAPANESE_TYPEFACE_FONT);
+		} catch (Exception e) {
+			jtf = null;
+		}
+		
 		currentLevel = -1;		
 	}
 	

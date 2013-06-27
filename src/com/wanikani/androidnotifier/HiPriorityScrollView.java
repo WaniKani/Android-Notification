@@ -51,8 +51,14 @@ public class HiPriorityScrollView extends HorizontalScrollView {
 		 * @param childIsLarger if set, this child is larger than this view 
 		 */
 		public void up (HiPriorityScrollView hpsw, boolean childIsLarger);
-		
-	};
+
+		/**
+		 * Called when a motion is cancelled.
+		 * @param hpsw the scroll view receiving an event
+		 * @param childIsLarger if set, this child is larger than this view 
+		 */
+		public void cancel (HiPriorityScrollView hpsw, boolean childIsLarger);
+};
 	
 	/// The callback
 	private Callback callback;
@@ -84,6 +90,7 @@ public class HiPriorityScrollView extends HorizontalScrollView {
 	@Override
 	public boolean onTouchEvent (MotionEvent event)
 	{		
+		View.OnClickListener ocl;
 		boolean childIsLarger;
 		View child;
 				
@@ -96,9 +103,12 @@ public class HiPriorityScrollView extends HorizontalScrollView {
 				callback.down (this, childIsLarger);
 				break;
 
-			case MotionEvent.ACTION_CANCEL:
 			case MotionEvent.ACTION_UP:
 				callback.up (this, childIsLarger);
+				break;
+				
+			case MotionEvent.ACTION_CANCEL:
+				callback.cancel (this, childIsLarger);
 				break;
 			}
 		}
