@@ -574,28 +574,6 @@ public class MainActivity extends FragmentActivity implements Runnable {
 				
 		alarm.screenOn ();
 		visible = true;
-		
-		setJapaneseLocale ();
-	}
-	
-	/**
-	 * Called on startup to set default locale.
-	 */
-	public void setJapaneseLocale ()
-	{
-		Configuration config;
-		DisplayMetrics dm;
-		Resources res;
-		Locale locale;
-				
-		locale = new Locale ("jp");
-		Locale.setDefault (locale);
-		
-		config = new Configuration ();
-		config.locale = locale;
-		res = getBaseContext ().getResources ();
-		dm = res.getDisplayMetrics ();
-		res.updateConfiguration (config, dm);		
 	}
 	
 	/**

@@ -446,6 +446,8 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 
 			tw = (TextView) row.findViewById (R.id.it_glyph);
 			tw.setText (kanji.character);
+			if (jtf != null)
+				tw.setTypeface (jtf);
 		}
 		
 		/**
@@ -462,6 +464,9 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 
 			tw = (TextView) row.findViewById (R.id.it_glyph);
 			tw.setText (vocab.character);
+
+			if (jtf != null)
+				tw.setTypeface (jtf);
 		}
 
 		@Override
@@ -810,8 +815,20 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 	/// The current filter
 	private Filter currentFilter;
 	
+	/// The japanese typeface
+	private Typeface jtf;
+	
+	/// The japanese typeface path
+	private final String JAPANESE_TYPEFACE_FONT = "/system/fonts/MTLmr3m.ttf";
+	
 	public ItemsFragment ()
 	{
+		try {
+			jtf = Typeface.createFromFile (JAPANESE_TYPEFACE_FONT);
+		} catch (Exception e) {
+			jtf = null;
+		}
+		
 		currentLevel = -1;		
 	}
 	

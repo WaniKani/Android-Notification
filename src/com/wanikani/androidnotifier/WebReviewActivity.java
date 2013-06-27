@@ -555,39 +555,6 @@ public class WebReviewActivity extends Activity {
 		wv.loadUrl (getIntent ().getData ().toString ());
 	}
 	
-	/**
-	 * Called when the application resumes.
-	 * We notify this the alarm to adjust its timers in case
-	 * they were tainted by a deep sleep mode transition.
-	 */
-	@Override
-	public void onResume ()
-	{
-		super.onResume ();
-				
-		setJapaneseLocale ();
-	}
-	
-	/**
-	 * Called on startup to set default locale.
-	 */
-	public void setJapaneseLocale ()
-	{
-		Configuration config;
-		DisplayMetrics dm;
-		Resources res;
-		Locale locale;
-				
-		locale = new Locale ("jp");
-		Locale.setDefault (locale);
-		
-		config = new Configuration ();
-		config.locale = locale;
-		res = getBaseContext ().getResources ();
-		dm = res.getDisplayMetrics ();
-		res.updateConfiguration (config, dm);		
-	}
-	
 	@Override
 	protected void onPause ()
 	{
