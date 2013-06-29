@@ -1,6 +1,7 @@
 package com.wanikani.androidnotifier;
 
 import java.io.IOException;
+import java.util.Calendar;
 import java.util.Date;
 
 import android.app.AlarmManager;
@@ -12,6 +13,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.SQLException;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Bundle;
@@ -19,7 +21,9 @@ import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 
 import com.wanikani.androidnotifier.NotifierStateMachine.Event;
+import com.wanikani.androidnotifier.db.HistoryDatabase;
 import com.wanikani.wklib.Connection;
+import com.wanikani.wklib.SRSDistribution;
 import com.wanikani.wklib.StudyQueue;
 import com.wanikani.wklib.UserInformation;
 import com.wanikani.wklib.UserLogin;
@@ -119,7 +123,7 @@ public class NotificationService
 	public static final String ACTION_CONNECTIVITY_CHANGE = 
 			PREFIX + "CONNECTIVITY_CHANGE";
 
-	/** Called when a state machine or the chron alarm goes off.
+	/** Called when a state machine or the cron alarm goes off.
 	 *  The state machine is reconstructed from intent extra data
 	 *  and we proceed to the next step */
 	public static final String ACTION_ALARM = 
@@ -149,11 +153,14 @@ public class NotificationService
 	 *  constant */
 	private static final int NOT_ID = 1;
 	
-	/** The chron schedule alarm time shared preferences key */
-	private static final String PREFS_CHRON_NEXT = PREFIX + "CHRON_NEXT";
+	/** The cron schedule alarm time shared preferences key */
+	private static final String PREFS_CRON_NEXT = PREFIX + "CRON_NEXT";
 	
-	/** The chron interval. Default is one day */
-	private static final long CHRON_INTERVAL = 24 * 3600 * 1000;
+	/** The cron interval. Default is one day */
+	private static final long CRON_INTERVAL = 24 * 3600 * 1000;
+	
+	/** The cron retry interval. Default is one hour */
+	private static final long CRON_RETRY = 2600 * 1000;
 	
 	/**
 	 * Constructor. 
@@ -195,7 +202,7 @@ public class NotificationService
 			return;
 		}
 		
-		chronDaily (enabled);
+		cronDaily (enabled);
 		
 		if (!enabled)
 			return;
@@ -211,39 +218,91 @@ public class NotificationService
 	}
 	
 	/**
-	 * Checks whether there it is time to run dailiy jobs.
+	 * Checks whether there it is time to run daily jobs.
 	 * Admittedly, this has nothing to do with the notification service,
 	 * however this class already handles alarms and gets boot notifications, so 
 	 * it's quite natural to put it here. In addition, since alarms are somehow a precious
 	 * resource, we merge the FSM alarsm with the cron alarms.
 	 * @param enabled if notifications are enabled 
 	 */
-	private void chronDaily (boolean enabled)
+	private void cronDaily (boolean enabled)
 	{
 		SharedPreferences prefs;
 		long next, now;
+		boolean ok;
 		
 		now = System.currentTimeMillis ();
 		prefs = PreferenceManager.getDefaultSharedPreferences (this);
-		next = prefs.getLong (PREFS_CHRON_NEXT, now);
+
+		next = prefs.getLong (PREFS_CRON_NEXT, normalize (now));
 		
 		if (now >= next) {
-			next = now + CHRON_INTERVAL;
-			prefs.edit ().putLong (PREFS_CHRON_NEXT, next).commit ();			
-			if (!enabled)
-				schedule (null, new Date (next));
-			
-			runDailyJobs ();
+			ok = false;
+			try {				
+				ok = runDailyJobs ();
+			} finally {
+				if (ok)
+					next = normalize (now + CRON_INTERVAL);
+				else
+					next = now + CRON_RETRY;
+
+				prefs.edit ().putLong (PREFS_CRON_NEXT, next).commit ();
+				if (!enabled)
+					schedule (null, new Date (next));
+			}
 		}
+	}
+	
+	/**
+	 * Given a timestamp, finds the best time of that day when to run the cron jobs.
+	 * It may also be earlier that the input timestamp.
+	 * 	@param timestamp a timestamp
+	 *  @return a normalized timestamp
+	 */
+	protected long normalize (long timestamp)
+	{
+		Calendar cal;
+
+		/* Set time = 1am. This gives us a lot of time to retry if something goes bad */
+		cal = Calendar.getInstance ();
+		cal.setTimeInMillis (timestamp);
+		cal.set (Calendar.HOUR_OF_DAY, 1);
+		cal.set (Calendar.MINUTE, 0);
+		
+		return cal.getTimeInMillis ();
 	}
 	
 	/**
 	 * This is the method that is guaranteed to be called exactly once a day, if 
 	 * the phone is turned on. If it is not turned on, it is called as soon as possible.
+	 * @param <code>true</code> if completed successfully 
 	 */
-	protected void runDailyJobs ()
+	protected boolean runDailyJobs ()
 	{
+		SharedPreferences prefs;
+		SRSDistribution srs;
+		UserInformation ui;
+		Connection conn;
+		UserLogin login;
 		
+		try {
+			prefs = PreferenceManager.getDefaultSharedPreferences (this);
+			login = SettingsActivity.getLogin (prefs);
+		
+			conn = new Connection (login);
+			
+			srs = conn.getSRSDistribution ();
+			ui = conn.getUserInformation ();
+			
+			HistoryDatabase.insert (this, ui, srs);
+			
+		} catch (IOException e) {
+			return false;
+		} catch (SQLException e) {
+			return false;
+		}
+		
+		return true;
 	}
 	
 	/**
@@ -486,7 +545,7 @@ public class NotificationService
 		
 		next = date.getTime ();
 		prefs = PreferenceManager.getDefaultSharedPreferences (this);
-		chron = prefs.getLong (PREFS_CHRON_NEXT, next);
+		chron = prefs.getLong (PREFS_CRON_NEXT, next);
 		if (next > chron)
 			next = chron;
 		
