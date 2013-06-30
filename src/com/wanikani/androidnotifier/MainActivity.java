@@ -530,14 +530,19 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	    
 	    DashboardData ldd;
 	    
-	    ldd = dd;
-	    dd = null;
-	    if (ldd != null) {
-	    	refreshComplete (ldd, false);
-	    	if (ldd.isIncomplete ())
-	    		refreshOptional ();
-	    } else
-	    	refresh (false);
+	    /* A refresh task may be going on, if the review activity
+	     * has sent a refresh request before disappearing
+	     */
+	    if (rtask == null) {
+	    	ldd = dd;
+	    	dd = null;
+	    	if (ldd != null) {
+	    		refreshComplete (ldd, false);
+	    		if (ldd.isIncomplete ())
+	    			refreshOptional ();
+	    	} else
+	    		refresh (false);
+	    }
 	}
 	
 	/**
