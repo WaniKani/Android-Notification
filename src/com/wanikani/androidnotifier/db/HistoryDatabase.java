@@ -126,7 +126,7 @@ public class HistoryDatabase {
 				return;
 			try {
 				if (c.moveToNext ()) {
-					n = (int) c.getLong (0);
+					n = c.isNull (0) ? 0 : (int) c.getLong (0);
 					if (n < day) {
 						stmt = db.compileStatement (SQL_INSERT_DAY);
 						for (i = n; i < day; i++) {
