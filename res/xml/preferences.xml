@@ -21,6 +21,11 @@
         	android:summary="@string/pref_show_keyboard_desc"
         	android:defaultValue="true" />
     <CheckBoxPreference
+        	android:key="pref_show_lessons_keyboard"
+        	android:title="@string/pref_show_lessons_keyboard"
+        	android:summary="@string/pref_show_lessons_keyboard_desc"
+        	android:defaultValue="true" />
+    <CheckBoxPreference
         	android:key="pref_large_keyboard"
         	android:title="@string/pref_large_keyboard"
         	android:summary="@string/pref_large_keyboard_desc"

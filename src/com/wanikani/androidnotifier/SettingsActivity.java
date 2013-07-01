@@ -46,8 +46,10 @@ public class SettingsActivity
 	private static final String KEY_PREF_USERKEY = "pref_userkey";
 	/** Refresh timeout. Must match preferences.xml */
 	private static final String KEY_PREF_REFRESH_TIMEOUT = "pref_refresh_timeout";
-	/** Enable enter keyboard key. Must match preferences.xml */
-	private static final String KEY_PREF_SHOW_KEYBOARD = "pref_show_keyboard";
+	/** Enable reviews keyboard. Must match preferences.xml */
+	private static final String KEY_PREF_SHOW_REVIEWS_KEYBOARD = "pref_show_keyboard";
+	/** Enable lessons keyboard Must match preferences.xml */
+	private static final String KEY_PREF_SHOW_LESSONS_KEYBOARD = "pref_show_lessons_keyboard";
 	/** Enable tall keyboard. Must match preferences.xml */
 	private static final String KEY_PREF_LARGE_KEYBOARD = "pref_large_keyboard";
 	/** Enable enter keyboard key. Must match preferences.xml */
@@ -104,7 +106,8 @@ public class SettingsActivity
 		onSharedPreferenceChanged (prefs, KEY_PREF_ENABLED);
 		onSharedPreferenceChanged (prefs, KEY_PREF_REFRESH_TIMEOUT);
 		onSharedPreferenceChanged (prefs, KEY_PREF_USE_INTEGRATED_BROWSER);
-		onSharedPreferenceChanged (prefs, KEY_PREF_SHOW_KEYBOARD);
+		onSharedPreferenceChanged (prefs, KEY_PREF_SHOW_REVIEWS_KEYBOARD);
+		onSharedPreferenceChanged (prefs, KEY_PREF_SHOW_LESSONS_KEYBOARD);
 		onSharedPreferenceChanged (prefs, KEY_PREF_ENTER);
 		prefs.registerOnSharedPreferenceChangeListener (this);
 	}
@@ -131,7 +134,8 @@ public class SettingsActivity
 							 R.string.pref_use_integrated_browser_desc :
 							 R.string.pref_use_external_browser_desc);
 			runIntegratedBrowserHook (prefs);
-		} if (key.equals (KEY_PREF_SHOW_KEYBOARD)) {
+		} if (key.equals (KEY_PREF_SHOW_LESSONS_KEYBOARD) ||
+			  key.equals (KEY_PREF_SHOW_REVIEWS_KEYBOARD)) {
 			runShowKeyboardHooks (prefs);
 		} else if (key.equals (KEY_PREF_USERKEY)) {
 			s = prefs.getString (KEY_PREF_USERKEY, "").trim ();
@@ -168,9 +172,12 @@ public class SettingsActivity
 	{
 		Preference pref;
 		
-		pref = findPreference (KEY_PREF_SHOW_KEYBOARD);
+		pref = findPreference (KEY_PREF_SHOW_REVIEWS_KEYBOARD);
 		pref.setEnabled (getUseIntegratedBrowser (prefs));
 		
+		pref = findPreference (KEY_PREF_SHOW_LESSONS_KEYBOARD);
+		pref.setEnabled (getUseIntegratedBrowser (prefs));
+
 		runShowKeyboardHooks (prefs);
 	}
 
@@ -180,10 +187,12 @@ public class SettingsActivity
 		Preference pref;
 		
 		pref = findPreference (KEY_PREF_ENTER);
-		pref.setEnabled (getShowKeyboard (prefs) && getUseIntegratedBrowser (prefs));	
+		pref.setEnabled ((getShowLessonsKeyboard (prefs) ||
+				          getShowReviewsKeyboard (prefs)) && getUseIntegratedBrowser (prefs));	
 
 		pref = findPreference (KEY_PREF_LARGE_KEYBOARD);
-		pref.setEnabled (getShowKeyboard (prefs) && getUseIntegratedBrowser (prefs));	
+		pref.setEnabled ((getShowLessonsKeyboard (prefs) ||
+		                  getShowReviewsKeyboard (prefs)) && getUseIntegratedBrowser (prefs));	
 	}
 	
 	public static String diagnose (SharedPreferences prefs, Resources res)
@@ -233,11 +242,17 @@ public class SettingsActivity
 		return getInt (prefs, KEY_PREF_REFRESH_TIMEOUT, DEFAULT_REFRESH_TIMEOUT);
 	}
 	
-	public static boolean getShowKeyboard (SharedPreferences prefs)
+	public static boolean getShowReviewsKeyboard (SharedPreferences prefs)
 	{
-		return prefs.getBoolean (KEY_PREF_SHOW_KEYBOARD, true);
+		return prefs.getBoolean (KEY_PREF_SHOW_REVIEWS_KEYBOARD, true);
 	}
 	
+	public static boolean getShowLessonsKeyboard (SharedPreferences prefs)
+	{
+		return prefs.getBoolean (KEY_PREF_SHOW_LESSONS_KEYBOARD, 
+								 getShowReviewsKeyboard (prefs));
+	}
+
 	public static boolean getLargeKeyboard (SharedPreferences prefs)
 	{
 		return prefs.getBoolean (KEY_PREF_LARGE_KEYBOARD, false);

@@ -1,20 +1,17 @@
 package com.wanikani.androidnotifier;
 
-import java.util.Locale;
-
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
-import android.util.DisplayMetrics;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
+import android.view.inputmethod.InputMethodManager;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
@@ -69,13 +66,16 @@ public class WebReviewActivity extends Activity {
 	public static class WKConfig {
 		
 		/** Review start page. Of course must be inside of @link {@link #REVIEW_SPACE} */
-		static final String REVIEW_START = "http://www.wanikani.com/review/session/start";
+		static final String REVIEW_START = "http://www.wanikani.com/review";
 
 		/** Review start page. Of course must be inside of @link {@link #REVIEW_SPACE} */
 		static final String LESSON_START = "http://www.wanikani.com/lesson";
 
 		/** HTML id of the textbox the user types its answer in (reviews) */
 		static final String ANSWER_BOX = "user_response";
+
+		/** HTML id of the textbox the user types its answer in (reviews, client-side) */
+		static final String ANSWER_BOX_V2 = "user-response";
 
 		/** HTML id of the textbox the user types its answer in (lessons) */
 		static final String LESSON_ANSWER_BOX_JP = "translit";
@@ -149,17 +149,10 @@ public class WebReviewActivity extends Activity {
 		@Override  
 	    public void onPageFinished(WebView view, String url)  
 	    {  
-			SharedPreferences prefs;
-			
-			prefs = PreferenceManager.getDefaultSharedPreferences (WebReviewActivity.this);
 			bar.setVisibility (View.GONE);
 
-			if (url.startsWith ("http")) {
-				if (SettingsActivity.getShowKeyboard (prefs))
-					js (JS_INIT_KBD);
-				else
-					js (JS_INIT_NOKBD);
-			}
+			if (url.startsWith ("http"))
+				js (JS_INIT_KBD);
 	    }
 	}
 	
@@ -416,6 +409,9 @@ public class WebReviewActivity extends Activity {
 			"textbox = document.getElementById (\"" + WKConfig.ANSWER_BOX + "\"); " +
 			"lessobj = document.getElementById (\"" + WKConfig.LESSONS_OBJ + "\"); " +
 			"ltextbox = document.getElementById (\"" + WKConfig.LESSON_ANSWER_BOX_JP + "\"); " +
+			"if (textbox == null) {" +
+			"   textbox = document.getElementById (\"" + WKConfig.ANSWER_BOX_V2 + "\"); " +
+			"}" +
 			"if (ltextbox == null) {" +
 			"   ltextbox = document.getElementById (\"" + WKConfig.LESSON_ANSWER_BOX_EN + "\"); " +
 			"}" +
@@ -427,20 +423,6 @@ public class WebReviewActivity extends Activity {
 			"   wknKeyboard.iconizeLessons ();" +
 			"} else {" +
 			"	wknKeyboard.hide ();" +			
-			"}";
-
-	private static final String JS_INIT_NOKBD = 
-			"var textbox, lessobj, ltextbox;" +
-			"textbox = document.getElementById (\"" + WKConfig.ANSWER_BOX + "\"); " +
-			"lessobj = document.getElementById (\"" + WKConfig.LESSONS_OBJ + "\"); " +
-			"ltextbox = document.getElementById (\"" + WKConfig.LESSON_ANSWER_BOX_JP + "\"); " +
-			"if (ltextbox == null) {" +
-			"   ltextbox = document.getElementById (\"" + WKConfig.LESSON_ANSWER_BOX_EN + "\"); " +
-			"}" +
-			"if (textbox != null) {" +
-			"   textbox.focus ();" +
-			"} else if (ltextbox != null) {" +
-			"   ltextbox.focus ();" +
 			"}";
 
 	private static final String JS_FOCUS = 
@@ -458,8 +440,9 @@ public class WebReviewActivity extends Activity {
 	 *  is an answer, so we iconize the keyboard. Otherwise we are entering the new question,
 	 *  so we need to show it  */
 	private static final String JS_ENTER =
-			"var textbox, ltextbox, form, submit;" +
+			"var textbox, textbox2, ltextbox, form, submit;" +
 			"textbox = document.getElementById (\"" + WKConfig.ANSWER_BOX + "\"); " +
+			"textbox2 = document.getElementById (\"" + WKConfig.ANSWER_BOX_V2 + "\"); " +
 		    "form = document.getElementById (\"new_lesson\"); " +
 			"ltextbox = document.getElementById (\"" + WKConfig.LESSON_ANSWER_BOX_JP + "\"); " +
 			"if (ltextbox == null) {" +
@@ -472,6 +455,9 @@ public class WebReviewActivity extends Activity {
 			"	   wknKeyboard.iconize ();" +
 			"   }" +
 			"   $(\"#" + WKConfig.SUBMIT_BUTTON + "\").click();" + 
+			"} else if (textbox2 != null) {" +
+		    "   buttons = document.getElementsByTagName('button'); " +
+		    "   buttons [0].click (); " +
 			"}";
 
 	/** The default keyboard. This is the sequence of keys from left to right, from top to bottom */
@@ -747,8 +733,7 @@ public class WebReviewActivity extends Activity {
 	 */
 	protected void show ()
 	{
-		kbstatus = KeyboardStatus.VISIBLE;
-		showCommon (showEnterKey);
+		showCommon (KeyboardStatus.VISIBLE, showEnterKey);
 	}
 
 	/**
@@ -757,8 +742,31 @@ public class WebReviewActivity extends Activity {
 	 */
 	protected void showLessons ()
 	{
-		kbstatus = KeyboardStatus.VISIBLE_LESSONS;
-		showCommon (false);
+		showCommon (KeyboardStatus.VISIBLE_LESSONS, false);
+	}
+	
+	protected void showCommon (KeyboardStatus kbstatus, boolean showEnter)
+	{
+		SharedPreferences prefs;
+		boolean embedded;
+		
+		this.kbstatus = kbstatus;
+		prefs = PreferenceManager.getDefaultSharedPreferences (this);
+		embedded = kbstatus == KeyboardStatus.VISIBLE ?
+				SettingsActivity.getShowReviewsKeyboard (prefs) :
+				SettingsActivity.getShowLessonsKeyboard (prefs);
+		if (embedded)
+			showEmbedded (showEnter);
+		else
+			showNative ();
+	}
+	
+	private void showNative ()
+	{
+		InputMethodManager imm;
+		
+		imm = (InputMethodManager) getSystemService (Context.INPUT_METHOD_SERVICE);
+		imm.showSoftInput (wv, InputMethodManager.SHOW_IMPLICIT);		
 	}
 	
 	/**
@@ -766,7 +774,7 @@ public class WebReviewActivity extends Activity {
 	 * @param showEnter if true, the bottom right key is <code>Enter</code>, 
 	 * 		otherwise <code>Hide</code>.
 	 */
-	private void showCommon (boolean showEnter)
+	private void showEmbedded (boolean showEnter)
 	{
 		View view, key;
 		int i;

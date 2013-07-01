@@ -15,6 +15,8 @@
     <string name="pref_userkey">User API Key</string>    
     <string name="pref_show_keyboard">Embedded keyboard</string>
     <string name="pref_show_keyboard_desc">Show custom keyboard when reviewing</string>
+    <string name="pref_show_lessons_keyboard">Embedded lessons keyboard</string>
+    <string name="pref_show_lessons_keyboard_desc">Show custom keyboard during lessons</string>
     <string name="pref_large_keyboard">Tall keyboard</string>
     <string name="pref_large_keyboard_desc">Display larger custom keyboard</string>
     <string name="pref_enter">Review keyboard Enter</string>
