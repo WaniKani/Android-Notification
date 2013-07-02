@@ -185,8 +185,7 @@
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
     	<item name="android:layout_margin">@dimen/m_half_gap</item>    
-        <item name="android:layout_gravity">top</item>
-        <item name="android:gravity">top</item>
+        <item name="android:layout_gravity">center</item>
         <item name="android:textColor">#fff</item>
     </style>
     
@@ -212,7 +211,7 @@
     
     <style parent="AppTheme" name="ItemDescription">
         <item name="android:layout_width">wrap_content</item>
-        <item name="android:layout_height">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
     </style>
     
     <style parent="AppTheme" name="ItemProgressLevel">

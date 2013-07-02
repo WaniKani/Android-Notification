@@ -3,55 +3,61 @@
     style="@style/KanjiItem"
     android:layout_width="match_parent"
     android:orientation="horizontal" >
-  <com.wanikani.androidnotifier.HiPriorityScrollView
-      android:id="@+id/hsv_item" 
-      android:layout_width="wrap_content"
-      android:layout_height="match_parent"
-      android:layout_margin="@dimen/m_half_gap">    
-	<LinearLayout 
-    	android:layout_width="wrap_content"
-    	android:layout_height="match_parent"
-    	android:orientation="horizontal" >
-      <RelativeLayout
-    	android:layout_width="wrap_content"
-    	android:layout_height="match_parent">
-    	<ImageView
-        	android:id="@+id/img_srs"
-        	android:layout_alignParentTop="true" 
-        	style="@style/ItemProgressLevel" />
 
-       	<TextView
-       	    android:id="@+id/it_level"
-       	    style="@style/ItemLevel"
-       	    android:layout_alignParentBottom="true"
-       	    android:text="" />
-    </RelativeLayout>
-    
-    <TextView
-        android:id="@+id/it_glyph"
-        style="@style/ItemGlyph"
-        android:textSize="@dimen/m_glyph" />
+    <com.wanikani.androidnotifier.HiPriorityScrollView
+        android:id="@+id/hsv_item"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_margin="@dimen/m_half_gap" >
 
         <LinearLayout
-            android:id="@+id/it_description"
-            style="@style/ItemDescription"
-            android:orientation="vertical" >
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="horizontal" >
+
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent" >
+
+                <ImageView
+                    android:id="@+id/img_srs"
+                    style="@style/ItemProgressLevel"
+                    android:layout_alignParentTop="true" />
+
+                <TextView
+                    android:id="@+id/it_level"
+                    style="@style/ItemLevel"
+                    android:layout_alignParentBottom="true"
+                    android:text="" />
+            </RelativeLayout>
 
             <TextView
-                android:id="@+id/it_onyomi"
-                style="@style/ItemImportantReading" />
+                android:id="@+id/it_glyph"
+                style="@style/ItemGlyph"
+                android:textSize="@dimen/m_glyph" />
 
-            <TextView
-                android:id="@+id/it_kunyomi"
-                style="@style/ItemReading"/>
-           <TextView
-                android:id="@+id/it_info"
-                style="@style/ItemInfo"/>
+            <LinearLayout
+                android:id="@+id/it_description"
+                style="@style/ItemDescription"
+                android:orientation="vertical" >
 
-           <TextView
-            	android:id="@+id/it_meaning"
-            	style="@style/ItemMeaning"/>
+                <TextView
+                    android:id="@+id/it_onyomi"
+                    style="@style/ItemImportantReading" />
+
+                <TextView
+                    android:id="@+id/it_kunyomi"
+                    style="@style/ItemReading" />
+
+                <TextView
+                    android:id="@+id/it_info"
+                    style="@style/ItemInfo" />
+
+                <TextView
+                    android:id="@+id/it_meaning"
+                    style="@style/ItemMeaning" />
+            </LinearLayout>
         </LinearLayout>
-    </LinearLayout>
-  </com.wanikani.androidnotifier.HiPriorityScrollView>
+    </com.wanikani.androidnotifier.HiPriorityScrollView>
+
 </LinearLayout>
