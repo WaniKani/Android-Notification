@@ -13,6 +13,8 @@ import android.view.ViewGroup;
 
 import com.wanikani.androidnotifier.graph.PieChart;
 import com.wanikani.androidnotifier.graph.PiePlot.DataSet;
+import com.wanikani.androidnotifier.graph.TYChart;
+import com.wanikani.androidnotifier.graph.TYPlot;
 import com.wanikani.wklib.SRSDistribution;
 
 /* 
@@ -46,11 +48,22 @@ public class StatsFragment extends Fragment implements Tab {
 	/// The root view of the fragment
 	View parent;
 	
+	/// All the charts. This is needed to lock and unlock scrolling
+	List<TYChart> charts;
+	
 	/// Overall number of kanji
 	private static final int ALL_THE_KANJI = 1700;
 	
 	/// Overall number of vocab items
 	private static final int ALL_THE_VOCAB = 5000;
+	
+	/**
+	 * Constructor
+	 */
+	public StatsFragment ()
+	{
+		this.charts = new Vector<TYChart> ();
+	}
 	
 	@Override
 	public void onAttach (Activity main)
@@ -85,8 +98,10 @@ public class StatsFragment extends Fragment implements Tab {
             				  Bundle savedInstanceState) 
     {
 		super.onCreateView (inflater, container, savedInstanceState);
-
+		
 		parent = inflater.inflate(R.layout.stats, container, false);
+		charts = new Vector<TYChart> ();
+		charts.add ((TYChart) parent.findViewById (R.id.ty_srs));
         
     	return parent;
     }
@@ -348,6 +363,10 @@ public class StatsFragment extends Fragment implements Tab {
 	@Override
 	public boolean scrollLock ()
 	{
+		for (TYChart chart : charts)
+			if (chart.scrolling ())
+				return true;
+		
 		return false; 
 	}
 

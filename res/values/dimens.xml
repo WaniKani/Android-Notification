@@ -16,4 +16,5 @@
 	<dimen name="m_li_width">36dp</dimen>
 	<dimen name="m_li_height">24dp</dimen>
 	<dimen name="m_spinner">24dp</dimen>	
+	<dimen name="m_typlot_size">192dp</dimen>
 </resources>

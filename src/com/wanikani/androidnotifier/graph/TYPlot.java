@@ -1,7 +1,10 @@
 package com.wanikani.androidnotifier.graph;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -9,25 +12,63 @@ import android.graphics.Color;
 import android.graphics.DashPathEffect;
 import android.graphics.Paint;
 import android.graphics.RectF;
+import android.support.v4.view.ViewCompat;
 import android.util.AttributeSet;
+import android.util.DisplayMetrics;
+import android.util.TypedValue;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Scroller;
 
+/* 
+ *  Copyright (c) 2013 Alberto Cuda
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 public class TYPlot extends View {
 
 	private class GestureListener extends GestureDetector.SimpleOnGestureListener {
 		
-		
-	}
-	
-	private class OnTouchListener implements View.OnTouchListener {
+		@Override
+		public boolean onDown (MotionEvent mev)
+		{
+			scroller.forceFinished (true);
+			ViewCompat.postInvalidateOnAnimation (TYPlot.this);
+			
+			return true;
+		}
 		
 		@Override
-		public boolean onTouch (View view, MotionEvent mev)
+		public boolean onScroll (MotionEvent mev1, MotionEvent mev2, float dx, float dy)
 		{
-			return gdect.onTouchEvent (mev);
+			vp.scroll ((int) dx, (int) dy);
+			ViewCompat.postInvalidateOnAnimation (TYPlot.this);
+			
+			return true;
+		}
+
+		@Override
+		public boolean onFling (MotionEvent mev1, MotionEvent mev2, float vx, float vy)
+		{			
+			scroller.forceFinished (true);
+			scroller.fling (vp.getAbsPosition (), 0, (int) -vx, 0, 0, 
+							vp.dayToAbsPosition (taxis.today) + 2000000, 0, 0);
+			ViewCompat.postInvalidateOnAnimation (TYPlot.this);
+			
+			return true;
 		}
 	}
 	
@@ -39,6 +80,12 @@ public class TYPlot extends View {
 		
 		public int DEFAULT_LOOKAHEAD = 1;
 		
+		public float DEFAULT_DATE_LABEL_FONT_SIZE = 12;
+		
+		public int DEFAULT_AXIS_WIDTH = 2;
+		
+		public int DEFAULT_TICK_SIZE = 10;
+		
 		public RectF rect;
 		
 		public RectF plotArea;
@@ -49,11 +96,27 @@ public class TYPlot extends View {
 		
 		public int lookAhead;
 		
-		public Measures (AttributeSet attrs)
+		public float axisWidth;
+		
+		public float dateLabelFontSize;
+		
+		public int tickSize;
+				
+		public Measures (Context ctxt, AttributeSet attrs)
 		{
+			DisplayMetrics dm;
+			
+			dm = ctxt.getResources ().getDisplayMetrics ();
+			
 			margin = DEFAULT_MARGIN;
 			dipPerDay = DEFAULT_DIP_PER_DAY;
 			lookAhead = DEFAULT_LOOKAHEAD;
+			axisWidth = DEFAULT_AXIS_WIDTH;
+			dateLabelFontSize = DEFAULT_DATE_LABEL_FONT_SIZE;
+			tickSize = DEFAULT_TICK_SIZE;
+			
+			dateLabelFontSize = TypedValue.applyDimension (TypedValue.COMPLEX_UNIT_SP, 
+					 									   dateLabelFontSize, dm);
 			
 			updateSize (new RectF ());
 		}
@@ -69,6 +132,34 @@ public class TYPlot extends View {
 		
 	}
 	
+	private static class PaintAssets {
+		
+		Paint axisPaint;
+		
+		Paint gridPaint;
+		
+		Paint dateLabels;
+		
+		public PaintAssets (AttributeSet attrs, Measures meas)
+		{
+			float points [];
+			
+			axisPaint = new Paint ();
+			axisPaint.setColor (Color.BLACK);
+			axisPaint.setStrokeWidth (meas.axisWidth);
+			
+			points = new float [] { 1, 1 };
+			gridPaint = new Paint ();
+			gridPaint.setColor (Color.BLACK);
+			gridPaint.setPathEffect (new DashPathEffect (points, 0));
+			
+			dateLabels = new Paint ();
+			dateLabels.setColor (Color.BLACK);
+			dateLabels.setTextAlign (Paint.Align.CENTER);
+			dateLabels.setTextSize ((int) meas.dateLabelFontSize);
+		}		
+	}
+	
 	private static class Viewport {
 		
 		Measures meas;
@@ -79,34 +170,69 @@ public class TYPlot extends View {
 		
 		float interval;
 		
-		public Viewport (Measures meas)
-		{
+		int today;
+		
+		public Viewport (Measures meas, int today)
+		{			
 			this.meas = meas;
+			this.today = today;
 			
-			t1 = meas.lookAhead;
-			updateSize ();
+			updateSize ((float) (today + meas.lookAhead));
 		}
 		
-		public void updateSize ()
+		public void updateSize (Float t1)
 		{
 			interval = meas.plotArea.width () / meas.dipPerDay;
+			if (t1 != null)
+				t0 = t1 - interval;
 			
 			update ();
 		}
 		
+		public void updateSize ()
+		{
+			updateSize (null);
+		}
+		
 		public void update ()
 		{
-			t0 = t1 - interval;
+			if (t0 < 0)
+				t0 = 0;
+			else if (t0 > today)
+				t0 = today;
+
+			t1 = t0 + interval;
 		}
 		
-		public float dayToPos (int day)
+		public int getAbsPosition ()
 		{
-			return (day - t0) * meas.dipPerDay;
+			return dayToAbsPosition (t0);
 		}
 		
-		public float posToDay (float pos)
+		public void setAbsPosition (int pos)
 		{
-			return pos / meas.dipPerDay + t0;
+			t0 = absPositionToDay (pos);
+			update ();
+		}
+		
+		public int getRelPosition (int day)
+		{
+			return (int) ((day - t0) * meas.dipPerDay);
+		}
+		
+		public void scroll (int dx, int dy)
+		{
+			setAbsPosition (getAbsPosition () + dx);
+		}
+
+		public int dayToAbsPosition (float day)
+		{
+			return (int) (day * meas.dipPerDay);
+		}
+		
+		public float absPositionToDay (int pos)
+		{
+			return ((float) pos) / meas.dipPerDay;
 		}
 		
 		private int floor (float d)
@@ -128,32 +254,60 @@ public class TYPlot extends View {
 		{
 			return ceil (t0);
 		}
+		
 	}
 	
-	private static class PaintAssets {
+	private static class TimeAxis {
 		
-		Paint axisPaint;
+		/// The date mapped as "day zero"
+		public Date origin;
 		
-		Paint gridPaint;
+		/// Now
+		public Date now;
 		
-		Paint background;
+		public int today;
 		
-		public PaintAssets (AttributeSet attrs)
+		public TimeAxis ()
 		{
-			float points [];
+			now = new Date ();
+			setOrigin (now);
+		}
+		
+		private Calendar getNormalizedCalendar (Date date)
+		{
+			Calendar ans;
 			
-			axisPaint = new Paint ();
-			axisPaint.setColor (Color.BLACK);
+			ans = Calendar.getInstance ();
+			ans.setTime (date);
+			ans.set (Calendar.HOUR, 1);
+			ans.set (Calendar.MINUTE, 2);
+			ans.set (Calendar.SECOND, 3);
+			ans.set (Calendar.MILLISECOND, 4);
 			
-			points = new float [] { 1, 1 };
-			gridPaint = new Paint ();
-			gridPaint.setColor (Color.BLACK);
-			gridPaint.setPathEffect (new DashPathEffect (points, 0));
+			return ans;
+		}
+		
+		public void setOrigin (Date date)
+		{
+			Calendar cal1, cal2;
 			
-			background = new Paint ();
-			background.setColor (Color.WHITE);
-			background.setStyle (Paint.Style.FILL);
-		}		
+			origin = date;
+			cal1 = getNormalizedCalendar (origin);
+			cal2 = getNormalizedCalendar (now);
+			today = (int) ((cal2.getTimeInMillis () - cal1.getTimeInMillis ()) /
+							(24 * 60 * 60 * 1000));
+		}
+		
+		public Calendar dayToCalendar (int day)
+		{
+			Calendar cal;
+			
+			cal = Calendar.getInstance ();
+			cal.setTime (origin);
+			cal.add (Calendar.DATE, day);
+			
+			return cal;
+		}	
 	}
 	
 	private Scroller scroller;
@@ -168,6 +322,14 @@ public class TYPlot extends View {
 	
 	private PaintAssets pas;
 	
+	private DateFormat datef;
+	
+	private DateFormat janf;
+	
+	private TimeAxis taxis;
+	
+	private boolean scrolling;
+	
 	public TYPlot (Context ctxt, AttributeSet attrs)
 	{
 		super (ctxt, attrs);
@@ -175,11 +337,45 @@ public class TYPlot extends View {
 		scroller = new Scroller (ctxt);
 		glist = new GestureListener ();
 		gdect = new GestureDetector (ctxt, glist);
-		setOnTouchListener (new OnTouchListener ());
 		
-		meas = new Measures (attrs);
-		vp = new Viewport (meas);
-		pas = new PaintAssets (attrs);
+		datef = new SimpleDateFormat ("MMM", Locale.US);
+		janf = new SimpleDateFormat ("MMM yyyy", Locale.US);
+		taxis = new TimeAxis ();
+		
+		loadAttributes (ctxt, attrs);
+	}
+	
+	void loadAttributes (Context ctxt, AttributeSet attrs)
+	{
+		meas = new Measures (ctxt, attrs);
+		vp = new Viewport (meas, taxis.today);
+		pas = new PaintAssets (attrs, meas);		
+	}
+	
+	public void setOrigin (Date date)
+	{
+		taxis.setOrigin (date);
+	}
+
+	@Override
+	public boolean onTouchEvent (MotionEvent mev)
+	{
+		boolean ans;
+
+		switch (mev.getAction ()) {
+		case MotionEvent.ACTION_DOWN:
+			scrolling = true;
+			break;
+
+		case MotionEvent.ACTION_UP:
+		case MotionEvent.ACTION_CANCEL:
+			scrolling = false;
+			break;
+		}
+		
+		ans = gdect.onTouchEvent (mev);
+		
+		return ans || super.onTouchEvent (mev);
 	}
 	
 	@Override
@@ -188,54 +384,63 @@ public class TYPlot extends View {
 		meas.updateSize (new RectF (0, 0, width, height));
 		vp.updateSize ();
 	}
+
+	@Override
+    public void computeScroll () 
+	{
+        super.computeScroll ();
+        
+        if (scroller.computeScrollOffset ()) {
+        	vp.setAbsPosition (scroller.getCurrX ());
+			ViewCompat.postInvalidateOnAnimation (TYPlot.this);
+        }
+	}
 	
 	@Override
 	protected void onDraw (Canvas canvas)
 	{
-		drawBackground (canvas);
 		drawGrid (canvas);
-	}
-	
-	protected void drawBackground (Canvas canvas)
-	{		
-		canvas.drawRect (meas.rect, pas.background);
-	}
-
-	protected Calendar dayToCalendar (int day)
-	{
-		Calendar c;
-
-		c = Calendar.getInstance ();
-		c.add (Calendar.DATE, day);
-		
-		return c;
-	}
-
-	protected Date dayToDate (int day)
-	{
-		return dayToCalendar (day).getTime ();
 	}
 	
 	protected void drawGrid (Canvas canvas)
 	{
-		int d, lo, hi, weekday;
-		float f;
+		float f, dateLabelBaseline;
+		int d, lo, hi;
+		DateFormat df;
+		String s;
+		Calendar cal;
 		
 		canvas.drawLine (meas.plotArea.left, meas.plotArea.bottom,
 				         meas.plotArea.right, meas.plotArea.bottom, pas.axisPaint);
-		f = vp.dayToPos (0);		
+		f = vp.getRelPosition (0);		
 		lo = vp.leftmostDay ();
 		hi = vp.rightmostDay ();
-		weekday = dayToCalendar (lo).get (Calendar.DAY_OF_WEEK) - 1;
-		if (weekday != 0)
-			lo += 7 - weekday;
-		for (d = lo; d <= hi; d += 7) {
-			f = vp.dayToPos (d);
-			canvas.drawLine (f, meas.plotArea.top, f, meas.plotArea.bottom, pas.gridPaint); 
+		cal = taxis.dayToCalendar (lo);
+		
+		dateLabelBaseline = meas.plotArea.bottom + meas.dateLabelFontSize;
+
+		for (d = lo; d <= hi; d++) {
+			f = vp.getRelPosition (d);
+			
+			if (d == 0)
+				canvas.drawLine (f, meas.plotArea.top, f, meas.plotArea.bottom, pas.axisPaint);
+			else if (cal.get (Calendar.DAY_OF_WEEK) == Calendar.MONDAY)
+				canvas.drawLine (f, meas.plotArea.top, f, meas.plotArea.bottom, pas.gridPaint);
+			
+			if (cal.get (Calendar.DAY_OF_MONTH) == 1) {
+				df = cal.get (Calendar.MONTH) == Calendar.JANUARY ? janf : datef;
+				s = df.format (cal.getTime ());
+				canvas.drawLine (f, meas.plotArea.bottom - meas.tickSize / 2,
+								 f, meas.plotArea.bottom + meas.tickSize / 2, pas.axisPaint);
+				canvas.drawText (s, f, dateLabelBaseline, pas.dateLabels);
+			}			
+			
+			cal.add (Calendar.DATE, 1);
 		}
-		if (lo <= 0 && 0 <= hi) {
-			f = vp.dayToPos (0);
-			canvas.drawLine (f, meas.plotArea.top, f, meas.plotArea.bottom, pas.axisPaint);
-		}
+	}
+	
+	public boolean scrolling ()
+	{
+		return scrolling;
 	}
 }

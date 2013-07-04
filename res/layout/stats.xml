@@ -31,10 +31,11 @@
                 android:layout_height="wrap_content"
                 custom:title="@string/ct_srs_distribution" />
 
-            <com.wanikani.androidnotifier.graph.TYPlot
-                android:id="@+id/tyc_srs"
+            <com.wanikani.androidnotifier.graph.TYChart
+                android:id="@+id/ty_srs"
                 android:layout_width="match_parent"
-                android:layout_height="128dp" />
+                android:layout_height="wrap_content"
+                custom:title="@string/ct_srs_distribution" />
             
             <com.wanikani.androidnotifier.graph.PieChart
                 android:id="@+id/pc_kanji"
