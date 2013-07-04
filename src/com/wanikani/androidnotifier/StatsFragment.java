@@ -14,7 +14,6 @@ import android.view.ViewGroup;
 import com.wanikani.androidnotifier.graph.PieChart;
 import com.wanikani.androidnotifier.graph.PiePlot.DataSet;
 import com.wanikani.androidnotifier.graph.TYChart;
-import com.wanikani.androidnotifier.graph.TYPlot;
 import com.wanikani.wklib.SRSDistribution;
 
 /* 

@@ -90,7 +90,6 @@ public class HiPriorityScrollView extends HorizontalScrollView {
 	@Override
 	public boolean onTouchEvent (MotionEvent event)
 	{		
-		View.OnClickListener ocl;
 		boolean childIsLarger;
 		View child;
 				

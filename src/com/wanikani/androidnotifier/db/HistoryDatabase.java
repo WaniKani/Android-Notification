@@ -1,6 +1,5 @@
 package com.wanikani.androidnotifier.db;
 
-import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
