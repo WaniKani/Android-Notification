@@ -1,5 +1,6 @@
 package com.wanikani.androidnotifier.graph;
 
+import java.util.Date;
 import java.util.List;
 
 import android.content.Context;
@@ -124,5 +125,14 @@ public class TYChart extends LinearLayout {
 	public boolean scrolling ()
 	{
 		return plot.scrolling ();
+	}
+	
+	/**
+	 * Updates time origin
+	 * 	@param date the origin
+	 */
+	public void setOrigin (Date date)
+	{
+		plot.setOrigin (date);
 	}
 }

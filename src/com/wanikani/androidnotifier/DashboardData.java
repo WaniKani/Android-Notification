@@ -162,6 +162,7 @@ class DashboardData {
 	private static final String KEY_USERNAME = PREFIX + "username";
 	private static final String KEY_TITLE = PREFIX + "title";
 	private static final String KEY_LEVEL = PREFIX + "level";
+	private static final String KEY_CREATION = PREFIX + "creation";
 	
 	private static final String KEY_LESSONS_AVAILABLE = PREFIX + "lessons_available";
 	private static final String KEY_REVIEWS_AVAILABLE = PREFIX + "reviews_available";
@@ -208,6 +209,8 @@ class DashboardData {
 	
 	public int level;
 	
+	public Date creation;
+	
 	public Bitmap gravatar;
 	
 	public int reviewsAvailableNextHour;
@@ -234,12 +237,13 @@ class DashboardData {
 		title = ui.title;
 		level = ui.level;
 		gravatar = ui.gravatarBitmap;
+		creation = ui.creationDate;
 
 		reviewsAvailable = sq.reviewsAvailable;
 		lessonsAvailable = sq.lessonsAvailable;
 		nextReviewDate = sq.nextReviewDate;
 		reviewsAvailableNextHour = sq.reviewsAvailableNextHour;
-		reviewsAvailableNextDay = sq.reviewsAvailableNextDay;
+		reviewsAvailableNextDay = sq.reviewsAvailableNextDay;		
 	}
 		
 	/**
@@ -305,6 +309,7 @@ class DashboardData {
 		bundle.putString (KEY_USERNAME, username);
 		bundle.putString (KEY_TITLE, title);
 		bundle.putInt(KEY_LEVEL, level);
+		bundle.putLong (KEY_CREATION, creation.getTime ());
 		
 		bundle.putInt (KEY_LESSONS_AVAILABLE, lessonsAvailable);
 		bundle.putInt (KEY_REVIEWS_AVAILABLE, reviewsAvailable);
@@ -357,6 +362,7 @@ class DashboardData {
 		username = bundle.getString (KEY_USERNAME);
 		title = bundle.getString (KEY_TITLE);
 		level = bundle.getInt (KEY_LEVEL);
+		creation = new Date (bundle.getLong (KEY_CREATION));
 		
 		lessonsAvailable = bundle.getInt (KEY_LESSONS_AVAILABLE);
 		reviewsAvailable = bundle.getInt (KEY_REVIEWS_AVAILABLE);

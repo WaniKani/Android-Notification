@@ -144,6 +144,10 @@ public class StatsFragment extends Fragment implements Tab {
 				
 			pc = (PieChart) parent.findViewById (R.id.pc_vocab);			
 			pc.setData (getVocabProgDataSets (dd.od.srs));
+			
+			for (TYChart chart : charts)
+				chart.setOrigin (dd.creation);
+				
 			break;
 		
 		case FAILED:

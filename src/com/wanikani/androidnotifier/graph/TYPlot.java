@@ -78,7 +78,7 @@ public class TYPlot extends View {
 		
 		public float DEFAULT_DIP_PER_DAY = 8;
 		
-		public int DEFAULT_LOOKAHEAD = 1;
+		public int DEFAULT_LOOKAHEAD = 7;
 		
 		public float DEFAULT_DATE_LABEL_FONT_SIZE = 12;
 		
@@ -157,6 +157,7 @@ public class TYPlot extends View {
 			dateLabels.setColor (Color.BLACK);
 			dateLabels.setTextAlign (Paint.Align.CENTER);
 			dateLabels.setTextSize ((int) meas.dateLabelFontSize);
+			dateLabels.setAntiAlias (true);
 		}		
 	}
 	
@@ -177,24 +178,30 @@ public class TYPlot extends View {
 			this.meas = meas;
 			this.today = today;
 			
-			updateSize ((float) (today + meas.lookAhead));
+			t1 = today + meas.lookAhead;
+			
+			updateSize ();
 		}
 		
-		public void updateSize (Float t1)
+		public void setToday (int today)
 		{
-			interval = meas.plotArea.width () / meas.dipPerDay;
-			if (t1 != null)
-				t0 = t1 - interval;
+			t1 += today - this.today;
+			t0 = t1 - interval;
 			
-			update ();
+			this.today = today;
+			adjust ();
 		}
 		
 		public void updateSize ()
 		{
-			updateSize (null);
+			interval = meas.plotArea.width () / meas.dipPerDay;
+			if (interval < meas.lookAhead)
+				interval = meas.lookAhead;
+			t0 = t1 - interval;
+			adjust ();
 		}
 		
-		public void update ()
+		public void adjust ()
 		{
 			if (t0 < 0)
 				t0 = 0;
@@ -212,7 +219,8 @@ public class TYPlot extends View {
 		public void setAbsPosition (int pos)
 		{
 			t0 = absPositionToDay (pos);
-			update ();
+			t1 = t0 + interval;
+			adjust ();
 		}
 		
 		public int getRelPosition (int day)
@@ -270,7 +278,7 @@ public class TYPlot extends View {
 		public TimeAxis ()
 		{
 			now = new Date ();
-			setOrigin (now);
+			setOrigin (new Date (0));
 		}
 		
 		private Calendar getNormalizedCalendar (Date date)
@@ -355,6 +363,8 @@ public class TYPlot extends View {
 	public void setOrigin (Date date)
 	{
 		taxis.setOrigin (date);
+		vp.setToday (taxis.today);
+		invalidate ();
 	}
 
 	@Override
@@ -422,7 +432,7 @@ public class TYPlot extends View {
 		for (d = lo; d <= hi; d++) {
 			f = vp.getRelPosition (d);
 			
-			if (d == 0)
+			if (d == 0 || d == taxis.today)
 				canvas.drawLine (f, meas.plotArea.top, f, meas.plotArea.bottom, pas.axisPaint);
 			else if (cal.get (Calendar.DAY_OF_WEEK) == Calendar.MONDAY)
 				canvas.drawLine (f, meas.plotArea.top, f, meas.plotArea.bottom, pas.gridPaint);
