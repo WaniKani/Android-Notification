@@ -697,6 +697,7 @@ public class WebReviewActivity extends Activity {
 		mutel = new MuteListener ();
 		muteH.setOnClickListener (mutel);
 		mute.setOnClickListener (mutel);
+		setMute (false);	// resume will take care of that
 		
 		tall = SettingsActivity.getLargeKeyboard (prefs);
 		
