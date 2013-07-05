@@ -58,10 +58,12 @@ public class HiPriorityScrollView extends HorizontalScrollView {
 		 * @param childIsLarger if set, this child is larger than this view 
 		 */
 		public void cancel (HiPriorityScrollView hpsw, boolean childIsLarger);
-};
+	};
 	
 	/// The callback
 	private Callback callback;
+	
+	private float lastX, lastY;
 	
 	/**
 	 * Constructor.
@@ -80,7 +82,7 @@ public class HiPriorityScrollView extends HorizontalScrollView {
 	public void setCallback (Callback callback)
 	{
 		this.callback = callback;
-	}
+	}	
 
 	/**
 	 * Called when a touch event is detected. It invokes the callback,
@@ -99,11 +101,18 @@ public class HiPriorityScrollView extends HorizontalScrollView {
 		if (callback != null) {
 			switch (event.getAction ()) {
 			case MotionEvent.ACTION_DOWN:
+				lastX = event.getRawX ();
+				lastY = event.getRawY ();
 				callback.down (this, childIsLarger);
 				break;
 
 			case MotionEvent.ACTION_UP:
-				callback.up (this, childIsLarger);
+				if (lastX == event.getRawX () &&
+					lastY == event.getRawY ())
+					callback.up (this, childIsLarger);
+				else
+					callback.cancel (this, childIsLarger);
+						
 				break;
 				
 			case MotionEvent.ACTION_CANCEL:

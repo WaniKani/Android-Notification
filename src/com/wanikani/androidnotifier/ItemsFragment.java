@@ -1049,7 +1049,7 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 
 		if (parent != null) {
 			btn = (RadioButton) parent.findViewById (R.id.btn_filter_critical); 
-			btn.setSelected (true);
+			btn.setChecked (true);
 
 			criticalf.select (main.getConnection ());
 			iview.setSelection (0);
@@ -1067,7 +1067,7 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 
 		if (parent != null) {
 			btn = (RadioButton) parent.findViewById (R.id.btn_filter_unlocks); 
-			btn.setSelected (true);
+			btn.setChecked (true);
 
 			unlockf.select (main.getConnection ());
 			iview.setSelection (0);
