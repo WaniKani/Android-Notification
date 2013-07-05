@@ -37,12 +37,22 @@
         android:layout_height="match_parent"
         android:orientation="vertical"
         android:visibility="visible" >
+        <RelativeLayout
+            android:layout_height="0dp"
+            android:layout_width="match_parent"
+            android:layout_weight="1" >
         <WebView
             android:id="@+id/wv_reviews"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1" />
-
+            android:layout_height="match_parent"/>
+        <ImageButton
+              android:id="@+id/kb_mute_h"
+              style="@style/AlertButton"
+              android:visibility="gone"
+              android:layout_alignParentTop="true"
+              android:layout_alignParentLeft="true"
+              android:src="@drawable/ic_mute" />
+        </RelativeLayout>
         <LinearLayout
             android:id="@+id/keyboard"
             style="@style/keyboard"
@@ -230,6 +240,11 @@
                     android:layout_weight="1.5"
                     android:text="@string/key_meta" />
 
+                <ImageButton
+                    android:id="@+id/kb_mute"
+                    style="@style/kb_key"
+                    android:layout_weight="1.5" />
+                
                 <Button
                     android:id="@+id/kb_space"
                     style="@style/kb_key"

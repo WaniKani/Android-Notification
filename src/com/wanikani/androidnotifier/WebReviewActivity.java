@@ -4,7 +4,10 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
+import android.media.AudioManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
@@ -17,6 +20,7 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -92,6 +96,21 @@ public class WebReviewActivity extends Activity {
 		/** Any object on the lesson pages */
 		static final String LESSONS_OBJ = "nav-lesson";
 	};
+	
+	/**
+	 * The listener that receives events from the mute buttons.
+	 */
+	private class MuteListener implements View.OnClickListener {
+		
+		@Override
+		public void onClick (View w)
+		{
+			SharedPreferences prefs;
+			
+			prefs = PreferenceManager.getDefaultSharedPreferences (WebReviewActivity.this);
+			setMute (SettingsActivity.toggleMute (prefs)); 
+		}
+	}
 
 	/**
 	 * Web view controller. This class is used by @link WebView to tell whether
@@ -147,7 +166,7 @@ public class WebReviewActivity extends Activity {
 	     * and run the initialization javascript that shows the keyboard, if needed.
 	     */
 		@Override  
-	    public void onPageFinished(WebView view, String url)  
+	    public void onPageFinished (WebView view, String url)  
 	    {  
 			bar.setVisibility (View.GONE);
 
@@ -277,7 +296,8 @@ public class WebReviewActivity extends Activity {
 		{
 			new ShowHideKeyboard (KeyboardStatus.ICONIZED_LESSONS);
 		}
-}
+
+	}
 	
 	/**
 	 * A button listener that handles all the meta keys on the keyboard.
@@ -501,6 +521,18 @@ public class WebReviewActivity extends Activity {
 	/** The "show enter key" setting */
 	protected boolean showEnterKey; 
 	
+	/** The mute button to be shown when the embedded keyboard is disabled */
+	private ImageButton muteH;
+	
+	/** The mute button to be shown when the embedded keyboard is enabled */
+	private ImageButton mute;
+	
+	/** The mute drawable */
+	private Drawable muteDrawable;
+	
+	/** The sound drawable */
+	private Drawable notMutedDrawable;
+
 	/**
 	 * Called when the action is initially displayed. It initializes the objects
 	 * and starts loading the review page.
@@ -512,6 +544,7 @@ public class WebReviewActivity extends Activity {
 		super.onCreate (bundle);
 
 		SharedPreferences prefs;
+		Resources res;
 		
 		setContentView (R.layout.web_review);
 		
@@ -519,10 +552,14 @@ public class WebReviewActivity extends Activity {
 		prefs.registerOnSharedPreferenceChangeListener (new PreferencesListener ());
 		showEnterKey = SettingsActivity.getEnter (prefs);
 
+		res = getResources ();
+		muteDrawable = res.getDrawable(R.drawable.ic_mute);
+		notMutedDrawable = res.getDrawable(R.drawable.ic_not_muted);
+
 		initKeyboard (prefs);
 		
 		bar = (ProgressBar) findViewById (R.id.pb_reviews);
-		
+				
 		/* First of all get references to views we'll need in the near future */
 		splashView = findViewById (R.id.wv_splash);
 		contentView = findViewById (R.id.wv_content);
@@ -542,11 +579,24 @@ public class WebReviewActivity extends Activity {
 	}
 	
 	@Override
+	protected void onResume ()
+	{
+		SharedPreferences prefs;
+		
+		super.onResume ();
+
+		prefs = PreferenceManager.getDefaultSharedPreferences (this);
+		if (SettingsActivity.getMute (prefs))
+			setMute (true);
+	}
+	
+	@Override
 	protected void onPause ()
 	{
 		LocalBroadcastManager lbm;
 		Intent intent;
-	
+		SharedPreferences prefs;
+
 		super.onPause ();
 		lbm = LocalBroadcastManager.getInstance (this);
 		intent = new Intent (MainActivity.ACTION_REFRESH);
@@ -556,6 +606,10 @@ public class WebReviewActivity extends Activity {
 		intent = new Intent (this, NotificationService.class);
 		intent.setAction (NotificationService.ACTION_NEW_DATA);
 		startService (intent);
+		
+		prefs = PreferenceManager.getDefaultSharedPreferences (this);		
+		if (SettingsActivity.getMute (prefs))
+			setMute (false);
 	}
 	
 	/**
@@ -563,11 +617,18 @@ public class WebReviewActivity extends Activity {
 	 */
 	protected void initKeyboard (SharedPreferences prefs)
 	{
-		View.OnClickListener klist, mlist;
+		View.OnClickListener klist, mlist, mutel;
 		LayoutParams lp;
 		boolean tall;
 		View key;
 		int i;
+
+		muteH = (ImageButton) findViewById (R.id.kb_mute_h);
+		mute = (ImageButton) findViewById (R.id.kb_mute);
+		
+		mutel = new MuteListener ();
+		muteH.setOnClickListener (mutel);
+		mute.setOnClickListener (mutel);
 		
 		tall = SettingsActivity.getLargeKeyboard (prefs);
 		
@@ -596,6 +657,19 @@ public class WebReviewActivity extends Activity {
 				key.setLayoutParams(lp);
 			}
 		}					
+	}
+	
+	private void setMute (boolean m)
+	{
+		AudioManager am;
+		Drawable d;
+		
+		am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+	    
+		am.setStreamMute (AudioManager.STREAM_MUSIC, m);
+		d = m ? muteDrawable : notMutedDrawable;
+	    muteH.setImageDrawable (d);
+		mute.setImageDrawable (d);
 	}
 	
 	/**
@@ -720,6 +794,7 @@ public class WebReviewActivity extends Activity {
 	{
 		View view;
 		
+		muteH.setVisibility (View.GONE);
 		kbstatus = KeyboardStatus.HIDDEN;
 		view = findViewById (R.id.keyboard);
 		view.setVisibility (View.GONE);					
@@ -765,6 +840,7 @@ public class WebReviewActivity extends Activity {
 	{
 		InputMethodManager imm;
 		
+		muteH.setVisibility (View.VISIBLE);
 		imm = (InputMethodManager) getSystemService (Context.INPUT_METHOD_SERVICE);
 		imm.showSoftInput (wv, InputMethodManager.SHOW_IMPLICIT);		
 	}
@@ -779,6 +855,7 @@ public class WebReviewActivity extends Activity {
 		View view, key;
 		int i;
 		
+		muteH.setVisibility (View.GONE);
 		for (i = 0; i < key_table.length; i++) {
 			key = findViewById (key_table [i]);
 			key.setVisibility (View.VISIBLE);

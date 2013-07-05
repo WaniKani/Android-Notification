@@ -57,6 +57,9 @@ public class SettingsActivity
 	/** Enable 42+ mode. Must match preferences.xml */
 	private static final String KEY_PREF_42PLUS = "pref_42plus";
 	
+	/** Mute review */
+	private static final String KEY_MUTE = "mute";
+	
 	/** The correct length of the API key (as far as we know) */
 	private static final int EXPECTED_KEYLEN = 32;
 	
@@ -266,6 +269,21 @@ public class SettingsActivity
 	public static boolean get42plus (SharedPreferences prefs)
 	{
 		return prefs.getBoolean (KEY_PREF_42PLUS, false);
+	}
+	
+	public static boolean getMute (SharedPreferences prefs)
+	{
+		return prefs.getBoolean (KEY_MUTE, false);
+	}
+	
+	public static boolean toggleMute (SharedPreferences prefs)
+	{
+		boolean v;
+
+		v = !getMute (prefs);
+		prefs.edit ().putBoolean(KEY_MUTE, v).commit ();
+		
+		return v;
 	}
 	
 	private static int getInt (SharedPreferences prefs, String key, int defval)
