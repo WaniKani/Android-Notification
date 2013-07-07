@@ -1,5 +1,7 @@
 package com.wanikani.androidnotifier.db;
 
+import java.util.Date;
+
 import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
@@ -29,7 +31,35 @@ import com.wanikani.wklib.UserInformation;
 
 public class HistoryDatabase {
 
-	static class Facts {
+	public static enum FactType {
+		
+		MISSING,
+		
+		PARTIAL,
+		
+		COMPLETE
+		
+	}
+	
+	public static class CoreStats {
+		
+		public int maxUnlockedRadicals;
+		
+		public int maxUnlockedKanji;
+	
+		public int maxUnlockedVocab;
+		
+		public CoreStats (int maxUnlockedRadicals, 
+						  int maxUnlockedKanji, 
+						  int maxUnlockedVocab)
+		{
+			this.maxUnlockedRadicals = maxUnlockedRadicals;
+			this.maxUnlockedKanji = maxUnlockedKanji;
+			this.maxUnlockedVocab = maxUnlockedVocab;
+		}
+	}
+	
+	public static class Facts {
 		
 		private static final String TABLE = "facts";
 		
@@ -63,8 +93,28 @@ public class HistoryDatabase {
 
 		private static final String C_BURNED_VOCAB = "burned_vocab";
 		
-		private static final String C_UNLOCKED_VOCAB = "unlocked_vocab";		
+		private static final String C_UNLOCKED_VOCAB = "unlocked_vocab";
 		
+		private static final int CX_DAY = 0;
+		
+		private static final int CX_GURU_RADICALS = 1;		
+		private static final int CX_MASTER_RADICALS = 2;
+		private static final int CX_ENLIGHTEN_RADICALS = 3;
+		private static final int CX_BURNED_RADICALS = 4;
+		private static final int CX_UNLOCKED_RADICALS = 5;
+		
+		private static final int CX_GURU_KANJI = 6;		
+		private static final int CX_MASTER_KANJI = 7;
+		private static final int CX_ENLIGHTEN_KANJI = 8;
+		private static final int CX_BURNED_KANJI = 9;
+		private static final int CX_UNLOCKED_KANJI = 10;
+
+		private static final int CX_GURU_VOCAB = 11;		
+		private static final int CX_MASTER_VOCAB = 12;
+		private static final int CX_ENLIGHTEN_VOCAB = 13;
+		private static final int CX_BURNED_VOCAB = 14;
+		private static final int CX_UNLOCKED_VOCAB = 15;
+
 		private static final String SQL_CREATE = 
 				"CREATE TABLE " + TABLE + " (" +
 
@@ -100,7 +150,10 @@ public class HistoryDatabase {
 						"?, ?, ?, ?, ?, " +
 						"?, ?, ?, ?, ?, " +
 						"?, ?, ?, ?, ?)";
-	
+		
+		private static final String SQL_SELECT = 
+				C_DAY + " IN (?, ?) ";
+		
 		public static void onCreate (SQLiteDatabase db)
 		{
 			db.execSQL (SQL_CREATE);
@@ -170,6 +223,91 @@ public class HistoryDatabase {
 			};
 			
 			db.execSQL (SQL_INSERT, values);		
+		}
+
+		public static Cursor select (SQLiteDatabase db, int from, int to)
+				throws SQLException
+		{
+			String args [];
+			
+			args = new String [] { Integer.toString (from), Integer.toString (to) };
+			
+			return db.query (TABLE, null, SQL_SELECT, args, null, null, C_DAY);
+		}
+		
+		public static CoreStats getCoreStats (SQLiteDatabase db)
+				throws SQLException
+		{
+			CoreStats cs;
+			String cols [];
+			Cursor c;
+			
+			cols = new String [] {
+				"MAX(" + C_UNLOCKED_RADICALS + ")",
+				"MAX(" + C_UNLOCKED_KANJI + ")",
+				"MAX(" + C_UNLOCKED_VOCAB + ")"
+			};
+			c = null;
+			cs = null;
+			try {
+				c = db.query(TABLE, cols, null, null, null, null, null);
+				c.moveToFirst ();
+				cs = new CoreStats (getIntOrZero (c, 0),
+									getIntOrZero (c, 1),
+									getIntOrZero (c, 2));
+			} catch (SQLException e) {
+				cs = new CoreStats (0, 0, 0);
+			} finally {
+				c.close ();
+			}
+			
+			return cs;
+		}
+
+		public static FactType getType (Cursor c)
+		{
+			return  !c.isNull (CX_GURU_RADICALS) ? FactType.COMPLETE :
+					!c.isNull (CX_UNLOCKED_RADICALS) ? FactType.PARTIAL : FactType.MISSING;
+		}
+		
+		public static int getDay (Cursor c)
+		{
+			return c.getInt (CX_DAY);
+		}
+		
+		private static int getIntOrZero (Cursor c, int column)
+		{
+			return c.isNull (column) ? 0 : c.getInt (column);
+		}
+		
+		public static SRSDistribution getSRSDistribution (Cursor c)
+		{
+			SRSDistribution srs;
+			
+			srs = new SRSDistribution ();
+			
+			srs.guru.radicals = getIntOrZero (c, CX_GURU_RADICALS);
+			srs.master.radicals = getIntOrZero (c, CX_MASTER_RADICALS);
+			srs.enlighten.radicals = getIntOrZero (c, CX_ENLIGHTEN_RADICALS);
+			srs.burned.radicals = getIntOrZero (c, CX_BURNED_RADICALS);
+			srs.apprentice.radicals = getIntOrZero (c, CX_UNLOCKED_RADICALS) -
+					srs.guru.radicals - srs.master.radicals - srs.enlighten.radicals;
+
+			srs.guru.kanji = getIntOrZero (c, CX_GURU_KANJI);
+			srs.master.kanji = getIntOrZero (c, CX_MASTER_KANJI);
+			srs.enlighten.kanji = getIntOrZero (c, CX_ENLIGHTEN_KANJI);
+			srs.burned.kanji = getIntOrZero (c, CX_BURNED_KANJI);
+			srs.apprentice.kanji = getIntOrZero (c, CX_UNLOCKED_KANJI) -
+					srs.guru.kanji - srs.master.kanji - srs.enlighten.kanji;
+			
+			srs.guru.vocabulary = getIntOrZero (c, CX_GURU_VOCAB);
+			srs.master.vocabulary = getIntOrZero (c, CX_MASTER_VOCAB);
+			srs.enlighten.vocabulary = getIntOrZero (c, CX_ENLIGHTEN_VOCAB);
+			srs.burned.vocabulary = getIntOrZero (c, CX_BURNED_VOCAB);
+			srs.apprentice.vocabulary = getIntOrZero (c, CX_UNLOCKED_VOCAB) -
+					srs.guru.vocabulary - srs.master.vocabulary - srs.enlighten.vocabulary;
+
+			return srs;
 		}
 	}
 	
@@ -245,7 +383,7 @@ public class HistoryDatabase {
 		}
 		
 	}
-
+	
 	OpenHelper helper;
 	
 	SQLiteDatabase db;
@@ -257,22 +395,30 @@ public class HistoryDatabase {
 		helper = new OpenHelper (ctxt);		
 	}	
 	
-	public void openW ()
+	public synchronized void openW ()
 		throws SQLException
 	{
-		db = helper.getWritableDatabase ();	
+		if (db == null)
+			db = helper.getWritableDatabase ();	
 	}
 	
-	public void openR ()
+	public synchronized void openR ()
 		throws SQLException
 	{
-		db = helper.getReadableDatabase ();	
+		if (db == null)
+			db = helper.getReadableDatabase ();	
 	}
-
+	
 	public void close ()
 		throws SQLException
 	{
 		helper.close ();
+	}
+	
+	public Cursor selectFacts (int from, int to)
+		throws SQLException
+	{
+		return Facts.select (db, from, to);
 	}
 	
 	private static int days (UserInformation ui, long ts)
@@ -311,5 +457,26 @@ public class HistoryDatabase {
 		} finally {
 			hdb.close ();
 		}
-	}	
+	}
+	
+	public CoreStats getCoreStats ()
+		throws SQLException
+	{
+		return Facts.getCoreStats (db);
+	}
+	
+	public static CoreStats getCoreStats (Context ctxt)
+		throws SQLException
+	{
+		HistoryDatabase hdb;
+		
+		hdb = new HistoryDatabase (ctxt);
+		hdb.openW ();
+		try {
+			return hdb.getCoreStats ();
+		} finally {
+			hdb.close ();
+		}		
+	}
+	
 }

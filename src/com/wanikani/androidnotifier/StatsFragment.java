@@ -4,13 +4,22 @@ import java.util.List;
 import java.util.Vector;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.res.Resources;
+import android.database.SQLException;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.wanikani.androidnotifier.db.HistoryDatabase;
+import com.wanikani.androidnotifier.db.HistoryDatabaseCache;
+import com.wanikani.androidnotifier.db.HistoryDatabaseCache.Page;
+import com.wanikani.androidnotifier.db.HistoryDatabaseCache.PageSegment;
+import com.wanikani.androidnotifier.graph.Pager;
+import com.wanikani.androidnotifier.graph.Pager.Series;
 import com.wanikani.androidnotifier.graph.PieChart;
 import com.wanikani.androidnotifier.graph.PiePlot.DataSet;
 import com.wanikani.androidnotifier.graph.TYChart;
@@ -40,6 +49,116 @@ import com.wanikani.wklib.SRSDistribution;
  * (we need to create and maintain a database, though).
  */
 public class StatsFragment extends Fragment implements Tab {
+	
+	private class GetCoreStatsTask extends AsyncTask<Void, Void, HistoryDatabase.CoreStats> {
+		
+		private Context ctxt;
+		
+		public GetCoreStatsTask (Context ctxt)
+		{
+			this.ctxt = ctxt;
+		}
+		
+		@Override
+		protected HistoryDatabase.CoreStats doInBackground (Void... v)
+		{
+			try {
+				return HistoryDatabase.getCoreStats (ctxt);
+			} catch (SQLException e) {
+				return new HistoryDatabase.CoreStats (0, 0, 0);
+			}
+		}	
+		
+		@Override
+		protected void onPostExecute (HistoryDatabase.CoreStats cs)
+		{
+			setCoreStats (cs);
+		}
+	}
+	
+	private class SRSDataSource extends HistoryDatabaseCache.DataSource {
+	
+		private int maxY;
+		
+		private List<Series> series;
+		
+		private List<Series> completeSeries;
+		
+		private List<Series> partialSeries;
+		
+		public SRSDataSource (HistoryDatabaseCache hdbc)
+		{
+			super (hdbc);
+			
+			Resources res;
+			
+			maxY = 100;
+			
+			res = getResources ();
+						
+			completeSeries = new Vector<Series> ();
+			completeSeries.add (new Series (res.getColor (R.color.apprentice), 
+										    res.getString (R.string.tag_apprentice)));
+			completeSeries.add (new Series (res.getColor (R.color.guru), 
+							                res.getString (R.string.tag_guru)));
+			completeSeries.add (new Series (res.getColor (R.color.master), 
+										    res.getString (R.string.tag_master)));
+			completeSeries.add (new Series (res.getColor (R.color.enlightened), 
+											res.getString (R.string.tag_enlightened)));
+			
+			partialSeries = new Vector<Series> ();
+			partialSeries.add (new Series (res.getColor (R.color.unlocked),
+										   res.getString (R.string.tag_unlocked)));
+			
+			series = new Vector<Series> ();
+			series.addAll (completeSeries);
+			series.addAll (partialSeries);
+		}
+		
+		public void setCoreStats (HistoryDatabase.CoreStats cs)
+		{
+			maxY = cs.maxUnlockedRadicals + cs.maxUnlockedKanji + cs.maxUnlockedVocab;
+			if (maxY == 0)
+				maxY = 100;			
+		}
+		
+		public List<Series> getSeries ()
+		{
+			return series;
+		}
+		
+		public float getMaxY ()
+		{
+			return maxY;
+		}
+		
+		protected void fillPartialSegment (Pager.Segment segment, PageSegment pseg)
+		{
+			int i;
+			
+			segment.series = partialSeries;
+			segment.data = new float [1][pseg.srsl.size ()];
+			i = 0;
+			for (SRSDistribution srs : pseg.srsl)
+				segment.data [0][i++] = srs.apprentice.total;											
+		}
+
+		protected void fillSegment (Pager.Segment segment, PageSegment pseg)
+		{
+			int i;
+			
+			segment.series = completeSeries;
+			segment.data = new float [4][pseg.srsl.size ()];
+			i = 0;
+			for (SRSDistribution srs : pseg.srsl) {
+				segment.data [0][i] = srs.apprentice.total;
+				segment.data [1][i] = srs.guru.total;
+				segment.data [2][i] = srs.master.total;
+				segment.data [3][i] = srs.enlighten.total;
+			}			
+		}
+		
+	}
 
 	/// The main activity
 	MainActivity main;
@@ -50,11 +169,22 @@ public class StatsFragment extends Fragment implements Tab {
 	/// All the charts. This is needed to lock and unlock scrolling
 	List<TYChart> charts;
 	
+	/// The core stats, used to trim graph scales
+	HistoryDatabase.CoreStats cs;
+	
+	/// The task that retrives core stats
+	GetCoreStatsTask task;
+	
+	SRSDataSource srsds;
+	
 	/// Overall number of kanji
 	private static final int ALL_THE_KANJI = 1700;
 	
 	/// Overall number of vocab items
 	private static final int ALL_THE_VOCAB = 5000;
+	
+	/// The database
+	HistoryDatabaseCache hdbc;
 	
 	/**
 	 * Constructor
@@ -62,6 +192,7 @@ public class StatsFragment extends Fragment implements Tab {
 	public StatsFragment ()
 	{
 		this.charts = new Vector<TYChart> ();
+		hdbc = new HistoryDatabaseCache ();
 	}
 	
 	@Override
@@ -72,6 +203,31 @@ public class StatsFragment extends Fragment implements Tab {
 		this.main = (MainActivity) main;
 		
 		this.main.register (this);
+		
+		if (cs == null && task == null) {
+			task = new GetCoreStatsTask (main);
+			task.execute ();
+		}
+		
+		hdbc.open (main);
+	}
+	
+	@Override
+	public void onDetach ()
+	{
+		super.onDetach ();		
+
+		hdbc.close ();
+	}
+	
+	private void setCoreStats (HistoryDatabase.CoreStats cs)
+	{
+		this.cs = cs;
+		srsds.setCoreStats (cs);
+		for (TYChart tyc : charts) {
+			tyc.invalidate ();
+			tyc.spin (false);
+		}
 	}
 
 	/**
@@ -98,9 +254,21 @@ public class StatsFragment extends Fragment implements Tab {
     {
 		super.onCreateView (inflater, container, savedInstanceState);
 		
+		TYChart tyc;
+		
 		parent = inflater.inflate(R.layout.stats, container, false);
 		charts = new Vector<TYChart> ();
-		charts.add ((TYChart) parent.findViewById (R.id.ty_srs));
+
+		srsds = new SRSDataSource (hdbc);
+		hdbc.addDataSource (srsds);
+		
+		tyc = (TYChart) parent.findViewById (R.id.ty_srs);
+		tyc.setDataSource (srsds);
+		if (cs != null)
+			srsds.setCoreStats (cs);
+		else
+			tyc.spin (true);
+		charts.add (tyc);
         
     	return parent;
     }
@@ -112,7 +280,7 @@ public class StatsFragment extends Fragment implements Tab {
 		
 		refreshComplete (main.getDashboardData ());
 	}
-
+	
 	@Override
 	public int getName ()
 	{

@@ -135,4 +135,10 @@ public class TYChart extends LinearLayout {
 	{
 		plot.setOrigin (date);
 	}
+	
+	public void setDataSource (Pager.DataSource dsource)
+	{
+		plot.setDataSource (dsource);
+	}
+
 }

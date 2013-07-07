@@ -4,13 +4,17 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Hashtable;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.DashPathEffect;
 import android.graphics.Paint;
+import android.graphics.Path;
 import android.graphics.RectF;
 import android.support.v4.view.ViewCompat;
 import android.util.AttributeSet;
@@ -20,6 +24,8 @@ import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Scroller;
+
+import com.wanikani.androidnotifier.graph.Pager.DataSet;
 
 /* 
  *  Copyright (c) 2013 Alberto Cuda
@@ -140,6 +146,8 @@ public class TYPlot extends View {
 		
 		Paint dateLabels;
 		
+		Map<Pager.Series, Paint> series;
+		
 		public PaintAssets (AttributeSet attrs, Measures meas)
 		{
 			float points [];
@@ -158,10 +166,27 @@ public class TYPlot extends View {
 			dateLabels.setTextAlign (Paint.Align.CENTER);
 			dateLabels.setTextSize ((int) meas.dateLabelFontSize);
 			dateLabels.setAntiAlias (true);
+			
+			series = new Hashtable<Pager.Series, Paint> ();
 		}		
+		
+		public void setSeries (List<Pager.Series> series)
+		{
+			Paint p;
+			
+			series.clear ();
+			for (Pager.Series s : series) {
+				p = new Paint ();
+				p.setColor (s.color);
+				p.setStyle (Paint.Style.FILL_AND_STROKE);
+				p.setAntiAlias (true);
+			}
+		}
 	}
 	
 	private static class Viewport {
+		
+		DataSink dsink;
 		
 		Measures meas;
 		
@@ -171,16 +196,20 @@ public class TYPlot extends View {
 		
 		float interval;
 		
+		float yScale;
+		
 		int today;
 		
-		public Viewport (Measures meas, int today)
+		public Viewport (DataSink dsink, Measures meas, int today)
 		{			
+			this.dsink = dsink;
 			this.meas = meas;
 			this.today = today;
 			
 			t1 = today + meas.lookAhead;
 			
-			updateSize ();
+			/* Will be updated as soon as we have a valid datasource */
+			updateSize (100);
 		}
 		
 		public void setToday (int today)
@@ -190,11 +219,13 @@ public class TYPlot extends View {
 			
 			this.today = today;
 			adjust ();
+			dsink.refresh ();
 		}
 		
-		public void updateSize ()
+		public void updateSize (float yMax)
 		{
 			interval = meas.plotArea.width () / meas.dipPerDay;
+			yScale = meas.plotArea.height () / yMax;
 			if (interval < meas.lookAhead)
 				interval = meas.lookAhead;
 			t0 = t1 - interval;
@@ -221,11 +252,17 @@ public class TYPlot extends View {
 			t0 = absPositionToDay (pos);
 			t1 = t0 + interval;
 			adjust ();
+			dsink.refresh ();
 		}
 		
 		public int getRelPosition (int day)
 		{
 			return (int) ((day - t0) * meas.dipPerDay);
+		}
+		
+		public float getY (float y)
+		{
+			return meas.plotArea.bottom - y * yScale;
 		}
 		
 		public void scroll (int dx, int dy)
@@ -263,6 +300,10 @@ public class TYPlot extends View {
 			return ceil (t0);
 		}
 		
+		public Pager.Interval getInterval ()
+		{
+			return new Pager.Interval (floor (t0), ceil (t1));
+		}		
 	}
 	
 	private static class TimeAxis {
@@ -318,6 +359,27 @@ public class TYPlot extends View {
 		}	
 	}
 	
+	private class DataSink implements Pager.DataSink {
+		
+		DataSet ds;
+		
+		public void refresh ()
+		{
+			if (pager != null)
+				pager.requestData (vp.getInterval ());
+			else
+				invalidate ();
+		}
+
+		public void dataAvailable (DataSet ds)
+		{
+			if (ds.interval.equals (vp.getInterval ())) {
+				this.ds = ds;
+				invalidate ();
+			}
+		}		
+	}
+	
 	private Scroller scroller;
 	
 	private GestureDetector gdect;
@@ -336,6 +398,10 @@ public class TYPlot extends View {
 	
 	private TimeAxis taxis;
 	
+	private Pager pager;
+	
+	private DataSink dsink;
+	
 	private boolean scrolling;
 	
 	public TYPlot (Context ctxt, AttributeSet attrs)
@@ -349,6 +415,7 @@ public class TYPlot extends View {
 		datef = new SimpleDateFormat ("MMM", Locale.US);
 		janf = new SimpleDateFormat ("MMM yyyy", Locale.US);
 		taxis = new TimeAxis ();
+		dsink = new DataSink ();
 		
 		loadAttributes (ctxt, attrs);
 	}
@@ -356,7 +423,7 @@ public class TYPlot extends View {
 	void loadAttributes (Context ctxt, AttributeSet attrs)
 	{
 		meas = new Measures (ctxt, attrs);
-		vp = new Viewport (meas, taxis.today);
+		vp = new Viewport (dsink, meas, taxis.today);
 		pas = new PaintAssets (attrs, meas);		
 	}
 	
@@ -364,7 +431,14 @@ public class TYPlot extends View {
 	{
 		taxis.setOrigin (date);
 		vp.setToday (taxis.today);
-		invalidate ();
+	}
+	
+	public void setDataSource (Pager.DataSource dsource)
+	{
+		pager = new Pager (dsource, dsink);
+		pas.setSeries (dsource.getSeries ());
+		vp.updateSize (dsource.getMaxY ());
+		dsink.refresh ();
 	}
 
 	@Override
@@ -392,7 +466,7 @@ public class TYPlot extends View {
 	protected void onSizeChanged (int width, int height, int ow, int oh)
 	{
 		meas.updateSize (new RectF (0, 0, width, height));
-		vp.updateSize ();
+		vp.updateSize (pager != null ? pager.dsource.getMaxY () : 100);
 	}
 
 	@Override
@@ -409,6 +483,9 @@ public class TYPlot extends View {
 	@Override
 	protected void onDraw (Canvas canvas)
 	{
+		if (dsink != null && dsink.ds != null && dsink.ds.interval.equals (vp.interval))
+			drawPlot (canvas, dsink.ds);
+		
 		drawGrid (canvas);
 	}
 	
@@ -447,6 +524,57 @@ public class TYPlot extends View {
 			
 			cal.add (Calendar.DATE, 1);
 		}
+	}
+	
+	protected void drawPlot (Canvas canvas, Pager.DataSet ds)
+	{
+		for (Pager.Segment segment : ds.segments)
+			drawSegment (canvas, segment);
+	}
+	
+	protected void drawSegment (Canvas canvas, Pager.Segment segment)
+	{
+		float f [];
+		int i;
+		
+		switch (segment.type) {
+		case MISSING:
+			break;
+
+		case VALID:
+			f = new float [segment.interval.getSize ()];
+			for (i = 0; i < segment.data.length; i++)
+				drawPlot (canvas, segment.series.get (i), segment.interval, 
+						  f, segment.data [i]);
+				
+			break;
+		}
+	}
+	
+	protected void drawPlot (Canvas canvas, Pager.Series series, Pager.Interval interval,
+							 float base [], float samples [])
+	{
+		Path path;
+		Paint p;
+		int i, n;
+	
+		p = pas.series.get (series);
+		n = interval.stop - interval.start + 1;
+		if (p == null || samples.length == 0 || n <= 0)
+			return;
+				
+		path = new Path ();
+		path.moveTo (vp.getRelPosition (interval.start), vp.getY (samples [0]));
+		for (i = 1; i < n; i++)
+			path.lineTo (vp.getRelPosition (interval.start + i), vp.getY (samples [i]));
+		while (i >= 0) {
+			path.lineTo (vp.getRelPosition (interval.start + i), vp.getY (base [i]));
+			base [i] += samples [i];
+			i--;
+		}
+		path.close ();
+		
+		canvas.drawPath (path, p);
 	}
 	
 	public boolean scrolling ()

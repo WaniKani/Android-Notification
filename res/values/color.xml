@@ -9,5 +9,6 @@
     <color name="selected">#f87217</color>
     <color name="unselected">#000</color>
     <color name="locked">#efefef</color>
+    <color name="unlocked">#cfcfcf</color>
     <color name="burned">#555</color>
 </resources>
