@@ -237,7 +237,7 @@
                 <Button
                     android:id="@+id/kb_meta"
                     style="@style/kb_meta_key"
-                    android:layout_weight="1.5"
+                    android:layout_weight="2"
                     android:text="@string/key_meta" />
 
                 <ImageButton
@@ -258,7 +258,7 @@
                 <Button
                     android:id="@+id/kb_hide"
                     style="@style/kb_key"
-                    android:layout_weight="1.5"
+                    android:layout_weight="2"
                     android:text="@string/key_hide" />
                 </LinearLayout>
         </LinearLayout>
