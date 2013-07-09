@@ -52,6 +52,8 @@ public class SettingsActivity
 	private static final String KEY_PREF_LARGE_KEYBOARD = "pref_large_keyboard";
 	/** Enable enter keyboard key. Must match preferences.xml */
 	private static final String KEY_PREF_ENTER = "pref_enter";
+	/** Show mute button. Must match preferences.xml */
+	private static final String KEY_PREF_SHOW_MUTE = "pref_show_mute";
 	/** Enable 42+ mode. Must match preferences.xml */
 	private static final String KEY_PREF_42PLUS = "pref_42plus";
 	
@@ -173,6 +175,9 @@ public class SettingsActivity
 		
 		pref = findPreference (KEY_PREF_SHOW_KEYBOARD);
 		pref.setEnabled (getUseIntegratedBrowser (prefs));
+
+		pref = findPreference (KEY_PREF_SHOW_MUTE);
+		pref.setEnabled (getUseIntegratedBrowser (prefs));
 		
 		runShowKeyboardHooks (prefs);
 	}
@@ -239,6 +244,11 @@ public class SettingsActivity
 	public static boolean getShowKeyboard (SharedPreferences prefs)
 	{
 		return prefs.getBoolean (KEY_PREF_SHOW_KEYBOARD, true);
+	}
+	
+	public static boolean getShowMute (SharedPreferences prefs)
+	{
+		return prefs.getBoolean (KEY_PREF_SHOW_MUTE, true);
 	}
 	
 	public static boolean getLargeKeyboard (SharedPreferences prefs)

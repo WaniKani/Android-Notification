@@ -279,7 +279,7 @@ public class WebReviewActivity extends Activity {
 		 */
 		public void run ()
 		{
-			muteH.setVisibility (show ? View.VISIBLE : View.GONE);
+			showMuteButtons (muteH, show);
 		}
 		
 	}
@@ -698,6 +698,7 @@ public class WebReviewActivity extends Activity {
 		muteH.setOnClickListener (mutel);
 		mute.setOnClickListener (mutel);
 		setMute (false);	// resume will take care of that
+		showMuteButtons (mute, true);
 		
 		tall = SettingsActivity.getLargeKeyboard (prefs);
 		
@@ -726,6 +727,16 @@ public class WebReviewActivity extends Activity {
 				key.setLayoutParams(lp);
 			}
 		}					
+	}
+	
+	private void showMuteButtons (View mute, boolean show)
+	{
+		SharedPreferences prefs;
+		
+		prefs = PreferenceManager.getDefaultSharedPreferences (this);
+		show &= SettingsActivity.getShowMute (prefs);
+		
+		mute.setVisibility (show ? View.VISIBLE : View.GONE);
 	}
 	
 	private void setMute (boolean m)
