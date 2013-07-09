@@ -1,9 +1,13 @@
 package com.wanikani.androidnotifier;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
+import android.media.AudioManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
@@ -15,6 +19,7 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -87,6 +92,21 @@ public class WebReviewActivity extends Activity {
 		/** Any object on the lesson pages */
 		static final String LESSONS_OBJ = "nav-lesson";
 	};
+	
+	/**
+	 * The listener that receives events from the mute buttons.
+	 */
+	private class MuteListener implements View.OnClickListener {
+		
+		@Override
+		public void onClick (View w)
+		{
+			SharedPreferences prefs;
+			
+			prefs = PreferenceManager.getDefaultSharedPreferences (WebReviewActivity.this);
+			setMute (SettingsActivity.toggleMute (prefs)); 
+		}
+	}
 
 	/**
 	 * Web view controller. This class is used by @link WebView to tell whether
@@ -142,7 +162,7 @@ public class WebReviewActivity extends Activity {
 	     * and run the initialization javascript that shows the keyboard, if needed.
 	     */
 		@Override  
-	    public void onPageFinished(WebView view, String url)  
+	    public void onPageFinished (WebView view, String url)  
 	    {  
 			SharedPreferences prefs;
 			
@@ -150,10 +170,11 @@ public class WebReviewActivity extends Activity {
 			bar.setVisibility (View.GONE);
 
 			if (url.startsWith ("http")) {
-				if (SettingsActivity.getShowKeyboard (prefs))
+				if (SettingsActivity.getShowKeyboard (prefs)) {
+					muteH.setVisibility (View.GONE);
 					js (JS_INIT_KBD);
-				else
-					js (JS_INIT_NOKBD);
+				} else
+					js (JS_INIT_NOKBD);				
 			}
 	    }
 	}
@@ -229,6 +250,41 @@ public class WebReviewActivity extends Activity {
 	}
 	
 	/**
+	 * A small job that hides or shows the mute botton. We need to implement this
+	 * here because {@link WebReviewActibity.WKNKeyboard} gets called from a
+	 * javascript thread, which is not necessarily an UI thread.
+	 * The constructor simply calls <code>runOnUIThread</code> to make sure
+	 * we hide/show the button from the correct context.
+	 */
+	private class ShowHideMuteButton implements Runnable {
+		
+		/** Whether to show or to hide */
+		boolean show;
+		
+		/**
+		 * Constructor. It also takes care to schedule the invokation
+		 * on the UI thread, so all you have to do is just to create an
+		 * instance of this object
+		 * @param show whether to show or to hide
+		 */
+		ShowHideMuteButton (boolean show)
+		{
+			this.show = show;
+			
+			runOnUiThread (this);
+		}
+		
+		/**
+		 * Hides/shows the button. Invoked by the UI thread.
+		 */
+		public void run ()
+		{
+			showMuteButtons (muteH, show);
+		}
+		
+	}
+
+	/**
 	 * This class implements the <code>wknKeyboard</code> javascript object.
 	 * It implements the @link {@link #show} and {@link #hide} methods. 
 	 */
@@ -279,6 +335,25 @@ public class WebReviewActivity extends Activity {
 		{
 			new ShowHideKeyboard (KeyboardStatus.ICONIZED_LESSONS);
 		}
+		
+		/**
+		 * Called by javascript to show the mute button.
+		 */
+		@JavascriptInterface
+		public void showMuteButton ()
+		{
+			new ShowHideMuteButton (true);
+		}
+
+		/**
+		 * Called by javascript to show the mute button.
+		 */
+		@JavascriptInterface
+		public void hideMuteButton ()
+		{
+			new ShowHideMuteButton (false);
+		}
+
 }
 	
 	/**
@@ -434,8 +509,12 @@ public class WebReviewActivity extends Activity {
 			"}" +
 			"if (textbox != null) {" +
 			"   textbox.focus ();" +
+			"   wknKeyboard.showMuteButton ();" +
 			"} else if (ltextbox != null) {" +
 			"   ltextbox.focus ();" +
+			"   wknKeyboard.showMuteButton ();" +
+			"} else {" +
+			"   wknKeyboard.hideMuteButton ();" +
 			"}";
 
 	private static final String JS_FOCUS = 
@@ -510,6 +589,18 @@ public class WebReviewActivity extends Activity {
 	/** The "show enter key" setting */
 	protected boolean showEnterKey; 
 	
+	/** The mute button to be shown when the embedded keyboard is disabled */
+	private ImageButton muteH;
+	
+	/** The mute button to be shown when the embedded keyboard is enabled */
+	private ImageButton mute;
+	
+	/** The mute drawable */
+	private Drawable muteDrawable;
+	
+	/** The sound drawable */
+	private Drawable notMutedDrawable;
+
 	/**
 	 * Called when the action is initially displayed. It initializes the objects
 	 * and starts loading the review page.
@@ -521,6 +612,7 @@ public class WebReviewActivity extends Activity {
 		super.onCreate (bundle);
 
 		SharedPreferences prefs;
+		Resources res;
 		
 		setContentView (R.layout.web_review);
 		
@@ -528,10 +620,14 @@ public class WebReviewActivity extends Activity {
 		prefs.registerOnSharedPreferenceChangeListener (new PreferencesListener ());
 		showEnterKey = SettingsActivity.getEnter (prefs);
 
+		res = getResources ();
+		muteDrawable = res.getDrawable(R.drawable.ic_mute);
+		notMutedDrawable = res.getDrawable(R.drawable.ic_not_muted);
+
 		initKeyboard (prefs);
 		
 		bar = (ProgressBar) findViewById (R.id.pb_reviews);
-		
+				
 		/* First of all get references to views we'll need in the near future */
 		splashView = findViewById (R.id.wv_splash);
 		contentView = findViewById (R.id.wv_content);
@@ -551,11 +647,24 @@ public class WebReviewActivity extends Activity {
 	}
 	
 	@Override
+	protected void onResume ()
+	{
+		SharedPreferences prefs;
+		
+		super.onResume ();
+
+		prefs = PreferenceManager.getDefaultSharedPreferences (this);
+		if (SettingsActivity.getMute (prefs))
+			setMute (true);
+	}
+	
+	@Override
 	protected void onPause ()
 	{
 		LocalBroadcastManager lbm;
 		Intent intent;
-	
+		SharedPreferences prefs;
+
 		super.onPause ();
 		lbm = LocalBroadcastManager.getInstance (this);
 		intent = new Intent (MainActivity.ACTION_REFRESH);
@@ -565,6 +674,10 @@ public class WebReviewActivity extends Activity {
 		intent = new Intent (this, NotificationService.class);
 		intent.setAction (NotificationService.ACTION_NEW_DATA);
 		startService (intent);
+		
+		prefs = PreferenceManager.getDefaultSharedPreferences (this);		
+		if (SettingsActivity.getMute (prefs))
+			setMute (false);
 	}
 	
 	/**
@@ -572,11 +685,20 @@ public class WebReviewActivity extends Activity {
 	 */
 	protected void initKeyboard (SharedPreferences prefs)
 	{
-		View.OnClickListener klist, mlist;
+		View.OnClickListener klist, mlist, mutel;
 		LayoutParams lp;
 		boolean tall;
 		View key;
 		int i;
+
+		muteH = (ImageButton) findViewById (R.id.kb_mute_h);
+		mute = (ImageButton) findViewById (R.id.kb_mute);
+		
+		mutel = new MuteListener ();
+		muteH.setOnClickListener (mutel);
+		mute.setOnClickListener (mutel);
+		setMute (false);	// resume will take care of that
+		showMuteButtons (mute, true);
 		
 		tall = SettingsActivity.getLargeKeyboard (prefs);
 		
@@ -605,6 +727,29 @@ public class WebReviewActivity extends Activity {
 				key.setLayoutParams(lp);
 			}
 		}					
+	}
+	
+	private void showMuteButtons (View mute, boolean show)
+	{
+		SharedPreferences prefs;
+		
+		prefs = PreferenceManager.getDefaultSharedPreferences (this);
+		show &= SettingsActivity.getShowMute (prefs);
+		
+		mute.setVisibility (show ? View.VISIBLE : View.GONE);
+	}
+	
+	private void setMute (boolean m)
+	{
+		AudioManager am;
+		Drawable d;
+		
+		am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+	    
+		am.setStreamMute (AudioManager.STREAM_MUSIC, m);
+		d = m ? muteDrawable : notMutedDrawable;
+	    muteH.setImageDrawable (d);
+		mute.setImageDrawable (d);
 	}
 	
 	/**
