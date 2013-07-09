@@ -561,20 +561,21 @@ public class TYPlot extends View {
 		Path path;
 		Paint p;
 		int i, n;
-	
+		
 		p = pas.series.get (series);
 		n = interval.stop - interval.start + 1;
 		if (p == null || samples.length == 0 || n <= 0)
 			return;
-				
+
 		path = new Path ();
-		path.moveTo (vp.getRelPosition (interval.start), vp.getY (samples [0]));
-		for (i = 1; i < n; i++)
-			path.lineTo (vp.getRelPosition (interval.start + i), vp.getY (samples [i]));
-		while (--i >= 0) {
+		path.moveTo (vp.getRelPosition (interval.start), vp.getY (base [0]));
+		for (i = 1; i < n; i++) {
 			path.lineTo (vp.getRelPosition (interval.start + i), vp.getY (base [i]));
 			base [i] += samples [i];
 		}
+		while (--i >= 0)
+			path.lineTo (vp.getRelPosition (interval.start + i), vp.getY (base [i]));
+
 		path.close ();
 		
 		canvas.drawPath (path, p);
