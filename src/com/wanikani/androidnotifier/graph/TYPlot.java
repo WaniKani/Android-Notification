@@ -174,12 +174,13 @@ public class TYPlot extends View {
 		{
 			Paint p;
 			
-			series.clear ();
+			this.series.clear ();
 			for (Pager.Series s : series) {
 				p = new Paint ();
 				p.setColor (s.color);
 				p.setStyle (Paint.Style.FILL_AND_STROKE);
 				p.setAntiAlias (true);
+				this.series.put (s, p);
 			}
 		}
 	}
@@ -214,6 +215,9 @@ public class TYPlot extends View {
 		
 		public void setToday (int today)
 		{
+			if (today == this.today)
+				return;
+			
 			t1 += today - this.today;
 			t0 = t1 - interval;
 			
@@ -483,7 +487,7 @@ public class TYPlot extends View {
 	@Override
 	protected void onDraw (Canvas canvas)
 	{
-		if (dsink != null && dsink.ds != null && dsink.ds.interval.equals (vp.interval))
+		if (dsink != null && dsink.ds != null)
 			drawPlot (canvas, dsink.ds);
 		
 		drawGrid (canvas);
@@ -567,10 +571,9 @@ public class TYPlot extends View {
 		path.moveTo (vp.getRelPosition (interval.start), vp.getY (samples [0]));
 		for (i = 1; i < n; i++)
 			path.lineTo (vp.getRelPosition (interval.start + i), vp.getY (samples [i]));
-		while (i >= 0) {
+		while (--i >= 0) {
 			path.lineTo (vp.getRelPosition (interval.start + i), vp.getY (base [i]));
 			base [i] += samples [i];
-			i--;
 		}
 		path.close ();
 		

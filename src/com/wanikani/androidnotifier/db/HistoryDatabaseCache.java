@@ -99,9 +99,11 @@ public class HistoryDatabaseCache {
 				}
 				
 				ds.segments.add (segment);
-				
-				pager.pageAvailable (ds);
 			}
+				
+			interval = pager.pageAvailable (ds);
+			if (interval != null)
+				dbc.getPage (this, interval);			
 		}
 		
 		protected abstract void fillPartialSegment (Pager.Segment segment, PageSegment pseg);

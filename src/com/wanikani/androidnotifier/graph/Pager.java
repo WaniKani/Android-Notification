@@ -168,7 +168,7 @@ public class Pager {
 				if (s.interval.start > dataSet.interval.stop)
 					break;
 				dataSet.segments.add (s);
-				nextDay = s.trim (dataSet.interval.stop);
+				nextDay = s.trim (dataSet.interval.stop) + 1;
 			}
 		}
 		
@@ -202,7 +202,6 @@ public class Pager {
 	{
 		Interval ans;
 		
-		dsink.dataAvailable (ds);
 		if (request == null)
 			return null;
 		

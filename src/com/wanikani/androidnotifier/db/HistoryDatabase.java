@@ -152,7 +152,7 @@ public class HistoryDatabase {
 						"?, ?, ?, ?, ?)";
 		
 		private static final String SQL_SELECT = 
-				C_DAY + " IN (?, ?) ";
+				C_DAY + " BETWEEN ? AND ? ";
 		
 		public static void onCreate (SQLiteDatabase db)
 		{
@@ -178,13 +178,11 @@ public class HistoryDatabase {
 				return;
 			try {
 				if (c.moveToNext ()) {
-					n = c.isNull (0) ? 0 : (int) c.getLong (0);
-					if (n < day) {
-						stmt = db.compileStatement (SQL_INSERT_DAY);
-						for (i = n; i < day; i++) {
-							stmt.bindLong (1, i);
-							stmt.executeInsert ();
-						}
+					n = c.isNull (0) ? -1 : (int) c.getLong (0);
+					stmt = db.compileStatement (SQL_INSERT_DAY);
+					for (i = n + 1; i < day; i++) {
+						stmt.bindLong (1, i);
+						stmt.executeInsert ();
 					}
 				}
 			} finally {
@@ -205,21 +203,21 @@ public class HistoryDatabase {
 					Integer.toString (srs.enlighten.radicals),
 					Integer.toString (srs.burned.radicals),
 					Integer.toString (srs.apprentice.radicals + srs.guru.radicals +
-									  srs.enlighten.radicals),
+									  srs.master.radicals + srs.enlighten.radicals),
 
 					Integer.toString (srs.guru.kanji),
 					Integer.toString (srs.master.kanji),
 					Integer.toString (srs.enlighten.kanji),
 					Integer.toString (srs.burned.kanji),
 					Integer.toString (srs.apprentice.kanji + srs.guru.kanji +
-									  srs.enlighten.kanji),
+									  srs.master.kanji + srs.enlighten.kanji),
 
 					Integer.toString (srs.guru.vocabulary),
 					Integer.toString (srs.master.vocabulary),
 					Integer.toString (srs.enlighten.vocabulary),
 					Integer.toString (srs.burned.vocabulary),
 					Integer.toString (srs.apprentice.vocabulary + srs.guru.vocabulary +
-									  srs.enlighten.vocabulary),									  
+									  srs.master.vocabulary + srs.enlighten.vocabulary),									  
 			};
 			
 			db.execSQL (SQL_INSERT, values);		
@@ -285,7 +283,7 @@ public class HistoryDatabase {
 			SRSDistribution srs;
 			
 			srs = new SRSDistribution ();
-			
+
 			srs.guru.radicals = getIntOrZero (c, CX_GURU_RADICALS);
 			srs.master.radicals = getIntOrZero (c, CX_MASTER_RADICALS);
 			srs.enlighten.radicals = getIntOrZero (c, CX_ENLIGHTEN_RADICALS);
@@ -306,8 +304,19 @@ public class HistoryDatabase {
 			srs.burned.vocabulary = getIntOrZero (c, CX_BURNED_VOCAB);
 			srs.apprentice.vocabulary = getIntOrZero (c, CX_UNLOCKED_VOCAB) -
 					srs.guru.vocabulary - srs.master.vocabulary - srs.enlighten.vocabulary;
-
+			
+			fixupTotals (srs);
+						
 			return srs;
+		}
+		
+		private static void fixupTotals (SRSDistribution srs)
+		{
+			srs.apprentice.total = srs.apprentice.radicals + srs.apprentice.kanji + srs.apprentice.vocabulary;
+			srs.guru.total = srs.guru.radicals + srs.guru.kanji + srs.guru.vocabulary;
+			srs.master.total = srs.master.radicals + srs.master.kanji + srs.master.vocabulary;
+			srs.enlighten.total = srs.enlighten.radicals + srs.enlighten.kanji + srs.enlighten.vocabulary;
+			srs.burned.total = srs.burned.radicals + srs.burned.kanji + srs.burned.vocabulary;			
 		}
 	}
 	
@@ -387,9 +396,7 @@ public class HistoryDatabase {
 	OpenHelper helper;
 	
 	SQLiteDatabase db;
-	
-	private static final long ONE_DAY = 24 * 60 * 60 * 1000;
-	
+		
 	public HistoryDatabase (Context ctxt)
 	{
 		helper = new OpenHelper (ctxt);		
@@ -421,25 +428,15 @@ public class HistoryDatabase {
 		return Facts.select (db, from, to);
 	}
 	
-	private static int days (UserInformation ui, long ts)
-	{
-		return (int) ((ts - ui.creationDate.getTime ()) / ONE_DAY);
-	}
-	
-	private static int days (UserInformation ui)
-	{
-		return days (ui, System.currentTimeMillis ());
-	}
-
 	public void insert (UserInformation ui, SRSDistribution srs)
 		throws SQLException
 	{
 		int today;
 		
-		today = days (ui);
+		today = ui.getDay ();
 		
-		Levels.insertOrIgnore (db, ui.level, today);
 		Facts.fillGap (db, today);
+		Levels.insertOrIgnore (db, ui.level, today);
 		
 		/* This is the only non-idempotent operation */
 		Facts.insert (db, today, srs);		
@@ -478,5 +475,4 @@ public class HistoryDatabase {
 			hdb.close ();
 		}		
 	}
-	
 }
