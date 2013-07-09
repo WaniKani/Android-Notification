@@ -48,6 +48,8 @@ public class UserInformation {
 	
 	public Date creationDate;
 	
+	private static final long ONE_DAY = 24 * 60 * 60 * 1000;
+	
 	UserInformation (JSONObject obj)
 		throws JSONException
 	{
@@ -61,5 +63,15 @@ public class UserInformation {
 		topicsCount = Util.getInt (obj, "topics_count");
 		postsCount = Util.getInt (obj, "posts_count");
 		creationDate = Util.getDate (obj, "creation_date");
+	}
+	
+	public int getDay ()
+	{
+		return getDay (new Date ());
+	}
+	
+	public int getDay (Date d)
+	{
+		return (int) ((d.getTime () - creationDate.getTime ()) / ONE_DAY);
 	}
 }
