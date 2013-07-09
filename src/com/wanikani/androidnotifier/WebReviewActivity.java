@@ -629,6 +629,8 @@ public class WebReviewActivity extends Activity {
 		mutel = new MuteListener ();
 		muteH.setOnClickListener (mutel);
 		mute.setOnClickListener (mutel);
+		setMute (false);	// resume will take care of that
+		showMuteButtons (mute, true);
 		
 		tall = SettingsActivity.getLargeKeyboard (prefs);
 		
@@ -657,6 +659,16 @@ public class WebReviewActivity extends Activity {
 				key.setLayoutParams(lp);
 			}
 		}					
+	}
+	
+	private void showMuteButtons (View mute, boolean show)
+	{
+		SharedPreferences prefs;
+		
+		prefs = PreferenceManager.getDefaultSharedPreferences (this);
+		show &= SettingsActivity.getShowMute (prefs);
+		
+		mute.setVisibility (show ? View.VISIBLE : View.GONE);
 	}
 	
 	private void setMute (boolean m)
@@ -794,7 +806,7 @@ public class WebReviewActivity extends Activity {
 	{
 		View view;
 		
-		muteH.setVisibility (View.GONE);
+		showMuteButtons (muteH, false);
 		kbstatus = KeyboardStatus.HIDDEN;
 		view = findViewById (R.id.keyboard);
 		view.setVisibility (View.GONE);					
@@ -840,7 +852,7 @@ public class WebReviewActivity extends Activity {
 	{
 		InputMethodManager imm;
 		
-		muteH.setVisibility (View.VISIBLE);
+		showMuteButtons (muteH, true);
 		imm = (InputMethodManager) getSystemService (Context.INPUT_METHOD_SERVICE);
 		imm.showSoftInput (wv, InputMethodManager.SHOW_IMPLICIT);		
 	}
@@ -855,7 +867,7 @@ public class WebReviewActivity extends Activity {
 		View view, key;
 		int i;
 		
-		muteH.setVisibility (View.GONE);
+		showMuteButtons (muteH, false);
 		for (i = 0; i < key_table.length; i++) {
 			key = findViewById (key_table [i]);
 			key.setVisibility (View.VISIBLE);

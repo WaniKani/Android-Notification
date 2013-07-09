@@ -31,6 +31,11 @@
         	android:summary="@string/pref_large_keyboard_desc"
         	android:defaultValue="false" />
     <CheckBoxPreference
+        	android:key="pref_show_mute"
+        	android:title="@string/pref_show_mute"
+        	android:summary="@string/pref_show_mute_desc"
+        	android:defaultValue="true" />
+    <CheckBoxPreference
         	android:key="pref_enter"
         	android:title="@string/pref_enter"
         	android:summary="@string/pref_enter_descr"
