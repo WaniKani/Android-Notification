@@ -234,8 +234,7 @@ public class NotificationService
 		now = System.currentTimeMillis ();
 		prefs = PreferenceManager.getDefaultSharedPreferences (this);
 
-		next = prefs.getLong (PREFS_CRON_NEXT, normalize (now));
-		
+		next = prefs.getLong (PREFS_CRON_NEXT, normalize (now));		
 		if (now >= next) {
 			ok = false;
 			try {				
