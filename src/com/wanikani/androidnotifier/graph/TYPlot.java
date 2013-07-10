@@ -10,12 +10,17 @@ import java.util.Locale;
 import java.util.Map;
 
 import android.content.Context;
+import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.BitmapShader;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.DashPathEffect;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.RectF;
+import android.graphics.Shader;
 import android.support.v4.view.ViewCompat;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
@@ -25,6 +30,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Scroller;
 
+import com.wanikani.androidnotifier.R;
 import com.wanikani.androidnotifier.graph.Pager.DataSet;
 
 /* 
@@ -146,10 +152,14 @@ public class TYPlot extends View {
 		
 		Paint dateLabels;
 		
+		Paint partial;
+		
 		Map<Pager.Series, Paint> series;
 		
-		public PaintAssets (AttributeSet attrs, Measures meas)
+		public PaintAssets (Resources res, AttributeSet attrs, Measures meas)
 		{
+			Bitmap bmp;
+			Shader shader;
 			float points [];
 			
 			axisPaint = new Paint ();
@@ -166,6 +176,12 @@ public class TYPlot extends View {
 			dateLabels.setTextAlign (Paint.Align.CENTER);
 			dateLabels.setTextSize ((int) meas.dateLabelFontSize);
 			dateLabels.setAntiAlias (true);
+			
+			bmp = BitmapFactory.decodeResource (res, R.drawable.partial);
+			
+			partial = new Paint (Paint.FILTER_BITMAP_FLAG);
+			shader = new BitmapShader (bmp, Shader.TileMode.REPEAT, Shader.TileMode.REPEAT);
+			partial.setShader (shader);
 			
 			series = new Hashtable<Pager.Series, Paint> ();
 		}		
@@ -428,7 +444,7 @@ public class TYPlot extends View {
 	{
 		meas = new Measures (ctxt, attrs);
 		vp = new Viewport (dsink, meas, taxis.today);
-		pas = new PaintAssets (attrs, meas);		
+		pas = new PaintAssets (getResources (), attrs, meas);		
 	}
 	
 	public void setOrigin (Date date)
@@ -543,8 +559,9 @@ public class TYPlot extends View {
 		
 		switch (segment.type) {
 		case MISSING:
+			drawMissing (canvas, segment.interval);
 			break;
-
+			
 		case VALID:
 			f = new float [segment.interval.getSize ()];
 			for (i = 0; i < segment.data.length; i++)
@@ -553,6 +570,20 @@ public class TYPlot extends View {
 				
 			break;
 		}
+	}
+	
+	protected void drawMissing (Canvas canvas, Pager.Interval i)
+	{
+		int from, to;
+		
+		if (i.start >= vp.today)
+			return;
+		
+		from = i.start;
+		to = Math.min (i.stop + 1, vp.today);
+		
+		canvas.drawRect (vp.getRelPosition (from), meas.plotArea.top,
+				   		 vp.getRelPosition (to), meas.plotArea.bottom, pas.partial);
 	}
 	
 	protected void drawPlot (Canvas canvas, Pager.Series series, Pager.Interval interval,
