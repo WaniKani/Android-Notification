@@ -89,7 +89,7 @@ public class TYPlot extends View {
 		public float DEFAULT_MARGIN = 24;
 		
 		public float DEFAULT_DIP_PER_DAY = 8;
-		
+				
 		public int DEFAULT_LOOKAHEAD = 7;
 		
 		public float DEFAULT_DATE_LABEL_FONT_SIZE = 12;
@@ -97,6 +97,8 @@ public class TYPlot extends View {
 		public int DEFAULT_AXIS_WIDTH = 2;
 		
 		public int DEFAULT_TICK_SIZE = 10;
+		
+		public int DEFAULT_YAXIS_GRID = 100;
 		
 		public RectF rect;
 		
@@ -113,6 +115,8 @@ public class TYPlot extends View {
 		public float dateLabelFontSize;
 		
 		public int tickSize;
+		
+		public int yaxisGrid;
 				
 		public Measures (Context ctxt, AttributeSet attrs)
 		{
@@ -126,6 +130,7 @@ public class TYPlot extends View {
 			axisWidth = DEFAULT_AXIS_WIDTH;
 			dateLabelFontSize = DEFAULT_DATE_LABEL_FONT_SIZE;
 			tickSize = DEFAULT_TICK_SIZE;
+			yaxisGrid = DEFAULT_YAXIS_GRID;
 			
 			dateLabelFontSize = TypedValue.applyDimension (TypedValue.COMPLEX_UNIT_SP, 
 					 									   dateLabelFontSize, dm);
@@ -544,6 +549,10 @@ public class TYPlot extends View {
 			
 			cal.add (Calendar.DATE, 1);
 		}
+		
+		for (d = meas.yaxisGrid; vp.getY (d) >= meas.plotArea.top; d += meas.yaxisGrid)
+			canvas.drawLine (meas.plotArea.left, vp.getY (d), 
+							 meas.plotArea.right, vp.getY (d), pas.gridPaint);
 	}
 	
 	protected void drawPlot (Canvas canvas, Pager.DataSet ds)
