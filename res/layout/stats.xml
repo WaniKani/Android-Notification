@@ -43,12 +43,24 @@
                 android:layout_height="wrap_content"
                 custom:title="@string/ct_kanji_progress" />
 
+            <com.wanikani.androidnotifier.graph.TYChart
+                android:id="@+id/ty_kanji"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                custom:title="@string/ct_kanji_progress" />
+            
             <com.wanikani.androidnotifier.graph.PieChart
                 android:id="@+id/pc_vocab"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 custom:title="@string/ct_vocab_progress" />
-        </LinearLayout>
+
+            <com.wanikani.androidnotifier.graph.TYChart
+                android:id="@+id/ty_vocab"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                custom:title="@string/ct_vocab_progress" />            
+            </LinearLayout>
     </RelativeLayout>
 
 </ScrollView>

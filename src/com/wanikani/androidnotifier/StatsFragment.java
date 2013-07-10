@@ -65,7 +65,7 @@ public class StatsFragment extends Fragment implements Tab {
 			try {
 				return HistoryDatabase.getCoreStats (ctxt);
 			} catch (SQLException e) {
-				return new HistoryDatabase.CoreStats (0, 0, 0);
+				return new HistoryDatabase.CoreStats (0, 0, 0, 0, 0, 0);
 			}
 		}	
 		
@@ -161,6 +161,196 @@ public class StatsFragment extends Fragment implements Tab {
 		
 	}
 
+	private class KanjiDataSource extends HistoryDatabaseCache.DataSource {
+		
+		private int maxY;
+		
+		private List<Series> series;
+		
+		private List<Series> completeSeries;
+		
+		private List<Series> partialSeries;
+
+		public KanjiDataSource (HistoryDatabaseCache hdbc)
+		{
+			super (hdbc);
+			
+			Resources res;
+			Series burned;
+			
+			maxY = 100;
+			
+			res = getResources ();
+						
+			burned = new Series (res.getColor (R.color.burned),
+								 res.getString (R.string.tag_burned));
+			completeSeries = new Vector<Series> ();
+			completeSeries.add (new Series (res.getColor (R.color.apprentice), 
+										    res.getString (R.string.tag_apprentice)));
+			completeSeries.add (new Series (res.getColor (R.color.guru), 
+							                res.getString (R.string.tag_guru)));
+			completeSeries.add (new Series (res.getColor (R.color.master), 
+										    res.getString (R.string.tag_master)));
+			completeSeries.add (new Series (res.getColor (R.color.enlightened), 
+											res.getString (R.string.tag_enlightened)));
+			
+			partialSeries = new Vector<Series> ();
+			partialSeries.add (new Series (res.getColor (R.color.unlocked),
+										   res.getString (R.string.tag_unlocked)));
+			
+			series = new Vector<Series> ();
+			series.addAll (completeSeries);
+			series.addAll (partialSeries);
+			
+			series.add (burned);
+			partialSeries.add (burned);
+			completeSeries.add (burned);
+		}
+		
+		public void setCoreStats (HistoryDatabase.CoreStats cs)
+		{
+			maxY = cs.maxKanji;
+			if (maxY == 0)
+				maxY = 100;			
+		}
+		
+		public List<Series> getSeries ()
+		{
+			return series;
+		}
+		
+		public float getMaxY ()
+		{
+			return maxY;
+		}
+		
+		protected void fillPartialSegment (Pager.Segment segment, PageSegment pseg)
+		{
+			int i;
+			
+			segment.series = partialSeries;
+			segment.data = new float [2][pseg.srsl.size ()];
+			i = 0;
+			for (SRSDistribution srs : pseg.srsl) {
+				segment.data [0][i] = srs.apprentice.kanji;
+				segment.data [1][i++] = srs.burned.kanji;
+			}
+		}
+
+		protected void fillSegment (Pager.Segment segment, PageSegment pseg)
+		{
+			int i;
+			
+			segment.series = completeSeries;
+			segment.data = new float [5][pseg.srsl.size ()];
+			i = 0;
+			for (SRSDistribution srs : pseg.srsl) {
+				segment.data [0][i] = srs.apprentice.kanji;
+				segment.data [1][i] = srs.guru.kanji;
+				segment.data [2][i] = srs.master.kanji;
+				segment.data [3][i] = srs.enlighten.kanji;
+				segment.data [4][i] = srs.burned.kanji;
+				i++;
+			}			
+		}
+		
+	}
+
+	private class VocabDataSource extends HistoryDatabaseCache.DataSource {
+		
+		private int maxY;
+		
+		private List<Series> series;
+		
+		private List<Series> completeSeries;
+		
+		private List<Series> partialSeries;
+
+		public VocabDataSource (HistoryDatabaseCache hdbc)
+		{
+			super (hdbc);
+			
+			Resources res;
+			Series burned;
+			
+			maxY = 100;
+			
+			res = getResources ();
+						
+			burned = new Series (res.getColor (R.color.burned),
+								 res.getString (R.string.tag_burned));
+			completeSeries = new Vector<Series> ();
+			completeSeries.add (new Series (res.getColor (R.color.apprentice), 
+										    res.getString (R.string.tag_apprentice)));
+			completeSeries.add (new Series (res.getColor (R.color.guru), 
+							                res.getString (R.string.tag_guru)));
+			completeSeries.add (new Series (res.getColor (R.color.master), 
+										    res.getString (R.string.tag_master)));
+			completeSeries.add (new Series (res.getColor (R.color.enlightened), 
+											res.getString (R.string.tag_enlightened)));
+			
+			partialSeries = new Vector<Series> ();
+			partialSeries.add (new Series (res.getColor (R.color.unlocked),
+										   res.getString (R.string.tag_unlocked)));
+			
+			series = new Vector<Series> ();
+			series.addAll (completeSeries);
+			series.addAll (partialSeries);
+			
+			series.add (burned);
+			partialSeries.add (burned);
+			completeSeries.add (burned);
+		}
+		
+		public void setCoreStats (HistoryDatabase.CoreStats cs)
+		{
+			maxY = cs.maxVocab;
+			if (maxY == 0)
+				maxY = 100;			
+		}
+		
+		public List<Series> getSeries ()
+		{
+			return series;
+		}
+		
+		public float getMaxY ()
+		{
+			return maxY;
+		}
+		
+		protected void fillPartialSegment (Pager.Segment segment, PageSegment pseg)
+		{
+			int i;
+			
+			segment.series = partialSeries;
+			segment.data = new float [2][pseg.srsl.size ()];
+			i = 0;
+			for (SRSDistribution srs : pseg.srsl) {
+				segment.data [0][i] = srs.apprentice.vocabulary;
+				segment.data [1][i++] = srs.burned.vocabulary;
+			}
+		}
+
+		protected void fillSegment (Pager.Segment segment, PageSegment pseg)
+		{
+			int i;
+			
+			segment.series = completeSeries;
+			segment.data = new float [5][pseg.srsl.size ()];
+			i = 0;
+			for (SRSDistribution srs : pseg.srsl) {
+				segment.data [0][i] = srs.apprentice.vocabulary;
+				segment.data [1][i] = srs.guru.vocabulary;
+				segment.data [2][i] = srs.master.vocabulary;
+				segment.data [3][i] = srs.enlighten.vocabulary;
+				segment.data [4][i] = srs.burned.vocabulary;
+				i++;
+			}			
+		}
+		
+	}
+
 	/// The main activity
 	MainActivity main;
 	
@@ -176,8 +366,15 @@ public class StatsFragment extends Fragment implements Tab {
 	/// The task that retrives core stats
 	GetCoreStatsTask task;
 	
+	/// The SRS plot datasource
 	SRSDataSource srsds;
 	
+	/// The Kanji progress plot datasource
+	KanjiDataSource kanjids;
+
+	/// The Vocab progress plot datasource
+	VocabDataSource vocabds;
+
 	/// Overall number of kanji
 	private static final int ALL_THE_KANJI = 1700;
 	
@@ -225,6 +422,8 @@ public class StatsFragment extends Fragment implements Tab {
 	{
 		this.cs = cs;
 		srsds.setCoreStats (cs);
+		kanjids.setCoreStats (cs);
+		vocabds.setCoreStats (cs);
 		for (TYChart tyc : charts) {
 			tyc.invalidate ();
 			tyc.spin (false);
@@ -261,7 +460,12 @@ public class StatsFragment extends Fragment implements Tab {
 		charts = new Vector<TYChart> ();
 
 		srsds = new SRSDataSource (hdbc);
+		kanjids = new KanjiDataSource (hdbc);
+		vocabds = new VocabDataSource (hdbc);
+		
 		hdbc.addDataSource (srsds);
+		hdbc.addDataSource (kanjids);
+		hdbc.addDataSource (vocabds);
 		
 		tyc = (TYChart) parent.findViewById (R.id.ty_srs);
 		tyc.setDataSource (srsds);
@@ -271,7 +475,23 @@ public class StatsFragment extends Fragment implements Tab {
 			tyc.spin (true);
 		charts.add (tyc);
         
-    	return parent;
+		tyc = (TYChart) parent.findViewById (R.id.ty_kanji);
+		tyc.setDataSource (kanjids);
+		if (cs != null)
+			kanjids.setCoreStats (cs);
+		else
+			tyc.spin (true);
+		charts.add (tyc);
+
+		tyc = (TYChart) parent.findViewById (R.id.ty_vocab);
+		tyc.setDataSource (vocabds);
+		if (cs != null)
+			vocabds.setCoreStats (cs);
+		else
+			tyc.spin (true);
+		charts.add (tyc);
+		
+		return parent;
     }
 
 	@Override

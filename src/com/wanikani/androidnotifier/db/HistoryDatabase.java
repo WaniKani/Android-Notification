@@ -49,13 +49,25 @@ public class HistoryDatabase {
 	
 		public int maxUnlockedVocab;
 		
+		public int maxRadicals;
+		
+		public int maxKanji;
+		
+		public int maxVocab;
+		
 		public CoreStats (int maxUnlockedRadicals, 
 						  int maxUnlockedKanji, 
-						  int maxUnlockedVocab)
+						  int maxUnlockedVocab,
+						  int maxRadicals,
+						  int maxKanji,
+						  int maxVocab)
 		{
 			this.maxUnlockedRadicals = maxUnlockedRadicals;
 			this.maxUnlockedKanji = maxUnlockedKanji;
 			this.maxUnlockedVocab = maxUnlockedVocab;
+			this.maxRadicals = maxRadicals;
+			this.maxKanji = maxKanji;
+			this.maxVocab = maxVocab;
 		}
 	}
 	
@@ -243,7 +255,10 @@ public class HistoryDatabase {
 			cols = new String [] {
 				"MAX(" + C_UNLOCKED_RADICALS + ")",
 				"MAX(" + C_UNLOCKED_KANJI + ")",
-				"MAX(" + C_UNLOCKED_VOCAB + ")"
+				"MAX(" + C_UNLOCKED_VOCAB + ")",
+				"MAX(" + C_UNLOCKED_RADICALS + " + " + C_BURNED_RADICALS + ")",
+				"MAX(" + C_UNLOCKED_KANJI + " + " + C_BURNED_KANJI + ")",
+				"MAX(" + C_UNLOCKED_VOCAB + " + " + C_BURNED_VOCAB + ")"
 			};
 			c = null;
 			cs = null;
@@ -252,9 +267,12 @@ public class HistoryDatabase {
 				c.moveToFirst ();
 				cs = new CoreStats (getIntOrZero (c, 0),
 									getIntOrZero (c, 1),
-									getIntOrZero (c, 2));
+									getIntOrZero (c, 2),
+									getIntOrZero (c, 3),
+									getIntOrZero (c, 4),
+									getIntOrZero (c, 5));
 			} catch (SQLException e) {
-				cs = new CoreStats (0, 0, 0);
+				cs = new CoreStats (0, 0, 0, 0, 0, 0);
 			} finally {
 				c.close ();
 			}
