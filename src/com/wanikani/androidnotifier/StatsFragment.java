@@ -155,6 +155,7 @@ public class StatsFragment extends Fragment implements Tab {
 				segment.data [1][i] = srs.guru.total;
 				segment.data [2][i] = srs.master.total;
 				segment.data [3][i] = srs.enlighten.total;
+				i++;
 			}			
 		}
 		

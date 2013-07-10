@@ -568,12 +568,17 @@ public class TYPlot extends View {
 			return;
 
 		path = new Path ();
-		path.moveTo (vp.getRelPosition (interval.start), vp.getY (base [0]));
-		for (i = 1; i < n; i++) {
-			path.lineTo (vp.getRelPosition (interval.start + i), vp.getY (base [i]));
+		
+		i = n - 1;
+		path.moveTo (vp.getRelPosition (interval.start + i), vp.getY (base [i]));
+		while (true) {
 			base [i] += samples [i];
+			if (i-- == 0)
+				break;
+			path.lineTo (vp.getRelPosition (interval.start + i), vp.getY (base [i]));
 		}
-		while (--i >= 0)
+			
+		for (i = 0; i < n; i++)
 			path.lineTo (vp.getRelPosition (interval.start + i), vp.getY (base [i]));
 
 		path.close ();
