@@ -104,9 +104,7 @@ public class Pager {
 		
 		public int trim (int ceil)
 		{
-			interval.stop = Math.min (ceil, interval.stop);
-			
-			return interval.stop;
+			return Math.min (ceil, interval.stop);
 		}
 
 	}
