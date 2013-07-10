@@ -309,7 +309,9 @@ class DashboardData {
 		bundle.putString (KEY_USERNAME, username);
 		bundle.putString (KEY_TITLE, title);
 		bundle.putInt(KEY_LEVEL, level);
-		bundle.putLong (KEY_CREATION, creation.getTime ());
+		/* It could be null, if e != null */
+		if (creation != null)
+			bundle.putLong (KEY_CREATION, creation.getTime ());
 		
 		bundle.putInt (KEY_LESSONS_AVAILABLE, lessonsAvailable);
 		bundle.putInt (KEY_REVIEWS_AVAILABLE, reviewsAvailable);
@@ -362,7 +364,8 @@ class DashboardData {
 		username = bundle.getString (KEY_USERNAME);
 		title = bundle.getString (KEY_TITLE);
 		level = bundle.getInt (KEY_LEVEL);
-		creation = new Date (bundle.getLong (KEY_CREATION));
+		if (bundle.containsKey (KEY_CREATION))
+			creation = new Date (bundle.getLong (KEY_CREATION));
 		
 		lessonsAvailable = bundle.getInt (KEY_LESSONS_AVAILABLE);
 		reviewsAvailable = bundle.getInt (KEY_REVIEWS_AVAILABLE);
