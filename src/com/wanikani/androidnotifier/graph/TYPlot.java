@@ -32,6 +32,7 @@ import android.widget.Scroller;
 
 import com.wanikani.androidnotifier.R;
 import com.wanikani.androidnotifier.graph.Pager.DataSet;
+import com.wanikani.wklib.UserInformation;
 
 /* 
  *  Copyright (c) 2013 Alberto Cuda
@@ -352,29 +353,10 @@ public class TYPlot extends View {
 			setOrigin (new Date (0));
 		}
 		
-		private Calendar getNormalizedCalendar (Date date)
-		{
-			Calendar ans;
-			
-			ans = Calendar.getInstance ();
-			ans.setTime (date);
-			ans.set (Calendar.HOUR, 1);
-			ans.set (Calendar.MINUTE, 2);
-			ans.set (Calendar.SECOND, 3);
-			ans.set (Calendar.MILLISECOND, 4);
-			
-			return ans;
-		}
-		
 		public void setOrigin (Date date)
 		{
-			Calendar cal1, cal2;
-			
 			origin = date;
-			cal1 = getNormalizedCalendar (origin);
-			cal2 = getNormalizedCalendar (now);
-			today = (int) ((cal2.getTimeInMillis () - cal1.getTimeInMillis ()) /
-							(24 * 60 * 60 * 1000));
+			today = UserInformation.getDay (origin, now);
 		}
 		
 		public Calendar dayToCalendar (int day)

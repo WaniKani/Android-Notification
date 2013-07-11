@@ -1,5 +1,6 @@
 package com.wanikani.wklib;
 
+import java.util.Calendar;
 import java.util.Date;
 
 import org.json.JSONException;
@@ -65,6 +66,20 @@ public class UserInformation {
 		creationDate = Util.getDate (obj, "creation_date");
 	}
 	
+	private static Calendar getNormalizedCalendar (Date date)
+	{
+		Calendar ans;
+		
+		ans = Calendar.getInstance ();
+		ans.setTime (date);
+		ans.set (Calendar.HOUR, 1);
+		ans.set (Calendar.MINUTE, 2);
+		ans.set (Calendar.SECOND, 3);
+		ans.set (Calendar.MILLISECOND, 4);
+		
+		return ans;
+	}
+	
 	public int getDay ()
 	{
 		return getDay (new Date ());
@@ -72,6 +87,15 @@ public class UserInformation {
 	
 	public int getDay (Date d)
 	{
-		return (int) ((d.getTime () - creationDate.getTime ()) / ONE_DAY);
+		return getDay (creationDate, d);
+	}
+	
+	public static int getDay (Date origin, Date d)
+	{
+		Calendar cal1, cal2;
+		
+		cal1 = getNormalizedCalendar (origin);
+		cal2 = getNormalizedCalendar (d);
+		return (int) ((cal2.getTimeInMillis () - cal1.getTimeInMillis ()) / ONE_DAY);
 	}
 }
