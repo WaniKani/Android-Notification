@@ -6,6 +6,8 @@ import java.io.OutputStream;
 import java.util.List;
 import java.util.Vector;
 
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -26,6 +28,7 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.content.LocalBroadcastManager;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -1055,4 +1058,5 @@ public class MainActivity extends FragmentActivity implements Runnable {
 		view = findViewById (R.id.f_error);
 		view.setVisibility (id == R.id.f_error ? View.VISIBLE : View.INVISIBLE);
 	}
+	
 }

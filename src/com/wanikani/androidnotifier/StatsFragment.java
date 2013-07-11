@@ -104,6 +104,11 @@ public class StatsFragment extends Fragment implements Tab {
 		
 		public void fillPartial ()
 		{
+			if (!isDetached ()) {
+				if (rd != null)
+					rd.cancel ();
+				rd = new ReconstructDialog (main);
+			}
 		}
 	}
 	
@@ -367,6 +372,8 @@ public class StatsFragment extends Fragment implements Tab {
 	/// The database
 	HistoryDatabaseCache hdbc;
 	
+	ReconstructDialog rd;
+	
 	/**
 	 * Constructor
 	 */
@@ -391,6 +398,9 @@ public class StatsFragment extends Fragment implements Tab {
 		}
 		
 		hdbc.open (main);
+		
+		if (rd != null)
+			rd.attach (main);
 	}
 	
 	@Override
@@ -399,6 +409,9 @@ public class StatsFragment extends Fragment implements Tab {
 		super.onDetach ();		
 
 		hdbc.close ();
+		
+		if (rd != null)
+			rd.detach ();
 	}
 	
 	private void setCoreStats (HistoryDatabase.CoreStats cs)
@@ -427,7 +440,8 @@ public class StatsFragment extends Fragment implements Tab {
 	/**
 	 * Builds the GUI.
 	 * @param inflater the inflater
-	 * @param container the parent view
+	 * @param container
+	 *  the parent view
 	 * @param savedInstance an (unused) bundle
 	 */
 	@Override

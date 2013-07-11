@@ -111,4 +111,15 @@
     <string name="ct_vocab_progress">Vocab Progress</string>
     
     <string name="alert_can_fill">Reconstruct missing data</string>
+    
+    <string name="txt_reconstruct_title">Reconstruct Data</string>
+    <string name="txt_reconstruct_intro">
+        This tool lets you fix the plots, by reconstructing item history.
+        Unfortunately this can only be partial: we can only count the number
+        of unlocked items and burned items, not their SRS type.
+        The process loads all the item info from level one up to your current
+        level, so it may be a lengthy and traffic intensive operation.   
+    </string>
+    <string name="tag_reconstruct_go">Go!</string>
+    <string name="tag_reconstruct_cancel">Cancel</string>
 </resources>
