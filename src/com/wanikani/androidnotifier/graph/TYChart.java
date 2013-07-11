@@ -5,6 +5,7 @@ import java.util.List;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.text.Html;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -33,6 +34,24 @@ import com.wanikani.androidnotifier.R;
 
 public class TYChart extends LinearLayout {
 
+	private class AlertListener implements View.OnClickListener {
+		
+		public void onClick (View view)
+		{
+			if (chainListener != null)
+				chainListener.onClick (view);
+		}
+	}
+	
+	private class PartialListener implements View.OnClickListener {
+		
+		public void onClick (View view)
+		{
+			plot.fillPartial ();
+		}
+		
+	}
+	
 	/// The inflater
 	LayoutInflater inflater;
 	
@@ -50,6 +69,10 @@ public class TYChart extends LinearLayout {
 	
 	/// The alert message
 	TextView alertMessage;
+	
+	View.OnClickListener partialListener;
+	
+	View.OnClickListener chainListener;
 	
 	/**
 	 * Constructor. It only shows the spinner and the title, until 
@@ -70,12 +93,17 @@ public class TYChart extends LinearLayout {
 		spinner = (ProgressBar) findViewById (R.id.ty_spinner);
 		alertPanel = findViewById (R.id.ty_lay_alert);
 		alertMessage = (TextView) findViewById (R.id.ty_alert);
+		alertMessage.setOnClickListener (new AlertListener ());
+		alertMessage.setClickable (true);
+		
+		partialListener = new PartialListener ();
 		
 		plot.setTYChart (this);
 		
 		loadAttributes (ctxt, attrs);
 		
 		spin (false);
+		hideAlert ();
 	}
 	
 	/**
@@ -106,7 +134,6 @@ public class TYChart extends LinearLayout {
 	{
 		spinner.setVisibility (enabled ? View.VISIBLE : View.GONE);
 		plot.setVisibility (enabled ? View.GONE : View.VISIBLE);
-		alertPanel.setVisibility (View.GONE);
 	}
 	
 	public void retrieving (boolean enabled)
@@ -117,12 +144,17 @@ public class TYChart extends LinearLayout {
 	/**
 	 * Shows an alert message
 	 */
-	public void alert (String msg)
+	public void alert (CharSequence msg, View.OnClickListener ocl)
 	{
 		spinner.setVisibility (View.GONE);
-		plot.setVisibility (View.GONE);
 		alertPanel.setVisibility (View.VISIBLE);
 		alertMessage.setText (msg);
+		chainListener = ocl;
+	}
+	
+	public void hideAlert ()
+	{
+		alertPanel.setVisibility (View.GONE);
 	}
 	
 	/**
@@ -147,6 +179,17 @@ public class TYChart extends LinearLayout {
 	{
 		plot.setDataSource (dsource);
 	}
-	
+
+	public void partialShown (boolean shown)
+	{
+		String s;
+		
+		if (shown) { 
+			s = getResources ().getString (R.string.alert_can_fill);
+			s = "<font color=\"blue\"><u>" + s + "</u></font>";
+			alert (Html.fromHtml (s), partialListener);
+		} else
+			hideAlert ();
+	}
 
 }

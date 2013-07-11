@@ -101,6 +101,10 @@ public class StatsFragment extends Fragment implements Tab {
 		}
 		
 		public abstract void setCoreStats (HistoryDatabase.CoreStats cs);
+		
+		public void fillPartial ()
+		{
+		}
 	}
 	
 	private class SRSDataSource extends DataSource {

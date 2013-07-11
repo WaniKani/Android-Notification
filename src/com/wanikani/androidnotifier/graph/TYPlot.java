@@ -329,6 +329,11 @@ public class TYPlot extends View {
 		{
 			return new Pager.Interval (floor (t0), ceil (t1));
 		}		
+		
+		public boolean visible (Pager.Interval i)
+		{
+			return i.start < today && i.stop > t0;
+		}
 	}
 	
 	private static class TimeAxis {
@@ -523,9 +528,14 @@ public class TYPlot extends View {
 	@Override
 	protected void onDraw (Canvas canvas)
 	{
-		if (dsink != null && dsink.ds != null)
-			drawPlot (canvas, dsink.ds);
+		boolean partial;
 		
+		if (dsink != null && dsink.ds != null) {
+			partial = drawPlot (canvas, dsink.ds);
+			if (chart != null)
+				chart.partialShown (partial);				
+		}
+			
 		drawGrid (canvas);
 	}
 	
@@ -570,21 +580,26 @@ public class TYPlot extends View {
 							 meas.plotArea.right, vp.getY (d), pas.gridPaint);
 	}
 	
-	protected void drawPlot (Canvas canvas, Pager.DataSet ds)
+	protected boolean drawPlot (Canvas canvas, Pager.DataSet ds)
 	{
+		boolean ans;
+		
+		ans = false;
+		
 		for (Pager.Segment segment : ds.segments)
-			drawSegment (canvas, segment);
+			ans |= drawSegment (canvas, segment);
+		
+		return ans;
 	}
 	
-	protected void drawSegment (Canvas canvas, Pager.Segment segment)
+	protected boolean drawSegment (Canvas canvas, Pager.Segment segment)
 	{
 		float f [];
 		int i;
 		
 		switch (segment.type) {
 		case MISSING:
-			drawMissing (canvas, segment.interval);
-			break;
+			return drawMissing (canvas, segment.interval);
 			
 		case VALID:
 			f = new float [segment.interval.getSize ()];
@@ -594,20 +609,24 @@ public class TYPlot extends View {
 				
 			break;
 		}
+		
+		return false;
 	}
 	
-	protected void drawMissing (Canvas canvas, Pager.Interval i)
+	protected boolean drawMissing (Canvas canvas, Pager.Interval i)
 	{
 		int from, to;
 		
-		if (i.start >= vp.today)
-			return;
+		if (!vp.visible (i))
+			return false;
 		
 		from = i.start;
 		to = Math.min (i.stop + 1, vp.today);
 		
 		canvas.drawRect (vp.getRelPosition (from), meas.plotArea.top,
 				   		 vp.getRelPosition (to), meas.plotArea.bottom, pas.partial);
+		
+		return true;
 	}
 	
 	protected void drawPlot (Canvas canvas, Pager.Series series, Pager.Interval interval,
@@ -658,5 +677,11 @@ public class TYPlot extends View {
 			chart.retrieving (enable);
 		if (!enable)
 			spin (false);
+	}
+	
+	public void fillPartial ()
+	{
+		if (pager != null) 
+			pager.fillPartial ();
 	}
 }

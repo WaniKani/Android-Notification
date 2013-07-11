@@ -19,7 +19,11 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="right|top" />
-
+    
+    <com.wanikani.androidnotifier.graph.TYPlot
+        android:id="@+id/ty_plot"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/m_typlot_size"/>    
 	<LinearLayout
 	    android:id="@+id/ty_lay_alert"
 	    android:layout_width="fill_parent"
@@ -36,11 +40,7 @@
 	        android:layout_width="wrap_content"
 	        android:layout_height="wrap_content"/>
 	</LinearLayout>
+  </LinearLayout>
     
-    <com.wanikani.androidnotifier.graph.TYPlot
-        android:id="@+id/ty_plot"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/m_typlot_size"/>    
-	</LinearLayout>
-
+    
 </LinearLayout>

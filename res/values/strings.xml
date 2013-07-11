@@ -109,4 +109,6 @@
     <string name="ct_srs_distribution">SRS Distribution</string>
     <string name="ct_kanji_progress">Kanji Progress</string>
     <string name="ct_vocab_progress">Vocab Progress</string>
+    
+    <string name="alert_can_fill">Reconstruct missing data</string>
 </resources>

@@ -1,10 +1,9 @@
 package com.wanikani.androidnotifier.graph;
 
 import java.util.List;
-import java.util.Queue;
 import java.util.Vector;
 
-import android.graphics.Color;
+import android.content.Context;
 
 /* 
  *  Copyright (c) 2013 Alberto Cuda
@@ -130,6 +129,8 @@ public class Pager {
 		
 		public float getMaxY ();
 		
+		public void fillPartial ();
+		
 	}
 	
 	public static interface DataSink {
@@ -212,5 +213,11 @@ public class Pager {
 		}
 		
 		return ans;
-	}	
+	}
+	
+	public void fillPartial ()
+	{
+		dsource.fillPartial ();
+	}
+
 }
