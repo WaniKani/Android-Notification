@@ -74,14 +74,37 @@ public class StatsFragment extends Fragment implements Tab {
 		{
 			setCoreStats (cs);
 		}
+
 	}
 	
-	private class SRSDataSource extends HistoryDatabaseCache.DataSource {
+	private abstract class DataSource extends HistoryDatabaseCache.DataSource {
+
+		protected List<Series> series;
+		
+		protected int maxY;
+		
+		public DataSource (HistoryDatabaseCache hdbc)
+		{
+			super (hdbc);
+			
+			maxY = 100;
+		}
+		
+		public List<Series> getSeries ()
+		{
+			return series;
+		}
+		
+		public float getMaxY ()
+		{
+			return maxY;
+		}
+		
+		public abstract void setCoreStats (HistoryDatabase.CoreStats cs);
+	}
 	
-		private int maxY;
-		
-		private List<Series> series;
-		
+	private class SRSDataSource extends DataSource {
+	
 		private List<Series> completeSeries;
 		
 		private List<Series> partialSeries;
@@ -91,8 +114,6 @@ public class StatsFragment extends Fragment implements Tab {
 			super (hdbc);
 			
 			Resources res;
-			
-			maxY = 100;
 			
 			res = getResources ();
 						
@@ -120,16 +141,6 @@ public class StatsFragment extends Fragment implements Tab {
 			maxY = cs.maxUnlockedRadicals + cs.maxUnlockedKanji + cs.maxUnlockedVocab;
 			if (maxY == 0)
 				maxY = 100;			
-		}
-		
-		public List<Series> getSeries ()
-		{
-			return series;
-		}
-		
-		public float getMaxY ()
-		{
-			return maxY;
 		}
 		
 		protected void fillPartialSegment (Pager.Segment segment, PageSegment pseg)
@@ -161,11 +172,7 @@ public class StatsFragment extends Fragment implements Tab {
 		
 	}
 
-	private class KanjiDataSource extends HistoryDatabaseCache.DataSource {
-		
-		private int maxY;
-		
-		private List<Series> series;
+	private class KanjiDataSource extends DataSource {
 		
 		private List<Series> completeSeries;
 		
@@ -177,8 +184,6 @@ public class StatsFragment extends Fragment implements Tab {
 			
 			Resources res;
 			Series burned;
-			
-			maxY = 100;
 			
 			res = getResources ();
 						
@@ -214,16 +219,6 @@ public class StatsFragment extends Fragment implements Tab {
 				maxY = 100;			
 		}
 		
-		public List<Series> getSeries ()
-		{
-			return series;
-		}
-		
-		public float getMaxY ()
-		{
-			return maxY;
-		}
-		
 		protected void fillPartialSegment (Pager.Segment segment, PageSegment pseg)
 		{
 			int i;
@@ -256,11 +251,7 @@ public class StatsFragment extends Fragment implements Tab {
 		
 	}
 
-	private class VocabDataSource extends HistoryDatabaseCache.DataSource {
-		
-		private int maxY;
-		
-		private List<Series> series;
+	private class VocabDataSource extends DataSource {
 		
 		private List<Series> completeSeries;
 		
@@ -272,8 +263,6 @@ public class StatsFragment extends Fragment implements Tab {
 			
 			Resources res;
 			Series burned;
-			
-			maxY = 100;
 			
 			res = getResources ();
 						
@@ -307,16 +296,6 @@ public class StatsFragment extends Fragment implements Tab {
 			maxY = cs.maxVocab;
 			if (maxY == 0)
 				maxY = 100;			
-		}
-		
-		public List<Series> getSeries ()
-		{
-			return series;
-		}
-		
-		public float getMaxY ()
-		{
-			return maxY;
 		}
 		
 		protected void fillPartialSegment (Pager.Segment segment, PageSegment pseg)
@@ -421,13 +400,12 @@ public class StatsFragment extends Fragment implements Tab {
 	private void setCoreStats (HistoryDatabase.CoreStats cs)
 	{
 		this.cs = cs;
+		
 		srsds.setCoreStats (cs);
 		kanjids.setCoreStats (cs);
 		vocabds.setCoreStats (cs);
-		for (TYChart tyc : charts) {
+		for (TYChart tyc : charts)
 			tyc.invalidate ();
-			tyc.spin (false);
-		}
 	}
 
 	/**
@@ -454,8 +432,6 @@ public class StatsFragment extends Fragment implements Tab {
     {
 		super.onCreateView (inflater, container, savedInstanceState);
 		
-		TYChart tyc;
-		
 		parent = inflater.inflate(R.layout.stats, container, false);
 		charts = new Vector<TYChart> ();
 
@@ -467,32 +443,24 @@ public class StatsFragment extends Fragment implements Tab {
 		hdbc.addDataSource (kanjids);
 		hdbc.addDataSource (vocabds);
 		
-		tyc = (TYChart) parent.findViewById (R.id.ty_srs);
-		tyc.setDataSource (srsds);
-		if (cs != null)
-			srsds.setCoreStats (cs);
-		else
-			tyc.spin (true);
-		charts.add (tyc);
-        
-		tyc = (TYChart) parent.findViewById (R.id.ty_kanji);
-		tyc.setDataSource (kanjids);
-		if (cs != null)
-			kanjids.setCoreStats (cs);
-		else
-			tyc.spin (true);
-		charts.add (tyc);
-
-		tyc = (TYChart) parent.findViewById (R.id.ty_vocab);
-		tyc.setDataSource (vocabds);
-		if (cs != null)
-			vocabds.setCoreStats (cs);
-		else
-			tyc.spin (true);
-		charts.add (tyc);
+		attach (R.id.ty_srs, srsds);
+		attach (R.id.ty_kanji, kanjids);
+		attach (R.id.ty_vocab, vocabds);
 		
 		return parent;
     }
+	
+	private void attach (int chart, DataSource ds)
+	{
+		TYChart tyc;
+
+		tyc = (TYChart) parent.findViewById (chart);
+		if (cs != null)
+			ds.setCoreStats (cs);
+		
+		tyc.setDataSource (ds);
+		charts.add (tyc);		
+	}
 
 	@Override
 	public void onResume ()

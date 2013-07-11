@@ -71,6 +71,8 @@ public class TYChart extends LinearLayout {
 		alertPanel = findViewById (R.id.ty_lay_alert);
 		alertMessage = (TextView) findViewById (R.id.ty_alert);
 		
+		plot.setTYChart (this);
+		
 		loadAttributes (ctxt, attrs);
 		
 		spin (false);
@@ -107,6 +109,11 @@ public class TYChart extends LinearLayout {
 		alertPanel.setVisibility (View.GONE);
 	}
 	
+	public void retrieving (boolean enabled)
+	{
+		spinner.setVisibility (enabled ? View.VISIBLE : View.GONE);
+	}
+	
 	/**
 	 * Shows an alert message
 	 */
@@ -140,5 +147,6 @@ public class TYChart extends LinearLayout {
 	{
 		plot.setDataSource (dsource);
 	}
+	
 
 }

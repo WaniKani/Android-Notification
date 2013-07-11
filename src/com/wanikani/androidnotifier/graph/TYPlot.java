@@ -390,16 +390,18 @@ public class TYPlot extends View {
 		
 		public void refresh ()
 		{
-			if (pager != null)
+			if (pager != null && gotOrigin) {
+				retrieving (true);
 				pager.requestData (vp.getInterval ());
-			else
+			} else
 				invalidate ();
 		}
 
 		public void dataAvailable (DataSet ds)
 		{
-			if (ds.interval.equals (vp.getInterval ())) {
+			if (ds.interval.equals (vp.getInterval ())) {				
 				this.ds = ds;
+				retrieving (false);
 				invalidate ();
 			}
 		}		
@@ -429,6 +431,10 @@ public class TYPlot extends View {
 	
 	private boolean scrolling;
 	
+	private TYChart chart;
+
+	boolean gotOrigin;	
+	
 	public TYPlot (Context ctxt, AttributeSet attrs)
 	{
 		super (ctxt, attrs);
@@ -445,6 +451,12 @@ public class TYPlot extends View {
 		loadAttributes (ctxt, attrs);
 	}
 	
+	public void setTYChart (TYChart chart)
+	{
+		this.chart = chart;
+		spin (true);
+	}
+	
 	void loadAttributes (Context ctxt, AttributeSet attrs)
 	{
 		meas = new Measures (ctxt, attrs);
@@ -454,16 +466,18 @@ public class TYPlot extends View {
 	
 	public void setOrigin (Date date)
 	{
+		gotOrigin = true;
 		taxis.setOrigin (date);
 		vp.setToday (taxis.today);
 	}
 	
 	public void setDataSource (Pager.DataSource dsource)
 	{
+		gotOrigin = false;
 		pager = new Pager (dsource, dsink);
 		pas.setSeries (dsource.getSeries ());
 		vp.updateSize (dsource.getMaxY ());
-		dsink.refresh ();
+		spin (true);
 	}
 
 	@Override
@@ -492,6 +506,7 @@ public class TYPlot extends View {
 	{
 		meas.updateSize (new RectF (0, 0, width, height));
 		vp.updateSize (pager != null ? pager.dsource.getMaxY () : 100);
+		dsink.refresh ();
 	}
 
 	@Override
@@ -529,7 +544,7 @@ public class TYPlot extends View {
 		hi = vp.rightmostDay ();
 		cal = taxis.dayToCalendar (lo);
 		
-		dateLabelBaseline = meas.plotArea.bottom + meas.dateLabelFontSize;
+		dateLabelBaseline = meas.plotArea.bottom + meas.dateLabelFontSize + meas.tickSize / 2;
 
 		for (d = lo; d <= hi; d++) {
 			f = vp.getRelPosition (d);
@@ -629,5 +644,19 @@ public class TYPlot extends View {
 	public boolean scrolling ()
 	{
 		return scrolling;
+	}
+	
+	public void spin (boolean enable)
+	{
+		if (chart != null)
+			chart.spin (enable);
+	}
+
+	public void retrieving (boolean enable)
+	{
+		if (chart != null)
+			chart.retrieving (enable);
+		if (!enable)
+			spin (false);
 	}
 }
