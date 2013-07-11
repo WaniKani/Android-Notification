@@ -159,8 +159,8 @@ public class NotificationService
 	/** The cron interval. Default is one day */
 	private static final long CRON_INTERVAL = 24 * 3600 * 1000;
 	
-	/** The cron retry interval. Default is one hour */
-	private static final long CRON_RETRY = 2600 * 1000;
+	/** The cron retry interval. Default is half an hour */
+	private static final long CRON_RETRY = 1800 * 1000;
 	
 	/**
 	 * Constructor. 
@@ -234,21 +234,21 @@ public class NotificationService
 		now = System.currentTimeMillis ();
 		prefs = PreferenceManager.getDefaultSharedPreferences (this);
 
-		next = prefs.getLong (PREFS_CRON_NEXT, normalize (now));		
+		next = prefs.getLong (PREFS_CRON_NEXT, normalize (now));
 		if (now >= next) {
 			ok = false;
 			try {				
 				ok = runDailyJobs ();
 			} finally {
-				if (ok)
+				if (ok) {
 					next = normalize (now + CRON_INTERVAL);
-				else
+					prefs.edit ().putLong (PREFS_CRON_NEXT, next).commit ();
+				} else
 					next = now + CRON_RETRY;
-
-				prefs.edit ().putLong (PREFS_CRON_NEXT, next).commit ();
+				
 				if (!enabled)
 					schedule (null, new Date (next));
-			}
+			}			
 		}
 	}
 	
