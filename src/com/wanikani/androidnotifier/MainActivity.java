@@ -29,6 +29,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.DisplayMetrics;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -1015,6 +1016,21 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	}
 
 	/**
+	 * Shows the items tab, and shows the search dialog
+	 */
+	public void showSearch ()
+	{
+		int idx;
+		
+		idx = pad.getTabIndex (itemsf);
+		if (pager.getCurrentItem () != idx) {
+			pager.setCurrentItem (pad.getTabIndex (itemsf), true);
+			itemsf.showSearchDialog (true);
+		} else
+			itemsf.showSearchDialog (false);
+	}
+
+	/**
 	 * Returns the latest version of the dashboard data. Used by tabs.
 	 * @return the dashboard data 
 	 */
@@ -1057,5 +1073,16 @@ public class MainActivity extends FragmentActivity implements Runnable {
 
 		view = findViewById (R.id.f_error);
 		view.setVisibility (id == R.id.f_error ? View.VISIBLE : View.INVISIBLE);
+	}
+	
+	@Override
+	public boolean onKeyUp (int keyCode, KeyEvent kev)
+	{
+		if (keyCode == KeyEvent.KEYCODE_SEARCH) {
+			showSearch ();
+			return true;
+		}
+		
+		return false;
 	}
 }
