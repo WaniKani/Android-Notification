@@ -454,7 +454,7 @@ public class NotificationService
 		pint = PendingIntent.getService (this, 0, intent, 0);
 
 		builder = new NotificationCompat.Builder (this);
-		builder.setSmallIcon (R.drawable.not_icon);
+		builder.setSmallIcon (R.drawable.not_lessons);
 		
 		if (SettingsActivity.get42plus (prefs) && lessons > DashboardFragment.LESSONS_42P)
 			text = getString (R.string.new_lessons_42plus, DashboardFragment.LESSONS_42P);
