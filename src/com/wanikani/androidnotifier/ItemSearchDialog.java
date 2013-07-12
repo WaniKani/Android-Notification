@@ -352,4 +352,12 @@ public class ItemSearchDialog {
 		
 		return i.matches (s);
 	}
+	
+	public void show (boolean focusIfShown)
+	{
+		if (!iss.visible)
+			toggleVisibility ();
+		else if (focusIfShown)
+			filter.requestFocus ();
+	}
 }

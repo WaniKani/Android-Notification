@@ -1387,4 +1387,13 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 	{
 		 return iad != null && iad.lock;
 	}
+	
+	/**
+	 * Shows the search dialog.
+	 * @param switching <tt>true</tt> if the activity was in background
+	 */
+	public void showSearchDialog (boolean switching)
+	{
+		isd.show (!switching);
+	}
 }
