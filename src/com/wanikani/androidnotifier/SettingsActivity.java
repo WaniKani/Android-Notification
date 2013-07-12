@@ -61,7 +61,7 @@ public class SettingsActivity
 	/** Enable 42+ mode. Must match preferences.xml */
 	private static final String KEY_PREF_42PLUS = "pref_42plus";
 	/** Wanikani review URL */
-	private static final String KEY_URL = "pref_url";
+	private static final String KEY_URL = "pref_review_url";
 	
 	/** Mute review */
 	private static final String KEY_MUTE = "mute";
@@ -136,7 +136,7 @@ public class SettingsActivity
 		
 		pref = findPreference (key);
 		res = getResources ();
-		
+				
 		if (key.equals (KEY_PREF_ENABLED))
 			runEnabledHooks (prefs);
 		else if (key.equals (KEY_PREF_USE_INTEGRATED_BROWSER)) {
@@ -163,6 +163,11 @@ public class SettingsActivity
 			else
 				s = res.getString (R.string.pref_refresh_one_min_descr);
 			pref.setSummary (s);
+		} else if (key.equals (KEY_URL)) {
+			s = getURL (prefs);
+			if (s.length () == 0)
+				pref.getEditor ().putString (KEY_URL, 
+						WebReviewActivity.WKConfig.DEFAULT_REVIEW_START).commit ();
 		}
 		
 		updateConfig (prefs);
