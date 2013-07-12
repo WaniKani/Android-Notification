@@ -144,6 +144,10 @@
         <item name="android:layout_height">@dimen/m_rythm</item>        
     </style>
     
+    <style parent="AppTheme" name="SearchButton">
+        <item name="android:layout_height">@dimen/m_search_button_height</item>        
+    </style>
+    
     <style parent="AppTheme" name="LevelRow">
         <item name="android:layout_width">fill_parent</item>
         <item name="android:layout_height">@dimen/m_rythm</item>
@@ -153,7 +157,8 @@
     
     <style parent="AppTheme" name="ItemTable">
         <item name="android:layout_width">fill_parent</item>
-        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_height">0dip</item>
+        <item name="android:layout_weight">1</item>
         <item name="android:divider">#cccccc</item>
         <item name="android:dividerHeight">3dip</item>
     </style> 

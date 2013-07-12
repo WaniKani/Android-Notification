@@ -58,4 +58,10 @@ public class Vocabulary extends Item {
 	{
 		return "vocabulary";
 	}
+	
+	public boolean matches (String s)
+	{
+		return super.matches (s) ||
+				kana.contains (s);
+	}
 }

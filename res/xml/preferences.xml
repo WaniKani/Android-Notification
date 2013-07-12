@@ -57,8 +57,8 @@
         	android:title="@string/pref_enter"
         	android:summary="@string/pref_enter_descr"
         	android:defaultValue="true" />
-    <EditTextPreference android:key="pref_url" 
+    <EditTextPreference android:key="pref_review_url" 
         	android:title="@string/pref_url" android:summary="@string/pref_url_desc"
-        	android:defaultValue="http://www.wanikani.com/review/session" />
+        	android:defaultValue="http://www.wanikani.com/review/session/start" />
     </PreferenceCategory>
 </PreferenceScreen>

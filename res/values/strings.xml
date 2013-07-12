@@ -102,6 +102,7 @@
     <string name="tag_filter_missing">apprentice</string>
     <string name="tag_filter_unlocks">recent unlocks</string>
     <string name="tag_filter_critical">critical items</string>
+    <string name="tag_filter_search">search&#8230;</string>
     
     <string name="tag_sort_by">Sort by</string>
     <string name="tag_sort_type">type</string>

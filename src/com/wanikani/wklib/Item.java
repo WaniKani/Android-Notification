@@ -2,6 +2,7 @@ package com.wanikani.wklib;
 
 import java.util.Comparator;
 import java.util.Date;
+import java.util.EnumSet;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -364,5 +365,11 @@ public abstract class Item {
 	{
 		return "http://www.wanikani.com/" + 
 				getClassURLComponent () + "/" + getItemURLComponent ();
+	}
+	
+	public boolean matches (String s)
+	{
+		return meaning.contains (s) ||
+				(character != null && character.contains (s));
 	}
 }

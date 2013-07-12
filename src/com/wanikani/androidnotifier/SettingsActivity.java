@@ -61,7 +61,7 @@ public class SettingsActivity
 	/** Enable 42+ mode. Must match preferences.xml */
 	private static final String KEY_PREF_42PLUS = "pref_42plus";
 	/** Wanikani review URL */
-	private static final String KEY_URL = "pref_url";
+	private static final String KEY_URL = "pref_review_url";
 	
 	/** Mute review */
 	private static final String KEY_MUTE = "mute";
@@ -78,6 +78,9 @@ public class SettingsActivity
 	/** The current notification settings. Used to check whether it is toggled */ 
 	private boolean enabled;
 	
+	/** The current lessons notification settings. Used to check whether it is toggled */ 
+	private boolean lessonsEnabled;
+
 	/** The action sent when credentials are changed */
 	public static final String ACT_CREDENTIALS = "com.wanikani.wanikaninotifier.action.CREDENTIALS";
 	
@@ -110,6 +113,7 @@ public class SettingsActivity
 		prefs = PreferenceManager.getDefaultSharedPreferences (this);
 		login = getLogin (prefs);
 		enabled = getEnabled (prefs);
+		lessonsEnabled = getLessonsEnabled (prefs);
 		
 		onSharedPreferenceChanged (prefs, KEY_PREF_USERKEY);
 		onSharedPreferenceChanged (prefs, KEY_PREF_ENABLED);
@@ -136,7 +140,7 @@ public class SettingsActivity
 		
 		pref = findPreference (key);
 		res = getResources ();
-		
+				
 		if (key.equals (KEY_PREF_ENABLED))
 			runEnabledHooks (prefs);
 		else if (key.equals (KEY_PREF_USE_INTEGRATED_BROWSER)) {
@@ -163,6 +167,11 @@ public class SettingsActivity
 			else
 				s = res.getString (R.string.pref_refresh_one_min_descr);
 			pref.setSummary (s);
+		} else if (key.equals (KEY_URL)) {
+			s = getURL (prefs);
+			if (s.length () == 0)
+				pref.getEditor ().putString (KEY_URL, 
+						WebReviewActivity.WKConfig.DEFAULT_REVIEW_START).commit ();
 		}
 		
 		updateConfig (prefs);
@@ -339,12 +348,15 @@ public class SettingsActivity
 	{
 		LocalBroadcastManager lbm;
 		UserLogin llogin;
-		boolean lenabled;
+		boolean lenabled, lLessonsEnabled;
 		Intent i;
 		
 		llogin = getLogin (prefs);
 		lenabled = getEnabled (prefs);
 		lenabled &= findPreference (KEY_PREF_ENABLED).isEnabled ();
+		
+		lLessonsEnabled = getLessonsEnabled (prefs);
+		lLessonsEnabled &= findPreference (KEY_PREF_LESSONS_ENABLED).isEnabled ();
 		
 		lbm = LocalBroadcastManager.getInstance (this);
 		if (!llogin.equals (login)) {
@@ -353,10 +365,12 @@ public class SettingsActivity
 			i.putExtra (E_ENABLED, lenabled);
 			login = llogin;
 			lbm.sendBroadcast (i);
-		} else if (lenabled != enabled) {
+		} else if (lenabled != enabled || 
+				   lLessonsEnabled != lessonsEnabled) {
 			i = new Intent (ACT_NOTIFY);
 			i.putExtra (E_ENABLED, lenabled);
 			enabled = lenabled;
+			lessonsEnabled = lLessonsEnabled;
 			lbm.sendBroadcast (i);
 		} 
 	}

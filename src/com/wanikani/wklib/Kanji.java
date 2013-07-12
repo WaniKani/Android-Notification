@@ -93,5 +93,13 @@ public class Kanji extends Item {
 	{
 		return "kanji";
 	}
+	
+	public boolean matches (String s)
+	{
+		return super.matches (s) ||
+				(onyomi != null && onyomi.contains (s)) ||
+				(kunyomi != null && kunyomi.contains (s));
+	}
+	
 }
 ;
