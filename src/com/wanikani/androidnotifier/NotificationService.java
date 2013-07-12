@@ -125,11 +125,17 @@ public class NotificationService
 	public static final String ACTION_ALARM = 
 			PREFIX + "ALARM";
 
-	/** Called when the user taps the notification.
+	/** Called when the user taps the reviews notification.
 	 *  We start an external browser, but also reset the state machine
 	 *  that may be polling with large intervals */
 	public static final String ACTION_TAP = 
 			PREFIX + "TAP";
+
+	/** Called when the user taps the lessons notification.
+	 *  We start an external browser, but also reset the state machine
+	 *  that may be polling with large intervals */
+	public static final String ACTION_LESSONS_TAP = 
+			PREFIX + "LESSONS_TAP";
 
 	/** Called by @link DashboardActivity when the notification icon needs to
 	 *  be hidden. It is similar to @link {@link #ACTION_TAP}, however it
@@ -144,11 +150,12 @@ public class NotificationService
 	public static final String ACTION_NEW_DATA = 
 			PREFIX + "NEW_DATA";
 
-	/** The ID associated to the notification icon. Since we can
-	 *  only display one notification at a time, this is a
-	 *  constant */
-	private static final int NOT_ID = 1;
+	/** The ID associated to the reviews notification icon */
+	private static final int NOT_REVIEWS_ID = 1;
 	
+	/** The ID associated to the lessons notification icon */
+	private static final int NOT_LESSONS_ID = 2;
+
 	/** The chron schedule alarm time shared preferences key */
 	private static final String PREFS_CHRON_NEXT = PREFIX + "CHRON_NEXT";
 	
@@ -184,7 +191,7 @@ public class NotificationService
 		enabled = SettingsActivity.getEnabled (prefs);
 		action = intent.getAction ();
 		
-		/* ACTION_HIDE_NOTIFICATION and ACTION_TAP are special, 
+		/* ACTION_HIDE_NOTIFICATION and ACTION_(LESSONS_)TAP are special, 
 		 * because we must call it even if notifications
 		 * are disabled */
 		if (action.equals (ACTION_HIDE_NOTIFICATION)) {
@@ -192,6 +199,9 @@ public class NotificationService
 			return;
 		} else if (action.equals (ACTION_TAP)) {
 			tap (intent, enabled);
+			return;
+		} else if (action.equals (ACTION_LESSONS_TAP)) {
+			lessonsTap (intent);
 			return;
 		}
 		
@@ -311,12 +321,22 @@ public class NotificationService
 	{
 		NotifierStateMachine fsm;
 		
-		openBrowser ();
+		openBrowser (true);
 		if (enabled) {
 			fsm = new NotifierStateMachine (this);
 
 			feed (fsm, NotifierStateMachine.Event.E_TAP);
 		}
+	}
+
+	/**
+	 * Handler of the {@link #ACTION_LESSONS_TAP} intent, called when
+	 * the user taps the lessons notification. 
+	 * @param intent the intent
+	 */
+	protected void lessonsTap (Intent intent)
+	{
+		openBrowser (false);
 	}
 
 	/**
@@ -391,6 +411,10 @@ public class NotificationService
 			/* This call does not cause network traffic */
 			ui = conn.getUserInformation ();
 			dd = new DashboardData (ui, sq);
+			if (SettingsActivity.getLessonsEnabled (prefs))
+				showLessons (dd.lessonsAvailable);
+			else
+				showLessons (0);
 		} catch (IOException e) {
 			if (event == Event.E_UNSOLICITED)
 				return;
@@ -400,6 +424,53 @@ public class NotificationService
 		
 		fsm.next (event, dd);
 	}	
+	
+	/**
+	 * Shows the lessons icon.
+	 *  @param lessons the number of available lessons
+	 */
+	public void showLessons (int lessons)
+	{
+		NotificationManager nmanager;
+		NotificationCompat.Builder builder;
+		SharedPreferences prefs;
+		Notification not;
+		PendingIntent pint;
+		Intent intent;
+		String text;
+
+		nmanager = (NotificationManager) 
+				getSystemService (Context.NOTIFICATION_SERVICE);
+		if (lessons == 0) {
+			nmanager.cancel (NOT_LESSONS_ID);
+			return;
+		}
+
+		prefs = PreferenceManager.getDefaultSharedPreferences (this); 
+			
+		intent = new Intent (this, NotificationService.class);
+		intent.setAction (ACTION_LESSONS_TAP);
+		
+		pint = PendingIntent.getService (this, 0, intent, 0);
+
+		builder = new NotificationCompat.Builder (this);
+		builder.setSmallIcon (R.drawable.not_icon);
+		
+		if (SettingsActivity.get42plus (prefs) && lessons > DashboardFragment.LESSONS_42P)
+			text = getString (R.string.new_lessons_42plus, DashboardFragment.LESSONS_42P);
+		else
+			text = getString (lessons == 1 ? 
+						      R.string.new_lesson : R.string.new_lessons, lessons);
+		builder.setContentTitle (getString (R.string.app_name));
+								 
+		builder.setContentText (text);
+		builder.setContentIntent (pint);
+				
+		not = builder.build ();
+		not.flags |= Notification.FLAG_AUTO_CANCEL;
+		
+		nmanager.notify (NOT_LESSONS_ID, not);
+	}
 	
 	/**
 	 * Shows the notification icon.
@@ -415,6 +486,9 @@ public class NotificationService
 		Intent intent;
 		String text;
 
+		nmanager = (NotificationManager) 
+				getSystemService (Context.NOTIFICATION_SERVICE);
+			
 		prefs = PreferenceManager.getDefaultSharedPreferences (this); 
 			
 		intent = new Intent (this, NotificationService.class);
@@ -435,18 +509,14 @@ public class NotificationService
 		builder.setContentText (text);
 		builder.setContentIntent (pint);
 		
-		nmanager = (NotificationManager) 
-			getSystemService (Context.NOTIFICATION_SERVICE);
-		
 		not = builder.build ();
 		not.flags |= Notification.FLAG_AUTO_CANCEL;
 		
-		nmanager.notify (NOT_ID, not);
+		nmanager.notify (NOT_REVIEWS_ID, not);
 	}
 	
 	/**
-	 * Hides the notifi
-	 * cation icon and resets the state machine.
+	 * Hides the notification icon and resets the state machine.
 	 */
 	public void hideNotification ()
 	{
@@ -455,7 +525,7 @@ public class NotificationService
 		nmanager = (NotificationManager) 
 			getSystemService (Context.NOTIFICATION_SERVICE);
 		
-		nmanager.cancel (NOT_ID);
+		nmanager.cancel (NOT_REVIEWS_ID);
 	}
 
 	/**
@@ -498,11 +568,13 @@ public class NotificationService
 	
 	/**
 	 * Open the browser, showing the reviews page.
+	 * 	@param reviews if we must open the reviews page (instead of the lessons)
 	 */
-	protected void openBrowser ()
+	protected void openBrowser (boolean reviews)
 	{		
 		SharedPreferences prefs;
 		Intent intent;
+		String url;
 		
 		prefs = PreferenceManager.getDefaultSharedPreferences (this);
 		if (SettingsActivity.getUseIntegratedBrowser (prefs)) {
@@ -510,7 +582,8 @@ public class NotificationService
 			intent.setAction (WebReviewActivity.OPEN_ACTION);
 		} else
 			intent = new Intent (Intent.ACTION_VIEW);
-		intent.setData (Uri.parse (SettingsActivity.getURL (prefs)));
+		url = reviews ? SettingsActivity.getURL (prefs) : WebReviewActivity.WKConfig.LESSON_START;
+		intent.setData (Uri.parse (url));
 		intent.setFlags (Intent.FLAG_ACTIVITY_NEW_TASK);
 		
 		startActivity (intent);

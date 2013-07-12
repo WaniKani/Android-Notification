@@ -4,6 +4,9 @@
     <string name="new_reviews_42plus">You have %d+ pending reviews</string>
     <string name="new_reviews">You have %d pending reviews</string>
     <string name="new_review">You have one pending review</string>
+    <string name="new_lessons_42plus">You can unlock %d+ items</string>
+    <string name="new_lessons">You can unlock %d items</string>
+    <string name="new_lesson">You can unlock one item</string>
     <string name="tpref_notifications">Notifications</string>
     <string name="tpref_dashboard">Dashboard</string>
     <string name="tpref_reviews">Reviews</string>
