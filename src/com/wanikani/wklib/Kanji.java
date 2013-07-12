@@ -97,8 +97,8 @@ public class Kanji extends Item {
 	public boolean matches (String s)
 	{
 		return super.matches (s) ||
-				onyomi.contains (s) ||
-				kunyomi.contains (s);
+				(onyomi != null && onyomi.contains (s)) ||
+				(kunyomi != null && kunyomi.contains (s));
 	}
 	
 }
