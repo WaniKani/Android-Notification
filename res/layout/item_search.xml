@@ -33,31 +33,31 @@
     	android:layout_height="wrap_content"
         android:orientation="horizontal">
      <ImageButton
-        android:id="@+id/btn_srs_apprentice"
+        android:id="@+id/btn_apprentice_filter"
 		android:layout_height="wrap_content"
         android:layout_width="0dip"
         android:layout_weight="1"
         android:src="@drawable/apprentice" />
      <ImageButton
-        android:id="@+id/btn_srs_guru"
+        android:id="@+id/btn_guru_filter"
 		android:layout_height="wrap_content"
         android:layout_width="0dip"
         android:layout_weight="1"
         android:src="@drawable/guru" />
      <ImageButton
-        android:id="@+id/btn_srs_master"
+        android:id="@+id/btn_master_filter"
 		android:layout_height="wrap_content"
         android:layout_width="0dip"
         android:layout_weight="1"
         android:src="@drawable/master" />
      <ImageButton
-        android:id="@+id/btn_srs_enlighten"
+        android:id="@+id/btn_enlighten_filter"
 		android:layout_height="wrap_content"
         android:layout_width="0dip"
         android:layout_weight="1"
         android:src="@drawable/enlighten" />
      <ImageButton
-        android:id="@+id/btn_srs_burned"
+        android:id="@+id/btn_burned_filter"
 		android:layout_height="wrap_content"
         android:layout_width="0dip"
         android:layout_weight="1"
@@ -65,7 +65,7 @@
      </LinearLayout>
 
     <EditText
-        android:id="@+id/editText1"
+        android:id="@+id/et_filter"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:ems="10" >

@@ -61,6 +61,11 @@
                 android:id="@+id/btn_item_sort"
                 style="@style/ItemButton"
                 android:src="@drawable/sort" />
+
+            <ImageButton
+                android:id="@+id/btn_item_search"
+                style="@style/ItemButton"
+                android:src="@drawable/search" />            
         </LinearLayout>
 
         <RelativeLayout
@@ -126,12 +131,6 @@
                         style="@style/ItemButton"
                         android:layout_width="wrap_content"
                         android:text="@string/tag_filter_critical" />
-                    
-                    <RadioButton
-                        android:id="@+id/btn_filter_search"
-                        style="@style/ItemButton"
-                        android:layout_width="wrap_content"
-                        android:text="@string/tag_filter_search" />                    
                 </RadioGroup>
             </LinearLayout>
 

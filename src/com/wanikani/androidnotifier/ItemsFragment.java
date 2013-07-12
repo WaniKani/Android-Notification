@@ -294,16 +294,19 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 			return view;
 		}
 	}
-	
+
 	/**
 	 * The implementation of the items' ViewList. Items are instances
 	 * of the WKLib {@link Item} class. This class implements sorting
-	 * but no filtering.
+	 * and filtering through {@link ItemSearchDialog}.
 	 */
-	class ItemListAdapter extends BaseAdapter {
+	class ItemListAdapter extends BaseAdapter implements ItemSearchDialog.Listener {
 
+		/// The full (unfiltered) list of items.
+		List<Item> allItems;
+		
 		/// The current list of items. It is always sorted.
-		List<Item> items;
+		List<Item> filteredItems;
 
 		/// The current comparator
 		Comparator<Item> cmp;
@@ -325,7 +328,8 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 			this.cmp = cmp;
 			this.iinfo = iinfo;
 			
-			items = new Vector<Item> ();
+			allItems = new Vector<Item> ();
+			filteredItems = new Vector<Item> ();
 		}		
 
 		/**
@@ -343,15 +347,21 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 		}
 		
 		@Override
+		public void filterChanged ()
+		{
+			invalidate ();
+		}
+		
+		@Override
 		public int getCount ()
 		{
-			return items.size ();
+			return filteredItems.size ();
 		}
 		
 		@Override
 		public Item getItem (int position)
 		{
-			return items.get (position);
+			return filteredItems.get (position);
 		}
 		
 		@Override
@@ -365,8 +375,8 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 		 */
 		public void clear ()
 		{
-			items.clear ();
-			items.clear ();
+			allItems.clear ();
+			filteredItems.clear ();
 			notifyDataSetChanged ();
 		}
 
@@ -376,7 +386,7 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 		 */
 		public void addAll (List<Item> newItems)
 		{
-			items.addAll (newItems);
+			allItems.addAll (newItems);
 			invalidate ();
 		}
 		
@@ -385,7 +395,8 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 		 */
 		private void invalidate ()
 		{		
-			Collections.sort (items, cmp);
+			filteredItems = isd != null ? isd.filter (allItems) : allItems;  
+			Collections.sort (filteredItems, cmp);
 			notifyDataSetChanged ();
 		}
 		
@@ -562,6 +573,9 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 					sortW.setVisibility (View.VISIBLE);
 				break;
 				
+			case R.id.btn_item_search:
+				if (isd != null)
+					isd.toggleVisibility ();
 			}
 		}
 	}
@@ -800,6 +814,12 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 	/// True if the apprentice filter is set (i.e. we are displaying only apprentice
 	/// items
 	boolean apprentice;
+	
+	/// Item Search State
+	ItemSearchDialog.State iss;
+	
+	/// Item Search dialog (null when detached)
+	ItemSearchDialog isd;
 
 	/* ---------- Filters ---------- */
 	
@@ -839,7 +859,7 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 		
 		this.main = (MainActivity) main;
 
-		this.main.register (this);
+		this.main.register (this);			
 	}
 	
 	/**
@@ -881,6 +901,8 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 
     	lad = new LevelListAdapter ();
 		iad = new ItemListAdapter (Item.SortByType.INSTANCE, ItemInfo.AGE);
+		
+		iss = new ItemSearchDialog.State ();
 	}
 	
 	/**
@@ -896,6 +918,7 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
     {
 		RadioGroup rg;
 		ImageButton btn;
+		View sview;
 		int i;
 		
 		super.onCreateView (inflater, container, bundle);
@@ -909,9 +932,14 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 		iview = (ListView) parent.findViewById (R.id.lv_items);
 		iview.setAdapter (iad);
 		
+		sview = parent.findViewById (R.id.it_search_win);
+		isd = new ItemSearchDialog (sview, iss, iad);
+				
 		btn = (ImageButton) parent.findViewById (R.id.btn_item_filter);
 		btn.setOnClickListener (mpl);
 		btn = (ImageButton) parent.findViewById (R.id.btn_item_sort);
+		btn.setOnClickListener (mpl);
+		btn = (ImageButton) parent.findViewById (R.id.btn_item_search);
 		btn.setOnClickListener (mpl);
 		
 		rg = (RadioGroup) parent.findViewById (R.id.rg_filter);
@@ -992,6 +1020,7 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 		levelf.stopTask ();
 		criticalf.stopTask ();
 		unlockf.stopTask ();
+		isd = null;
 	}
 
 	/**
@@ -1301,7 +1330,7 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 		view = parent.findViewById (R.id.btn_sort_time);
 		view.setEnabled (unlock);
 	}
-
+	
 	/**
 	 * This methods is called by the levels' list adapter, right before
 	 * displaying a new row. It is needed to make sure that the spinner
