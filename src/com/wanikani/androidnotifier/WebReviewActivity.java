@@ -70,7 +70,7 @@ public class WebReviewActivity extends Activity {
 	public static class WKConfig {
 		
 		/** Review start page. Of course must be inside of @link {@link #REVIEW_SPACE} */
-		static final String REVIEW_START = "http://www.wanikani.com/review";
+		static final String DEFAULT_REVIEW_START = "http://www.wanikani.com/review/session";
 
 		/** Review start page. Of course must be inside of @link {@link #REVIEW_SPACE} */
 		static final String LESSON_START = "http://www.wanikani.com/lesson";

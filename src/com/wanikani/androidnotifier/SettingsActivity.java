@@ -40,6 +40,8 @@ public class SettingsActivity
 	
 	/** Preferences enabled key. Must match preferences.xml */
 	private static final String KEY_PREF_ENABLED = "pref_enabled";
+	/** Enable lessons. Must match preferences.xml */
+	private static final String KEY_PREF_LESSONS_ENABLED = "pref_lessons_enabled";
 	/** Use integrated browser key. Must match preferences.xml */
 	private static final String KEY_PREF_USE_INTEGRATED_BROWSER = "pref_use_integrated_browser";
 	/** User key. Must match preferences.xml */
@@ -58,6 +60,8 @@ public class SettingsActivity
 	private static final String KEY_PREF_SHOW_MUTE = "pref_show_mute";
 	/** Enable 42+ mode. Must match preferences.xml */
 	private static final String KEY_PREF_42PLUS = "pref_42plus";
+	/** Wanikani review URL */
+	private static final String KEY_URL = "pref_url";
 	
 	/** Mute review */
 	private static final String KEY_MUTE = "mute";
@@ -106,7 +110,7 @@ public class SettingsActivity
 		prefs = PreferenceManager.getDefaultSharedPreferences (this);
 		login = getLogin (prefs);
 		enabled = getEnabled (prefs);
-				
+		
 		onSharedPreferenceChanged (prefs, KEY_PREF_USERKEY);
 		onSharedPreferenceChanged (prefs, KEY_PREF_ENABLED);
 		onSharedPreferenceChanged (prefs, KEY_PREF_REFRESH_TIMEOUT);
@@ -116,7 +120,6 @@ public class SettingsActivity
 		onSharedPreferenceChanged (prefs, KEY_PREF_ENTER);
 		prefs.registerOnSharedPreferenceChangeListener (this);
 	}
-	
 	
 	/**
 	 * Called when preferences get changed. We check the new values,
@@ -134,12 +137,14 @@ public class SettingsActivity
 		pref = findPreference (key);
 		res = getResources ();
 		
-		if (key.equals (KEY_PREF_USE_INTEGRATED_BROWSER)) {
+		if (key.equals (KEY_PREF_ENABLED))
+			runEnabledHooks (prefs);
+		else if (key.equals (KEY_PREF_USE_INTEGRATED_BROWSER)) {
 			pref.setSummary (getUseIntegratedBrowser (prefs) ? 
 							 R.string.pref_use_integrated_browser_desc :
 							 R.string.pref_use_external_browser_desc);
 			runIntegratedBrowserHook (prefs);
-		} if (key.equals (KEY_PREF_SHOW_LESSONS_KEYBOARD) ||
+		} else if (key.equals (KEY_PREF_SHOW_LESSONS_KEYBOARD) ||
 			  key.equals (KEY_PREF_SHOW_REVIEWS_KEYBOARD)) {
 			runShowKeyboardHooks (prefs);
 		} else if (key.equals (KEY_PREF_USERKEY)) {
@@ -169,7 +174,18 @@ public class SettingsActivity
 		Preference pref;
 		
 		pref = findPreference (KEY_PREF_ENABLED);
-		pref.setEnabled (credentialsAreValid (prefs));	
+		pref.setEnabled (credentialsAreValid (prefs));
+		
+		runEnabledHooks (prefs);
+	}
+	
+	@SuppressWarnings ("deprecation")
+	private void runEnabledHooks (SharedPreferences prefs)
+	{
+		Preference pref;
+		
+		pref = findPreference (KEY_PREF_LESSONS_ENABLED);
+		pref.setEnabled (getEnabled (prefs));		
 	}
 	
 	@SuppressWarnings ("deprecation")
@@ -235,6 +251,11 @@ public class SettingsActivity
 		return prefs.getBoolean (KEY_PREF_ENABLED, true);	
 	}
 	
+	public static boolean getLessonsEnabled (SharedPreferences prefs)
+	{
+		return getEnabled (prefs) && prefs.getBoolean (KEY_PREF_LESSONS_ENABLED, false);	
+	}
+
 	public static boolean getUseIntegratedBrowser (SharedPreferences prefs)
 	{
 		return prefs.getBoolean (KEY_PREF_USE_INTEGRATED_BROWSER, true);	
@@ -284,6 +305,11 @@ public class SettingsActivity
 	public static boolean getMute (SharedPreferences prefs)
 	{
 		return prefs.getBoolean (KEY_MUTE, false);
+	}
+	
+	public static String getURL (SharedPreferences prefs)
+	{
+		return prefs.getString (KEY_URL, WebReviewActivity.WKConfig.DEFAULT_REVIEW_START);
 	}
 	
 	public static boolean toggleMute (SharedPreferences prefs)

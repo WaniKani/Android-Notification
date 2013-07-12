@@ -2,16 +2,33 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
     <EditTextPreference android:key="pref_userkey" 
         	android:title="@string/pref_userkey" android:summary="@string/pref_userkey_descr"/>
-    <CheckBoxPreference 
-        	android:key="pref_enabled" 
-        	android:title="@string/pref_enabled" 
-        	android:defaultValue="true" android:summary="@string/pref_enabled_descr"/>
-    <EditTextPreference  
+    <PreferenceCategory
+        	android:title="@string/tpref_notifications">    
+    	<CheckBoxPreference 
+        		android:key="pref_enabled" 
+        		android:title="@string/pref_enabled" 
+        		android:defaultValue="true" android:summary="@string/pref_enabled_descr"/>
+    	<CheckBoxPreference    	    	
+    	    	android:key="pref_lessons_enabled"
+    	    	android:title="@string/pref_lessons_enabled"
+    	    	android:defaultValue="false" android:summary="@string/pref_lessons_enabled_descr"/>    	    
+	</PreferenceCategory>
+	<PreferenceCategory
+	    	android:title="@string/tpref_dashboard">
+    	<EditTextPreference  
         	android:title="@string/pref_refresh_timeout" 
         	android:key="pref_refresh_timeout"
         	android:inputType="number"
-        	android:defaultValue="5"/>    
-    <CheckBoxPreference
+        	android:defaultValue="5"/>
+    	<CheckBoxPreference
+        	android:key="pref_42plus"
+        	android:title="@string/pref_42plus"
+        	android:summary="@string/pref_42plus_descr"
+        	android:defaultValue="false" />    	
+    </PreferenceCategory>   
+	<PreferenceCategory
+	    	android:title="@string/tpref_reviews">
+	<CheckBoxPreference
         	android:key="pref_use_integrated_browser"
         	android:title="@string/pref_use_integrated_browser"
         	android:defaultValue="true" />
@@ -40,9 +57,8 @@
         	android:title="@string/pref_enter"
         	android:summary="@string/pref_enter_descr"
         	android:defaultValue="true" />
-    <CheckBoxPreference
-        	android:key="pref_42plus"
-        	android:title="@string/pref_42plus"
-        	android:summary="@string/pref_42plus_descr"
-        	android:defaultValue="false" />
+    <EditTextPreference android:key="pref_url" 
+        	android:title="@string/pref_url" android:summary="@string/pref_url_desc"
+        	android:defaultValue="http://www.wanikani.com/review/session" />
+    </PreferenceCategory>
 </PreferenceScreen>

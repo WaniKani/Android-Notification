@@ -510,7 +510,7 @@ public class NotificationService
 			intent.setAction (WebReviewActivity.OPEN_ACTION);
 		} else
 			intent = new Intent (Intent.ACTION_VIEW);
-		intent.setData (Uri.parse (WebReviewActivity.WKConfig.REVIEW_START));
+		intent.setData (Uri.parse (SettingsActivity.getURL (prefs)));
 		intent.setFlags (Intent.FLAG_ACTIVITY_NEW_TASK);
 		
 		startActivity (intent);

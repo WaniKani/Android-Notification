@@ -942,13 +942,15 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	 */
 	public void review ()
 	{
+		SharedPreferences prefs;
 		Intent intent;
 		
+		prefs = PreferenceManager.getDefaultSharedPreferences (this);
 		intent = new Intent (MainActivity.this, NotificationService.class);			
 		intent.setAction (NotificationService.ACTION_HIDE_NOTIFICATION);			
 		startService (intent);
 		
-		open (WebReviewActivity.WKConfig.REVIEW_START);
+		open (SettingsActivity.getURL (prefs));
 	}
 	
 	/**
