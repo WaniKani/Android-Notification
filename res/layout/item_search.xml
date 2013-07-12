@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/it_search_win"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical" >
+            
+    <LinearLayout 
+	    android:layout_width="match_parent"
+    	android:layout_height="wrap_content"
+        android:orientation="horizontal">
+     <ImageButton
+        android:id="@+id/btn_radicals_filter"
+        style="@style/SearchButton"
+        android:layout_width="0dip"
+        android:layout_weight="1"
+        android:src="@drawable/blue" />
+    <ImageButton
+        android:id="@+id/btn_kanji_filter"
+        style="@style/SearchButton"
+        android:layout_width="0dip"
+        android:layout_weight="1"
+        android:src="@drawable/magenta" />
+    <ImageButton
+        android:id="@+id/btn_vocab_filter"
+        style="@style/SearchButton"
+        android:layout_width="0dip"
+        android:layout_weight="1"
+        android:src="@drawable/violet" />
+    </LinearLayout>
+    <LinearLayout 
+	    android:layout_width="match_parent"
+    	android:layout_height="wrap_content"
+        android:orientation="horizontal">
+     <ImageButton
+        android:id="@+id/btn_srs_apprentice"
+		android:layout_height="wrap_content"
+        android:layout_width="0dip"
+        android:layout_weight="1"
+        android:src="@drawable/apprentice" />
+     <ImageButton
+        android:id="@+id/btn_srs_guru"
+		android:layout_height="wrap_content"
+        android:layout_width="0dip"
+        android:layout_weight="1"
+        android:src="@drawable/guru" />
+     <ImageButton
+        android:id="@+id/btn_srs_master"
+		android:layout_height="wrap_content"
+        android:layout_width="0dip"
+        android:layout_weight="1"
+        android:src="@drawable/master" />
+     <ImageButton
+        android:id="@+id/btn_srs_enlighten"
+		android:layout_height="wrap_content"
+        android:layout_width="0dip"
+        android:layout_weight="1"
+        android:src="@drawable/enlighten" />
+     <ImageButton
+        android:id="@+id/btn_srs_burned"
+		android:layout_height="wrap_content"
+        android:layout_width="0dip"
+        android:layout_weight="1"
+        android:src="@drawable/burned" />
+     </LinearLayout>
+
+    <EditText
+        android:id="@+id/editText1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ems="10" >
+
+        <requestFocus />
+    </EditText>
+
+</LinearLayout>

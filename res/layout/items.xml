@@ -63,11 +63,23 @@
                 android:src="@drawable/sort" />
         </LinearLayout>
 
-        <RelativeLayout style="@style/ItemTable" >
+        <RelativeLayout
+            	android:layout_width="match_parent"
+            	android:layout_height="match_parent" >
 
+            <LinearLayout 
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:orientation="vertical">
+                
             <ListView
                 android:id="@+id/lv_items"
-                style="@style/ItemTable" />
+                android:layout_width="match_parent"
+                android:layout_height="0dip"
+                android:layout_weight="1" />
+            <include layout="@layout/item_search"/>           
+             
+            </LinearLayout>
 
             <LinearLayout
                 android:id="@+id/menu_filter"
@@ -114,6 +126,12 @@
                         style="@style/ItemButton"
                         android:layout_width="wrap_content"
                         android:text="@string/tag_filter_critical" />
+                    
+                    <RadioButton
+                        android:id="@+id/btn_filter_search"
+                        style="@style/ItemButton"
+                        android:layout_width="wrap_content"
+                        android:text="@string/tag_filter_search" />                    
                 </RadioGroup>
             </LinearLayout>
 
