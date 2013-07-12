@@ -1078,13 +1078,10 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	}
 	
 	@Override
-	public boolean onKeyUp (int keyCode, KeyEvent kev)
+	public boolean onSearchRequested ()
 	{
-		if (keyCode == KeyEvent.KEYCODE_SEARCH) {
-			showSearch ();
-			return true;
-		}
+		showSearch ();
 		
-		return false;
+		return true;
 	}
 }
