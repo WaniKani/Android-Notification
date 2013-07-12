@@ -14,6 +14,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
+import android.view.inputmethod.InputMethodManager;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
@@ -69,13 +70,16 @@ public class WebReviewActivity extends Activity {
 	public static class WKConfig {
 		
 		/** Review start page. Of course must be inside of @link {@link #REVIEW_SPACE} */
-		static final String REVIEW_START = "http://www.wanikani.com/review/session/start";
+		static final String DEFAULT_REVIEW_START = "http://www.wanikani.com/review/session";
 
 		/** Review start page. Of course must be inside of @link {@link #REVIEW_SPACE} */
 		static final String LESSON_START = "http://www.wanikani.com/lesson";
 
 		/** HTML id of the textbox the user types its answer in (reviews) */
 		static final String ANSWER_BOX = "user_response";
+
+		/** HTML id of the textbox the user types its answer in (reviews, client-side) */
+		static final String ANSWER_BOX_V2 = "user-response";
 
 		/** HTML id of the textbox the user types its answer in (lessons) */
 		static final String LESSON_ANSWER_BOX_JP = "translit";
@@ -164,18 +168,10 @@ public class WebReviewActivity extends Activity {
 		@Override  
 	    public void onPageFinished (WebView view, String url)  
 	    {  
-			SharedPreferences prefs;
-			
-			prefs = PreferenceManager.getDefaultSharedPreferences (WebReviewActivity.this);
 			bar.setVisibility (View.GONE);
 
-			if (url.startsWith ("http")) {
-				if (SettingsActivity.getShowKeyboard (prefs)) {
-					muteH.setVisibility (View.GONE);
-					js (JS_INIT_KBD);
-				} else
-					js (JS_INIT_NOKBD);				
-			}
+			if (url.startsWith ("http"))
+				js (JS_INIT_KBD);
 	    }
 	}
 	
@@ -250,41 +246,6 @@ public class WebReviewActivity extends Activity {
 	}
 	
 	/**
-	 * A small job that hides or shows the mute botton. We need to implement this
-	 * here because {@link WebReviewActibity.WKNKeyboard} gets called from a
-	 * javascript thread, which is not necessarily an UI thread.
-	 * The constructor simply calls <code>runOnUIThread</code> to make sure
-	 * we hide/show the button from the correct context.
-	 */
-	private class ShowHideMuteButton implements Runnable {
-		
-		/** Whether to show or to hide */
-		boolean show;
-		
-		/**
-		 * Constructor. It also takes care to schedule the invokation
-		 * on the UI thread, so all you have to do is just to create an
-		 * instance of this object
-		 * @param show whether to show or to hide
-		 */
-		ShowHideMuteButton (boolean show)
-		{
-			this.show = show;
-			
-			runOnUiThread (this);
-		}
-		
-		/**
-		 * Hides/shows the button. Invoked by the UI thread.
-		 */
-		public void run ()
-		{
-			showMuteButtons (muteH, show);
-		}
-		
-	}
-
-	/**
 	 * This class implements the <code>wknKeyboard</code> javascript object.
 	 * It implements the @link {@link #show} and {@link #hide} methods. 
 	 */
@@ -335,26 +296,8 @@ public class WebReviewActivity extends Activity {
 		{
 			new ShowHideKeyboard (KeyboardStatus.ICONIZED_LESSONS);
 		}
-		
-		/**
-		 * Called by javascript to show the mute button.
-		 */
-		@JavascriptInterface
-		public void showMuteButton ()
-		{
-			new ShowHideMuteButton (true);
-		}
 
-		/**
-		 * Called by javascript to show the mute button.
-		 */
-		@JavascriptInterface
-		public void hideMuteButton ()
-		{
-			new ShowHideMuteButton (false);
-		}
-
-}
+	}
 	
 	/**
 	 * A button listener that handles all the meta keys on the keyboard.
@@ -486,6 +429,9 @@ public class WebReviewActivity extends Activity {
 			"textbox = document.getElementById (\"" + WKConfig.ANSWER_BOX + "\"); " +
 			"lessobj = document.getElementById (\"" + WKConfig.LESSONS_OBJ + "\"); " +
 			"ltextbox = document.getElementById (\"" + WKConfig.LESSON_ANSWER_BOX_JP + "\"); " +
+			"if (textbox == null) {" +
+			"   textbox = document.getElementById (\"" + WKConfig.ANSWER_BOX_V2 + "\"); " +
+			"}" +
 			"if (ltextbox == null) {" +
 			"   ltextbox = document.getElementById (\"" + WKConfig.LESSON_ANSWER_BOX_EN + "\"); " +
 			"}" +
@@ -497,24 +443,6 @@ public class WebReviewActivity extends Activity {
 			"   wknKeyboard.iconizeLessons ();" +
 			"} else {" +
 			"	wknKeyboard.hide ();" +			
-			"}";
-
-	private static final String JS_INIT_NOKBD = 
-			"var textbox, lessobj, ltextbox;" +
-			"textbox = document.getElementById (\"" + WKConfig.ANSWER_BOX + "\"); " +
-			"lessobj = document.getElementById (\"" + WKConfig.LESSONS_OBJ + "\"); " +
-			"ltextbox = document.getElementById (\"" + WKConfig.LESSON_ANSWER_BOX_JP + "\"); " +
-			"if (ltextbox == null) {" +
-			"   ltextbox = document.getElementById (\"" + WKConfig.LESSON_ANSWER_BOX_EN + "\"); " +
-			"}" +
-			"if (textbox != null) {" +
-			"   textbox.focus ();" +
-			"   wknKeyboard.showMuteButton ();" +
-			"} else if (ltextbox != null) {" +
-			"   ltextbox.focus ();" +
-			"   wknKeyboard.showMuteButton ();" +
-			"} else {" +
-			"   wknKeyboard.hideMuteButton ();" +
 			"}";
 
 	private static final String JS_FOCUS = 
@@ -532,8 +460,9 @@ public class WebReviewActivity extends Activity {
 	 *  is an answer, so we iconize the keyboard. Otherwise we are entering the new question,
 	 *  so we need to show it  */
 	private static final String JS_ENTER =
-			"var textbox, ltextbox, form, submit;" +
+			"var textbox, textbox2, ltextbox, form, submit;" +
 			"textbox = document.getElementById (\"" + WKConfig.ANSWER_BOX + "\"); " +
+			"textbox2 = document.getElementById (\"" + WKConfig.ANSWER_BOX_V2 + "\"); " +
 		    "form = document.getElementById (\"new_lesson\"); " +
 			"ltextbox = document.getElementById (\"" + WKConfig.LESSON_ANSWER_BOX_JP + "\"); " +
 			"if (ltextbox == null) {" +
@@ -546,6 +475,9 @@ public class WebReviewActivity extends Activity {
 			"	   wknKeyboard.iconize ();" +
 			"   }" +
 			"   $(\"#" + WKConfig.SUBMIT_BUTTON + "\").click();" + 
+			"} else if (textbox2 != null) {" +
+		    "   buttons = document.getElementsByTagName('button'); " +
+		    "   buttons [0].click (); " +
 			"}";
 
 	/** The default keyboard. This is the sequence of keys from left to right, from top to bottom */
@@ -874,6 +806,7 @@ public class WebReviewActivity extends Activity {
 	{
 		View view;
 		
+		showMuteButtons (muteH, false);
 		kbstatus = KeyboardStatus.HIDDEN;
 		view = findViewById (R.id.keyboard);
 		view.setVisibility (View.GONE);					
@@ -887,8 +820,7 @@ public class WebReviewActivity extends Activity {
 	 */
 	protected void show ()
 	{
-		kbstatus = KeyboardStatus.VISIBLE;
-		showCommon (showEnterKey);
+		showCommon (KeyboardStatus.VISIBLE, showEnterKey);
 	}
 
 	/**
@@ -897,8 +829,32 @@ public class WebReviewActivity extends Activity {
 	 */
 	protected void showLessons ()
 	{
-		kbstatus = KeyboardStatus.VISIBLE_LESSONS;
-		showCommon (false);
+		showCommon (KeyboardStatus.VISIBLE_LESSONS, false);
+	}
+	
+	protected void showCommon (KeyboardStatus kbstatus, boolean showEnter)
+	{
+		SharedPreferences prefs;
+		boolean embedded;
+		
+		this.kbstatus = kbstatus;
+		prefs = PreferenceManager.getDefaultSharedPreferences (this);
+		embedded = kbstatus == KeyboardStatus.VISIBLE ?
+				SettingsActivity.getShowReviewsKeyboard (prefs) :
+				SettingsActivity.getShowLessonsKeyboard (prefs);
+		if (embedded)
+			showEmbedded (showEnter);
+		else
+			showNative ();
+	}
+	
+	private void showNative ()
+	{
+		InputMethodManager imm;
+		
+		showMuteButtons (muteH, true);
+		imm = (InputMethodManager) getSystemService (Context.INPUT_METHOD_SERVICE);
+		imm.showSoftInput (wv, InputMethodManager.SHOW_IMPLICIT);		
 	}
 	
 	/**
@@ -906,11 +862,12 @@ public class WebReviewActivity extends Activity {
 	 * @param showEnter if true, the bottom right key is <code>Enter</code>, 
 	 * 		otherwise <code>Hide</code>.
 	 */
-	private void showCommon (boolean showEnter)
+	private void showEmbedded (boolean showEnter)
 	{
 		View view, key;
 		int i;
 		
+		showMuteButtons (muteH, false);
 		for (i = 0; i < key_table.length; i++) {
 			key = findViewById (key_table [i]);
 			key.setVisibility (View.VISIBLE);
