@@ -17,4 +17,6 @@
 	<dimen name="m_li_width">36dp</dimen>
 	<dimen name="m_li_height">24dp</dimen>
 	<dimen name="m_spinner">24dp</dimen>	
+	<dimen name="m_search_button_height">36dip</dimen>
+	<dimen name="m_focus_border">5dip</dimen>
 </resources>
