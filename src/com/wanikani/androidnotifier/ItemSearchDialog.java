@@ -169,14 +169,14 @@ public class ItemSearchDialog {
 	
 	private class Images {
 		
+		public Drawable deselected;
+		
 		public Drawable selected;
 		
-		public Drawable unselected;
-		
-		public Images (Resources res, int selected, int unselected)
+		public Images (Resources res, int deselected, int selected)
 		{
+			this.deselected = res.getDrawable (deselected);
 			this.selected = res.getDrawable (selected);
-			this.unselected = res.getDrawable (unselected);
 		}
 		
 	}
@@ -232,25 +232,25 @@ public class ItemSearchDialog {
 
 		typeImages = new EnumMap<Item.Type, Images> (Item.Type.class);
 		typeImages.put (Item.Type.RADICAL, 
-						new Images (res, R.drawable.selected_blue, R.drawable.blue));
+						new Images (res, R.drawable.deselected_blue, R.drawable.blue));
 		typeImages.put (Item.Type.KANJI, 
-						new Images (res, R.drawable.selected_magenta, R.drawable.magenta));
+						new Images (res, R.drawable.deselected_magenta, R.drawable.magenta));
 		typeImages.put (Item.Type.VOCABULARY, 
-						new Images (res, R.drawable.selected_violet, R.drawable.violet));
+						new Images (res, R.drawable.deselected_violet, R.drawable.violet));
 
 		srsImages = new EnumMap<SRSLevel, Images> (SRSLevel.class);
 		srsImages.put (SRSLevel.APPRENTICE, 
-					   new Images (res, R.drawable.selected_apprentice, 
+					   new Images (res, R.drawable.deselected_apprentice, 
 							   	   R.drawable.apprentice));
 		srsImages.put (SRSLevel.GURU, 
-						new Images (res, R.drawable.selected_guru, R.drawable.guru));
+						new Images (res, R.drawable.deselected_guru, R.drawable.guru));
 		srsImages.put (SRSLevel.MASTER, 
-						new Images (res, R.drawable.selected_master, R.drawable.master));
+						new Images (res, R.drawable.deselected_master, R.drawable.master));
 		srsImages.put (SRSLevel.ENLIGHTEN, 
-					   new Images (res, R.drawable.selected_enlighten, 
+					   new Images (res, R.drawable.deselected_enlighten, 
 							   	   R.drawable.enlighten));
 		srsImages.put (SRSLevel.BURNED, 
-				       new Images (res, R.drawable.selected_burned, R.drawable.burned));
+				       new Images (res, R.drawable.deselected_burned, R.drawable.burned));
 
 		bind ();
 		syncFromISS ();
@@ -293,7 +293,7 @@ public class ItemSearchDialog {
 		Drawable d;
 		
 		images = typeImages.get (type);
-		d = iss.types.get (type) ? images.selected : images.unselected; 
+		d = iss.types.get (type) ? images.selected : images.deselected; 
 		typeButtons.get (type).setImageDrawable (d);
 	}
 	
@@ -303,7 +303,7 @@ public class ItemSearchDialog {
 		Drawable d;
 		
 		images = srsImages.get (srs);
-		d = iss.srses.get (srs) ? images.selected : images.unselected; 
+		d = iss.srses.get (srs) ? images.selected : images.deselected; 
 		srsButtons.get (srs).setImageDrawable (d);
 	}
 
