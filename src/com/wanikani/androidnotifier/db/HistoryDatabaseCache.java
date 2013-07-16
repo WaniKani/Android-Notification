@@ -1,5 +1,7 @@
 package com.wanikani.androidnotifier.db;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.Hashtable;
 import java.util.List;
@@ -49,6 +51,22 @@ public class HistoryDatabaseCache {
 			lad = new Date ();
 			
 			segments = new Vector<PageSegment> (1);
+		}
+		
+		public void access ()
+		{
+			lad = new Date ();
+		}		
+	}
+	
+	private static class PageAgeComparator implements Comparator<Page> {
+		
+		public static PageAgeComparator INSTANCE = new PageAgeComparator ();
+		
+		@Override
+		public int compare (Page p1, Page p2)
+		{
+			return - p1.lad.compareTo (p2.lad);
 		}
 		
 	}
@@ -193,6 +211,10 @@ public class HistoryDatabaseCache {
 	
 	List<DataSource> dsources;
 	
+	private static final int PAGES_PER_SOURCE_LO = 4;
+	
+	private static final int PAGES_PER_SOURCE_HI = 6;
+	
 	public HistoryDatabaseCache ()
 	{
 		pages = new Hashtable<Integer, Page> ();
@@ -219,9 +241,10 @@ public class HistoryDatabaseCache {
 		Page page;
 		
 		page = pages.get (interval.start);
-		if (page != null)
+		if (page != null) {
+			page.access ();
 			dsource.pageAvailable (page);
-		else if (ctxt != null)
+		} else if (ctxt != null)
 			new LoadPageTask (ctxt).execute (interval);
 		else
 			pageAvailable (dummyPage (interval));
@@ -239,9 +262,26 @@ public class HistoryDatabaseCache {
 	
 	private void pageAvailable (Page page)
 	{
+		makeRoom ();
 		pages.put (page.interval.start, page);
 		for (DataSource dsource : dsources)
 			dsource.pageAvailable (page);
+	}
+	
+	private void makeRoom ()
+	{
+		Vector<Page> v;
+		int i, expected;
+		
+		expected = PAGES_PER_SOURCE_HI * dsources.size () - 1;
+		if (pages.size () > expected) {
+			expected = PAGES_PER_SOURCE_LO * dsources.size () - 1;
+			v = new Vector<Page> (pages.values ());
+			Collections.sort (v, PageAgeComparator.INSTANCE);
+			pages.clear ();
+			for (i = 0; i < expected; i++)
+				pages.put (v.get (i).interval.start, v.get (i));
+		}
 	}
 	
 	public void flush ()
