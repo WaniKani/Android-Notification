@@ -7,6 +7,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
 import android.database.SQLException;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -107,7 +108,7 @@ public class StatsFragment extends Fragment implements Tab {
 			if (!isDetached ()) {
 				if (rd != null)
 					rd.cancel ();
-				rd = new ReconstructDialog (main);
+				rd = new ReconstructDialog (main, main.getConnection ());
 			}
 		}
 	}

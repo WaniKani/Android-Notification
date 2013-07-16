@@ -132,13 +132,41 @@ public class Connection {
 		}
 	}
 	
+	private static String levelList (int level [])
+	{
+		StringBuffer sb;
+		int i;
+		
+		sb = new StringBuffer ();
+		sb.append (level [0]);		
+		for (i = 1; i < level.length; i++)
+			sb.append (',').append (level [i]);
+		
+		return sb.toString ();
+	}
+	
 	public ItemLibrary<Radical> getRadicals (int level)
+			throws IOException
+	{
+		Response res;
+			
+		try {
+			res = call ("radicals", true, Integer.toString (level));
+
+			return new ItemLibrary<Radical> (Radical.FACTORY, res.infoAsArray);
+				
+		} catch (JSONException e) {
+			throw new ParseException ();
+		}
+	}
+
+	public ItemLibrary<Radical> getRadicals (int levels [])
 		throws IOException
 	{
 		Response res;
-		
+
 		try {
-			res = call ("radicals", true, Integer.toString (level));
+			res = call ("radicals", true, levelList (levels));
 
 			return new ItemLibrary<Radical> (Radical.FACTORY, res.infoAsArray);
 			
@@ -187,6 +215,21 @@ public class Connection {
 		}
 	}
 	
+	public ItemLibrary<Kanji> getKanji (int level [])
+		throws IOException
+	{
+		Response res;
+			
+		try {
+			res = call ("kanji", true, levelList (level));
+
+			return new ItemLibrary<Kanji> (Kanji.FACTORY, res.infoAsArray);
+				
+		} catch (JSONException e) {
+			throw new ParseException ();
+		}
+	}
+		
 	public ItemLibrary<Vocabulary> getVocabulary (int level)
 		throws IOException
 	{
@@ -194,6 +237,21 @@ public class Connection {
 		
 		try {
 			res = call ("vocabulary", true, Integer.toString (level));
+
+			return new ItemLibrary<Vocabulary> (Vocabulary.FACTORY, res.infoAsArray);
+			
+		} catch (JSONException e) {
+			throw new ParseException ();
+		}
+	}
+	
+	public ItemLibrary<Vocabulary> getVocabulary (int level [])
+			throws IOException
+	{
+		Response res;
+			
+		try {
+			res = call ("vocabulary", true, levelList (level));
 
 			return new ItemLibrary<Vocabulary> (Vocabulary.FACTORY, res.infoAsArray);
 			

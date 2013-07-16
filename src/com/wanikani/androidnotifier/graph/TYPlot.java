@@ -515,7 +515,7 @@ public class TYPlot extends View {
 		if (dsink != null && dsink.ds != null) {
 			partial = drawPlot (canvas, dsink.ds);
 			if (chart != null)
-				chart.partialShown (partial);				
+				chart.partialShown (partial || true);				
 		}
 			
 		drawGrid (canvas);

@@ -1,14 +1,25 @@
 package com.wanikani.androidnotifier;
 
+import java.io.IOException;
+
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.database.SQLException;
 import android.os.AsyncTask;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+
+import com.wanikani.androidnotifier.db.HistoryDatabase;
+import com.wanikani.wklib.Connection;
+import com.wanikani.wklib.ItemLibrary;
+import com.wanikani.wklib.Kanji;
+import com.wanikani.wklib.Radical;
+import com.wanikani.wklib.UserInformation;
+import com.wanikani.wklib.Vocabulary;
 
 public class ReconstructDialog {
 
@@ -41,10 +52,10 @@ public class ReconstructDialog {
 		int percentage;
 		
 		String msg;
-	
-		public Update (int percentage, String msg)
+		
+		public Update (int done, int steps, String msg)
 		{
-			this.percentage = percentage;
+			percentage = (100 * done) / steps;
 			this.msg = msg;
 		}
 		
@@ -81,9 +92,9 @@ public class ReconstructDialog {
 			dialog.show ();				
 		}
 		
-		public void cancel ()
+		public void dismiss ()
 		{
-			dialog.cancel ();
+			dialog.dismiss ();
 		}
 		
 		public void publish (Update u)
@@ -95,20 +106,120 @@ public class ReconstructDialog {
 	
 	private class Task extends AsyncTask<Void, Update, Boolean> {
 		
+		private Connection conn;
+		
+		private Context ctxt;
+		
+		private static final int RADICALS_CHUNK = 10;
+		
+		private static final int KANJI_CHUNK = 10;
+		
+		private static final int VOCAB_CHUNK = 5;
+		
+		public Task (Connection conn, Context ctxt)
+		{
+			this.conn = conn;
+			this.ctxt = ctxt;
+		}
+		
+		private int [] array (int from, int to)
+		{
+			int ans [], i;
+			
+			ans = new int [to - from + 1];
+			for (i = from; i <= to; i++)
+				ans [i - from] = i;
+			
+			return ans;
+		}
+		
+		private int itemStepsFor (int level, int chunk)
+		{
+			return (level + chunk - 1) / chunk;
+		}
+		
 		@Override
 		protected Boolean doInBackground (Void... v)
 		{
-			int i;
-			
-			for (i = 0; i < 100; i += 5) {
-				if (cancelled)
-					break;
-				super.publishProgress (new Update (i, "At " + i));
-				try {
-					Thread.sleep (1000);
-				} catch (Exception e) {
-					
+			HistoryDatabase.ReconstructTable rt;
+			ItemLibrary<Vocabulary> vlib;
+			ItemLibrary<Radical> rlib;
+			ItemLibrary<Kanji> klib;
+			UserInformation ui;
+			HistoryDatabase hdb;
+			int i, step, steps;
+			Update u;
+
+			hdb = null;
+			rt = null;
+			try {
+				hdb = new HistoryDatabase (ctxt);
+				hdb.openW ();
+
+				ui = conn.getUserInformation ();
+				steps = 1 +	 
+						(2 * itemStepsFor (ui.level, RADICALS_CHUNK)) +   
+						(2 * itemStepsFor (ui.level, KANJI_CHUNK)) +
+						(2 * itemStepsFor (ui.level, VOCAB_CHUNK)) +
+						1;
+				step = 0;
+				
+				u = new Update (step++, steps, ctxt.getString (R.string.rec_start));
+				publishProgress (u);
+				rt = hdb.startReconstructing (ui);
+				for (i = 1; i <= ui.level; i += RADICALS_CHUNK) {
+					u = new Update (step++, steps, 
+									ctxt.getString (R.string.rec_radicals_r,
+									i, i + RADICALS_CHUNK - 1));
+					publishProgress (u);
+					rlib = conn.getRadicals (array (i, i + RADICALS_CHUNK - 1));
+					u = new Update (step++, steps, ctxt.getString (R.string.rec_radicals_w));
+					publishProgress (u);
+					for (Radical r : rlib.list)
+						rt.load (r);
 				}
+				
+				for (i = 1; i <= ui.level; i += KANJI_CHUNK) {
+					u = new Update (step++, steps, 
+									ctxt.getString (R.string.rec_kanji_r,
+									i, i + KANJI_CHUNK - 1));
+					publishProgress (u);
+					klib = conn.getKanji (array (i, i + KANJI_CHUNK - 1));
+					u = new Update (step++, steps, ctxt.getString (R.string.rec_kanji_w));
+					publishProgress (u);
+					try {
+						for (Kanji kanji : klib.list)
+							rt.load (kanji);
+					} catch (Throwable t) {
+						t.printStackTrace();
+					}
+				}
+				
+				for (i = 1; i <= ui.level; i += VOCAB_CHUNK) {
+					u = new Update (step++, steps, 
+									ctxt.getString (R.string.rec_vocab_r,
+									i, i + VOCAB_CHUNK - 1));
+					publishProgress (u);
+					vlib = conn.getVocabulary (array (i, i + VOCAB_CHUNK - 1));
+					u = new Update (step++, steps, ctxt.getString (R.string.rec_vocab_w));
+					publishProgress (u);
+					for (Vocabulary vocab : vlib.list)
+						rt.load (vocab);
+				}
+
+				u = new Update (step++, steps, ctxt.getString (R.string.rec_end));
+				publishProgress (u);
+				hdb.endReconstructing (rt);
+				
+			} catch (SQLException e) {
+				return false;
+			} catch (IOException e) {
+				return false;
+			} finally {
+				if (rt != null)
+					rt.close ();
+				if (hdb != null)
+					hdb.close ();
 			}
 			
 			return true;	
@@ -117,8 +228,7 @@ public class ReconstructDialog {
 		@Override
 		protected void onPostExecute (Boolean b)
 		{
-			if (pdialog != null)
-				pdialog.cancel ();
+			complete ();
 		}
 		
 		@Override
@@ -129,15 +239,21 @@ public class ReconstructDialog {
 		}
 	}
 	
+	Connection conn;
+	
 	boolean cancelled;
+	
+	boolean completed;
 	
 	ProgressDialog pdialog;
 	
-	public ReconstructDialog (Context ctxt)
+	public ReconstructDialog (Context ctxt, Connection conn)
 	{
 		AlertDialog.Builder builder;
 		Dialog dialog;
 					
+		this.conn = conn;
+		
 		builder = new AlertDialog.Builder (ctxt);
 		builder.setTitle (R.string.txt_reconstruct_title);
 		builder.setMessage (R.string.txt_reconstruct_intro);
@@ -152,7 +268,7 @@ public class ReconstructDialog {
 	public void go (Context ctxt)
 	{
 		attach (ctxt);
-		new Task ().execute ();
+		new Task (conn, ctxt).execute ();
 	}
 	
 	public void cancel ()
@@ -162,16 +278,29 @@ public class ReconstructDialog {
 	
 	public void attach (Context ctxt)
 	{
+		if (cancelled || completed)
+			return;
+		
 		createDialog (ctxt);
 	}
 	
 	public void detach ()
 	{
+		if (pdialog != null)
+			pdialog.dismiss ();
+		
 		pdialog = null;
 	}
 	
 	private void createDialog (Context ctxt)
 	{
 		pdialog = new ProgressDialog (ctxt);
+	}
+	
+	private void complete ()
+	{
+		detach ();
+		
+		completed = true;
 	}
 }

@@ -2,6 +2,7 @@ package com.wanikani.androidnotifier.db;
 
 import java.util.Date;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
@@ -9,8 +10,11 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
 
+import com.wanikani.wklib.Kanji;
+import com.wanikani.wklib.Radical;
 import com.wanikani.wklib.SRSDistribution;
 import com.wanikani.wklib.UserInformation;
+import com.wanikani.wklib.Vocabulary;
 
 /* 
  *  Copyright (c) 2013 Alberto Cuda
@@ -153,8 +157,12 @@ public class HistoryDatabase {
 		private static final String SQL_DROP = 
 				"DROP TABLE IF EXISTS " + TABLE;
 		
+		private static final String SQL_MISSING_DAYS =
+				"SELECT " + C_DAY + " FROM " + TABLE + 
+				" WHERE " + C_GURU_KANJI + " IS NULL";
+		
 		private static final String SQL_INSERT_DAY =
-				"REPLACE INTO " + TABLE + " (" + C_DAY + ") VALUES (?)";
+				"INSERT OR IGNORE INTO " + TABLE + " (" + C_DAY + ") VALUES (?)";
 		
 		private static final String SQL_INSERT =
 				"REPLACE INTO " + TABLE +  " VALUES (" +
@@ -163,8 +171,14 @@ public class HistoryDatabase {
 						"?, ?, ?, ?, ?, " +
 						"?, ?, ?, ?, ?)";
 		
-		private static final String SQL_SELECT = 
+		private static final String WHERE_DAY_BETWEEN = 
 				C_DAY + " BETWEEN ? AND ? ";
+		
+		private static final String WHERE_DAY_LTE =
+				C_DAY + " <= ?";
+		
+		private static final String WHERE_DAY_IS =
+				C_DAY + " = ?";
 		
 		public static void onCreate (SQLiteDatabase db)
 		{
@@ -202,37 +216,79 @@ public class HistoryDatabase {
 			}
 		}
 		
+		public static void fillGapsThoroughly (SQLiteDatabase db, int day)
+			throws SQLException
+		{
+			SQLiteStatement stmt;
+			String cols [], args [];
+			Cursor c;
+			int i;
+						
+			cols = new String [] { " COUNT (*)" };
+			args = new String [] { Integer.toString (day) };
+		 	
+			/* First of all we must make sure that gaps do exist */
+			c = db.query (TABLE, cols, WHERE_DAY_LTE, args, null, null, null);
+			if (c.moveToNext () && !c.isNull (0)) {
+				if (c.getInt (0) == day + 1)
+					return;
+			}
+			
+			/* Yeah, I know, using rowcount I could identify where gaps lie, 
+			 * but this should never happen, so we can afford being brutal */
+			stmt = db.compileStatement (SQL_INSERT_DAY);
+			for (i = 0; i <= day; i++) {
+				stmt.bindLong (1, i);
+				stmt.executeInsert ();
+			}
+		}
+		
 		public static void insert (SQLiteDatabase db, int day, SRSDistribution srs)
 			throws SQLException
 		{
-			String values [];
-
-			values = new String [] {
-					Integer.toString (day),
-
-					Integer.toString (srs.guru.radicals),
-					Integer.toString (srs.master.radicals),
-					Integer.toString (srs.enlighten.radicals),
-					Integer.toString (srs.burned.radicals),
-					Integer.toString (srs.apprentice.radicals + srs.guru.radicals +
-									  srs.master.radicals + srs.enlighten.radicals),
-
-					Integer.toString (srs.guru.kanji),
-					Integer.toString (srs.master.kanji),
-					Integer.toString (srs.enlighten.kanji),
-					Integer.toString (srs.burned.kanji),
-					Integer.toString (srs.apprentice.kanji + srs.guru.kanji +
-									  srs.master.kanji + srs.enlighten.kanji),
-
-					Integer.toString (srs.guru.vocabulary),
-					Integer.toString (srs.master.vocabulary),
-					Integer.toString (srs.enlighten.vocabulary),
-					Integer.toString (srs.burned.vocabulary),
-					Integer.toString (srs.apprentice.vocabulary + srs.guru.vocabulary +
-									  srs.master.vocabulary + srs.enlighten.vocabulary),									  
-			};
+			ContentValues cv;
+			String deleteArgs [];
 			
-			db.execSQL (SQL_INSERT, values);		
+			cv = new ContentValues ();
+			cv.put (C_DAY, day);
+			cv.put (C_GURU_RADICALS, srs.guru.radicals);
+			cv.put (C_MASTER_RADICALS, srs.master.radicals);
+			cv.put (C_ENLIGHTEN_RADICALS, srs.enlighten.radicals);
+			cv.put (C_BURNED_RADICALS, srs.burned.radicals);
+			cv.put (C_UNLOCKED_RADICALS,
+					srs.apprentice.radicals + srs.guru.radicals +
+					srs.master.radicals + srs.enlighten.radicals);
+
+			cv.put (C_GURU_KANJI, srs.guru.kanji);
+			cv.put (C_MASTER_KANJI, srs.master.kanji);
+			cv.put (C_ENLIGHTEN_KANJI, srs.enlighten.kanji);
+			cv.put (C_BURNED_KANJI, srs.burned.kanji);
+			cv.put (C_UNLOCKED_KANJI, 
+					srs.apprentice.kanji + srs.guru.kanji +
+					srs.master.kanji + srs.enlighten.kanji);
+
+			cv.put (C_GURU_VOCAB, srs.guru.vocabulary);
+			cv.put (C_MASTER_VOCAB, srs.master.vocabulary);
+			cv.put (C_ENLIGHTEN_VOCAB, srs.enlighten.vocabulary);
+			cv.put (C_BURNED_VOCAB, srs.burned.vocabulary);
+			cv.put (C_UNLOCKED_VOCAB,
+					srs.apprentice.vocabulary + srs.guru.vocabulary +
+					srs.master.vocabulary + srs.enlighten.vocabulary);
+			
+			deleteArgs = new String [] { Integer.toString (day) };
+
+			/* What I'd like to do here is a REPLACE operation, and receive an
+			 * SQLException if it fails. I could not find any way to implement 
+			 * this, however, using this API level. 
+			 * So I do it manually */						
+			db.beginTransaction ();
+			try {
+				db.delete (TABLE, WHERE_DAY_IS, deleteArgs);
+				db.insertOrThrow (TABLE, null, cv);
+				db.setTransactionSuccessful ();
+			} finally {
+				db.endTransaction ();
+			}
 		}
 
 		public static Cursor select (SQLiteDatabase db, int from, int to)
@@ -242,7 +298,7 @@ public class HistoryDatabase {
 			
 			args = new String [] { Integer.toString (from), Integer.toString (to) };
 			
-			return db.query (TABLE, null, SQL_SELECT, args, null, null, C_DAY);
+			return db.query (TABLE, null, WHERE_DAY_BETWEEN, args, null, null, C_DAY);
 		}
 		
 		public static CoreStats getCoreStats (SQLiteDatabase db)
@@ -336,6 +392,215 @@ public class HistoryDatabase {
 			srs.enlighten.total = srs.enlighten.radicals + srs.enlighten.kanji + srs.enlighten.vocabulary;
 			srs.burned.total = srs.burned.radicals + srs.burned.kanji + srs.burned.vocabulary;			
 		}
+	}
+	
+	public static class ReconstructTable {
+
+		private static final String TABLE = "reconstruct";
+		
+		private static final String C_DAY = "_id";
+		
+		private static final String C_BURNED_RADICALS = "burned_radicals";
+		
+		private static final String C_UNLOCKED_RADICALS = "unlocked_radicals";
+
+		private static final String C_BURNED_KANJI = "burned_kanji";
+
+		private static final String C_UNLOCKED_KANJI = "unlocked_kanji";
+
+		private static final String C_BURNED_VOCAB = "burned_vocab";
+		
+		private static final String C_UNLOCKED_VOCAB = "unlocked_vocab";
+		
+		private static final String SQL_CREATE = 
+				"CREATE TABLE " + TABLE + " (" +
+
+						C_DAY + " INTEGER PRIMARY KEY," +
+						
+						C_BURNED_RADICALS + " INTEGER DEFAULT 0, " +
+						C_UNLOCKED_RADICALS + " INTEGER DEFAULT 0, " +
+
+						C_BURNED_KANJI + " INTEGER DEFAULT 0, " +
+						C_UNLOCKED_KANJI + " INTEGER DEFAULT 0, " +
+
+						C_BURNED_VOCAB + " INTEGER DEFAULT 0, " +
+						C_UNLOCKED_VOCAB + " INTEGER DEFAULT 0)";
+		
+		private static final String SQL_DROP = 
+				"DROP TABLE IF EXISTS " + TABLE;
+		
+		private static final String SQL_COPY_FROM_FACTS =
+				"INSERT INTO " + TABLE +  "(" + C_DAY + ") " + 
+						Facts.SQL_MISSING_DAYS;
+		
+		private static final String SQL_COPY_TO_FACTS =
+				"REPLACE INTO " + Facts.TABLE + "( " +
+						Facts.C_DAY + ", " +
+						Facts.C_UNLOCKED_RADICALS + ", " +
+						Facts.C_BURNED_RADICALS + ", " +
+						Facts.C_UNLOCKED_KANJI + ", " +
+						Facts.C_BURNED_KANJI + ", " +
+						Facts.C_UNLOCKED_VOCAB + ", "+
+						Facts.C_BURNED_VOCAB + " ) " +
+				"SELECT " +
+						C_DAY + ", " +
+						C_UNLOCKED_RADICALS + ", " +
+						C_BURNED_RADICALS + ", " +
+						C_UNLOCKED_KANJI + ", " +
+						C_BURNED_KANJI + ", " +
+						C_UNLOCKED_VOCAB + ", "+
+						C_BURNED_VOCAB + " " +
+				"FROM " + TABLE;
+
+		private static String SQL_ABOVE =
+				"UPDATE " + TABLE + " SET %1$s = %1$s + 1 WHERE " + C_DAY + " >= ?";
+		
+		private static String SQL_BETWEEN =
+				"UPDATE " + TABLE + " SET %1$s = %1$s + 1 WHERE " + 
+						C_DAY + " BETWEEN ? AND ?";
+		
+		private SQLiteStatement radicalStmtU;
+		
+		private SQLiteStatement radicalStmtB1;
+		
+		private SQLiteStatement radicalStmtB2;
+
+		private SQLiteStatement kanjiStmtU;
+		
+		private SQLiteStatement kanjiStmtB1;
+		
+		private SQLiteStatement kanjiStmtB2;
+
+		private SQLiteStatement vocabStmtU;
+		
+		private SQLiteStatement vocabStmtB1;
+				
+		private SQLiteStatement vocabStmtB2;
+
+		private SQLiteDatabase db;
+		
+		private UserInformation ui;
+		
+		private ReconstructTable (UserInformation ui, SQLiteDatabase db, int day)
+		{			
+			this.db = db;
+			this.ui = ui;
+			
+			db.execSQL (SQL_DROP);
+			db.execSQL (SQL_CREATE);
+			db.execSQL (SQL_COPY_FROM_FACTS);			
+			
+			radicalStmtU = db.compileStatement 
+					(String.format (SQL_ABOVE, C_UNLOCKED_RADICALS));
+			radicalStmtB1 = db.compileStatement
+					(String.format (SQL_BETWEEN, C_UNLOCKED_RADICALS));
+			radicalStmtB2 = db.compileStatement
+					(String.format (SQL_ABOVE, C_BURNED_RADICALS));
+
+			kanjiStmtU = db.compileStatement 
+					(String.format (SQL_ABOVE, C_UNLOCKED_KANJI));
+			kanjiStmtB1 = db.compileStatement
+					(String.format (SQL_BETWEEN, C_UNLOCKED_KANJI));
+			kanjiStmtB2 = db.compileStatement
+					(String.format (SQL_ABOVE, C_BURNED_KANJI));
+
+			vocabStmtU = db.compileStatement 
+					(String.format (SQL_ABOVE, C_UNLOCKED_VOCAB));
+			vocabStmtB1 = db.compileStatement
+					(String.format (SQL_BETWEEN, C_UNLOCKED_VOCAB));
+			vocabStmtB2 = db.compileStatement
+					(String.format (SQL_ABOVE, C_BURNED_VOCAB));
+		}
+		
+		public void close ()
+		{
+			radicalStmtU.close ();
+			radicalStmtB1.close ();
+			radicalStmtB2.close ();
+			
+			kanjiStmtU.close ();
+			kanjiStmtB1.close ();
+			kanjiStmtB2.close ();
+			
+			vocabStmtU.close ();
+			vocabStmtB1.close ();
+			vocabStmtB2.close ();
+		}
+		
+		public void load (Radical radical)
+		{
+			Date from, to;
+			
+			from = radical.getUnlockedDate ();
+			if (from == null)
+				return;
+
+			to = radical.stats.burned ? radical.stats.burnedDate : null; 
+			
+			if (to != null) {
+				radicalStmtB1.bindLong (1, ui.getDay (from));
+				radicalStmtB1.bindLong (2, ui.getDay (to));
+				radicalStmtB1.execute ();
+				
+				radicalStmtB2.bindLong (1, ui.getDay (to));
+				radicalStmtB2.execute ();				
+			} else {
+				radicalStmtU.bindLong (1, ui.getDay (from));
+				radicalStmtU.execute ();				
+			}
+		}
+		
+		public void load (Kanji kanji)
+		{
+			Date from, to;
+			
+			from = kanji.getUnlockedDate ();
+			if (from == null)
+				return;
+
+			to = kanji.stats.burned ? kanji.stats.burnedDate : null; 
+			
+			if (to != null) {
+				kanjiStmtB1.bindLong (1, ui.getDay (from));
+				kanjiStmtB1.bindLong (2, ui.getDay (to));
+				kanjiStmtB1.execute ();
+				
+				kanjiStmtB2.bindLong (1, ui.getDay (to));
+				kanjiStmtB2.execute ();				
+			} else {
+				kanjiStmtU.bindLong (1, ui.getDay (from));
+				kanjiStmtU.execute ();				
+			}
+		}
+		
+		public void load (Vocabulary vocab)
+		{
+			Date from, to;
+			
+			from = vocab.getUnlockedDate ();
+			if (from == null)
+				return;
+			
+			to = vocab.stats.burned ? vocab.stats.burnedDate : null; 
+			
+			if (to != null) {
+				vocabStmtB1.bindLong (1, ui.getDay (from));
+				vocabStmtB1.bindLong (2, ui.getDay (to));
+				vocabStmtB1.execute ();
+				
+				vocabStmtB2.bindLong (1, ui.getDay (to));
+				vocabStmtB2.execute ();				
+			} else {
+				vocabStmtU.bindLong (1, ui.getDay (from));
+				vocabStmtU.execute ();				
+			}
+		}
+		
+		private void merge ()
+		{
+			db.execSQL (SQL_COPY_TO_FACTS);
+		}
+		
 	}
 	
 	static class Levels {
@@ -446,6 +711,24 @@ public class HistoryDatabase {
 		return Facts.select (db, from, to);
 	}
 	
+	public ReconstructTable startReconstructing (UserInformation ui)
+	{
+		int yesterday;
+		
+		yesterday = ui.getDay () - 1;
+		if (yesterday < 0)
+			return null;
+		
+		Facts.fillGapsThoroughly (db, yesterday);
+		
+		return new ReconstructTable (ui, db, yesterday);
+	}
+	
+	public void endReconstructing (ReconstructTable rt)
+	{
+		rt.merge ();
+	}
+		
 	public void insert (UserInformation ui, SRSDistribution srs)
 		throws SQLException
 	{
