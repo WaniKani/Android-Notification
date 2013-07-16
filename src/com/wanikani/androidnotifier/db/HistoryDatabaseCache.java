@@ -142,9 +142,11 @@ public class HistoryDatabaseCache {
 				day = interval [0].start - 1; /* A safe default in case we got an empty set */
 				while (c.moveToNext ()) {
 					day = HistoryDatabase.Facts.getDay (c);
-					if (day != i)
+					if (day != i) {
 						page.segments.add (new PageSegment (i, day - 1, 
 								                            ltype = HistoryDatabase.FactType.MISSING));
+						i = day;
+					}
 						
 					type = HistoryDatabase.Facts.getType (c);
 					if (type != ltype) {
