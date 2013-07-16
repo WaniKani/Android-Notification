@@ -1,9 +1,8 @@
 package com.wanikani.androidnotifier.graph;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
-
-import android.content.Context;
 
 /* 
  *  Copyright (c) 2013 Alberto Cuda
@@ -68,6 +67,20 @@ public class Pager {
 				
 	}
 	
+	public static class Marker {
+		
+		public int color;
+		
+		public String name;
+		
+		public Marker (int color, String name)
+		{
+			this.color = color;
+			this.name = name;
+		}
+	}
+		
+	
 	public static enum SegmentType {
 		
 		MISSING,
@@ -123,6 +136,8 @@ public class Pager {
 	
 	public static interface DataSource {
 	
+		public Map<Integer, Marker> getMarkers ();
+		
 		public List<Series> getSeries ();
 		
 		public void requestPage (Interval interval, Pager pager);

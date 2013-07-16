@@ -1,6 +1,8 @@
 package com.wanikani.androidnotifier.db;
 
 import java.util.Date;
+import java.util.Hashtable;
+import java.util.Map;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -59,12 +61,15 @@ public class HistoryDatabase {
 		
 		public int maxVocab;
 		
+		public Map<Integer, Integer> levelups;
+		
 		public CoreStats (int maxUnlockedRadicals, 
 						  int maxUnlockedKanji, 
 						  int maxUnlockedVocab,
 						  int maxRadicals,
 						  int maxKanji,
-						  int maxVocab)
+						  int maxVocab,
+						  Map<Integer, Integer> levelups)
 		{
 			this.maxUnlockedRadicals = maxUnlockedRadicals;
 			this.maxUnlockedKanji = maxUnlockedKanji;
@@ -72,6 +77,7 @@ public class HistoryDatabase {
 			this.maxRadicals = maxRadicals;
 			this.maxKanji = maxKanji;
 			this.maxVocab = maxVocab;
+			this.levelups = levelups;
 		}
 	}
 	
@@ -163,13 +169,6 @@ public class HistoryDatabase {
 		
 		private static final String SQL_INSERT_DAY =
 				"INSERT OR IGNORE INTO " + TABLE + " (" + C_DAY + ") VALUES (?)";
-		
-		private static final String SQL_INSERT =
-				"REPLACE INTO " + TABLE +  " VALUES (" +
-						"?," +
-						"?, ?, ?, ?, ?, " +
-						"?, ?, ?, ?, ?, " +
-						"?, ?, ?, ?, ?)";
 		
 		private static final String WHERE_DAY_BETWEEN = 
 				C_DAY + " BETWEEN ? AND ? ";
@@ -326,9 +325,10 @@ public class HistoryDatabase {
 									getIntOrZero (c, 2),
 									getIntOrZero (c, 3),
 									getIntOrZero (c, 4),
-									getIntOrZero (c, 5));
+									getIntOrZero (c, 5),
+									Levels.getLevelups (db));
 			} catch (SQLException e) {
-				cs = new CoreStats (0, 0, 0, 0, 0, 0);
+				cs = new CoreStats (0, 0, 0, 0, 0, 0, null);
 			} finally {
 				c.close ();
 			}
@@ -623,7 +623,7 @@ public class HistoryDatabase {
 		
 		private static final String SQL_INSERT_OR_IGNORE =
 				"INSERT OR IGNORE INTO " + TABLE + " VALUES (?, ?)";
-	
+		
 		public static void onCreate (SQLiteDatabase db)
 		{
 			db.execSQL (SQL_CREATE);
@@ -645,6 +645,23 @@ public class HistoryDatabase {
 			};
 
 			db.execSQL (SQL_INSERT_OR_IGNORE, values);		
+		}
+		
+		public static Map<Integer, Integer> getLevelups (SQLiteDatabase db)
+			throws SQLException
+		{
+			Map<Integer, Integer> ans;
+			String cols [];
+			Cursor c;
+			
+			cols = new String [] { C_LEVEL, C_DAY };
+			ans = new Hashtable<Integer, Integer> ();
+			
+			c = db.query (TABLE, cols, null, null, null, null, null);
+			while (c.moveToNext ())
+				ans.put (c.getInt (0), c.getInt (1));
+					
+			return ans;
 		}
 		
 	}

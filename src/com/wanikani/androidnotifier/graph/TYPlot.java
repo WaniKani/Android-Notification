@@ -160,6 +160,8 @@ public class TYPlot extends View {
 		
 		Paint partial;
 		
+		Paint levelup;
+		
 		Map<Pager.Series, Paint> series;
 		
 		public PaintAssets (Resources res, AttributeSet attrs, Measures meas)
@@ -188,6 +190,11 @@ public class TYPlot extends View {
 			partial = new Paint (Paint.FILTER_BITMAP_FLAG);
 			shader = new BitmapShader (bmp, Shader.TileMode.REPEAT, Shader.TileMode.REPEAT);
 			partial.setShader (shader);
+			
+			levelup = new Paint ();
+			levelup.setTextAlign (Paint.Align.CENTER);
+			levelup.setTextSize ((int) meas.dateLabelFontSize);
+			levelup.setAntiAlias (true);
 			
 			series = new Hashtable<Pager.Series, Paint> ();
 		}		
@@ -523,7 +530,9 @@ public class TYPlot extends View {
 	
 	protected void drawGrid (Canvas canvas)
 	{
-		float f, dateLabelBaseline;
+		float f, dateLabelBaseline, levelupBaseline;
+		Map<Integer, Pager.Marker> markers;
+		Pager.Marker marker;
 		int d, lo, hi;
 		DateFormat df;
 		String s;
@@ -536,7 +545,14 @@ public class TYPlot extends View {
 		hi = vp.rightmostDay ();
 		cal = taxis.dayToCalendar (lo);
 		
+		markers = pager.dsource.getMarkers ();
+		
 		dateLabelBaseline = meas.plotArea.bottom + meas.dateLabelFontSize + meas.tickSize / 2;
+		levelupBaseline = meas.plotArea.top - meas.tickSize / 2;
+
+		for (d = meas.yaxisGrid; vp.getY (d) >= meas.plotArea.top; d += meas.yaxisGrid)
+			canvas.drawLine (meas.plotArea.left, vp.getY (d), 
+							 meas.plotArea.right, vp.getY (d), pas.gridPaint);
 
 		for (d = lo; d <= hi; d++) {
 			f = vp.getRelPosition (d);
@@ -551,15 +567,18 @@ public class TYPlot extends View {
 				s = df.format (cal.getTime ());
 				canvas.drawLine (f, meas.plotArea.bottom - meas.tickSize / 2,
 								 f, meas.plotArea.bottom + meas.tickSize / 2, pas.axisPaint);
-				canvas.drawText (s, f, dateLabelBaseline, pas.dateLabels);
+				canvas.drawText (s, f, dateLabelBaseline, pas.dateLabels);							
 			}			
+			
+			marker = markers.get (d);
+			if (marker != null) {
+				pas.levelup.setColor (marker.color);
+				canvas.drawLine (f, meas.plotArea.top, f, meas.plotArea.bottom, pas.levelup);
+				canvas.drawText (marker.name, f, levelupBaseline, pas.levelup);
+			}
 			
 			cal.add (Calendar.DATE, 1);
 		}
-		
-		for (d = meas.yaxisGrid; vp.getY (d) >= meas.plotArea.top; d += meas.yaxisGrid)
-			canvas.drawLine (meas.plotArea.left, vp.getY (d), 
-							 meas.plotArea.right, vp.getY (d), pas.gridPaint);
 	}
 	
 	protected boolean drawPlot (Canvas canvas, Pager.DataSet ds)

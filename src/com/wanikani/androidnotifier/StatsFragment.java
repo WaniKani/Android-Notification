@@ -1,13 +1,14 @@
 package com.wanikani.androidnotifier;
 
+import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
 import android.database.SQLException;
-import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -17,7 +18,6 @@ import android.view.ViewGroup;
 
 import com.wanikani.androidnotifier.db.HistoryDatabase;
 import com.wanikani.androidnotifier.db.HistoryDatabaseCache;
-import com.wanikani.androidnotifier.db.HistoryDatabaseCache.Page;
 import com.wanikani.androidnotifier.db.HistoryDatabaseCache.PageSegment;
 import com.wanikani.androidnotifier.graph.Pager;
 import com.wanikani.androidnotifier.graph.Pager.Series;
@@ -66,7 +66,7 @@ public class StatsFragment extends Fragment implements Tab {
 			try {
 				return HistoryDatabase.getCoreStats (ctxt);
 			} catch (SQLException e) {
-				return new HistoryDatabase.CoreStats (0, 0, 0, 0, 0, 0);
+				return new HistoryDatabase.CoreStats (0, 0, 0, 0, 0, 0, null);
 			}
 		}	
 		
@@ -84,11 +84,21 @@ public class StatsFragment extends Fragment implements Tab {
 		
 		protected int maxY;
 		
+		protected Map<Integer, Pager.Marker> markers;
+		
+		protected int markerColor;
+		
 		public DataSource (HistoryDatabaseCache hdbc)
 		{
 			super (hdbc);
 			
+			Resources res;
+			
+			res = getResources ();
+			
+			markerColor = res.getColor (R.color.levelup);		
 			maxY = 100;
+			markers = new Hashtable<Integer, Pager.Marker> ();
 		}
 		
 		public List<Series> getSeries ()
@@ -101,7 +111,30 @@ public class StatsFragment extends Fragment implements Tab {
 			return maxY;
 		}
 		
-		public abstract void setCoreStats (HistoryDatabase.CoreStats cs);
+		public void setCoreStats (HistoryDatabase.CoreStats cs)
+		{
+			if (cs.levelups != null)
+				loadLevelups (cs.levelups);
+		}
+		
+		private void loadLevelups (Map<Integer, Integer> levelups)
+		{
+			markers.clear ();
+
+			for (Map.Entry<Integer, Integer> e : levelups.entrySet ()) {
+				markers.put (e.getValue (), newMarker (e.getValue (), e.getKey ()));
+			}
+		}		
+		
+		protected Pager.Marker newMarker (int day, int level)
+		{
+			return new Pager.Marker (markerColor, Integer.toString (level));
+		}
+		
+		public Map<Integer, Pager.Marker> getMarkers ()
+		{
+			return markers;
+		}
 		
 		public void fillPartial ()
 		{
@@ -148,6 +181,8 @@ public class StatsFragment extends Fragment implements Tab {
 		
 		public void setCoreStats (HistoryDatabase.CoreStats cs)
 		{
+			super.setCoreStats (cs);
+			
 			maxY = cs.maxUnlockedRadicals + cs.maxUnlockedKanji + cs.maxUnlockedVocab;
 			if (maxY == 0)
 				maxY = 100;			
@@ -224,6 +259,8 @@ public class StatsFragment extends Fragment implements Tab {
 		
 		public void setCoreStats (HistoryDatabase.CoreStats cs)
 		{
+			super.setCoreStats (cs);
+
 			maxY = cs.maxKanji;
 			if (maxY == 0)
 				maxY = 100;			
@@ -303,6 +340,8 @@ public class StatsFragment extends Fragment implements Tab {
 		
 		public void setCoreStats (HistoryDatabase.CoreStats cs)
 		{
+			super.setCoreStats (cs);
+
 			maxY = cs.maxVocab;
 			if (maxY == 0)
 				maxY = 100;			

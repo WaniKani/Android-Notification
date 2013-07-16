@@ -11,4 +11,5 @@
     <color name="locked">#efefef</color>
     <color name="unlocked">#7f7f7f</color>
     <color name="burned">#555</color>
+    <color name="levelup">#f00</color>
 </resources>
