@@ -1,5 +1,6 @@
 package com.wanikani.androidnotifier.db;
 
+import java.util.Date;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Vector;
@@ -35,6 +36,8 @@ public class HistoryDatabaseCache {
 	
 	public class Page {
 		
+		Date lad;
+		
 		Interval interval;
 		
 		List<PageSegment> segments;
@@ -42,6 +45,8 @@ public class HistoryDatabaseCache {
 		public Page (Interval interval)
 		{
 			this.interval = interval;
+			
+			lad = new Date ();
 			
 			segments = new Vector<PageSegment> (1);
 		}

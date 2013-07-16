@@ -12,6 +12,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
 
+import com.wanikani.wklib.Item;
 import com.wanikani.wklib.Kanji;
 import com.wanikani.wklib.Radical;
 import com.wanikani.wklib.SRSDistribution;
@@ -481,6 +482,8 @@ public class HistoryDatabase {
 		
 		private UserInformation ui;
 		
+		private Map<Integer, Integer> levelups;
+		
 		private ReconstructTable (UserInformation ui, SQLiteDatabase db, int day)
 		{			
 			this.db = db;
@@ -489,6 +492,8 @@ public class HistoryDatabase {
 			db.execSQL (SQL_DROP);
 			db.execSQL (SQL_CREATE);
 			db.execSQL (SQL_COPY_FROM_FACTS);			
+			
+			levelups = Levels.getLevelups (db);
 			
 			radicalStmtU = db.compileStatement 
 					(String.format (SQL_ABOVE, C_UNLOCKED_RADICALS));
@@ -527,9 +532,27 @@ public class HistoryDatabase {
 			vocabStmtB2.close ();
 		}
 		
+		private void checkLevelup (Item i)
+		{
+			Date unlock;
+			Integer cday;
+			int day;
+			
+			unlock = i.getUnlockedDate ();
+			if (unlock == null)
+				return;
+			
+			day = ui.getDay (unlock);
+			cday = levelups.get (i.level);
+			if (cday == null || cday > day)
+				levelups.put (i.level, day);
+		}
+		
 		public void load (Radical radical)
 		{
 			Date from, to;
+			
+			checkLevelup (radical);
 			
 			from = radical.getUnlockedDate ();
 			if (from == null)
@@ -554,6 +577,8 @@ public class HistoryDatabase {
 		{
 			Date from, to;
 			
+			checkLevelup (kanji);
+
 			from = kanji.getUnlockedDate ();
 			if (from == null)
 				return;
@@ -577,6 +602,8 @@ public class HistoryDatabase {
 		{
 			Date from, to;
 			
+			checkLevelup (vocab);
+			
 			from = vocab.getUnlockedDate ();
 			if (from == null)
 				return;
@@ -598,6 +625,7 @@ public class HistoryDatabase {
 		
 		private void merge ()
 		{
+			Levels.setLevelups (db, levelups);
 			db.execSQL (SQL_COPY_TO_FACTS);
 		}
 		
@@ -624,6 +652,9 @@ public class HistoryDatabase {
 		private static final String SQL_INSERT_OR_IGNORE =
 				"INSERT OR IGNORE INTO " + TABLE + " VALUES (?, ?)";
 		
+		private static final String SQL_REPLACE =
+				"REPLACE INTO " + TABLE + " VALUES (?, ?)";
+
 		public static void onCreate (SQLiteDatabase db)
 		{
 			db.execSQL (SQL_CREATE);
@@ -662,6 +693,19 @@ public class HistoryDatabase {
 				ans.put (c.getInt (0), c.getInt (1));
 					
 			return ans;
+		}
+		
+		public static void setLevelups (SQLiteDatabase db, Map<Integer, Integer> map)
+		{
+			SQLiteStatement stmt;
+			
+			stmt = db.compileStatement (SQL_REPLACE);			
+			
+			for (Map.Entry<Integer, Integer> e : map.entrySet ()) {
+				stmt.bindLong (1, e.getKey ());
+				stmt.bindLong (2, e.getValue());
+				stmt.executeInsert ();
+			}
 		}
 		
 	}

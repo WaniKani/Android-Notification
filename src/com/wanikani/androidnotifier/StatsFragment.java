@@ -87,9 +87,9 @@ public class StatsFragment extends Fragment implements Tab {
 			rd = new ReconstructDialog (this, main, main.getConnection ());
 		}
 		
-		public void completed ()
+		public void completed (HistoryDatabase.CoreStats cs)
 		{
-			reconstructCompleted (this);
+			reconstructCompleted (this, cs);
 		}		
 	}
 	
@@ -473,7 +473,7 @@ public class StatsFragment extends Fragment implements Tab {
 		kanjids.setCoreStats (cs);
 		vocabds.setCoreStats (cs);
 		for (TYChart tyc : charts)
-			tyc.invalidate ();
+			tyc.refresh ();
 	}
 
 	/**
@@ -808,13 +808,14 @@ public class StatsFragment extends Fragment implements Tab {
 		}		
 	}
 	
-	private void reconstructCompleted (ReconstructListener rlist)
+	private void reconstructCompleted (ReconstructListener rlist,
+									   HistoryDatabase.CoreStats cs)
 	{
 		if (this.rlist == rlist) {
-
+			
 			hdbc.flush ();
-			for (TYChart tyc : charts)
-				tyc.refresh ();
+			
+			setCoreStats (cs);
 			
 			rlist = null;
 		}

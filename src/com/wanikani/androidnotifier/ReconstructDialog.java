@@ -25,7 +25,7 @@ public class ReconstructDialog {
 
 	public interface Interface {
 		
-		public void completed ();
+		public void completed (HistoryDatabase.CoreStats cs);
 		
 	}
 	
@@ -122,13 +122,11 @@ public class ReconstructDialog {
 		}		
 	}
 	
-	private class Task extends AsyncTask<Void, Update, Boolean> {
+	private class Task extends AsyncTask<Void, Update, HistoryDatabase.CoreStats> {
 		
 		private Connection conn;
 		
 		private Context ctxt;
-		
-		private Update lupd;
 		
 		private static final int RADICALS_CHUNK = 10;
 		
@@ -159,7 +157,7 @@ public class ReconstructDialog {
 		}
 		
 		@Override
-		protected Boolean doInBackground (Void... v)
+		protected HistoryDatabase.CoreStats doInBackground (Void... v)
 		{
 			HistoryDatabase.ReconstructTable rt;
 			ItemLibrary<Vocabulary> vlib;
@@ -167,7 +165,7 @@ public class ReconstructDialog {
 			ItemLibrary<Kanji> klib;
 			UserInformation ui;
 			HistoryDatabase hdb;
-			int i, step, steps;
+			int i, j, step, steps;
 			Update u;
 
 			hdb = null;
@@ -186,11 +184,13 @@ public class ReconstructDialog {
 				publishProgress (u);
 				rt = hdb.startReconstructing (ui);
 				for (i = 1; i <= ui.level; i += RADICALS_CHUNK) {
+					j = i + RADICALS_CHUNK - 1;
+					if (j > ui.level)
+						j = ui.level;
 					u = new Update (step++, steps, 
-									ctxt.getString (R.string.rec_radicals_r,
-									i, i + RADICALS_CHUNK - 1));
+									ctxt.getString (R.string.rec_radicals_r, i, j));
 					publishProgress (u);
-					rlib = conn.getRadicals (array (i, i + RADICALS_CHUNK - 1));
+					rlib = conn.getRadicals (array (i, j));
 					u = new Update (step++, steps, ctxt.getString (R.string.rec_radicals_w));
 					publishProgress (u);
 					for (Radical r : rlib.list)
@@ -198,11 +198,13 @@ public class ReconstructDialog {
 				}
 				
 				for (i = 1; i <= ui.level; i += KANJI_CHUNK) {
+					j = i + KANJI_CHUNK - 1;
+					if (j > ui.level)
+						j = ui.level;
 					u = new Update (step++, steps, 
-									ctxt.getString (R.string.rec_kanji_r,
-									i, i + KANJI_CHUNK - 1));
+									ctxt.getString (R.string.rec_kanji_r, i, j));
 					publishProgress (u);
-					klib = conn.getKanji (array (i, i + KANJI_CHUNK - 1));
+					klib = conn.getKanji (array (i, j));
 					u = new Update (step++, steps, ctxt.getString (R.string.rec_kanji_w));
 					publishProgress (u);
 					for (Kanji kanji : klib.list)
@@ -210,11 +212,13 @@ public class ReconstructDialog {
 				}
 				
 				for (i = 1; i <= ui.level; i += VOCAB_CHUNK) {
+					j = i + VOCAB_CHUNK - 1;
+					if (j > ui.level)
+						j = ui.level;
 					u = new Update (step++, steps, 
-									ctxt.getString (R.string.rec_vocab_r,
-									i, i + VOCAB_CHUNK - 1));
+									ctxt.getString (R.string.rec_vocab_r, i, j));
 					publishProgress (u);
-					vlib = conn.getVocabulary (array (i, i + VOCAB_CHUNK - 1));
+					vlib = conn.getVocabulary (array (i, j));
 					u = new Update (step++, steps, ctxt.getString (R.string.rec_vocab_w));
 					publishProgress (u);
 					for (Vocabulary vocab : vlib.list)
@@ -223,27 +227,27 @@ public class ReconstructDialog {
 
 				hdb.endReconstructing (rt);
 				
+				return hdb.getCoreStats ();
+				
 			} catch (SQLException e) {
-				return false;
+				return null;
 			} catch (IOException e) {
-				return false;
+				return null;
 			} finally {
 				if (rt != null)
 					rt.close ();
 				if (hdb != null)
 					hdb.close ();
 			}
-			
-			return true;	
 		}	
 						
 		@Override
-		protected void onPostExecute (Boolean b)
+		protected void onPostExecute (HistoryDatabase.CoreStats cs)
 		{
-			if (!b)
+			if (cs == null)
 				publishProgress (new Update (ctxt.getString (R.string.rec_error)));
 			
-			complete (b);
+			complete (cs);
 		}
 		
 		@Override
@@ -318,12 +322,12 @@ public class ReconstructDialog {
 			publish (lastUpdate);
 	}
 	
-	private void complete (boolean ok)
+	private void complete (HistoryDatabase.CoreStats cs)
 	{		
-		if (ok) {
+		if (cs != null) {
 			detach ();		
 			completed = true;
-			ifc.completed ();
+			ifc.completed (cs);
 		}
 	}
 	
