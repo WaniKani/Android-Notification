@@ -23,6 +23,12 @@ import com.wanikani.wklib.Vocabulary;
 
 public class ReconstructDialog {
 
+	public interface Interface {
+		
+		public void completed ();
+		
+	}
+	
 	private class GoListener implements DialogInterface.OnClickListener {
 		
 		Context ctxt;
@@ -53,12 +59,20 @@ public class ReconstructDialog {
 		
 		String msg;
 		
+		boolean showBar;
+		
 		public Update (int done, int steps, String msg)
 		{
 			percentage = (100 * done) / steps;
 			this.msg = msg;
+			showBar = true;
 		}
 		
+		public Update (String msg)
+		{
+			this.msg = msg;
+			showBar = false;
+		}
 	}
 	
 	private class ProgressDialog {
@@ -98,9 +112,13 @@ public class ReconstructDialog {
 		}
 		
 		public void publish (Update u)
-		{
+		{			
 			tv.setText (u.msg);
-			pb.setProgress (u.percentage);
+			if (u.showBar) {
+				pb.setVisibility (View.VISIBLE);
+				pb.setProgress (u.percentage);
+			} else
+				pb.setVisibility (View.GONE);
 		}		
 	}
 	
@@ -109,6 +127,8 @@ public class ReconstructDialog {
 		private Connection conn;
 		
 		private Context ctxt;
+		
+		private Update lupd;
 		
 		private static final int RADICALS_CHUNK = 10;
 		
@@ -157,11 +177,9 @@ public class ReconstructDialog {
 				hdb.openW ();
 
 				ui = conn.getUserInformation ();
-				steps = 1 +	 
-						(2 * itemStepsFor (ui.level, RADICALS_CHUNK)) +   
+				steps = (2 * itemStepsFor (ui.level, RADICALS_CHUNK)) +   
 						(2 * itemStepsFor (ui.level, KANJI_CHUNK)) +
-						(2 * itemStepsFor (ui.level, VOCAB_CHUNK)) +
-						1;
+						(2 * itemStepsFor (ui.level, VOCAB_CHUNK));
 				step = 0;
 				
 				u = new Update (step++, steps, ctxt.getString (R.string.rec_start));
@@ -187,12 +205,8 @@ public class ReconstructDialog {
 					klib = conn.getKanji (array (i, i + KANJI_CHUNK - 1));
 					u = new Update (step++, steps, ctxt.getString (R.string.rec_kanji_w));
 					publishProgress (u);
-					try {
-						for (Kanji kanji : klib.list)
-							rt.load (kanji);
-					} catch (Throwable t) {
-						t.printStackTrace();
-					}
+					for (Kanji kanji : klib.list)
+						rt.load (kanji);
 				}
 				
 				for (i = 1; i <= ui.level; i += VOCAB_CHUNK) {
@@ -207,8 +221,6 @@ public class ReconstructDialog {
 						rt.load (vocab);
 				}
 
-				u = new Update (step++, steps, ctxt.getString (R.string.rec_end));
-				publishProgress (u);
 				hdb.endReconstructing (rt);
 				
 			} catch (SQLException e) {
@@ -228,14 +240,16 @@ public class ReconstructDialog {
 		@Override
 		protected void onPostExecute (Boolean b)
 		{
-			complete ();
+			if (!b)
+				publishProgress (new Update (ctxt.getString (R.string.rec_error)));
+			
+			complete (b);
 		}
 		
 		@Override
 		protected void onProgressUpdate (Update... u)
 		{
-			if (pdialog != null)
-				pdialog.publish (u [0]);
+			publish (u [0]);
 		}
 	}
 	
@@ -247,12 +261,17 @@ public class ReconstructDialog {
 	
 	ProgressDialog pdialog;
 	
-	public ReconstructDialog (Context ctxt, Connection conn)
+	Update lastUpdate;
+	
+	Interface ifc;
+	
+	public ReconstructDialog (Interface ifc, Context ctxt, Connection conn)
 	{
 		AlertDialog.Builder builder;
 		Dialog dialog;
 					
 		this.conn = conn;
+		this.ifc = ifc;
 		
 		builder = new AlertDialog.Builder (ctxt);
 		builder.setTitle (R.string.txt_reconstruct_title);
@@ -295,12 +314,25 @@ public class ReconstructDialog {
 	private void createDialog (Context ctxt)
 	{
 		pdialog = new ProgressDialog (ctxt);
+		if (lastUpdate != null)
+			publish (lastUpdate);
 	}
 	
-	private void complete ()
-	{
-		detach ();
-		
-		completed = true;
+	private void complete (boolean ok)
+	{		
+		if (ok) {
+			detach ();		
+			completed = true;
+			ifc.completed ();
+		}
 	}
+	
+	private void publish (Update update)
+	{
+		lastUpdate = update;
+		
+		if (pdialog != null)
+			pdialog.publish (update);
+	}
+	
 }

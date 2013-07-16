@@ -78,6 +78,21 @@ public class StatsFragment extends Fragment implements Tab {
 
 	}
 	
+	private class ReconstructListener implements ReconstructDialog.Interface {
+		
+		ReconstructDialog rd;
+		
+		public ReconstructListener ()
+		{
+			rd = new ReconstructDialog (this, main, main.getConnection ());
+		}
+		
+		public void completed ()
+		{
+			reconstructCompleted (this);
+		}		
+	}
+	
 	private abstract class DataSource extends HistoryDatabaseCache.DataSource {
 
 		protected List<Series> series;
@@ -138,11 +153,7 @@ public class StatsFragment extends Fragment implements Tab {
 		
 		public void fillPartial ()
 		{
-			if (!isDetached ()) {
-				if (rd != null)
-					rd.cancel ();
-				rd = new ReconstructDialog (main, main.getConnection ());
-			}
+			openReconstructDialog ();
 		}
 	}
 	
@@ -412,7 +423,7 @@ public class StatsFragment extends Fragment implements Tab {
 	/// The database
 	HistoryDatabaseCache hdbc;
 	
-	ReconstructDialog rd;
+	ReconstructListener rlist;
 	
 	/**
 	 * Constructor
@@ -439,8 +450,8 @@ public class StatsFragment extends Fragment implements Tab {
 		
 		hdbc.open (main);
 		
-		if (rd != null)
-			rd.attach (main);
+		if (rlist != null)
+			rlist.rd.attach (main);
 	}
 	
 	@Override
@@ -450,8 +461,8 @@ public class StatsFragment extends Fragment implements Tab {
 
 		hdbc.close ();
 		
-		if (rd != null)
-			rd.detach ();
+		if (rlist != null)
+			rlist.rd.detach ();
 	}
 	
 	private void setCoreStats (HistoryDatabase.CoreStats cs)
@@ -787,5 +798,25 @@ public class StatsFragment extends Fragment implements Tab {
 		
 		return false; 
 	}
+	
+	private void openReconstructDialog ()
+	{
+		if (!isDetached ()) {
+			if (rlist != null)
+				rlist.rd.cancel ();
+			rlist = new ReconstructListener (); 
+		}		
+	}
+	
+	private void reconstructCompleted (ReconstructListener rlist)
+	{
+		if (this.rlist == rlist) {
 
+			hdbc.flush ();
+			for (TYChart tyc : charts)
+				tyc.refresh ();
+			
+			rlist = null;
+		}
+	}
 }

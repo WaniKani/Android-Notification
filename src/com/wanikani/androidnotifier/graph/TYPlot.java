@@ -685,4 +685,9 @@ public class TYPlot extends View {
 		if (pager != null) 
 			pager.fillPartial ();
 	}
+	
+	public void refresh ()
+	{
+		dsink.refresh ();
+	}
 }

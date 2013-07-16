@@ -191,5 +191,9 @@ public class TYChart extends LinearLayout {
 		} else
 			hideAlert ();
 	}
-
+	
+	public void refresh ()
+	{
+		plot.refresh ();
+	}	
 }

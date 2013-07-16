@@ -236,4 +236,9 @@ public class HistoryDatabaseCache {
 		for (DataSource dsource : dsources)
 			dsource.pageAvailable (page);
 	}
+	
+	public void flush ()
+	{
+		pages.clear ();
+	}
 }
