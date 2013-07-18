@@ -3,6 +3,7 @@ package com.wanikani.androidnotifier.db;
 import java.util.Date;
 import java.util.Hashtable;
 import java.util.Map;
+import java.util.concurrent.Callable;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -36,34 +37,83 @@ import com.wanikani.wklib.Vocabulary;
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/**
+ * The database helper that gives access to the user facts tables.
+ * The schema of this database is quite simple, since it comprises just two 
+ * (permanent) tables:
+ * <ul>
+ * <li>The facts table, that records all the SRS distribution state for each day
+ * <li>The levels table, associating each level to the the day the user levelled up
+ * </ul>   
+ * In addition to these tables, this class creates an auxilary (and temporary) table
+ * to perform item reconstruction. We do this to minimize the consequences of
+ * an item reconstruction going wrong: the actual update of the facts table is
+ * performed using a single SQL statement, and this makes error management
+ * a lot easier.<p>
+ * Access to the three tables is performed through three classes ({@link Facts},
+ * {@link Level} and {@link ReconstructTable respectively}). We don't follow
+ * the DAO pattern, since it seems quite unfit to the objects rows represent.<p>
+ * This class exposes both static and non-static methods. Static methods should
+ * be used for simple operations, because they take care of opening the DB, 
+ * doing what's needed, and closing it. Multiple operations require 
+ * the caller to create an instance, calling {@link #openR()} or {@link #openW()}, 
+ * the appropriate methods, and finally {@link #close()}.
+ */
 public class HistoryDatabase {
 
+	/**
+	 * How complete is the information stored on the facts table row.
+	 */
 	public static enum FactType {
 		
+		/** No information at all */
 		MISSING,
 		
+		/** Just number of unlocked and burned items */
 		PARTIAL,
 		
+		/** Information is complete */
 		COMPLETE
 		
 	}
 	
+	/**
+	 * Some overall information, useful to setup TY plots.
+	 * @see Facts#getCoreStats(SQLiteDatabase)
+	 */
 	public static class CoreStats {
 		
+		/** Maximum number of unlocked radicals so far */
 		public int maxUnlockedRadicals;
 		
+		/** Maximum number of unlocked kanji so far */
 		public int maxUnlockedKanji;
 	
+		/** Maximum number of unlocked vocab items so far */
 		public int maxUnlockedVocab;
 		
+		/** Maximum number of unlocked/burned radicals so far */
 		public int maxRadicals;
 		
+		/** Maximum number of unlocked/burned kanji so far */
 		public int maxKanji;
 		
+		/** Maximum number of unlocked/burned vocab items so far */
 		public int maxVocab;
 		
+		/** Contents of the levels table */
 		public Map<Integer, Integer> levelups;
 		
+		/**
+		 * Constructor.
+		 * @param maxUnlockedRadicals maximum number of unlocked radicals so far
+		 * @param maxUnlockedKanji maximum number of unlocked kanji so far
+		 * @param maxUnlockedVocab maximum number of unlocked vocab items so far
+		 * @param maxRadicals maximum number of unlocked/burned radicals so far
+		 * @param maxKanji maximum number of unlocked/burned kanji so far
+		 * @param maxVocab maximum number of unlocked/burned vocab items so far
+		 * @param levelups contents of the levels table
+		 */
 		public CoreStats (int maxUnlockedRadicals, 
 						  int maxUnlockedKanji, 
 						  int maxUnlockedVocab,
@@ -82,62 +132,116 @@ public class HistoryDatabase {
 		}
 	}
 	
+	/**
+	 * The facts table. Each line represents a day, and the primary key is 
+	 * the number of days since subscription. An healthy database always
+	 * contains all the rows from day zero up to today, because when a new
+	 * record is added, this class takes care of filling all the rows from
+	 * the last record to the current day.
+	 * Depending on the amount of information stored in a row, we have three
+	 * types of facts (@see FactType):
+	 * <ul>
+	 * 	<li>A regular record, containing all the information
+	 *  <li>A "filler" record, where there is no information at all. These records
+	 *  	are added when e.g. day 42 we add a regular record and the facts table
+	 *  	stops at day 39
+	 *  <li>A partial record, created by the reconstruction process. These records
+	 *      only contain the number of unlocked and burned radicals, kanji and vocab.
+	 * </ul>
+	 * To save space, there is no apprentice column, since it can be obtained
+	 * by subtracting guru, master and enlightened values from the number of unlocked
+	 * items.
+	 */
 	public static class Facts {
-		
+
+		/** Table name */
 		private static final String TABLE = "facts";
 		
+		/** Primary key. Number of days since subscription (encoded as an integer) */
 		private static final String C_DAY = "_id";
 		
+		/** Number or guru radicals */
 		private static final String C_GURU_RADICALS = "guru_radicals";
-		
+
+		/** Number of master radicals */
 		private static final String C_MASTER_RADICALS = "master_radicals";
 
+		/** Number of enlightened radicals */
 		private static final String C_ENLIGHTEN_RADICALS = "enlighten_radicals";
 
+		/** Number of burned radicals */
 		private static final String C_BURNED_RADICALS = "burned_radicals";
-		
+
+		/** Number of unlocked radicals */
 		private static final String C_UNLOCKED_RADICALS = "unlocked_radicals";
 
+		/** Number of guru kanji */
 		private static final String C_GURU_KANJI = "guru_kanji";
 		
+		/** Number of master kanji */
 		private static final String C_MASTER_KANJI = "master_kanji";
 
+		/** Number of enlightened kanji */
 		private static final String C_ENLIGHTEN_KANJI = "enlighten_kanji";
 
+		/** Number of burned kanji */
 		private static final String C_BURNED_KANJI = "burned_kanji";
 
+		/** Number of unlocked kanji */
 		private static final String C_UNLOCKED_KANJI = "unlocked_kanji";
 
+		/** Number of guru vocab items */
 		private static final String C_GURU_VOCAB = "guru_vocab";
 		
+		/** Number of master vocab items */
 		private static final String C_MASTER_VOCAB = "master_vocab";
 
+		/** Number of enlightened vocab items */
 		private static final String C_ENLIGHTEN_VOCAB = "enlighten_vocab";
 
+		/** Number of burned vocab items */
 		private static final String C_BURNED_VOCAB = "burned_vocab";
 		
+		/** Number of unlocked vocab items */
 		private static final String C_UNLOCKED_VOCAB = "unlocked_vocab";
 		
+		/** Day column index */
 		private static final int CX_DAY = 0;
 		
+		/** Guru radicals column index */
 		private static final int CX_GURU_RADICALS = 1;		
+		/** Master radicals column index */
 		private static final int CX_MASTER_RADICALS = 2;
+		/** Enlightened radicals column index */
 		private static final int CX_ENLIGHTEN_RADICALS = 3;
+		/** Burned radicals column index */
 		private static final int CX_BURNED_RADICALS = 4;
+		/** Unlocked radicals column index */
 		private static final int CX_UNLOCKED_RADICALS = 5;
 		
+		/** Guru kanji column index */
 		private static final int CX_GURU_KANJI = 6;		
+		/** Master kanji column index */
 		private static final int CX_MASTER_KANJI = 7;
+		/** Enlightened kanji column index */
 		private static final int CX_ENLIGHTEN_KANJI = 8;
+		/** Burned kanji column index */
 		private static final int CX_BURNED_KANJI = 9;
+		/** Unlocked kanji column index */
 		private static final int CX_UNLOCKED_KANJI = 10;
 
+		/** Guru vocab items column index */
 		private static final int CX_GURU_VOCAB = 11;		
+		/** Master vocab items column index */
 		private static final int CX_MASTER_VOCAB = 12;
+		/** Enlightened vocab items column index */
 		private static final int CX_ENLIGHTEN_VOCAB = 13;
+		/** Burned vocab items column index */
 		private static final int CX_BURNED_VOCAB = 14;
+		/** Unlocked vocab items column index */
 		private static final int CX_UNLOCKED_VOCAB = 15;
 
+		/** The SQL create statement */
 		private static final String SQL_CREATE = 
 				"CREATE TABLE " + TABLE + " (" +
 
@@ -160,36 +264,60 @@ public class HistoryDatabase {
 						C_ENLIGHTEN_VOCAB + " INTEGER DEFAULT NULL, " +
 						C_BURNED_VOCAB + " INTEGER DEFAULT NULL, " +
 						C_UNLOCKED_VOCAB + " INTEGER DEFAULT NULL)";
-		
+
+		/** The SQL drop statement */
 		private static final String SQL_DROP = 
 				"DROP TABLE IF EXISTS " + TABLE;
 		
+		/** An SQL query returning all the rows carrying partial or no information */
 		private static final String SQL_MISSING_DAYS =
 				"SELECT " + C_DAY + " FROM " + TABLE + 
 				" WHERE " + C_GURU_KANJI + " IS NULL";
 		
+		/** The SQL statement that creates a new record */
 		private static final String SQL_INSERT_DAY =
 				"INSERT OR IGNORE INTO " + TABLE + " (" + C_DAY + ") VALUES (?)";
 		
+		/** Where condition, selecting records between two days */
 		private static final String WHERE_DAY_BETWEEN = 
 				C_DAY + " BETWEEN ? AND ? ";
 		
+		/** Where condition, selecting records before a given day */
 		private static final String WHERE_DAY_LTE =
 				C_DAY + " <= ?";
 		
+		/** Where condition, selecting the record of a specific day */
 		private static final String WHERE_DAY_IS =
 				C_DAY + " = ?";
 		
+		/**
+		 * Creates the table
+		 * @param db the database
+		 */
 		public static void onCreate (SQLiteDatabase db)
 		{
 			db.execSQL (SQL_CREATE);
 		}
-		
+
+		/**
+		 * Drops the table
+		 * @param db the database
+		 */		
 		public static void onDrop (SQLiteDatabase db)
 		{
 			db.execSQL (SQL_DROP);
 		}
 		
+		/**
+		 * Makes sure that adding a new record does not create a gap.
+		 * This operation must be called before adding a record that will 
+		 * describe the most recent day in the table. If the last record is not
+		 * the day before, this method takes care of "bridging" the gap
+		 * by adding empty records. Of course if gaps exist before the last
+		 * record, they are left untouched.
+		 * @param db the database
+		 * @param day the day that will be added
+		 */
 		public static void fillGap (SQLiteDatabase db, int day)
 		{
 			SQLiteStatement stmt;
@@ -216,6 +344,14 @@ public class HistoryDatabase {
 			}
 		}
 		
+		/**
+		 * Fills all the gaps in the database. This (maintenance) method 
+		 * goes through all the table and, if some day is missing in the sequence,
+		 * it adds it as an empty record
+		 * @param db the database
+		 * @param day the last day that should be present in the sequence
+		 * @throws SQLException
+		 */
 		public static void fillGapsThoroughly (SQLiteDatabase db, int day)
 			throws SQLException
 		{
@@ -243,6 +379,13 @@ public class HistoryDatabase {
 			}
 		}
 		
+		/**
+		 * Adds a new fact to the table
+		 * @param db the database
+		 * @param day the day
+		 * @param srs the data to store 
+		 * @throws SQLException
+		 */
 		public static void insert (SQLiteDatabase db, int day, SRSDistribution srs)
 			throws SQLException
 		{
@@ -291,6 +434,14 @@ public class HistoryDatabase {
 			}
 		}
 
+		/**
+		 * Returns a cursor referring to an interval of rows.
+		 * @param db the sql database
+		 * @param from the first day to be selected 
+		 * @param to the last day to be selected
+		 * @return the cursor
+		 * @throws SQLException
+		 */
 		public static Cursor select (SQLiteDatabase db, int from, int to)
 				throws SQLException
 		{
@@ -301,6 +452,13 @@ public class HistoryDatabase {
 			return db.query (TABLE, null, WHERE_DAY_BETWEEN, args, null, null, C_DAY);
 		}
 		
+		/**
+		 * Returns a {@link CoreStats} object, containing some overall info regarding
+		 * this database.
+		 * @param db the database
+		 * @return the overall info
+		 * @throws SQLException
+		 */
 		public static CoreStats getCoreStats (SQLiteDatabase db)
 				throws SQLException
 		{
@@ -337,22 +495,45 @@ public class HistoryDatabase {
 			return cs;
 		}
 
+		/**
+		 * Returns the type of row currently selected by the cursor.
+		 * @param c the cursor
+		 * @return the type of row
+		 */
 		public static FactType getType (Cursor c)
 		{
 			return  !c.isNull (CX_GURU_RADICALS) ? FactType.COMPLETE :
 					!c.isNull (CX_UNLOCKED_RADICALS) ? FactType.PARTIAL : FactType.MISSING;
 		}
 		
+		/**
+		 * Return the day currently selected by the cursor
+		 * @param c the cursor
+		 * @return the day number
+		 */
 		public static int getDay (Cursor c)
 		{
 			return c.getInt (CX_DAY);
 		}
 		
+		/**
+		 * Returns a column integer value, defaulting to zero
+		 * @param c the cursor
+		 * @param column the column index
+		 * @return its contents
+		 */
 		private static int getIntOrZero (Cursor c, int column)
 		{
 			return c.isNull (column) ? 0 : c.getInt (column);
 		}
 		
+		/**
+		 * Returns the SRS distribution of the day selected by the cursor.
+		 * In case of partial information, the total number of unlocked items
+		 * is in the apprentice level (SRS distribution have no "unlocked" field).  
+		 * @param c the cursor
+		 * @return the distribution
+		 */
 		public static SRSDistribution getSRSDistribution (Cursor c)
 		{
 			SRSDistribution srs;
@@ -385,6 +566,11 @@ public class HistoryDatabase {
 			return srs;
 		}
 		
+		/**
+		 * Given a SRS distribution object, as built from the database, if fixes
+		 * the "total" fields up.
+		 * @param srs an SRS distribution objects
+		 */
 		private static void fixupTotals (SRSDistribution srs)
 		{
 			srs.apprentice.total = srs.apprentice.radicals + srs.apprentice.kanji + srs.apprentice.vocabulary;
@@ -395,24 +581,45 @@ public class HistoryDatabase {
 		}
 	}
 	
+	/**
+	 * A temporary table used to reconstruct SRS distribution from item information.
+	 * This is actually implemented by creating a subset of the facts table
+	 * (it contains just the unlocked and burned columns for each item type).
+	 * An instance of this class is fed with all the items from level one to
+	 * the user's current level, so it can update the rows of this temporary table.
+	 * At the end of the process, we update the master table using a single
+	 * sql statement.
+	 * This class also takes care of updating the levelup table. Here, however,
+	 * the rows are comparatively few, so we store everything in an hashtable
+	 * and update the master levels table row by row (the operation is idempotent).
+	 */
 	public static class ReconstructTable {
 
+		/** The table name */
 		private static final String TABLE = "reconstruct";
 		
+		/** Primary key. The same as the master facts table */
 		private static final String C_DAY = "_id";
 		
+		/** Number of burned radicals */
 		private static final String C_BURNED_RADICALS = "burned_radicals";
 		
+		/** Number of unlocked radicals */
 		private static final String C_UNLOCKED_RADICALS = "unlocked_radicals";
 
+		/** Number of burned kanji */
 		private static final String C_BURNED_KANJI = "burned_kanji";
 
+		/** Number of unlocked kanji */
 		private static final String C_UNLOCKED_KANJI = "unlocked_kanji";
 
+		/** Number of burned vocab items */
 		private static final String C_BURNED_VOCAB = "burned_vocab";
 		
+		/** Number of unlocked vocab items */
 		private static final String C_UNLOCKED_VOCAB = "unlocked_vocab";
 		
+		/** The SQL create statement */
 		private static final String SQL_CREATE = 
 				"CREATE TABLE " + TABLE + " (" +
 
@@ -427,13 +634,19 @@ public class HistoryDatabase {
 						C_BURNED_VOCAB + " INTEGER DEFAULT 0, " +
 						C_UNLOCKED_VOCAB + " INTEGER DEFAULT 0)";
 		
+		/** The SQL drop statement */
 		private static final String SQL_DROP = 
 				"DROP TABLE IF EXISTS " + TABLE;
 		
+		/** Loads the day sequence from the master table to the reconstruct table.
+		 *  It is important to select only the rows containing partial or no data,
+		 *  because at the end of the process all those rows will be overwritten
+		 *  on the master table  */
 		private static final String SQL_COPY_FROM_FACTS =
 				"INSERT INTO " + TABLE +  "(" + C_DAY + ") " + 
 						Facts.SQL_MISSING_DAYS;
 		
+		/** Puts the reconstructed data onto the master table */
 		private static final String SQL_COPY_TO_FACTS =
 				"REPLACE INTO " + Facts.TABLE + "( " +
 						Facts.C_DAY + ", " +
@@ -453,37 +666,75 @@ public class HistoryDatabase {
 						C_BURNED_VOCAB + " " +
 				"FROM " + TABLE;
 
+		/** Increase by one the values of a field from one day up to the end of the table */
 		private static String SQL_ABOVE =
 				"UPDATE " + TABLE + " SET %1$s = %1$s + 1 WHERE " + C_DAY + " >= ?";
 		
+		/** Increase by one the values of a field from one day to another */
 		private static String SQL_BETWEEN =
 				"UPDATE " + TABLE + " SET %1$s = %1$s + 1 WHERE " + 
 						C_DAY + " BETWEEN ? AND ?";
 		
+		/** A prepared statement to update the table when an unlocked radical
+		 *  is encountered. It increments the unlocked radicals counter from
+		 *  the unlock day up to the end of the table */
 		private SQLiteStatement radicalStmtU;
 		
+		/** The first prepared statement to update the table when a burned radical
+		 *  is encountered. It increments the unlocked radicals counter from
+		 *  the unlock day up to the day it is burned */
 		private SQLiteStatement radicalStmtB1;
 		
+		/** The second prepared statement to update the table when a burned radical
+		 *  is encountered. It increments the burned radicals counter from the
+		 *  day it is burned */
 		private SQLiteStatement radicalStmtB2;
 
+		/** A prepared statement to update the table when an unlocked kanji
+		 *  is encountered. It increments the unlocked kanji counter from
+		 *  the unlock day up to the end of the table */
 		private SQLiteStatement kanjiStmtU;
 		
+		/** The first prepared statement to update the table when a burned kanji
+		 *  is encountered. It increments the unlocked kanji counter from
+		 *  the unlock day up to the day it is burned */
 		private SQLiteStatement kanjiStmtB1;
 		
+		/** The second prepared statement to update the table when a burned kanji
+		 *  is encountered. It increments the burned kanji counter from the
+		 *  day it is burned */
 		private SQLiteStatement kanjiStmtB2;
 
+		/** A prepared statement to update the table when an unlocked vocab items
+		 *  is encountered. It increments the unlocked vocab items counter from
+		 *  the unlock day up to the end of the table */
 		private SQLiteStatement vocabStmtU;
 		
+		/** The first prepared statement to update the table when a burned vocab item
+		 *  is encountered. It increments the unlocked vocab items counter from
+		 *  the unlock day up to the day it is burned */
 		private SQLiteStatement vocabStmtB1;
 				
+		/** The second prepared statement to update the table when a burned vocab item
+		 *  is encountered. It increments the burned vocab items counter from the
+		 *  day it is burned */
 		private SQLiteStatement vocabStmtB2;
 
+		/** The database */
 		private SQLiteDatabase db;
 		
+		/** User information data. Needed to convert dates into days */
 		private UserInformation ui;
 		
+		/** The levelups hashtable, mapping levels to leveup days */
 		private Map<Integer, Integer> levelups;
 		
+		/**
+		 * Constructor.
+		 * @param ui the user information 
+		 * @param db the database
+		 * @param day the last day (today)
+		 */
 		private ReconstructTable (UserInformation ui, SQLiteDatabase db, int day)
 		{			
 			this.db = db;
@@ -517,6 +768,10 @@ public class HistoryDatabase {
 					(String.format (SQL_ABOVE, C_BURNED_VOCAB));
 		}
 		
+		/**
+		 * Ends the reconstruction process. Closes the statements and 
+		 * drops the table.
+		 */
 		public void close ()
 		{
 			radicalStmtU.close ();
@@ -530,8 +785,16 @@ public class HistoryDatabase {
 			vocabStmtU.close ();
 			vocabStmtB1.close ();
 			vocabStmtB2.close ();
+			
+			db.execSQL (SQL_DROP);
 		}
 		
+		/**
+		 * Updates the levelup hashtable by checking if an item has been
+		 * unlocked before the levelup day of this item's level.
+		 * If so, the levelup day is brought back.
+		 * @param i an item   
+		 */
 		private void checkLevelup (Item i)
 		{
 			Date unlock;
@@ -548,6 +811,11 @@ public class HistoryDatabase {
 				levelups.put (i.level, day);
 		}
 		
+		/**
+		 * Updates table and levlups hashtable using the info contained
+		 * in a radical. This method must be called for each unlocked radical.
+		 * @param radical a radical
+		 */
 		public void load (Radical radical)
 		{
 			Date from, to;
@@ -573,6 +841,11 @@ public class HistoryDatabase {
 			}
 		}
 		
+		/**
+		 * Updates table and levlups hashtable using the info contained
+		 * in a kanji. This method must be called for each unlocked kanji.
+		 * @param kanji a kanji
+		 */
 		public void load (Kanji kanji)
 		{
 			Date from, to;
@@ -598,6 +871,12 @@ public class HistoryDatabase {
 			}
 		}
 		
+		/**
+		 * Updates table and levlups hashtable using the info contained
+		 * in a vocab item. This method must be called for each unlocked 
+		 * vocab item.
+		 * @param radical a radical
+		 */
 		public void load (Vocabulary vocab)
 		{
 			Date from, to;
@@ -623,6 +902,11 @@ public class HistoryDatabase {
 			}
 		}
 		
+		/**
+		 * Updates the master tables using the information collected
+		 * during the reconstruction process. Must be called only 
+		 * after all the items have been successfully evaluated.
+		 */
 		private void merge ()
 		{
 			Levels.setLevelups (db, levelups);
@@ -631,14 +915,27 @@ public class HistoryDatabase {
 		
 	}
 	
+	/**
+	 * The levelup table. A simple mapping between level number (which
+	 * is the primary key) and day number. Gaps in the level sequence
+	 * are legitimate, especially when the app is installed when the
+	 * user is already at level two or higher.
+	 * Of course if the app is turned off, a leveup occurs and some days
+	 * later the app is turned on again, this table will not be accurate.
+	 * This can be fixed by a reconstruction process, however.
+	 */
 	static class Levels {
 		
+		/** The table name */
 		private static final String TABLE = "levels";
 		
+		/** The level column name (which is the primary key) */
 		private static final String C_LEVEL = "_id";
 		
+		/** The levelup day. Not nullable */
 		private static final String C_DAY = "day";
 				
+		/** The create statement */
 		private static final String SQL_CREATE = 
 				"CREATE TABLE " + TABLE + " (" +
 
@@ -646,25 +943,48 @@ public class HistoryDatabase {
 						
 						C_DAY + " INTEGER NOT NULL)";
 
+		/** The drop statement */
 		private static final String SQL_DROP = 
 				"DROP TABLE IF EXISTS " + TABLE;
 		
+		/** Tries to insert a new row into the table. If a row at the
+		 *  same level already exists, it is retained. */
 		private static final String SQL_INSERT_OR_IGNORE =
 				"INSERT OR IGNORE INTO " + TABLE + " VALUES (?, ?)";
 		
+		/** Inserts a new row into the table. If a row at the same level
+		 *  already exists, it is replaced */
 		private static final String SQL_REPLACE =
 				"REPLACE INTO " + TABLE + " VALUES (?, ?)";
 
+		/**
+		 * Creates the table
+		 * @param db the database
+		 */
 		public static void onCreate (SQLiteDatabase db)
 		{
 			db.execSQL (SQL_CREATE);
 		}
 		
+		/**
+		 * Drops the table
+		 * @param db the database
+		 */
 		public static void onDrop (SQLiteDatabase db)
 		{
 			db.execSQL (SQL_DROP);
 		}
 		
+		/**
+		 * Inserts a row into the database. If the row already exists, it
+		 * is retained. This method is the one to call daily, mapping the
+		 * current user level with the day number. If no row exists at this
+		 * level, a leveup has occurred. 
+		 * @param db the database
+		 * @param level the level number
+		 * @param day the day number
+		 * @throws SQLException if something goes wrong. May indicate the db is broken
+		 */
 		public static void insertOrIgnore (SQLiteDatabase db, int level, int day)
 			throws SQLException
 		{
@@ -678,6 +998,12 @@ public class HistoryDatabase {
 			db.execSQL (SQL_INSERT_OR_IGNORE, values);		
 		}
 		
+		/**
+		 * Returns the entire contents of the table.
+		 * @param db the database
+		 * @return the level to day mapping
+		 * @throws SQLException if something goes wrong. May indicate the db is broken
+		 */
 		public static Map<Integer, Integer> getLevelups (SQLiteDatabase db)
 			throws SQLException
 		{
@@ -695,6 +1021,14 @@ public class HistoryDatabase {
 			return ans;
 		}
 		
+		/**
+		 * Replaces the contents of the table. If a level is not present 
+		 * in the map, the corresponding table row (if present) is left
+		 * untouched. The operation is not atomic (I can't see a reason why
+		 * it should be).
+		 * @param db the database
+		 * @param map a map
+		 */
 		public static void setLevelups (SQLiteDatabase db, Map<Integer, Integer> map)
 		{
 			SQLiteStatement stmt;
@@ -710,13 +1044,21 @@ public class HistoryDatabase {
 		
 	}
 	
+	/**
+	 * The DB open helper.  
+	 */
 	static class OpenHelper extends SQLiteOpenHelper {
 		
+		/** DB Version. Hope I'll never need to change it */
 		private static final int VERSION = 1;
 		
+		/** The db file */
 		private static final String NAME = "history.db";
 
-		
+		/**
+		 * Constructor
+		 * @param ctxt the context
+		 */
 		OpenHelper (Context ctxt)
 		{
 			super (ctxt, NAME, null, VERSION);
@@ -736,16 +1078,27 @@ public class HistoryDatabase {
 		}
 		
 	}
+
+	/** The DB helper */
+	private OpenHelper helper;
 	
-	OpenHelper helper;
-	
-	SQLiteDatabase db;
+	/** The database */
+	private SQLiteDatabase db;
 		
+	/**
+	 * Cosntructor
+	 * @param ctxt the context
+	 */
 	public HistoryDatabase (Context ctxt)
 	{
 		helper = new OpenHelper (ctxt);		
 	}	
 	
+	/**
+	 * Opens the database in r/w mode. This method may be called multiple times
+	 * on the same instance, provided that {@link #close()} is called
+	 * beforehand.
+	 */	
 	public synchronized void openW ()
 		throws SQLException
 	{
@@ -753,6 +1106,11 @@ public class HistoryDatabase {
 			db = helper.getWritableDatabase ();	
 	}
 	
+	/**
+	 * Opens the database in r/o mode. This method may be called multiple times
+	 * on the same instance, provided that {@link #close()} is called
+	 * beforehand.
+	 */	
 	public synchronized void openR ()
 		throws SQLException
 	{
@@ -760,18 +1118,38 @@ public class HistoryDatabase {
 			db = helper.getReadableDatabase ();	
 	}
 	
+	/**
+	 * Closes the DB.
+	 */
 	public void close ()
 		throws SQLException
 	{
 		helper.close ();
 	}
-	
+
+	/**
+	 * Returns a cursor on the facts table, returning all the rows
+	 * between two given days. Rows are ordered by day, in ascending order.
+	 * Callers should deserialize the contents of each row through
+	 * {@link Facts}' convenience methods
+	 * @param from the first day to return
+	 * @param to the last day to return
+	 * @return a cursor
+	 */
 	public Cursor selectFacts (int from, int to)
 		throws SQLException
 	{
 		return Facts.select (db, from, to);
 	}
-	
+
+	/**
+	 * Starts the reconstruction process. If successful, the
+	 * process must be ended by calling {@link #endReconstructing(ReconstructTable)}.
+	 * Note that all the methods involve I/O activity, so should be
+	 * performed on a non-UI thread. 
+	 * @param ui the user info
+	 * @return a reconstruct control object, to feed with all the relevant items
+	 */
 	public ReconstructTable startReconstructing (UserInformation ui)
 	{
 		int yesterday;
@@ -785,11 +1163,25 @@ public class HistoryDatabase {
 		return new ReconstructTable (ui, db, yesterday);
 	}
 	
+	/**
+	 * Completes the reconstruction process.
+	 * @param rt the reconstruct control object
+	 */
 	public void endReconstructing (ReconstructTable rt)
 	{
 		rt.merge ();
 	}
 		
+	/**
+	 * Inserts a new row into the facts table. If a row already exists,
+	 * it is replaced. This seems the sensible thing to do since we
+	 * assume that this information is fresh. The old row may also
+	 * arise from a reconstruction process and therefore be partial.
+	 * When this method is called, the DB must have already been opened
+	 * in R/W mode.
+	 * @param ui the user info
+	 * @param srs the information to store into the table
+	 */
 	public void insert (UserInformation ui, SRSDistribution srs)
 		throws SQLException
 	{
@@ -800,10 +1192,18 @@ public class HistoryDatabase {
 		Facts.fillGap (db, today);
 		Levels.insertOrIgnore (db, ui.level, today);
 		
-		/* This is the only non-idempotent operation */
 		Facts.insert (db, today, srs);		
 	}
-	
+
+	/**
+	 * Inserts a new row into the facts table. If a row already exists,
+	 * it is replaced. This seems the sensible thing to do since we
+	 * assume that this information is fresh. The old row may also
+	 * arise from a reconstruction process and therefore be partial.
+	 * @param ctxt the context
+	 * @param ui the user info
+	 * @param srs the information to store into the table
+	 */
 	public static void insert (Context ctxt, UserInformation ui, SRSDistribution srs)
 		throws SQLException
 	{
@@ -818,12 +1218,23 @@ public class HistoryDatabase {
 		}
 	}
 	
+	/**
+	 * Retrieve some overall statistical data from the facts table.
+	 * When this method is called, the DB must have already been opened
+	 * in R/O (or R/W) mode.
+	 * @return the info
+	 */	
 	public CoreStats getCoreStats ()
 		throws SQLException
 	{
 		return Facts.getCoreStats (db);
 	}
 	
+	/**
+	 * Retrieve some overall statistical data from the facts table.
+	 * @param ctxt the context
+	 * @return the info
+	 */	
 	public static CoreStats getCoreStats (Context ctxt)
 		throws SQLException
 	{

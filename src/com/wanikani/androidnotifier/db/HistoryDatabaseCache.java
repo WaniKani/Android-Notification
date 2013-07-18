@@ -12,20 +12,45 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.os.AsyncTask;
 
+import com.wanikani.androidnotifier.db.HistoryDatabase.FactType;
 import com.wanikani.androidnotifier.graph.Pager;
 import com.wanikani.androidnotifier.graph.Pager.Interval;
 import com.wanikani.wklib.SRSDistribution;
 
+/**
+ * A wrapper of the {@link HistoryDatabase} class that implements the
+ * {@link Pager} interfaces to retrieve data from the facts table.
+ * While the pager takes care of paging requests, this class actually
+ * retrieves them from the database (and caches requests, of course).
+ * Since many plots may render different aspects of the same data,
+ * it is possible to register multiple datasources, each one translating
+ * raw db pages into pager datasets ready to be plotted.
+ * To do this, applications must extend the abstract {@link DataSource}
+ * class and implements the methods that perform this translation.   
+ */
 public class HistoryDatabaseCache {
 
+	/**
+	 * A subset of a page with homogeneous row types.
+	 */
 	public class PageSegment {
 		
+		/** This segment's interval */
 		public Interval interval;
 		
+		/** The type of info contained */
 		public HistoryDatabase.FactType type;
 		
+		/** The actual data. If data is missing (i.e. {@link #type} is
+		 *  {@link FactType#MISSING}), this field is <code>null</code> */
 		public List<SRSDistribution> srsl;
 		
+		/**
+		 * Constructor.
+		 * @param from start of segment
+		 * @param to end of segment
+		 * @param type facts type
+		 */
 		public PageSegment (int from, int to, HistoryDatabase.FactType type)
 		{
 			interval = new Interval (from, to);
@@ -36,14 +61,28 @@ public class HistoryDatabaseCache {
 		}
 	}
 	
+	/**
+	 * A DB page, which is a set of consecutive non overlapping
+	 * segments. Typically instances of this class map 1:1 
+	 * to {@link Pager.DataSet}, the difference being that
+	 * this is class is an image of the facts table, while a dataset
+	 * is further elaborated to contain the samples of a chart.
+	 */
 	public class Page {
 		
+		/** The last time this pages has been accessed */
 		Date lad;
 		
+		/** The interval of time covered by this page */
 		Interval interval;
 		
+		/** The segments comprising this page */
 		List<PageSegment> segments;
 		
+		/**
+		 * Constructor
+		 * @param interval the interval of time covered by this page
+		 */
 		public Page (Interval interval)
 		{
 			this.interval = interval;
@@ -53,14 +92,22 @@ public class HistoryDatabaseCache {
 			segments = new Vector<PageSegment> (1);
 		}
 		
+		/**
+		 * Should be called each time this page is accessed, to make
+		 * sure the access timestamp is freshened.
+		 */
 		public void access ()
 		{
 			lad = new Date ();
 		}		
 	}
 	
+	/**
+	 * A comparator that sorts pages by their last access time
+	 */
 	private static class PageAgeComparator implements Comparator<Page> {
 		
+		/** Static instance. No need to create new instances */
 		public static PageAgeComparator INSTANCE = new PageAgeComparator ();
 		
 		@Override
@@ -71,19 +118,35 @@ public class HistoryDatabaseCache {
 		
 	}
 	
+	/**
+	 * A partial implementation of the {@link Pager.DataSource} interface,
+	 * providing an implementation of the 
+	 * {@link Pager.DataSource#requestPage(Interval, Pager)}
+	 * method which leverages the cache functionalities.
+	 * Applications should extend this class, implement the translations
+	 * methods and register instances on the cache.
+	 */
 	public static abstract class DataSource implements Pager.DataSource {
 
-		HistoryDatabaseCache dbc;
+		/** The cache */
+		private HistoryDatabaseCache dbc;
 		
-		Pager pager;
+		/** The pager */
+		private Pager pager;
 		
-		Interval interval;
+		/** The interval of the last requested page */
+		private Interval interval;
 		
+		/**
+		 * Constructor.
+		 * @param dbc the cache
+		 */
 		public DataSource (HistoryDatabaseCache dbc)
 		{
 			this.dbc = dbc;
 		}
 		
+		@Override
 		public void requestPage (Interval interval, Pager pager)
 		{
 			this.pager = pager;
@@ -92,7 +155,17 @@ public class HistoryDatabaseCache {
 			dbc.getPage (this, interval);
 		}				
 		
-		public void pageAvailable (Page page)
+		/**
+		 * Called when a page becomes available. Actually the cache
+		 * broadcasts this event to all the registered datasources,
+		 * so this method takes care of checking whether the page
+		 * is of interest to this instance. After that, this
+		 * method calls the translation methods to transform
+		 * the raw pages into datasets. At the end of this process,
+		 * it hands the dataset to the pager. 
+		 * @param page the page just retrieved
+		 */
+		private void pageAvailable (Page page)
 		{
 			Pager.DataSet ds;
 			Pager.Segment segment;
@@ -102,7 +175,7 @@ public class HistoryDatabaseCache {
 			
 			ds = new Pager.DataSet (interval);
 			for (PageSegment pseg : page.segments) {
-				switch (pseg.type){
+				switch (pseg.type) {
 				case MISSING:
 					segment = new Pager.Segment (Pager.SegmentType.MISSING, pseg.interval);
 					break;
@@ -129,15 +202,33 @@ public class HistoryDatabaseCache {
 				dbc.getPage (this, interval);			
 		}
 		
+		/**
+		 * Translates a partial (reconstructed) db segment into a dataset segment. 
+		 * @param segment the input segment
+		 * @param pseg the output segment
+		 */
 		protected abstract void fillPartialSegment (Pager.Segment segment, PageSegment pseg);
 
+		/**
+		 * Translates a complete db segment into a dataset segment. 
+		 * @param segment the input segment
+		 * @param pseg the output segment
+		 */
 		protected abstract void fillSegment (Pager.Segment segment, PageSegment pseg);
 	}
 	
+	/**
+	 * The task that performs actual data retrieval.
+	 */
 	private class LoadPageTask extends AsyncTask<Interval, Void, Page> {
 
+		/** The context */
 		Context ctxt;
 		
+		/**
+		 * Constructor
+		 * @param ctxt the context
+		 */
 		public LoadPageTask (Context ctxt)
 		{
 			this.ctxt = ctxt;
@@ -205,38 +296,62 @@ public class HistoryDatabaseCache {
 		}
 	}
 	
+	/** The cached pages */
 	Hashtable<Integer, Page> pages;
 
+	/** The context */
 	Context ctxt;
 	
+	/** Registered datasouces */
 	List<DataSource> dsources;
 	
+	/** Number of pages per datasource after an LRU cleanup */
 	private static final int PAGES_PER_SOURCE_LO = 4;
 	
+	/** Number of pages per datasource that trigger a LRU cleanup */
 	private static final int PAGES_PER_SOURCE_HI = 6;
 	
+	/** 
+	 * Constructor.
+	 */
 	public HistoryDatabaseCache ()
 	{
 		pages = new Hashtable<Integer, Page> ();
 		dsources = new Vector<DataSource> ();
 	}	
 	
+	/**
+	 * Called when an activity becomes available
+	 * @param ctxt the context
+	 */
 	public void open (Context ctxt)
 	{
 		this.ctxt = ctxt;
 	}
 	
+	/**
+	 * Called when an activity becomes unavailable
+	 */
 	public void close ()
 	{
 		ctxt = null;
 	}
 	
+	/**
+	 * Registers a datasource
+	 * @param dsource the ds to be registered
+	 */
 	public void addDataSource (DataSource dsource)
 	{
 		dsources.add (dsource);
 	}
 	
-	public void getPage (DataSource dsource, Interval interval)
+	/**
+	 * Retrieves a page, looking on the page cache first.
+	 * @param dsource the requesting data source
+	 * @param interval the requeted interval
+	 */
+	private void getPage (DataSource dsource, Interval interval)
 	{
 		Page page;
 		
@@ -250,6 +365,11 @@ public class HistoryDatabaseCache {
 			pageAvailable (dummyPage (interval));
 	}
 	
+	/**
+	 * Creates a dummy page. Called when the context is not available
+	 * @param i the interval
+	 * @return a dummy page
+	 */
 	private Page dummyPage (Interval i)
 	{
 		Page ans;
@@ -260,6 +380,12 @@ public class HistoryDatabaseCache {
 		return ans;
 	}
 	
+	/**
+	 * Called by the task implementation after the page has been retrieved
+	 * from the DB. Broadcasts this new page to all registered datasources
+	 * and stores the page into the cache. 
+	 * @param page the page
+	 */
 	private void pageAvailable (Page page)
 	{
 		makeRoom ();
@@ -268,6 +394,11 @@ public class HistoryDatabaseCache {
 			dsource.pageAvailable (page);
 	}
 	
+	/**
+	 * Called before inserting a page into the cache.
+	 * If the cache size has been exceeded, a simple LRU cleanup
+	 * is performed.
+	 */
 	private void makeRoom ()
 	{
 		Vector<Page> v;
@@ -284,6 +415,9 @@ public class HistoryDatabaseCache {
 		}
 	}
 	
+	/**
+	 * Clears the cache.
+	 */
 	public void flush ()
 	{
 		pages.clear ();
