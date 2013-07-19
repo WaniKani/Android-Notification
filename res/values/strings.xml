@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
     <string name="app_name">WaniKani Notifier</string>
-    <string name="new_reviews_42plus">You have %d+ pending reviews</string>
-    <string name="new_reviews">You have %d pending reviews</string>
-    <string name="new_review">You have one pending review</string>
+    <string name="new_reviews_42plus">You have %d+ reviews</string>
+    <string name="new_reviews">You have %d reviews</string>
+    <string name="new_review">You have one review</string>
     <string name="new_lessons_42plus">You can unlock %d+ items</string>
     <string name="new_lessons">You can unlock %d items</string>
     <string name="new_lesson">You can unlock one item</string>
@@ -14,25 +14,25 @@
     <string name="pref_lessons_enabled">Notify lessons too</string>
     <string name="pref_lessons_enabled_descr">Notify also when new items can be unlocked</string>
     <string name="pref_use_integrated_browser">Use integrated browser</string>
-    <string name="pref_use_integrated_browser_desc">Tapping on the message opens integrated browser</string>
-    <string name="pref_use_external_browser_desc">Tapping on the message opens external browser</string>  
+    <string name="pref_use_integrated_browser_desc">Open integrated browser when doing reviews and lessons</string>
+    <string name="pref_use_external_browser_desc">Open external browser when doing reviews and lessons</string>  
     <string name="pref_refresh_timeout">Refresh interval</string>
     <string name="pref_refresh_descr">Data will be refreshed every %d minutes</string>
 	<string name="pref_refresh_one_min_descr">Data will be refreshed every minute</string>
     <string name="pref_userkey_descr">Copy here the "Public API Key" from your Account Settings page</string>
     <string name="pref_userkey">User API Key</string>    
     <string name="pref_show_keyboard">Embedded reviews kbd</string>
-    <string name="pref_show_keyboard_desc">Show custom keyboard when reviewing</string>
+    <string name="pref_show_keyboard_desc">Show embedded keyboard when reviewing</string>
     <string name="pref_show_lessons_keyboard">Embedded lessons kbd</string>
-    <string name="pref_show_lessons_keyboard_desc">Show custom keyboard during lessons</string>
+    <string name="pref_show_lessons_keyboard_desc">Show embedded keyboard during lessons</string>
     <string name="pref_large_keyboard">Tall keyboard</string>
-    <string name="pref_large_keyboard_desc">Display larger custom keyboard</string>
+    <string name="pref_large_keyboard_desc">Display larger embedded keyboard</string>
     <string name="pref_enter">Review keyboard Enter</string>
     <string name="pref_enter_descr">Enable enter key in embedded keyboard</string>
     <string name="pref_url">Review URL</string>
     <string name="pref_url_desc">Wanikani review URL</string>
     <string name="pref_42plus">42+ mode</string>
-    <string name="pref_42plus_descr">Hide real number of pending lessons/reviews when too big</string>
+    <string name="pref_42plus_descr">Hide real number of lessons/reviews when too big</string>
     <string name="pref_show_mute">Mute button</string>
     <string name="pref_show_mute_desc">Show mute button when reviewing</string>
     <string name="tag_next_review">Next Review</string>
@@ -49,6 +49,7 @@
     <string name="tag_gravatar">Gravatar</string>
     <string name="tag_loading">Loading&#8230;</string>
     <string name="tag_btn_review">Review</string>
+    <string name="tag_version">Version 1.0.0</string>
     
     <string name="tag_radicals_progression">Radicals</string>
     <string name="tag_kanji_progression">Kanji</string>
@@ -58,7 +59,7 @@
     
     <string name="em_refresh">Refresh</string>
     <string name="em_settings">Settings</string>
-    <string name="pref_enabled_descr">Show event icon when reviews are pending</string>
+    <string name="pref_enabled_descr">Show event icon when you have reviews</string>
     <string name="status_msg_error">Error connecting to WaniKani</string>
     <string name="status_msg_partial">Network error. Partial results</string>
     <string name="status_msg_unauthorized">Authentication failed: check User API Key</string>
@@ -127,8 +128,8 @@
     
     <string name="txt_reconstruct_title">Reconstruct Data</string>
     <string name="txt_reconstruct_intro">
-        This tool reconstructs item history and adds the missing samples to the plots.
-        Unfortunately this can only be partial: we can only count the number
+        This tool reconstructs item history and adds missing samples to the plots.
+        Unfortunately this can only be done partially: we can only count the number
         of unlocked items and burned items, not their SRS type.
         The process loads all the items from level one up to your current
         level, so it may be a lengthy and traffic intensive operation.   
