@@ -32,10 +32,21 @@ import com.wanikani.androidnotifier.R;
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/**
+ * A time-value chart, comprising of the plot itself, and some more 
+ * auxiliary stuff. 
+ * The look and feel tries to match the style of the dashboard
+ */
 public class TYChart extends LinearLayout {
 
+	/**
+	 * A class listening for click events on the alerts message.
+	 * If a chain listener (typically an instance of the 
+	 * @link PartialListener) is configured, it is called.
+	 */
 	private class AlertListener implements View.OnClickListener {
 		
+		@Override
 		public void onClick (View view)
 		{
 			if (chainListener != null)
@@ -70,6 +81,7 @@ public class TYChart extends LinearLayout {
 	/// The alert message
 	TextView alertMessage;
 	
+	/// The listener for the "partial data" message
 	View.OnClickListener partialListener;
 	
 	View.OnClickListener chainListener;
