@@ -443,7 +443,9 @@ public class StatsFragment extends Fragment implements Tab {
 		
 		this.main.register (this);
 		
-		if (cs == null && task == null) {
+		if (cs != null)
+			setCoreStats (cs);
+		else if (task == null) {
 			task = new GetCoreStatsTask (main);
 			task.execute ();
 		}
@@ -468,6 +470,9 @@ public class StatsFragment extends Fragment implements Tab {
 	private void setCoreStats (HistoryDatabase.CoreStats cs)
 	{
 		this.cs = cs;
+		
+		if (srsds == null)
+			return;
 		
 		srsds.setCoreStats (cs);
 		kanjids.setCoreStats (cs);
