@@ -3,7 +3,6 @@ package com.wanikani.androidnotifier.db;
 import java.util.Date;
 import java.util.Hashtable;
 import java.util.Map;
-import java.util.concurrent.Callable;
 
 import android.content.ContentValues;
 import android.content.Context;

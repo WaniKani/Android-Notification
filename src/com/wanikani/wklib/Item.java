@@ -2,7 +2,6 @@ package com.wanikani.wklib;
 
 import java.util.Comparator;
 import java.util.Date;
-import java.util.EnumSet;
 
 import org.json.JSONException;
 import org.json.JSONObject;
