@@ -443,13 +443,6 @@ public class StatsFragment extends Fragment implements Tab {
 		
 		this.main.register (this);
 		
-		if (cs != null)
-			setCoreStats (cs);
-		else if (task == null) {
-			task = new GetCoreStatsTask (main);
-			task.execute ();
-		}
-		
 		hdbc.open (main);
 		
 		if (rlist != null)
@@ -520,6 +513,13 @@ public class StatsFragment extends Fragment implements Tab {
 		attach (R.id.ty_srs, srsds);
 		attach (R.id.ty_kanji, kanjids);
 		attach (R.id.ty_vocab, vocabds);
+		
+		if (cs != null)
+			setCoreStats (cs);
+		else if (task == null) {
+			task = new GetCoreStatsTask (main);
+			task.execute ();
+		}
 		
 		return parent;
     }
