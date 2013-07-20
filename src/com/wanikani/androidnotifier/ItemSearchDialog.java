@@ -48,8 +48,7 @@ public class ItemSearchDialog {
 		/**
 		 * Called when any detail of the filter changes.
 		 */
-		public void filterChanged ();
-		
+		public void filterChanged ();		
 	}
 	
 	/**
@@ -74,6 +73,11 @@ public class ItemSearchDialog {
 		public String filter;
 		
 		/**
+		 * If set, SRS filter is applied
+		 */
+		public boolean srsApplied;
+		
+		/**
 		 * If set, the dialog is visible (and the filter applied)
 		 */
 		public boolean visible;
@@ -83,6 +87,8 @@ public class ItemSearchDialog {
 		 */
 		public State ()
 		{
+			srsApplied = true;
+			
 			types = new EnumMap<Item.Type, Boolean> (Item.Type.class);
 			srses = new EnumMap<SRSLevel, Boolean> (SRSLevel.class);
 			
@@ -294,9 +300,10 @@ public class ItemSearchDialog {
 	 * Constructor
 	 * @param view the view
 	 * @param iss the current state
+	 * @param ifilter the current item filter
 	 * @param listener the filter changes listener
 	 */
-	public ItemSearchDialog (View view, State iss, Listener listener)
+	public ItemSearchDialog (View view, State iss, Filter ifilter, Listener listener)
 	{
 		Resources res;
 		
@@ -355,6 +362,8 @@ public class ItemSearchDialog {
 		syncFromISS ();
 		
 		updateFilter ();
+		
+		itemFilterChanged (ifilter);
 	}
 	
 	/**
@@ -476,10 +485,15 @@ public class ItemSearchDialog {
 		if (!iss.types.get (i.type))
 			return false;
 		
-		if (i.stats != null && i.stats.srs != null &&
-		    !iss.srses.get (i.stats.srs))
-			return false;
-
+		if (iss.srsApplied) {
+			/* Locked items may have SRS unset */
+			if (i.stats == null || i.stats.srs == null)
+				return false;
+			
+			if (!iss.srses.get (i.stats.srs))				
+				return false;
+		}
+		
 		s = filter.getText ().toString ().trim ();
 		if (s.length () == 0)
 			return true;
@@ -498,5 +512,21 @@ public class ItemSearchDialog {
 			toggleVisibility ();
 		else if (focusIfShown)
 			filter.requestFocus ();
+	}
+	
+	/**
+	 * Called when the item filter changes. Hides or shows the relevant filters
+	 * @param f the new item filter
+	 */
+	public void itemFilterChanged (Filter ifilter)
+	{
+		int visibility;
+
+		iss.srsApplied = ifilter == null || ifilter.hasSRSLevelInfo (); 
+		
+		visibility = iss.srsApplied ? View.VISIBLE : View.GONE;
+		
+		for (View v : srsButtons.values ()) 
+			v.setVisibility (visibility);		
 	}
 }

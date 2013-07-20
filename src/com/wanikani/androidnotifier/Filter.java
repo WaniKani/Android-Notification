@@ -127,4 +127,9 @@ public interface Filter {
 	 * Clears the cache. Pending requests are not cancelled.
 	 */
 	public void flush ();
+	
+	/**
+	 * Tells if the filtered items contain SRS information
+	 */
+	public boolean hasSRSLevelInfo ();
 }

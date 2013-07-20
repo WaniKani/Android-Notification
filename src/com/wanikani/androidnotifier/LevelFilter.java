@@ -340,4 +340,10 @@ public class LevelFilter implements Filter {
 	{
 		ht.clear ();
 	}
+	
+	@Override
+	public boolean hasSRSLevelInfo ()
+	{
+		return true;
+	}	
 }

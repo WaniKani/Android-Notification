@@ -244,9 +244,14 @@ public class UnlockFilter implements Filter {
 		task = null;
 	}
 	
-	/* Inherited javadoc */
 	public void flush ()
 	{
 		citems = null;
 	}
+	
+	@Override
+	public boolean hasSRSLevelInfo ()
+	{
+		return false;
+	}		
 }

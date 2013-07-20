@@ -931,7 +931,7 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 		iview.setAdapter (iad);
 		
 		sview = parent.findViewById (R.id.it_search_win);
-		isd = new ItemSearchDialog (sview, iss, iad);
+		isd = new ItemSearchDialog (sview, iss, currentFilter, iad);
 				
 		btn = (ImageButton) parent.findViewById (R.id.btn_item_filter);
 		btn.setOnClickListener (mpl);
@@ -1065,6 +1065,8 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 			levelf.select (main.getConnection (), level, apprentice, type);
 			iview.setSelection (0);
 		}
+		
+		filterChanged ();
 	}
 
 	/**
@@ -1083,6 +1085,8 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 			criticalf.select (main.getConnection ());
 			iview.setSelection (0);
 		}
+		
+		filterChanged ();
 	}
 
 	/**
@@ -1101,6 +1105,17 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 			unlockf.select (main.getConnection ());
 			iview.setSelection (0);
 		}
+		
+		filterChanged ();
+	}
+	
+	/**
+	 * Called when the filter changes
+	 */
+	protected void filterChanged ()
+	{
+		if (isd != null)
+			isd.itemFilterChanged (currentFilter);
 	}
 
 	/**
@@ -1373,7 +1388,9 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 		else if (currentFilter == levelf && currentLevel > 0)
 			levelf.select (main.getConnection (), currentLevel, apprentice, null);
 		else if (currentFilter == unlockf)
-			unlockf.select (main.getConnection ());		
+			unlockf.select (main.getConnection ());
+		
+		filterChanged ();
 	}
 
 	/**

@@ -248,4 +248,10 @@ public class CriticalFilter implements Filter {
 	{
 		citems = null;
 	}
+	
+	@Override
+	public boolean hasSRSLevelInfo ()
+	{
+		return false;
+	}
 }
