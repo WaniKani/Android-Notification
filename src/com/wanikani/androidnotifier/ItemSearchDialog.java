@@ -15,7 +15,6 @@ import android.widget.ImageButton;
 import com.wanikani.wklib.Item;
 import com.wanikani.wklib.SRSLevel;
 
-
 /* 
  *  Copyright (c) 2013 Alberto Cuda
  *
@@ -33,24 +32,55 @@ import com.wanikani.wklib.SRSLevel;
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/**
+ * The search window that appears at the bottom of the items tab.
+ * This could have been part of the the {@link ItemsFragment} class, 
+ * however it's already big enough, so moving to its own class makes
+ * things a little bit more understandable.
+ */
 public class ItemSearchDialog {
 
+	/**
+	 * Implementations of this class receive notifications when the filter change. 
+	 */
 	public interface Listener {
-		
+
+		/**
+		 * Called when any detail of the filter changes.
+		 */
 		public void filterChanged ();
 		
 	}
 	
+	/**
+	 * The current state of the filter.
+	 */
 	public static class State {
-		
+
+		/**
+		 * Which item types match the filter criteria.
+		 */
 		private EnumMap<Item.Type, Boolean> types;
 		
+		/**
+		 * Which SRS levels match the filter criteria.
+		 */
 		public EnumMap<SRSLevel, Boolean> srses;
 		
+		/**
+		 * A search string. Its interpretation is up to the calling class,
+		 * however the idea is to be matched against any textual part of an item.
+		 */
 		public String filter;
 		
+		/**
+		 * If set, the dialog is visible (and the filter applied)
+		 */
 		public boolean visible;
 		
+		/**
+		 * Constructor.
+		 */
 		public State ()
 		{
 			types = new EnumMap<Item.Type, Boolean> (Item.Type.class);
@@ -63,27 +93,45 @@ public class ItemSearchDialog {
 				srses.put (srs, true);
 		}				
 		
+		/**
+		 * Toggles the filter on an item type. 
+		 */
 		public void toggle (Item.Type type)
 		{
 			types.put (type, !types.get (type));
 		}
 		
+		/**
+		 * Toggles the filter on an SRS level. 
+		 */
 		public void toggle (SRSLevel level)
 		{
 			srses.put (level, !srses.get (level));
 		}				
 	}
 	
+	/**
+	 * The listener attached to item type filter buttons. 
+	 */
 	private class TypeButtonListener 
 		implements View.OnClickListener, View.OnLongClickListener {
 	
+		/// The item type represented by this button
 		Item.Type type;
 	
+		/**
+		 * Constructor.
+		 * @param type the item type
+		 */
 		public TypeButtonListener (Item.Type type)
 		{
 			this.type = type;
 		}
 	
+		/**
+		 * Click event handler. Toggle the filter and notify the event. 
+		 * @param view the button
+		 */
 		@Override
 		public void onClick (View view)
 		{
@@ -92,7 +140,12 @@ public class ItemSearchDialog {
 			
 			updateFilter ();
 		}
-	
+		
+		/**
+		 * Long click event handler. Disable all the other item types
+		 * and notify the event
+		 * @param view the button
+		 */
 		@Override
 		public boolean onLongClick (View view)
 		{
@@ -109,16 +162,28 @@ public class ItemSearchDialog {
 		}
 	}
 
+	/**
+	 * The listener attached to SRS level filter buttons. 
+	 */
 	private class SRSButtonListener 
 		implements View.OnClickListener, View.OnLongClickListener {
 		
+		/// The SRS level represented by this button
 		SRSLevel level;
 		
+		/**
+		 * Constructor.
+		 * @param level the SRS level
+		 */
 		public SRSButtonListener (SRSLevel level)
 		{
 			this.level = level;
 		}
 		
+		/**
+		 * Click event handler. Toggle the filter and notify the event. 
+		 * @param view the button
+		 */
 		@Override
 		public void onClick (View view)
 		{
@@ -128,6 +193,11 @@ public class ItemSearchDialog {
 			updateFilter ();
 		}
 		
+		/**
+		 * Long click event handler. Disable all the other SRS levels
+		 * and notify the event
+		 * @param view the button
+		 */
 		@Override
 		public boolean onLongClick (View view)
 		{
@@ -145,6 +215,9 @@ public class ItemSearchDialog {
 		
 	}
 	
+	/**
+	 * Listener to changes of the text box.
+	 */
 	private class FilterWatcher implements TextWatcher {
 		
 		@Override
@@ -166,13 +239,25 @@ public class ItemSearchDialog {
 		}
 		
 	}
-	
+
+	/**
+	 * A structur holding the selected and deselected images for each 
+	 * filter button.
+	 */
 	private class Images {
 		
+		/// Drawable to be displayed when the filter is not applied
 		public Drawable deselected;
 		
+		/// Drawable to be displayed when the filter is applied
 		public Drawable selected;
 		
+		/**
+		 * Constructor
+		 * @param res the resources
+		 * @param deselected deselected drawable id
+		 * @param selected selected drawable id
+		 */
 		public Images (Resources res, int deselected, int selected)
 		{
 			this.deselected = res.getDrawable (deselected);
@@ -181,22 +266,36 @@ public class ItemSearchDialog {
 		
 	}
 	
+	/// The complete filter state
 	private State iss;
 	
+	/// The dialog view
 	private View view;
 	
+	/// The text box
 	private EditText filter;
 	
+	/// A mapping between item types and their buttons
 	private EnumMap<Item.Type, ImageButton> typeButtons;
 	
+	/// A mapping between SRS levels and their buttons
 	private EnumMap<SRSLevel, ImageButton> srsButtons;
 
+	/// A mapping between item types and their images
 	private EnumMap<Item.Type, Images> typeImages;
 
+	/// A mapping between SRS levels and their images
 	private EnumMap<SRSLevel, Images> srsImages;
 	
+	/// A reference to the object to notify when the filter changes
 	private Listener listener;
 
+	/**
+	 * Constructor
+	 * @param view the view
+	 * @param iss the current state
+	 * @param listener the filter changes listener
+	 */
 	public ItemSearchDialog (View view, State iss, Listener listener)
 	{
 		Resources res;
@@ -258,6 +357,9 @@ public class ItemSearchDialog {
 		updateFilter ();
 	}
 	
+	/**
+	 * Convenience method that binds each listener to its own button.
+	 */
 	private void bind ()
 	{
 		TypeButtonListener tl;
@@ -276,6 +378,9 @@ public class ItemSearchDialog {
 		}
 	}
 	
+	/**
+	 * Updates visual representation from current filter state
+	 */
 	protected void syncFromISS ()
 	{
 		for (Item.Type t : Item.Type.values ())
@@ -287,6 +392,11 @@ public class ItemSearchDialog {
 		view.setVisibility (iss.visible ? View.VISIBLE : View.GONE);
 	}
 	
+	/**
+	 * Convenience method that changes the style of an item type button, basing
+	 * itself on the current filter state
+	 * @param type the item type
+	 */
 	private void setActive (Item.Type type)
 	{
 		Images images;
@@ -297,6 +407,11 @@ public class ItemSearchDialog {
 		typeButtons.get (type).setImageDrawable (d);
 	}
 	
+	/**
+	 * Convenience method that changes the style of an SRS level button, basing
+	 * itself on the current filter state
+	 * @param type the SRS level
+	 */
 	private void setActive (SRSLevel srs)
 	{
 		Images images;
@@ -307,6 +422,9 @@ public class ItemSearchDialog {
 		srsButtons.get (srs).setImageDrawable (d);
 	}
 
+	/**
+	 * Toggles visibility of the search dialog
+	 */
 	public void toggleVisibility ()
 	{
 		iss.visible ^= true;
@@ -315,11 +433,22 @@ public class ItemSearchDialog {
 		updateFilter ();
 	}
 	
-	public void updateFilter ()
+	/**
+	 * Convenience method  to be called when any detail of the filter changes.
+	 * Its implementation forward the notification to the listener
+	 */
+	private void updateFilter ()
 	{
 		listener.filterChanged ();
 	}
 	
+	/**
+	 * Given an item list, it returns another list containing all the elements
+	 * that match the filter. The original list is not touched. The returned
+	 * object may be the original list if all the elements match the filter.
+	 * @param l the list
+	 * @return a subset
+	 */
 	public List<Item> filter (List<Item> l)
 	{
 		List<Item> ans;
@@ -335,6 +464,11 @@ public class ItemSearchDialog {
 		return ans;
 	}
 	
+	/**
+	 * Tells whether an item matches the filter criteria
+	 * @param i an item
+	 * @return <tt>true</tt> if it does
+	 */
 	protected boolean matches (Item i)
 	{
 		String s;
@@ -353,6 +487,11 @@ public class ItemSearchDialog {
 		return i.matches (s);
 	}
 	
+	/**
+	 * Called when a request to show to search dialog is issued
+	 * @param focusIfShown if set, and the dialog is already shown, focus on
+	 * the text box
+	 */
 	public void show (boolean focusIfShown)
 	{
 		if (!iss.visible)
