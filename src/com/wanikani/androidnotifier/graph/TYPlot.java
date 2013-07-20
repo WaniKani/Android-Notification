@@ -51,6 +51,12 @@ import com.wanikani.wklib.UserInformation;
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/**
+ * A time-value chart. This view represents just the diagram, while {@link TYChart}
+ * shows some other useful widgets too. Though it is possible to insert this view
+ * into a layout, it is advisable to use the chart, because otherwise e.g. data
+ * retrieval won't cause the spinner to show up.
+ */
 public class TYPlot extends View {
 
 	private class GestureListener extends GestureDetector.SimpleOnGestureListener {
@@ -688,6 +694,10 @@ public class TYPlot extends View {
 	
 	public void refresh ()
 	{
+		/* The size may have changed */
+		if (pager != null)
+			vp.updateSize (pager.dsource.getMaxY ());
+		
 		dsink.refresh ();
 	}
 }
