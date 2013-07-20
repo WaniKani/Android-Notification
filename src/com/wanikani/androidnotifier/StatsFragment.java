@@ -464,9 +464,6 @@ public class StatsFragment extends Fragment implements Tab {
 	{
 		this.cs = cs;
 		
-		if (srsds == null)
-			return;
-		
 		srsds.setCoreStats (cs);
 		kanjids.setCoreStats (cs);
 		vocabds.setCoreStats (cs);
