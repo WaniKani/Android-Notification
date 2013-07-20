@@ -83,7 +83,11 @@ public class TYChart extends LinearLayout {
 	
 	/// The listener for the "partial data" message
 	View.OnClickListener partialListener;
-	
+
+	/** The listener that actually reacts to clicks on the alert message.
+	 *  We use this "two-stage" listeners to avoid having to register and unregister
+	 *  the listener (this object may change, depending on the alert message)
+	 */
 	View.OnClickListener chainListener;
 	
 	/**
@@ -148,6 +152,11 @@ public class TYChart extends LinearLayout {
 		plot.setVisibility (enabled ? View.GONE : View.VISIBLE);
 	}
 	
+	/**
+	 * Called when data retrieval starts or ends. It shows or hides the spinner
+	 * respectively
+	 * @param enabled if starting retrieval 
+	 */
 	public void retrieving (boolean enabled)
 	{
 		spinner.setVisibility (enabled ? View.VISIBLE : View.GONE);
@@ -155,6 +164,8 @@ public class TYChart extends LinearLayout {
 	
 	/**
 	 * Shows an alert message
+	 * @param msg the message
+	 * @param ocl an optional click listener
 	 */
 	public void alert (CharSequence msg, View.OnClickListener ocl)
 	{
@@ -164,6 +175,9 @@ public class TYChart extends LinearLayout {
 		chainListener = ocl;
 	}
 	
+	/**
+	 * Hides the alert message
+	 */
 	public void hideAlert ()
 	{
 		alertPanel.setVisibility (View.GONE);
@@ -187,12 +201,22 @@ public class TYChart extends LinearLayout {
 		plot.setOrigin (date);
 	}
 	
+	/**
+	 * Changes the datasource and updates the chart
+	 * @param dsource the new datasource
+	 */
 	public void setDataSource (Pager.DataSource dsource)
 	{
 		plot.setDataSource (dsource);
 	}
 
-	public void partialShown (boolean shown)
+	/**
+	 * Called by {@link TYPlot} when a segment containing partial information
+	 * is shown. In that case we must display a warning message to allow the
+	 * user to start the reconstruction process  
+	 * @param shown if to be shown
+	 */
+	void partialShown (boolean shown)
 	{
 		String s;
 		
@@ -204,6 +228,9 @@ public class TYChart extends LinearLayout {
 			hideAlert ();
 	}
 	
+	/**
+	 * Forces a refresh of the plot
+	 */
 	public void refresh ()
 	{
 		plot.refresh ();

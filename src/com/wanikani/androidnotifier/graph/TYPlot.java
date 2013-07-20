@@ -59,6 +59,9 @@ import com.wanikani.wklib.UserInformation;
  */
 public class TYPlot extends View {
 
+	/**
+	 * The listener that intercepts motion and fling gestures.
+	 */
 	private class GestureListener extends GestureDetector.SimpleOnGestureListener {
 		
 		@Override
@@ -90,41 +93,65 @@ public class TYPlot extends View {
 			return true;
 		}
 	}
-	
+
+	/**
+	 * A repository of all the sizes and measures. Currently no variables
+	 * can be customized, however I've kept them separated from their default
+	 * values, so allowing layouts to override these default is just a matter of adding
+	 * an attributes parser.
+	 */
 	private static class Measures {
 		
+		/// Default margin around the diagram
 		public float DEFAULT_MARGIN = 24;
 		
+		/// Default number of pixels per day
 		public float DEFAULT_DIP_PER_DAY = 8;
 				
+		/// Default number of days after today that are displayed at startup
 		public int DEFAULT_LOOKAHEAD = 7;
 		
+		/// Default label font size
 		public float DEFAULT_DATE_LABEL_FONT_SIZE = 12;
 		
+		/// Default axis width
 		public int DEFAULT_AXIS_WIDTH = 2;
 		
+		/// Default height of a day tick
 		public int DEFAULT_TICK_SIZE = 10;
 		
+		/// Default number of items represented by a vertical mark
 		public int DEFAULT_YAXIS_GRID = 100;
-		
-		public RectF rect;
-		
+
+		/// The plot area
 		public RectF plotArea;
 		
+		/// Actual margin around the diagram
 		public float margin;
 		
+		/// Actual number of pixels per day
 		public float dipPerDay;
 		
+		/// Actual number of days after today that are displayed at startup
 		public int lookAhead;
 		
+		/// Actual label font size
 		public float axisWidth;
 		
+		/// Actual height of a day tick
 		public float dateLabelFontSize;
 		
+		/// Actual number of items represented by a vertical mark
 		public int tickSize;
 		
+		/// Actual number of items represented by a vertical mark
 		public int yaxisGrid;
 				
+		/**
+		 * Constructor
+		 * @param ctxt the context 
+		 * @param attrs attributes of the plot. Currently ignored
+		 */
 		public Measures (Context ctxt, AttributeSet attrs)
 		{
 			DisplayMetrics dm;
@@ -144,10 +171,13 @@ public class TYPlot extends View {
 			
 			updateSize (new RectF ());
 		}
-		
+
+		/**
+		 * Called when the plot changes it size. Updates the inner plot rect
+		 * @param rect the new plot size
+		 */
 		public void updateSize (RectF rect)
 		{
-			this.rect = rect;
 			plotArea = new RectF (rect);
 			
 			plotArea.top += margin;
@@ -156,20 +186,38 @@ public class TYPlot extends View {
 		
 	}
 	
+	/**
+	 * A collection of all the paint objects that will be needed when drawing
+	 * on the canvas. We create them beforehand and recycle them for performance
+	 * reasons.
+	 */
 	private static class PaintAssets {
-		
+
+		/// Paint used to draw the axis
 		Paint axisPaint;
-		
+
+		/// Paint used to draw the grids		
 		Paint gridPaint;
 		
+		/// Paint used to draw the labels
 		Paint dateLabels;
 		
+		/// Paint used to draw the area where samples are not available
 		Paint partial;
 		
+		/// Paint used to draw levelups
 		Paint levelup;
 		
+		/// Series to paint map
 		Map<Pager.Series, Paint> series;
 		
+		/**
+		 * Constructor. Creates all the paints, using the chart attributes and
+		 * measures
+		 * @param res the resources
+		 * @param attrs the chart attributes
+		 * @param meas measures object
+		 */
 		public PaintAssets (Resources res, AttributeSet attrs, Measures meas)
 		{
 			Bitmap bmp;
@@ -205,6 +253,11 @@ public class TYPlot extends View {
 			series = new Hashtable<Pager.Series, Paint> ();
 		}		
 		
+		/**
+		 * Called when the series set changes. Recreates the mapping between
+		 * series and paint objects
+		 * @param series the new series
+		 */
 		public void setSeries (List<Pager.Series> series)
 		{
 			Paint p;
@@ -220,22 +273,39 @@ public class TYPlot extends View {
 		}
 	}
 	
+	/**
+	 * This object tracks the position of the interval of the plot which is
+	 * currently visible.
+	 */
 	private static class Viewport {
 		
+		/// The connector to the datasource. Needed to refresh when the viewport moves
 		DataSink dsink;
 		
+		/// The measure object
 		Measures meas;
 		
+		/// The first (leftmost) day 
 		float t0;
 		
+		/// The last (rightmost) day
 		float t1;
 		
+		/// Size of interval (<tt>t1-t0</tt>) 
 		float interval;
 		
+		/// Y scale
 		float yScale;
 		
+		/// Number of days since subscription
 		int today;
 		
+		/**
+		 * Constructor
+		 * @param dsink the datasink 
+		 * @param meas the measure object
+		 * @param today number of days since subscription
+		 */
 		public Viewport (DataSink dsink, Measures meas, int today)
 		{			
 			this.dsink = dsink;
@@ -248,6 +318,10 @@ public class TYPlot extends View {
 			updateSize (100);
 		}
 		
+		/**
+		 * Changes the current day. Must be called when changing the datasource
+		 * @param today the new origin
+		 */
 		public void setToday (int today)
 		{
 			if (today == this.today)
@@ -261,6 +335,10 @@ public class TYPlot extends View {
 			dsink.refresh ();
 		}
 		
+		/**
+		 * Called when the plot area changes
+		 * @param yMax the Y max
+		 */
 		public void updateSize (float yMax)
 		{
 			interval = meas.plotArea.width () / meas.dipPerDay;
@@ -271,7 +349,10 @@ public class TYPlot extends View {
 			adjust ();
 		}
 		
-		public void adjust ()
+		/**
+		 * Updates the lower and upper edges after the viewport is resized 
+		 */
+		private void adjust ()
 		{
 			if (t0 < 0)
 				t0 = 0;
@@ -281,11 +362,22 @@ public class TYPlot extends View {
 			t1 = t0 + interval;
 		}
 		
+		/**
+		 * Returns the number of pixels between the left margin of the viewport
+		 * and day zero. Of course these pixels are not displayed because they
+		 * are outside the viewport.
+		 * @return the number of pixels
+		 */
 		public int getAbsPosition ()
 		{
 			return dayToAbsPosition (t0);
 		}
 		
+		/**
+		 * Moves the viewport, putting its left margin at a number of pixels to
+		 * the right of day zero
+		 * @param pos the new position
+		 */
 		public void setAbsPosition (int pos)
 		{
 			t0 = absPositionToDay (pos);
@@ -294,84 +386,155 @@ public class TYPlot extends View {
 			dsink.refresh ();
 		}
 		
+		/**
+		 * Returns the number of pixels between the leftmost day and a given day
+		 * @param day a day
+		 * @return the number of pixels
+		 */
 		public int getRelPosition (int day)
 		{
 			return (int) ((day - t0) * meas.dipPerDay);
 		}
 		
+		/**
+		 * Converts item numbers to pixel
+		 * @param y item numbers
+		 * @return the number of pixel
+		 */
 		public float getY (float y)
 		{
 			return meas.plotArea.bottom - y * yScale;
 		}
 		
+		/**
+		 * Scrolls the viewport by a given interval
+		 * @param dx the horizontal interval
+		 * @param dy the vertical interval (ignored)
+		 */
 		public void scroll (int dx, int dy)
 		{
 			setAbsPosition (getAbsPosition () + dx);
 		}
 
+		/**
+		 * Returns the number of pixels between a given day and the
+		 * day of subscription.
+		 * @param day a day
+		 * @return the number of pixels
+		 */
 		public int dayToAbsPosition (float day)
 		{
 			return (int) (day * meas.dipPerDay);
 		}
 		
+		/**
+		 * Returns the day, given the number of pixels from subscription day
+		 * @param pos number of pixels
+		 * @return the day number
+		 */
 		public float absPositionToDay (int pos)
 		{
 			return ((float) pos) / meas.dipPerDay;
 		}
 		
+		/**
+		 * A floor operation that always points to -inf.
+		 * @param d a number 
+		 * @return the floor
+		 */
 		private int floor (float d)
 		{
 			return (int) (d > 0 ? Math.floor (d) : Math.ceil (d));
 		}
 		
+		/**
+		 * A ceil operation that always points to +inf.
+		 * @param d a number 
+		 * @return the ceil
+		 */
 		private int ceil (float d)
 		{
 			return (int) (d > 0 ? Math.ceil (d) : Math.floor (d));
 		}
 
+		/**
+		 * Returns the rightmost day represented in this viewport.
+		 * This differs from {@link #t1} because it is an integer
+		 * @return the day
+		 */
 		public int rightmostDay ()
 		{
 			return floor (t1);
 		}
 		
+		/**
+		 * Returns the leftmost day represented in this viewport.
+		 * This differs from {@link #t0} because it is an integer
+		 * @return the day
+		 */
 		public int leftmostDay ()
 		{
 			return ceil (t0);
 		}
 		
+		/**
+		 * Returns the current displayed interval
+		 * @return the interval
+		 */
 		public Pager.Interval getInterval ()
 		{
 			return new Pager.Interval (floor (t0), ceil (t1));
 		}		
 		
+		/**
+		 * Tells whether a subset of this interval is visible in the viewport 
+		 * @param i an interval
+		 * @return <tt>true</tt> if it is visible
+		 */
 		public boolean visible (Pager.Interval i)
 		{
 			return i.start < today && i.stop > t0;
 		}
 	}
 	
+	/**
+	 * The time axis state
+	 */
 	private static class TimeAxis {
 		
 		/// The date mapped as "day zero"
 		public Date origin;
 		
-		/// Now
+		/// Now as a date
 		public Date now;
 		
+		/// Now as a day
 		public int today;
 		
+		/**
+		 * Constructor
+		 */
 		public TimeAxis ()
 		{
 			now = new Date ();
 			setOrigin (new Date (0));
 		}
 		
+		/**
+		 * Moves the origin to a given date
+		 * @param date the date
+		 */
 		public void setOrigin (Date date)
 		{
 			origin = date;
 			today = UserInformation.getDay (origin, now);
 		}
 		
+		/**
+		 * Converts a day into the calendar
+		 * @param day a day
+		 * @return the calendar position
+		 */
 		public Calendar dayToCalendar (int day)
 		{
 			Calendar cal;
@@ -384,10 +547,20 @@ public class TYPlot extends View {
 		}	
 	}
 	
+	/**
+	 * An implementation of the pager datasink. This is the object that
+	 * requests data from the data source, and updates the plot when
+	 * it receives the samples.
+	 */
 	private class DataSink implements Pager.DataSink {
 		
+		/// The current dataset
 		DataSet ds;
 		
+		/**
+		 * Called when the plot needs to be refreshed. Note that we always
+		 * request data because caching is done at a lower layer.
+		 */
 		public void refresh ()
 		{
 			if (pager != null && gotOrigin) {
@@ -397,6 +570,10 @@ public class TYPlot extends View {
 				invalidate ();
 		}
 
+		/**
+		 * Called when data is available. Refreshes the plot area
+		 * @param ds the samples
+		 */
 		public void dataAvailable (DataSet ds)
 		{
 			if (ds.interval.equals (vp.getInterval ())) {				
@@ -407,34 +584,53 @@ public class TYPlot extends View {
 		}		
 	}
 	
+	/// The scroller object that tracks fling gestures
 	private Scroller scroller;
 	
+	/// The android gesture detector
 	private GestureDetector gdect;
 	
+	/// Our gesture listener
 	private GestureListener glist;
 	
+	/// The measure object
 	private Measures meas;
 	
+	/// The current viewport
 	private Viewport vp;
 	
+	/// The paint objects
 	private PaintAssets pas;
 	
+	/// Date format to display time labels
 	private DateFormat datef;
 	
+	/// Date format to display january (we also print the year)
 	private DateFormat janf;
 	
+	/// The time axis
 	private TimeAxis taxis;
 	
+	/// The pager, if a datasource is available, <tt>null</tt> otherwise
 	private Pager pager;
 	
+	/// Our datasink
 	private DataSink dsink;
 	
+	/// <tt>true</tt> during fling gestures
 	private boolean scrolling;
 	
+	/// A reference to the parent chart, if any
 	private TYChart chart;
-
+	
+	/// <tt>true</tt> if we know where we are
 	boolean gotOrigin;	
 	
+	/**
+	 * Constructor
+	 * @param ctxt the context
+	 * @param attrs the attributes
+	 */
 	public TYPlot (Context ctxt, AttributeSet attrs)
 	{
 		super (ctxt, attrs);
@@ -451,12 +647,22 @@ public class TYPlot extends View {
 		loadAttributes (ctxt, attrs);
 	}
 	
-	public void setTYChart (TYChart chart)
+	/**
+	 * Called by the parent chart, if any. Calling this method enables some
+	 * extra features. 
+	 * @param chart the chart
+	 */
+	void setTYChart (TYChart chart)
 	{
 		this.chart = chart;
 		spin (true);
 	}
 	
+	/**
+	 * Constructs the objects that use attributes.
+	 * @param ctxt the context
+	 * @param attrs the attributes
+	 */
 	void loadAttributes (Context ctxt, AttributeSet attrs)
 	{
 		meas = new Measures (ctxt, attrs);
@@ -464,6 +670,12 @@ public class TYPlot extends View {
 		pas = new PaintAssets (getResources (), attrs, meas);		
 	}
 	
+	/**
+	 * Sets the time origin. Until this call is made, no data is ever shown,
+	 * so it must be the first call after 
+	 * {@link #setDataSource(com.wanikani.androidnotifier.graph.Pager.DataSource)}
+	 * @param date the origin
+	 */
 	public void setOrigin (Date date)
 	{
 		gotOrigin = true;
@@ -471,6 +683,10 @@ public class TYPlot extends View {
 		vp.setToday (taxis.today);
 	}
 	
+	/**
+	 * Sets the datasource. After this, callers should use {@link #setOrigin(Date)}
+	 * @param dsource the new datasource
+	 */
 	public void setDataSource (Pager.DataSource dsource)
 	{
 		gotOrigin = false;
@@ -534,6 +750,11 @@ public class TYPlot extends View {
 		drawGrid (canvas);
 	}
 	
+	/**
+	 * Draws the grinds on the canvas. Since they are "over" the plot, this
+	 * method should be called last
+	 * @param canvas the canvas
+	 */
 	protected void drawGrid (Canvas canvas)
 	{
 		float f, dateLabelBaseline, levelupBaseline;
@@ -587,6 +808,12 @@ public class TYPlot extends View {
 		}
 	}
 	
+	/**
+	 * Draws the plot
+	 * @param canvas the canvas
+	 * @param ds the samples
+	 * @return <tt>true</tt> if some partial data is present
+	 */
 	protected boolean drawPlot (Canvas canvas, Pager.DataSet ds)
 	{
 		boolean ans;
@@ -599,6 +826,13 @@ public class TYPlot extends View {
 		return ans;
 	}
 	
+	/**
+	 * Draws a segment of the plot.
+	 * @param canvas the canvas
+	 * @param segment the segment
+	 * @return <tt>true</tt> if this is a partial segment (i.e. its type
+	 * is {@link Pager.SegmentType#MISSING}
+	 */
 	protected boolean drawSegment (Canvas canvas, Pager.Segment segment)
 	{
 		float f [];
@@ -620,6 +854,12 @@ public class TYPlot extends View {
 		return false;
 	}
 	
+	/**
+	 * Draws a segment without data
+	 * @param canvas the canvas
+	 * @param i the interval size
+	 * @return <tt>true</tt> unless this part entirely outside the viewport
+	 */
 	protected boolean drawMissing (Canvas canvas, Pager.Interval i)
 	{
 		int from, to;
@@ -636,6 +876,14 @@ public class TYPlot extends View {
 		return true;
 	}
 	
+	/**
+	 * Draws a segment containins samples
+	 * @param canvas the canvas
+	 * @param series the series
+	 * @param interval the interval
+	 * @param base a float array initially set to zero, and updated by this method
+	 * @param samples the samples 
+	 */
 	protected void drawPlot (Canvas canvas, Pager.Series series, Pager.Interval interval,
 							 float base [], float samples [])
 	{
@@ -667,17 +915,29 @@ public class TYPlot extends View {
 		canvas.drawPath (path, p);
 	}
 	
+	/**
+	 * True if scrolling 
+	 * @return <tt>true</tt> if scrolling
+	 */
 	public boolean scrolling ()
 	{
 		return scrolling;
 	}
 	
+	/**
+	 * Draws the spinner if attached to a chart
+	 * @param enable set if should be shown
+	 */
 	public void spin (boolean enable)
 	{
 		if (chart != null)
 			chart.spin (enable);
 	}
 
+	/**
+	 * Called when retrieving data or as soon as data has been retrieved
+	 * @param enable set if retrieving. Reset if data has been retrieved
+	 */
 	public void retrieving (boolean enable)
 	{
 		if (chart != null)
@@ -686,12 +946,19 @@ public class TYPlot extends View {
 			spin (false);
 	}
 	
+	/**
+	 * Starts data reconstruction
+	 */
 	public void fillPartial ()
 	{
 		if (pager != null) 
 			pager.fillPartial ();
 	}
-	
+
+	/**
+	 * Called when the samples have been changed. Updates the Y scale and 
+	 * requests fresh data to the data source.
+	 */
 	public void refresh ()
 	{
 		/* The size may have changed */
