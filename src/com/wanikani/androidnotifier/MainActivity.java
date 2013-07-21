@@ -11,6 +11,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -1056,6 +1059,28 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	}
 	
 	/**
+	 * Updates the splash screen with the version ID
+	 * 	@param view the view
+	 */
+	private void setVersion (View view)
+	{
+		PackageManager pmgr;
+		PackageInfo pinfo;
+		Resources res;
+		TextView tv;
+		
+		pmgr = getPackageManager ();
+		res = getResources ();
+		try {
+			pinfo = pmgr.getPackageInfo (getPackageName (), 0);
+			tv = (TextView) view.findViewById (R.id.splash_version);
+			tv.setText (res.getString (R.string.tag_version, pinfo.versionName));
+		} catch (NameNotFoundException e) {
+			/* leave it as it is */
+		}				
+	}
+	
+	/**
 	 * Switches to one of the three screeens (main, dashboard or error)
 	 * @param id the id to switch to
 	 */
@@ -1067,6 +1092,7 @@ public class MainActivity extends FragmentActivity implements Runnable {
 		view.setVisibility (id == R.id.f_main ? View.VISIBLE : View.INVISIBLE);
 
 		view = findViewById (R.id.f_splash);
+		setVersion (view);
 		view.setVisibility (id == R.id.f_splash ? View.VISIBLE : View.INVISIBLE);
 
 		view = findViewById (R.id.f_error);

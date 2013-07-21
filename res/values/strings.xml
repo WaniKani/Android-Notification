@@ -49,7 +49,7 @@
     <string name="tag_gravatar">Gravatar</string>
     <string name="tag_loading">Loading&#8230;</string>
     <string name="tag_btn_review">Review</string>
-    <string name="tag_version">Version 1.0.0</string>
+    <string name="tag_version">Version %s</string>
     
     <string name="tag_radicals_progression">Radicals</string>
     <string name="tag_kanji_progression">Kanji</string>
