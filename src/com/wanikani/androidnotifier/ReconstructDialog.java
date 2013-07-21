@@ -21,46 +21,102 @@ import com.wanikani.wklib.Radical;
 import com.wanikani.wklib.UserInformation;
 import com.wanikani.wklib.Vocabulary;
 
+/* 
+ *  Copyright (c) 2013 Alberto Cuda
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/**
+ * Here we implement the reconstruction logic. This class handles both the GUI
+ * and the feed algorithm. The actual reconstruction, however, is implemented in
+ * the {@link HistoryDatabase} class.
+ */
 public class ReconstructDialog {
 
+	/**
+	 * A listener for reconstruction events.
+	 */
 	public interface Interface {
-		
+
+		/**
+		 * Called when reconstruction completes successfully.
+		 * @param cs the new core stats
+		 */
 		public void completed (HistoryDatabase.CoreStats cs);
 		
 	}
 	
+	/**
+	 * Listener attached to the "Go" button of the initial dialog.
+	 */
 	private class GoListener implements DialogInterface.OnClickListener {
-		
+
+		/// Context
 		Context ctxt;
 		
+		/**
+		 * Constructor
+		 * @param ctxt the context
+		 */
 		public GoListener (Context ctxt)
 		{
 			this.ctxt = ctxt;
 		}
 		
+		@Override
 		public void onClick (DialogInterface ifc, int which)
 		{
 			go (ctxt);
 		}		
 	}
 	
+	/**
+	 * Listener attached to the "Cancel" button of the initial dialog. 
+	 */
 	private class CancelListener implements DialogInterface.OnClickListener {
-		
+
+		@Override
 		public void onClick (DialogInterface ifc, int which)
 		{
 			cancelled = true;
-		}
-		
+		}		
 	}
 
+	/**
+	 * The current state of the update process. If we want to make the process
+	 * resumable, this should hold all the needed info. At the moment, however,
+	 * we keep here the info needed to resume/recreate the dialog if the activity
+	 * is recreated.
+	 */
 	private class Update {
 		
+		/// Completion percentage
 		int percentage;
 		
+		/// Last message displayed
 		String msg;
 		
+		/// If set, the progress bar is shown
 		boolean showBar;
 		
+		/**
+		 * Constructor. Used when the update process is still going on
+		 * @param done completed steps
+		 * @param steps number of steps
+		 * @param msg the message to display
+		 */
 		public Update (int done, int steps, String msg)
 		{
 			percentage = (100 * done) / steps;
@@ -68,6 +124,10 @@ public class ReconstructDialog {
 			showBar = true;
 		}
 		
+		/**
+		 * Constructor. Used when the update process is complete.
+		 * @param msg the completion message
+		 */
 		public Update (String msg)
 		{
 			this.msg = msg;
@@ -75,14 +135,26 @@ public class ReconstructDialog {
 		}
 	}
 	
+	/**
+	 * The dialog. This class is destroyed and recreated as the main activity
+	 * is paused and resumed, so we must make sure the Update class contains
+	 * all needed info to recreate the original GUI.
+	 */
 	private class ProgressDialog {
 		
+		/// Progress bar
 		ProgressBar pb;
 		
+		/// The message view
 		TextView tv;
 		
+		/// The android dialog
 		Dialog dialog;
 
+		/**
+		 * Constructor
+		 * @param ctxt the context
+		 */
 		public ProgressDialog (Context ctxt)
 		{
 			LayoutInflater inflater;
@@ -106,11 +178,18 @@ public class ReconstructDialog {
 			dialog.show ();				
 		}
 		
+		/**
+		 * Called when the dialog should be closed
+		 */
 		public void dismiss ()
 		{
 			dialog.dismiss ();
 		}
 		
+		/**
+		 * Called when the dialog must be updated
+		 * @param u new info
+		 */
 		public void publish (Update u)
 		{			
 			tv.setText (u.msg);
@@ -122,24 +201,45 @@ public class ReconstructDialog {
 		}		
 	}
 	
+	/**
+	 * The asynch task that loads all the info from WK, feeds the database and
+	 * publishes the progress.
+	 */
 	private class Task extends AsyncTask<Void, Update, HistoryDatabase.CoreStats> {
-		
+
+		/// WK connection
 		private Connection conn;
 		
+		/// Context
 		private Context ctxt;
 		
+		/// Number of radical levels to load at a time
 		private static final int RADICALS_CHUNK = 10;
 		
+		/// Number of kanji levels to load at a time
 		private static final int KANJI_CHUNK = 10;
 		
+		/// Number of vocab levels to load at a time
 		private static final int VOCAB_CHUNK = 5;
 		
+		/**
+		 * Constructor
+		 * @param conn WK connection
+		 * @param ctxt the context
+		 */
 		public Task (Connection conn, Context ctxt)
 		{
 			this.conn = conn;
 			this.ctxt = ctxt;
 		}
 		
+		/**
+		 * Conveience method to create an array contaning all the integer between
+		 * to numbers
+		 * @param from the start number
+		 * @param to the end number
+		 * @return the array
+		 */
 		private int [] array (int from, int to)
 		{
 			int ans [], i;
@@ -151,11 +251,22 @@ public class ReconstructDialog {
 			return ans;
 		}
 		
+		/**
+		 * Returns the number of steps needed to load all the item types.
+		 * @param level the user leve
+		 * @param chunk chunk size
+		 * @return the number of steps
+		 */
 		private int itemStepsFor (int level, int chunk)
 		{
 			return (level + chunk - 1) / chunk;
 		}
 		
+		/**
+		 * The reconstruction process itself. It opens a DB reconstruction object,
+		 * loads all the items, and retrieves the new core stats 
+		 * @return the core stats, or <tt>null</tt> if something goes wrong
+		 */
 		@Override
 		protected HistoryDatabase.CoreStats doInBackground (Void... v)
 		{
@@ -241,6 +352,10 @@ public class ReconstructDialog {
 			}
 		}	
 						
+		/**
+		 * Ends the reconstruction process by telling everybody how it went.
+		 * @param cs the core stats, or <tt>null</tt> if smoething wrong happened
+		 */
 		@Override
 		protected void onPostExecute (HistoryDatabase.CoreStats cs)
 		{
@@ -250,6 +365,9 @@ public class ReconstructDialog {
 			complete (cs);
 		}
 		
+		/**
+		 * Publishes the progress by updating the window
+		 */
 		@Override
 		protected void onProgressUpdate (Update... u)
 		{
@@ -257,18 +375,30 @@ public class ReconstructDialog {
 		}
 	}
 	
+	/// The connection
 	Connection conn;
 	
+	/// Set if the user cancelled the operation
 	boolean cancelled;
 	
+	/// Set if the process completed
 	boolean completed;
 	
+	/// The dialog windows
 	ProgressDialog pdialog;
 	
+	/// Last update
 	Update lastUpdate;
 	
+	/// The listener interface
 	Interface ifc;
 	
+	/**
+	 * Constructor
+	 * @param ifc the listener interface
+	 * @param ctxt the context
+	 * @param conn a WK connection
+	 */
 	public ReconstructDialog (Interface ifc, Context ctxt, Connection conn)
 	{
 		AlertDialog.Builder builder;
@@ -288,17 +418,30 @@ public class ReconstructDialog {
 		dialog.show ();		
 	}
 	
+	/**
+	 * Starts the reconstruction process. This happens immediately after the
+	 * user reads the description of what's going to happen
+	 * @param ctxt the context
+	 */
 	public void go (Context ctxt)
 	{
 		attach (ctxt);
 		new Task (conn, ctxt).execute ();
 	}
 	
+	/**
+	 * Cancels the process.
+	 */
 	public void cancel ()
 	{
 		cancelled = true;
 	}
 	
+	/**
+	 * Called when the fragment is attached to a context.
+	 * We rebuild a dialog window and put all the info that was in the former one.
+	 * @param ctxt the context
+	 */
 	public void attach (Context ctxt)
 	{
 		if (cancelled || completed)
@@ -307,6 +450,10 @@ public class ReconstructDialog {
 		createDialog (ctxt);
 	}
 	
+	/**
+	 * Called when the fragment is detached from the context.
+	 * We close the dialog and make sure updates are not published anymore. 
+	 */
 	public void detach ()
 	{
 		if (pdialog != null)
@@ -315,6 +462,10 @@ public class ReconstructDialog {
 		pdialog = null;
 	}
 	
+	/**
+	 * Convenience method that opens the progress dialog
+	 * @param ctxt the context
+	 */
 	private void createDialog (Context ctxt)
 	{
 		pdialog = new ProgressDialog (ctxt);
@@ -322,6 +473,10 @@ public class ReconstructDialog {
 			publish (lastUpdate);
 	}
 	
+	/**
+	 * Called when the process completes successfully. We notify the listener.
+	 * @param cs the core stats
+	 */
 	private void complete (HistoryDatabase.CoreStats cs)
 	{		
 		if (cs != null) {
@@ -331,6 +486,10 @@ public class ReconstructDialog {
 		}
 	}
 	
+	/**
+	 * Publishes an updated on the progress dialog (if any).
+	 * @param update the update info
+	 */
 	private void publish (Update update)
 	{
 		lastUpdate = update;

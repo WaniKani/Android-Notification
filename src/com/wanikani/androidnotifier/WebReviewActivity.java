@@ -484,6 +484,11 @@ public class WebReviewActivity extends Activity {
 			"	wknKeyboard.hide ();" +			
 			"}";
 	
+	/**
+	 * A simple javascript to be called when we are accessing the server-side
+	 * (traditional) reviews start page. If the page is empty (i.e. has no title)
+	 * we notify the {@link EmptyPageListener}. We leave the page as it is.
+	 */
 	private static final String JS_CHECK_REDIRECT =
 			"var title;" +
 			"title = document.getElementsByTagName ('title');" +
