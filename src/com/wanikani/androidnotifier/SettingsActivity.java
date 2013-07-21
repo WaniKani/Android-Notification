@@ -321,6 +321,11 @@ public class SettingsActivity
 		return prefs.getString (KEY_URL, WebReviewActivity.WKConfig.DEFAULT_REVIEW_START);
 	}
 	
+	public static void setURL (SharedPreferences prefs, String url)
+	{
+		prefs.edit ().putString (KEY_URL, url).commit ();
+	}
+
 	public static boolean toggleMute (SharedPreferences prefs)
 	{
 		boolean v;

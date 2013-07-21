@@ -72,6 +72,9 @@ public class WebReviewActivity extends Activity {
 		/** Review start page. Of course must be inside of @link {@link #REVIEW_SPACE} */
 		static final String DEFAULT_REVIEW_START = "http://www.wanikani.com/review/session/start";
 
+		/** New review start page. This is the start page when client side reviews will be deployed */
+		static final String NEW_REVIEW_START = "http://www.wanikani.com/review";
+
 		/** Review start page. Of course must be inside of @link {@link #REVIEW_SPACE} */
 		static final String LESSON_START = "http://www.wanikani.com/lesson";
 
@@ -164,6 +167,8 @@ public class WebReviewActivity extends Activity {
 		/**
 	     * Called when a page finishes to be loaded. We hide the progress bar
 	     * and run the initialization javascript that shows the keyboard, if needed.
+	     * In addition, if this is the initial page, we check whether Viet has
+	     * deployed the client-side review system
 	     */
 		@Override  
 	    public void onPageFinished (WebView view, String url)  
@@ -172,6 +177,9 @@ public class WebReviewActivity extends Activity {
 
 			if (url.startsWith ("http"))
 				js (JS_INIT_KBD);
+			
+			if (url.equals (WKConfig.DEFAULT_REVIEW_START))
+				js (JS_CHECK_REDIRECT);
 	    }
 	}
 	
@@ -295,8 +303,39 @@ public class WebReviewActivity extends Activity {
 		public void iconizeLessons ()
 		{
 			new ShowHideKeyboard (KeyboardStatus.ICONIZED_LESSONS);
+		}	
+	}
+	
+	/**
+	 * This javascipt-accessible object is called when the initial review 
+	 * page contains no title. This is not like him. It means that we have
+	 * switched to client side reviews, so we change the preferences settings
+	 * to point to the new URL. The expected behaviour is that we show the
+	 * user an empty page, but if he/she retries, the correct page is displayed.
+	 * We handle the transition this (inelegant) way, rather than redirecting 
+	 * from the javascript because I want to avoid possible unintended 
+	 * dDOS if we end up in a loop. 
+	 * Note also that false positives are nearly harmless because the new URL
+	 * page is still valid even for the server-side review system. It just
+	 * requires an extra click.
+	 */
+	private class EmptyPageListener {
+		
+		/**
+		 * Called by {@value WebReviewActivity#JS_CHECK_REDIRECT} if the page
+		 * URL is {@link WKConfig#DEFAULT_REVIEW_START} and it contains
+		 * no title. This is handled by changing the start URL. 
+		 */
+		@JavascriptInterface
+		public void emptyPage ()
+		{
+			SharedPreferences prefs;
+			
+			prefs = PreferenceManager.getDefaultSharedPreferences (WebReviewActivity.this);
+			if (SettingsActivity.getURL (prefs).equals (WKConfig.DEFAULT_REVIEW_START))
+				SettingsActivity.setURL (prefs, WKConfig.NEW_REVIEW_START);
 		}
-
+		
 	}
 	
 	/**
@@ -444,6 +483,13 @@ public class WebReviewActivity extends Activity {
 			"} else {" +
 			"	wknKeyboard.hide ();" +			
 			"}";
+	
+	private static final String JS_CHECK_REDIRECT =
+			"var title;" +
+			"title = document.getElementsByTagName ('title');" +
+			"if (title == null || title.length == 0) {" +
+			"     emptyPageListener.emptyPage ();" +
+			"}";
 
 	private static final String JS_FOCUS = 
 			"var ltextbox;" +
@@ -571,6 +617,7 @@ public class WebReviewActivity extends Activity {
 		wv.getSettings ().setSupportMultipleWindows (true);
 		wv.getSettings ().setUseWideViewPort (true);
 		wv.addJavascriptInterface (new WKNKeyboard (), "wknKeyboard");
+		wv.addJavascriptInterface (new EmptyPageListener (), "emptyPageListener");
 		wv.setScrollBarStyle (ScrollView.SCROLLBARS_OUTSIDE_OVERLAY);
 		wv.setWebViewClient (new WebViewClientImpl ());
 		wv.setWebChromeClient (new WebChromeClientImpl ());		
