@@ -51,15 +51,28 @@ import com.wanikani.wklib.SRSDistribution;
  */
 public class StatsFragment extends Fragment implements Tab {
 	
+	/**
+	 * This task gets called at application start time to acquire some overall
+	 * info from the database. The main object, here, is to fix the Y scale. 
+	 */
 	private class GetCoreStatsTask extends AsyncTask<Void, Void, HistoryDatabase.CoreStats> {
 		
+		/// The context
 		private Context ctxt;
 		
+		/**
+		 * Constructor
+		 * @param ctxt the context
+		 */
 		public GetCoreStatsTask (Context ctxt)
 		{
 			this.ctxt = ctxt;
 		}
 		
+		/**
+		 * The worker function. We simply call the DB that will perform the real job.
+		 * @return the stats
+		 */
 		@Override
 		protected HistoryDatabase.CoreStats doInBackground (Void... v)
 		{
@@ -70,6 +83,10 @@ public class StatsFragment extends Fragment implements Tab {
 			}
 		}	
 		
+		/**
+		 * Called when DB has been accesses. Publish the info to the main class
+		 * 	@param stats
+		 */
 		@Override
 		protected void onPostExecute (HistoryDatabase.CoreStats cs)
 		{
@@ -78,31 +95,55 @@ public class StatsFragment extends Fragment implements Tab {
 
 	}
 	
+	/**
+	 * Handler of reconstruction dialog events.
+	 */
 	private class ReconstructListener implements ReconstructDialog.Interface {
-		
+
+		/// The reconstruct dialog
 		ReconstructDialog rd;
 		
+		/**
+		 * Constructor. Builds the reconstruct dialog, and start reconstruction process.
+		 */
 		public ReconstructListener ()
 		{
 			rd = new ReconstructDialog (this, main, main.getConnection ());
 		}
 		
+		/**
+		 * Called by reconstruction dialog when it's over and everything went
+		 * smoothly. Notify the main class.
+		 * @param cs the new core stats
+		 */
 		public void completed (HistoryDatabase.CoreStats cs)
 		{
 			reconstructCompleted (this, cs);
 		}		
 	}
 	
+	/**
+	 * The base class for all the datasources in this main class. All the common tasks 
+	 * are implemented at this level
+	 */
 	private abstract class DataSource extends HistoryDatabaseCache.DataSource {
 
+		/// The series.
 		protected List<Series> series;
 		
+		/// Y axis scale
 		protected int maxY;
 		
+		/// A mapping between levels and their levelup days
 		protected Map<Integer, Pager.Marker> markers;
 		
+		/// The levelup color
 		protected int markerColor;
 		
+		/**
+		 * Constructor
+		 * @param hdbc the database cache
+		 */
 		public DataSource (HistoryDatabaseCache hdbc)
 		{
 			super (hdbc);
@@ -116,22 +157,45 @@ public class StatsFragment extends Fragment implements Tab {
 			markers = new Hashtable<Integer, Pager.Marker> ();
 		}
 		
+		/**
+		 * Returns the series, which nonetheless must have been created by the
+		 * subclass.
+		 * 	@param return the series
+		 */
+		@Override
 		public List<Series> getSeries ()
 		{
 			return series;
 		}
 		
+		/**
+		 * Returns the Y scale, which nonetheless must have been set by
+		 * the subclass
+		 * 	@param the Y scale
+		 */
 		public float getMaxY ()
 		{
 			return maxY;
 		}
 		
+		/**
+		 * Called by the main class when core stats become available.
+		 * Subclasses can (should) override this method, by must still call
+		 * this implementation, that takes care of populating the levelup hashtable.
+		 * @param cs the new corestats
+		 */
 		public void setCoreStats (HistoryDatabase.CoreStats cs)
 		{
 			if (cs.levelups != null)
 				loadLevelups (cs.levelups);
 		}
 		
+		/**
+		 * Creates the levelups hashtable. Called by 
+		 * {@link #setCoreStats(com.wanikani.androidnotifier.db.HistoryDatabase.CoreStats)},
+		 * so there is no need to access the DB.
+		 * @param levelups
+		 */
 		private void loadLevelups (Map<Integer, Integer> levelups)
 		{
 			markers.clear ();
@@ -141,28 +205,55 @@ public class StatsFragment extends Fragment implements Tab {
 			}
 		}		
 		
+		/**
+		 * Adds a levelup marker. This method may be overridden by subclasses in order
+		 * to change marker color or tag
+		 * @param day the day
+		 * @param level the level
+		 * @return a marker
+		 */
 		protected Pager.Marker newMarker (int day, int level)
 		{
 			return new Pager.Marker (markerColor, Integer.toString (level));
 		}
 		
+		/**
+		 * Returns the marker hashtable. This is populated at this level, so
+		 * subclasses need not override this method (though they can still to it
+		 * if they want to display something fancier).
+		 * @return the leveup markers 
+		 */
+		@Override
 		public Map<Integer, Pager.Marker> getMarkers ()
 		{
 			return markers;
 		}
 		
+		/**
+		 * Called when the user requested partial info to be reconstructed.
+		 * We open the reconstruct dialog and let it handle the business
+		 */
 		public void fillPartial ()
 		{
 			openReconstructDialog ();
 		}
 	}
 	
+	/**
+	 * The SRS distribution datasource implementation.
+	 */
 	private class SRSDataSource extends DataSource {
 	
+		/// The series of complete segments 
 		private List<Series> completeSeries;
 		
+		/// The series of partial segments
 		private List<Series> partialSeries;
 		
+		/**
+		 * Constructor.
+		 * @param hdbc the database cache
+		 */
 		public SRSDataSource (HistoryDatabaseCache hdbc)
 		{
 			super (hdbc);
@@ -190,6 +281,12 @@ public class StatsFragment extends Fragment implements Tab {
 			series.addAll (partialSeries);
 		}
 		
+		/**
+		 * Called when core stats become available. Setup the {@link DataSource#maxY}
+		 * field
+		 * @param cs the core stats
+		 */
+		@Override
 		public void setCoreStats (HistoryDatabase.CoreStats cs)
 		{
 			super.setCoreStats (cs);
@@ -199,6 +296,13 @@ public class StatsFragment extends Fragment implements Tab {
 				maxY = 100;			
 		}
 		
+		/**
+		 * Called by some ancestor when we need to translate a raw page segment
+		 * into a plot segment <i>and</i> data is partial. 
+		 * @param segment raw input segment
+		 * @param pseg output segment
+		 */
+		@Override
 		protected void fillPartialSegment (Pager.Segment segment, PageSegment pseg)
 		{
 			int i;
@@ -210,6 +314,12 @@ public class StatsFragment extends Fragment implements Tab {
 				segment.data [0][i++] = srs.apprentice.total;											
 		}
 
+		/**
+		 * Called by some ancestor when we need to translate a raw page segment
+		 * into a plot segment <i>and</i> data is complete. 
+		 * @param segment raw input segment
+		 * @param pseg output segment
+		 */
 		protected void fillSegment (Pager.Segment segment, PageSegment pseg)
 		{
 			int i;
@@ -228,12 +338,21 @@ public class StatsFragment extends Fragment implements Tab {
 		
 	}
 
+	/**
+	 * The kanji distribution datasource implementation.
+	 */
 	private class KanjiDataSource extends DataSource {
 		
+		/// The series of complete segments 
 		private List<Series> completeSeries;
 		
+		/// The series of partial segments 
 		private List<Series> partialSeries;
 
+		/**
+		 * Constructor.
+		 * @param hdbc the database cache
+		 */
 		public KanjiDataSource (HistoryDatabaseCache hdbc)
 		{
 			super (hdbc);
@@ -268,6 +387,11 @@ public class StatsFragment extends Fragment implements Tab {
 			completeSeries.add (burned);
 		}
 		
+		/**
+		 * Called when core stats become available. Setup the {@link DataSource#maxY}
+		 * field
+		 * @param cs the core stats
+		 */
 		public void setCoreStats (HistoryDatabase.CoreStats cs)
 		{
 			super.setCoreStats (cs);
@@ -277,6 +401,12 @@ public class StatsFragment extends Fragment implements Tab {
 				maxY = 100;			
 		}
 		
+		/**
+		 * Called by some ancestor when we need to translate a raw page segment
+		 * into a plot segment <i>and</i> data is partial. 
+		 * @param segment raw input segment
+		 * @param pseg output segment
+		 */
 		protected void fillPartialSegment (Pager.Segment segment, PageSegment pseg)
 		{
 			int i;
@@ -290,6 +420,12 @@ public class StatsFragment extends Fragment implements Tab {
 			}
 		}
 
+		/**
+		 * Called by some ancestor when we need to translate a raw page segment
+		 * into a plot segment <i>and</i> data is complete. 
+		 * @param segment raw input segment
+		 * @param pseg output segment
+		 */
 		protected void fillSegment (Pager.Segment segment, PageSegment pseg)
 		{
 			int i;
@@ -309,12 +445,21 @@ public class StatsFragment extends Fragment implements Tab {
 		
 	}
 
+	/**
+	 * The vocab distribution datasource implementation.
+	 */
 	private class VocabDataSource extends DataSource {
 		
+		/// The series of complete segments 
 		private List<Series> completeSeries;
 		
+		/// The series of partial segments 
 		private List<Series> partialSeries;
 
+		/**
+		 * Constructor.
+		 * @param hdbc the database cache
+		 */
 		public VocabDataSource (HistoryDatabaseCache hdbc)
 		{
 			super (hdbc);
@@ -349,6 +494,11 @@ public class StatsFragment extends Fragment implements Tab {
 			completeSeries.add (burned);
 		}
 		
+		/**
+		 * Called when core stats become available. Setup the {@link DataSource#maxY}
+		 * field
+		 * @param cs the core stats
+		 */
 		public void setCoreStats (HistoryDatabase.CoreStats cs)
 		{
 			super.setCoreStats (cs);
@@ -358,6 +508,12 @@ public class StatsFragment extends Fragment implements Tab {
 				maxY = 100;			
 		}
 		
+		/**
+		 * Called by some ancestor when we need to translate a raw page segment
+		 * into a plot segment <i>and</i> data is partial. 
+		 * @param segment raw input segment
+		 * @param pseg output segment
+		 */
 		protected void fillPartialSegment (Pager.Segment segment, PageSegment pseg)
 		{
 			int i;
@@ -371,6 +527,12 @@ public class StatsFragment extends Fragment implements Tab {
 			}
 		}
 
+		/**
+		 * Called by some ancestor when we need to translate a raw page segment
+		 * into a plot segment <i>and</i> data is complete. 
+		 * @param segment raw input segment
+		 * @param pseg output segment
+		 */
 		protected void fillSegment (Pager.Segment segment, PageSegment pseg)
 		{
 			int i;
@@ -423,6 +585,7 @@ public class StatsFragment extends Fragment implements Tab {
 	/// The database
 	HistoryDatabaseCache hdbc;
 	
+	/// The object that listens for reconstruction events
 	ReconstructListener rlist;
 	
 	/**
@@ -460,6 +623,11 @@ public class StatsFragment extends Fragment implements Tab {
 			rlist.rd.detach ();
 	}
 	
+	/**
+	 * Called when core stats become available. Update each datasource and
+	 * request plots to be refreshed.
+	 * @param cs the core stats
+	 */
 	private void setCoreStats (HistoryDatabase.CoreStats cs)
 	{
 		this.cs = cs;
@@ -521,6 +689,11 @@ public class StatsFragment extends Fragment implements Tab {
 		return parent;
     }
 	
+	/**
+	 * Binds each datasource to its chart 
+	 * @param chart the chart ID
+	 * @param ds the datasource
+	 */
 	private void attach (int chart, DataSource ds)
 	{
 		TYChart tyc;
@@ -801,6 +974,10 @@ public class StatsFragment extends Fragment implements Tab {
 		return false; 
 	}
 	
+	/**
+	 * Called when the user wants to start the reconstruct process.
+	 * We open the dialog and let it handle the process.
+	 */
 	private void openReconstructDialog ()
 	{
 		if (!isDetached ()) {
@@ -810,6 +987,12 @@ public class StatsFragment extends Fragment implements Tab {
 		}		
 	}
 	
+	/**
+	 * Called when reconstruction is successfully completed. Refresh datasources 
+	 * and plots.
+	 * @param rlist the listener
+	 * @param cs the core stats
+	 */
 	private void reconstructCompleted (ReconstructListener rlist,
 									   HistoryDatabase.CoreStats cs)
 	{
