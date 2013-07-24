@@ -69,20 +69,17 @@ public class WebReviewActivity extends Activity {
 	 */
 	public static class WKConfig {
 		
-		/** Review start page. Of course must be inside of @link {@link #REVIEW_SPACE} */
-		static final String DEFAULT_REVIEW_START = "http://www.wanikani.com/review/session/start";
+		/** Review start page. Old version. Kept just to clear old configuration entries */
+		static final String OBSOLETE_REVIEW_START = "http://www.wanikani.com/review/session/start";
 
 		/** New review start page. This is the start page when client side reviews will be deployed */
-		static final String NEW_REVIEW_START = "http://www.wanikani.com/review";
+		static final String CURRENT_REVIEW_START = "http://www.wanikani.com/review";
 
 		/** Review start page. Of course must be inside of @link {@link #REVIEW_SPACE} */
 		static final String LESSON_START = "http://www.wanikani.com/lesson";
 
-		/** HTML id of the textbox the user types its answer in (reviews) */
-		static final String ANSWER_BOX = "user_response";
-
 		/** HTML id of the textbox the user types its answer in (reviews, client-side) */
-		static final String ANSWER_BOX_V2 = "user-response";
+		static final String ANSWER_BOX = "user-response";
 
 		/** HTML id of the textbox the user types its answer in (lessons) */
 		static final String LESSON_ANSWER_BOX_JP = "translit";
@@ -176,10 +173,7 @@ public class WebReviewActivity extends Activity {
 			bar.setVisibility (View.GONE);
 
 			if (url.startsWith ("http"))
-				js (JS_INIT_KBD);
-			
-			if (url.equals (WKConfig.DEFAULT_REVIEW_START))
-				js (JS_CHECK_REDIRECT);
+				js (JS_INIT_KBD);			
 	    }
 	}
 	
@@ -304,38 +298,6 @@ public class WebReviewActivity extends Activity {
 		{
 			new ShowHideKeyboard (KeyboardStatus.ICONIZED_LESSONS);
 		}	
-	}
-	
-	/**
-	 * This javascipt-accessible object is called when the initial review 
-	 * page contains no title. This is not like him. It means that we have
-	 * switched to client side reviews, so we change the preferences settings
-	 * to point to the new URL. The expected behaviour is that we show the
-	 * user an empty page, but if he/she retries, the correct page is displayed.
-	 * We handle the transition this (inelegant) way, rather than redirecting 
-	 * from the javascript because I want to avoid possible unintended 
-	 * dDOS if we end up in a loop. 
-	 * Note also that false positives are nearly harmless because the new URL
-	 * page is still valid even for the server-side review system. It just
-	 * requires an extra click.
-	 */
-	private class EmptyPageListener {
-		
-		/**
-		 * Called by {@value WebReviewActivity#JS_CHECK_REDIRECT} if the page
-		 * URL is {@link WKConfig#DEFAULT_REVIEW_START} and it contains
-		 * no title. This is handled by changing the start URL. 
-		 */
-		@JavascriptInterface
-		public void emptyPage ()
-		{
-			SharedPreferences prefs;
-			
-			prefs = PreferenceManager.getDefaultSharedPreferences (WebReviewActivity.this);
-			if (SettingsActivity.getURL (prefs).equals (WKConfig.DEFAULT_REVIEW_START))
-				SettingsActivity.setURL (prefs, WKConfig.NEW_REVIEW_START);
-		}
-		
 	}
 	
 	/**
@@ -468,9 +430,6 @@ public class WebReviewActivity extends Activity {
 			"textbox = document.getElementById (\"" + WKConfig.ANSWER_BOX + "\"); " +
 			"lessobj = document.getElementById (\"" + WKConfig.LESSONS_OBJ + "\"); " +
 			"ltextbox = document.getElementById (\"" + WKConfig.LESSON_ANSWER_BOX_JP + "\"); " +
-			"if (textbox == null) {" +
-			"   textbox = document.getElementById (\"" + WKConfig.ANSWER_BOX_V2 + "\"); " +
-			"}" +
 			"if (ltextbox == null) {" +
 			"   ltextbox = document.getElementById (\"" + WKConfig.LESSON_ANSWER_BOX_EN + "\"); " +
 			"}" +
@@ -484,18 +443,6 @@ public class WebReviewActivity extends Activity {
 			"	wknKeyboard.hide ();" +			
 			"}";
 	
-	/**
-	 * A simple javascript to be called when we are accessing the server-side
-	 * (traditional) reviews start page. If the page is empty (i.e. has no title)
-	 * we notify the {@link EmptyPageListener}. We leave the page as it is.
-	 */
-	private static final String JS_CHECK_REDIRECT =
-			"var title;" +
-			"title = document.getElementsByTagName ('title');" +
-			"if (title == null || title.length == 0) {" +
-			"     emptyPageListener.emptyPage ();" +
-			"}";
-
 	private static final String JS_FOCUS = 
 			"var ltextbox;" +
 			"ltextbox = document.getElementById (\"" + WKConfig.LESSON_ANSWER_BOX_JP + "\"); " +
@@ -511,22 +458,14 @@ public class WebReviewActivity extends Activity {
 	 *  is an answer, so we iconize the keyboard. Otherwise we are entering the new question,
 	 *  so we need to show it  */
 	private static final String JS_ENTER =
-			"var textbox, textbox2, ltextbox, form, submit;" +
+			"var textbox, ltextbox, form, submit;" +
 			"textbox = document.getElementById (\"" + WKConfig.ANSWER_BOX + "\"); " +
-			"textbox2 = document.getElementById (\"" + WKConfig.ANSWER_BOX_V2 + "\"); " +
 		    "form = document.getElementById (\"new_lesson\"); " +
 			"ltextbox = document.getElementById (\"" + WKConfig.LESSON_ANSWER_BOX_JP + "\"); " +
 			"if (ltextbox == null) {" +
 			"   ltextbox = document.getElementById (\"" + WKConfig.LESSON_ANSWER_BOX_EN + "\"); " +
 			"}" +
-			"if (textbox != null) { " +
-			"   if (textbox.disabled) {" +
-			"	   wknKeyboard.show ();" +
-			"   } else {" +
-			"	   wknKeyboard.iconize ();" +
-			"   }" +
-			"   $(\"#" + WKConfig.SUBMIT_BUTTON + "\").click();" + 
-			"} else if (textbox2 != null) {" +
+			"if (textbox != null) {" +
 		    "   buttons = document.getElementsByTagName('button'); " +
 		    "   buttons [0].click (); " +
 			"}";
@@ -625,7 +564,6 @@ public class WebReviewActivity extends Activity {
 		wv.getSettings ().setDomStorageEnabled (true);
 		wv.getSettings ().setDatabasePath (getFilesDir ().getPath () + "/wv");
 		wv.addJavascriptInterface (new WKNKeyboard (), "wknKeyboard");
-		wv.addJavascriptInterface (new EmptyPageListener (), "emptyPageListener");
 		wv.setScrollBarStyle (ScrollView.SCROLLBARS_OUTSIDE_OVERLAY);
 		wv.setWebViewClient (new WebViewClientImpl ());
 		wv.setWebChromeClient (new WebChromeClientImpl ());		

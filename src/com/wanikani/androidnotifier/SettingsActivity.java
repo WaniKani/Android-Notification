@@ -171,7 +171,7 @@ public class SettingsActivity
 			s = getURL (prefs);
 			if (s.length () == 0)
 				pref.getEditor ().putString (KEY_URL, 
-						WebReviewActivity.WKConfig.DEFAULT_REVIEW_START).commit ();
+						WebReviewActivity.WKConfig.CURRENT_REVIEW_START).commit ();
 		}
 		
 		updateConfig (prefs);
@@ -320,9 +320,9 @@ public class SettingsActivity
 	{
 		String s;
 		
-		s = prefs.getString (KEY_URL, WebReviewActivity.WKConfig.DEFAULT_REVIEW_START);
-		if (s.equals (WebReviewActivity.WKConfig.DEFAULT_REVIEW_START))
-			s = WebReviewActivity.WKConfig.NEW_REVIEW_START;
+		s = prefs.getString (KEY_URL, WebReviewActivity.WKConfig.OBSOLETE_REVIEW_START);
+		if (s.equals (WebReviewActivity.WKConfig.CURRENT_REVIEW_START))
+			setURL (prefs, s = WebReviewActivity.WKConfig.CURRENT_REVIEW_START);
 		
 		return s;
 	}
