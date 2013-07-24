@@ -493,8 +493,6 @@ public class MainActivity extends FragmentActivity implements Runnable {
 		setContentView (R.layout.main);
 		switchTo (R.id.f_splash);
 		
-		displayWarning ();
-
 		pager = (LowPriorityViewPager) findViewById (R.id.pager);
         pager.setMain (this);
         pager.setAdapter (pad);
@@ -512,30 +510,6 @@ public class MainActivity extends FragmentActivity implements Runnable {
 			pager.setCurrentItem (bundle.getInt (CURRENT_TAB));
 	    } else
 	    	pager.setCurrentItem (pad.getTabIndex (dashboardf), false);
-	}
-	
-	void displayWarning ()
-	{
-		AlertDialog.Builder builder;
-		SharedPreferences prefs;
-		String key;
-		boolean msgd;
-		
-		key = PREFIX + "ReviewsWarning";
-		
-		prefs = PreferenceManager.getDefaultSharedPreferences (this);
-		msgd = prefs.getBoolean (key, false);
-		if (!msgd) {
-			builder = new AlertDialog.Builder (this);
-			builder.setTitle ("WARNING");
-			builder.setMessage ("Integrated browser can send data to WK only if you " +
-					            "complete all the reviews. DO NOT use it if you plan to stop " +
-								"after making a bunch of them, otherwise you'll have to review " + 
-					            "them once more!! You can disable it by unchecking Settings/Use Integrated browser");
-			builder.setNegativeButton ("Ok", null);
-			builder.show ();
-			prefs.edit ().putBoolean (key, true).commit ();
-		}
 	}
 	
 	void register (Tab tab)

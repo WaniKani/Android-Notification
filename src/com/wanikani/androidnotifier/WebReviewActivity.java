@@ -621,6 +621,9 @@ public class WebReviewActivity extends Activity {
 		wv.getSettings().setJavaScriptCanOpenWindowsAutomatically (true);
 		wv.getSettings ().setSupportMultipleWindows (true);
 		wv.getSettings ().setUseWideViewPort (true);
+		wv.getSettings ().setDatabaseEnabled (true);
+		wv.getSettings ().setDomStorageEnabled (true);
+		wv.getSettings ().setDatabasePath (getFilesDir ().getPath () + "/wv");
 		wv.addJavascriptInterface (new WKNKeyboard (), "wknKeyboard");
 		wv.addJavascriptInterface (new EmptyPageListener (), "emptyPageListener");
 		wv.setScrollBarStyle (ScrollView.SCROLLBARS_OUTSIDE_OVERLAY);
