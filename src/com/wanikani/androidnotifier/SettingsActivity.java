@@ -318,7 +318,13 @@ public class SettingsActivity
 	
 	public static String getURL (SharedPreferences prefs)
 	{
-		return prefs.getString (KEY_URL, WebReviewActivity.WKConfig.DEFAULT_REVIEW_START);
+		String s;
+		
+		s = prefs.getString (KEY_URL, WebReviewActivity.WKConfig.DEFAULT_REVIEW_START);
+		if (s.equals (WebReviewActivity.WKConfig.DEFAULT_REVIEW_START))
+			s = WebReviewActivity.WKConfig.NEW_REVIEW_START;
+		
+		return s;
 	}
 	
 	public static void setURL (SharedPreferences prefs, String url)
