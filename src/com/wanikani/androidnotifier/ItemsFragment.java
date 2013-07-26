@@ -1372,15 +1372,25 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 	 * Clears the cache and redisplays data. This may be called quite early,
 	 * so we check the null pointers. 
 	 */
-	public void flush ()
+	@Override
+	public void flush (Tab.RefreshType rtype)
 	{
 		/* Might be called really early! */
 		if (criticalf == null)
 			return;
 		
-		criticalf.flush ();
-		levelf.flush ();
-		unlockf.flush ();
+		switch (rtype) {
+		case LIGHT:
+			break;
+			
+		case FULL:
+			levelf.flush ();
+			/* Fall through */
+
+		case MEDIUM:
+			criticalf.flush ();
+			unlockf.flush ();			
+		}
 		
 		/* Note that this resets the kanji vs radical filter */
 		if (currentFilter == criticalf)

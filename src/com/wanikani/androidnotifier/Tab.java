@@ -24,6 +24,21 @@ package com.wanikani.androidnotifier;
 public interface Tab {
 
 	/**
+	 * The type of refresh that should be done
+	 */
+	public enum RefreshType {
+		
+		/// Light refresh: just dashboard data
+		LIGHT,
+		
+		/// Medium refresh: all data that could be changed by reviews
+		MEDIUM,
+		
+		/// Full refresh: clear all data
+		FULL
+	}
+
+	/**
 	 * Returns the tab name
 	 * @return the resource id of the string
 	 */
@@ -43,8 +58,9 @@ public interface Tab {
 	
 	/**
 	 * Called when caches need to be flushed.
+	 * 	@param rtype the type of refresh to be done
 	 */
-	public void flush ();
+	public void flush (RefreshType rtype);
 	
 	/**
 	 * Tells whether the tab is interested in scroll events.

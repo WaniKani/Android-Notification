@@ -938,7 +938,7 @@ public class StatsFragment extends Fragment implements Tab {
 	}
 	
 	@Override
-	public void flush ()
+	public void flush (Tab.RefreshType rtype)
 	{
 		/* empty */
 	}

@@ -68,6 +68,7 @@ import com.wanikani.wklib.UserLogin;
  */
 public class MainActivity extends FragmentActivity implements Runnable {
 		
+	
 	/**
 	 * The pager model. It also broadcasts requests to all the
 	 * tabs throught the @link Tab interface.
@@ -147,11 +148,12 @@ public class MainActivity extends FragmentActivity implements Runnable {
 		 /**
 		  * Broadcasts the flush request, to clear all the tabs' caches 
 		  * @see Tab#flush()
+		  * @param rtype the type of refresh
 		  */
-		 public void flush ()
+		 public void flush (Tab.RefreshType rtype)
 		 {
 			 for (Tab tab : tabs)
-				 tab.flush ();			 
+				 tab.flush (rtype);			 
 		 }
 		 
 		 /**
@@ -215,7 +217,7 @@ public class MainActivity extends FragmentActivity implements Runnable {
 			} else if (action.equals (SettingsActivity.ACT_NOTIFY))
 				enableNotifications (i.getBooleanExtra (SettingsActivity.E_ENABLED, true));			
 			else if (action.equals (ACTION_REFRESH))
-				refresh (true);
+				refresh (Tab.RefreshType.MEDIUM);
 		}
 		
 	}
@@ -386,7 +388,7 @@ public class MainActivity extends FragmentActivity implements Runnable {
 		@Override
 		public void refresh ()
 		{
-			MainActivity.this.refresh (true);
+			MainActivity.this.refresh (Tab.RefreshType.FULL);
 		}
 		
 		@Override
@@ -547,7 +549,7 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	    		if (ldd.isIncomplete ())
 	    			refreshOptional ();
 	    	} else
-	    		refresh (false);
+	    		refresh (Tab.RefreshType.LIGHT);
 	    }
 	}
 	
@@ -675,7 +677,7 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	{
 		conn = new Connection (login);
 		
-		refresh (true);
+		refresh (Tab.RefreshType.FULL);
 	}
 
 	/**
@@ -684,22 +686,21 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	 */
 	public void run ()
 	{
-		refresh (false);
+		refresh (Tab.RefreshType.FULL);
 	}
 
 	/**
 	 * Called when the GUI needs to be refreshed. 
 	 * It starts an asynchrous task that actually performs the job and
 	 * optionally clears the cache any fragment may hold.
-	 * 	@param hard if set, any cache is discarded. May be expensive
+	 * 	@param rtype the type of refresh 
 	 */
-	private void refresh (boolean hard)
+	private void refresh (Tab.RefreshType rtype)
 	{
 			if (rtask != null)
 				rtask.cancel (false);
 			
-			if (hard)
-				pad.flush ();
+			pad.flush (rtype);
 			
 			rtask = new RefreshTask ();
 			rtask.execute (conn);			
