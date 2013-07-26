@@ -80,12 +80,21 @@ public class SettingsActivity
 	
 	/** The current lessons notification settings. Used to check whether it is toggled */ 
 	private boolean lessonsEnabled;
+	
+	/** This flag is set when initialization is complete. From this point on,
+	 *  all the calls to {@link SettingsActivity#updateConfig} come from genuine
+	 *  changes to the menu preferences 
+	 */
+	private boolean inited;
 
 	/** The action sent when credentials are changed */
 	public static final String ACT_CREDENTIALS = "com.wanikani.wanikaninotifier.action.CREDENTIALS";
 	
 	/** The action sent when notifications are enabled or disabled */
 	public static final String ACT_NOTIFY = "com.wanikani.wanikaninotifier.action.NOTIFY";
+
+	/** The action sent when preferences get changed */
+	public static final String ACT_CHANGED = "com.wanikani.wanikaninotifier.action.CHANGED";
 
 	/** Extra key in the intent {@link #ACT_CREDENTIALS} action, 
 	 * containing the user key  */
@@ -122,6 +131,8 @@ public class SettingsActivity
 		onSharedPreferenceChanged (prefs, KEY_PREF_SHOW_REVIEWS_KEYBOARD);
 		onSharedPreferenceChanged (prefs, KEY_PREF_SHOW_LESSONS_KEYBOARD);
 		onSharedPreferenceChanged (prefs, KEY_PREF_ENTER);
+		inited = true;
+		
 		prefs.registerOnSharedPreferenceChangeListener (this);
 	}
 	
@@ -384,5 +395,10 @@ public class SettingsActivity
 			lessonsEnabled = lLessonsEnabled;
 			lbm.sendBroadcast (i);
 		} 
+
+		if (inited) {
+			i = new Intent (ACT_CHANGED);
+			lbm.sendBroadcast (i);
+		}
 	}
 }

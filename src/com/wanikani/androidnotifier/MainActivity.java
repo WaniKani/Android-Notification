@@ -6,7 +6,6 @@ import java.io.OutputStream;
 import java.util.List;
 import java.util.Vector;
 
-import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -68,26 +67,8 @@ import com.wanikani.wklib.UserLogin;
  * retrieval, since all the core tasks are implemented at fragment level.
  */
 public class MainActivity extends FragmentActivity implements Runnable {
-	
-	private class PreferencesListener 
-		implements SharedPreferences.OnSharedPreferenceChangeListener {
-
-		/**
-		 * Called when the user changes the settings. We handle the event
-		 * to update the enable state of the enter key. 
-		 * @param prefs the preferences
-		 * @param key the settings key just changed
-	 	 */
-		@Override
-		public void onSharedPreferenceChanged (SharedPreferences prefs, String key)
-		{
-			if (dd != null)
-				refreshComplete (dd, false);
-		}
-	};
-
-
-/**
+		
+	/**
 	 * The pager model. It also broadcasts requests to all the
 	 * tabs throught the @link Tab interface.
 	 */
@@ -395,6 +376,26 @@ public class MainActivity extends FragmentActivity implements Runnable {
 			refreshComplete (dd, false);
 		}
 	}
+	
+	/**
+	 * The listener of menu-related events. We intercept the refresh request
+	 * and deliver the event to the main class
+	 */
+	private class MenuListener extends MenuHandler.Listener {
+		
+		@Override
+		public void refresh ()
+		{
+			MainActivity.this.refresh (true);
+		}
+		
+		@Override
+		public void settingsChanged ()
+		{			
+			if (dd != null)
+				refreshComplete (dd, false);
+		}		
+	}
 
 	/*** The avatar bitmap filename */
 	private static final String AVATAR_FILENAME = "avatar.png";
@@ -443,6 +444,9 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	
 	/** The stats fragment */
 	StatsFragment statsf;
+	
+	/** The menu handler */
+	MenuHandler mh;
 
 	/** Is this activity visible? */
 	boolean visible;
@@ -476,6 +480,7 @@ public class MainActivity extends FragmentActivity implements Runnable {
 
 	    receiver = new Receiver ();
 	    alarm = new Alarm ();
+	    mh = new MenuHandler (this, new MenuListener ());
 	    
 	    tabs = new Vector<Tab> ();
 
@@ -501,7 +506,7 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	    
 	    prefs = PreferenceManager.getDefaultSharedPreferences (this);
 	    if (!SettingsActivity.credentialsAreValid (prefs))
-	    	settings ();
+	    	mh.settings ();
 
 	    conn = new Connection (SettingsActivity.getLogin (prefs));
 
@@ -619,7 +624,6 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	{
 		IntentFilter filter;
 		LocalBroadcastManager lbm;
-		SharedPreferences prefs;
 				
 		lbm = LocalBroadcastManager.getInstance (this);
 		
@@ -627,9 +631,6 @@ public class MainActivity extends FragmentActivity implements Runnable {
 		filter.addAction (SettingsActivity.ACT_NOTIFY);
 		filter.addAction (ACTION_REFRESH);
 		lbm.registerReceiver (receiver, filter);
-		
-		prefs = PreferenceManager.getDefaultSharedPreferences (this);
-		prefs.registerOnSharedPreferenceChangeListener (new PreferencesListener ());		
 	}
 	
 	/**
@@ -651,46 +652,20 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) 
 	{
-		getMenuInflater().inflate(R.menu.main, menu);
+		getMenuInflater().inflate (R.menu.main, menu);
 		return true;
 	}
 	
 	/**
-	 * Menu handler. Calls either the {@link #refresh} or the
-	 * {@link #settings} method, depending on the selected item.
-	 * 	@param item the item that has been seleted
+	 * Menu handler. Relays the call to the common {@link MenuHandler}.
+	 * 	@param item the selected menu item
 	 */
 	@Override
 	public boolean onOptionsItemSelected (MenuItem item)
 	{
-		switch (item.getItemId ()) {
-		case R.id.em_refresh:
-			refresh (true);
-			break;
-			
-		case R.id.em_settings:
-			settings ();
-			break;
-		
-		default:
-			return super.onOptionsItemSelected (item);
-		}
-		
-		return true;
+		return mh.onOptionsItemSelected (item) || super.onOptionsItemSelected (item);
 	}
 
-	/**
-	 * Settings menu implementation. Actually, it simply stacks the 
-	 * {@link SettingsActivity} activity.
-	 */
-	private void settings ()
-	{
-		Intent intent;
-		
-		intent = new Intent (this, SettingsActivity.class);
-		startActivity (intent);
-	}
-	
 	/**
 	 * Called to update the credentials. It also triggers a refresh of 
 	 * the GUI.

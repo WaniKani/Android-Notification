@@ -12,6 +12,8 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.view.KeyEvent;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
 import android.view.inputmethod.InputMethodManager;
@@ -95,6 +97,9 @@ public class WebReviewActivity extends Activity {
 		
 		/** Any object on the lesson pages */
 		static final String LESSONS_OBJ = "nav-lesson";
+		
+		/** Reviews div */
+		static final String REVIEWS_DIV = "reviews";
 	};
 	
 	/**
@@ -363,22 +368,20 @@ public class WebReviewActivity extends Activity {
 		}
 	};
 	
-	private class PreferencesListener 
-		implements SharedPreferences.OnSharedPreferenceChangeListener {
+
+	/**
+	 * Our implementation of a menu listener. We listen for configuration changes. 
+	 */
+	private class MenuListener extends MenuHandler.Listener {
 		
 		/**
-		 * Called when the user changes the settings. We handle the event
-		 * to update the enable state of the enter key. 
-		 * @param prefs the preferences
-		 * @param key the settings key just changed
+		 * When preferences change, we update the layout. 
 		 */
-		@Override
-		public void onSharedPreferenceChanged (SharedPreferences prefs, String key)
+		public void settingsChanged ()
 		{
-			updateLayout (prefs);
+			updateLayout (PreferenceManager.getDefaultSharedPreferences (WebReviewActivity.this));
 		}
-
-	};
+	}
 	
 	/**
 	 * Keyboard visiblity status.
@@ -426,10 +429,11 @@ public class WebReviewActivity extends Activity {
 	
 	/** Javascript to be called each time an HTML page is loaded. It hides or shows the keyboard */
 	private static final String JS_INIT_KBD = 
-			"var textbox, lessobj, ltextbox;" +
+			"var textbox, lessobj, ltextbox, reviews;" +
 			"textbox = document.getElementById (\"" + WKConfig.ANSWER_BOX + "\"); " +
 			"lessobj = document.getElementById (\"" + WKConfig.LESSONS_OBJ + "\"); " +
 			"ltextbox = document.getElementById (\"" + WKConfig.LESSON_ANSWER_BOX_JP + "\"); " +
+			"reviews = document.getElementById (\"" + WKConfig.REVIEWS_DIV + "\");" +
 			"if (ltextbox == null) {" +
 			"   ltextbox = document.getElementById (\"" + WKConfig.LESSON_ANSWER_BOX_EN + "\"); " +
 			"}" +
@@ -441,7 +445,10 @@ public class WebReviewActivity extends Activity {
 			"   wknKeyboard.iconizeLessons ();" +
 			"} else {" +
 			"	wknKeyboard.hide ();" +			
-			"}";
+			"}" +
+			"if (reviews != null) {" +
+			"   reviews.style.overflow = \"visible\";" +
+			"} ";
 	
 	private static final String JS_FOCUS = 
 			"var ltextbox;" +
@@ -517,11 +524,20 @@ public class WebReviewActivity extends Activity {
 	/** The mute button to be shown when the embedded keyboard is enabled */
 	private ImageButton mute;
 	
+	/** Height of a tall keyboard key */
+	private int tallKey;
+	
+	/** Height of a short keyboard key */
+	private int shortKey;
+
 	/** The mute drawable */
 	private Drawable muteDrawable;
 	
 	/** The sound drawable */
 	private Drawable notMutedDrawable;
+	
+	/** The menu handler */
+	private MenuHandler mh;
 
 	/**
 	 * Called when the action is initially displayed. It initializes the objects
@@ -536,10 +552,11 @@ public class WebReviewActivity extends Activity {
 		SharedPreferences prefs;
 		Resources res;
 		
+		mh = new MenuHandler (this, new MenuListener ());
+		
 		setContentView (R.layout.web_review);
 		
 		prefs = PreferenceManager.getDefaultSharedPreferences (this);
-		prefs.registerOnSharedPreferenceChangeListener (new PreferencesListener ());
 		showEnterKey = SettingsActivity.getEnter (prefs);
 
 		res = getResources ();
@@ -579,7 +596,8 @@ public class WebReviewActivity extends Activity {
 		super.onResume ();
 
 		prefs = PreferenceManager.getDefaultSharedPreferences (this);
-		if (SettingsActivity.getMute (prefs))
+		if (SettingsActivity.getMute (prefs) &&
+			SettingsActivity.getShowMute (prefs))
 			setMute (true);
 	}
 	
@@ -606,13 +624,35 @@ public class WebReviewActivity extends Activity {
 	}
 	
 	/**
+	 * Associates the menu description to the menu key (or action bar).
+	 * The XML description is <code>review.xml</code>
+	 */
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) 
+	{
+		getMenuInflater().inflate (R.menu.review, menu);
+		return true;
+	}
+		
+	
+	/**
+	 * Menu handler. Relays the call to the common {@link MenuHandler}.
+	 * 	@param item the selected menu item
+	 */
+	@Override
+	public boolean onOptionsItemSelected (MenuItem item)
+	{
+		return mh.onOptionsItemSelected (item) || super.onOptionsItemSelected (item);
+	}
+	
+	
+	/**
 	 * Sets up listener and bindings of the initial keyboard.
 	 */
 	protected void initKeyboard (SharedPreferences prefs)
 	{
 		View.OnClickListener klist, mlist, mutel;
 		LayoutParams lp;
-		boolean tall;
 		View key;
 		int i;
 
@@ -625,33 +665,59 @@ public class WebReviewActivity extends Activity {
 		setMute (false);	// resume will take care of that
 		showMuteButtons (mute, true);
 		
-		tall = SettingsActivity.getLargeKeyboard (prefs);
-		
 		kbstatus = KeyboardStatus.HIDDEN;
 		loadKeyboard (KB_LATIN);		
 
 		klist = new KeyListener ();
 		mlist = new MetaListener ();
 
+		key = findViewById (key_table [0]);
+		lp = key.getLayoutParams ();
+		shortKey = lp.height;
+		tallKey = shortKey + shortKey / 2;
+
 		for (i = 0; i < key_table.length; i++) {
 			key = findViewById (key_table [i]);
 			key.setOnClickListener (klist);
-			if (tall) {
-				lp = key.getLayoutParams ();
-				lp.height += lp.height / 2;
-				key.setLayoutParams(lp);
-			}
 		}					
 
 		for (i = 0; i < meta_table.length; i++) {
 			key = findViewById (meta_table [i]);
 			key.setOnClickListener (mlist);
-			if (tall) {
-				lp = key.getLayoutParams ();
-				lp.height += lp.height / 2;
-				key.setLayoutParams(lp);
-			}
+		}
+		
+		updateLayout (prefs);
+	}
+	
+	/**
+	 * Updates the layout, according to the current preferences
+	 * @param prefs the preferences
+	 */
+	private void updateLayout (SharedPreferences prefs)
+	{
+		LayoutParams lp;
+		int height;
+		View key;
+		int i;
+
+		height = SettingsActivity.getLargeKeyboard (prefs) ? tallKey : shortKey;
+		for (i = 0; i < key_table.length; i++) {
+			key = findViewById (key_table [i]);
+			lp = key.getLayoutParams ();
+			lp.height = height;
+			key.setLayoutParams(lp);
 		}					
+
+		for (i = 0; i < meta_table.length; i++) {
+			key = findViewById (key_table [i]);
+			lp = key.getLayoutParams ();
+			lp.height = height;
+			key.setLayoutParams(lp);
+		}					
+		
+		showEnterKey = SettingsActivity.getEnter (prefs);
+		if (kbstatus == KeyboardStatus.VISIBLE)
+			show ();
 	}
 	
 	private void showMuteButtons (View mute, boolean show)
@@ -662,6 +728,8 @@ public class WebReviewActivity extends Activity {
 		show &= SettingsActivity.getShowMute (prefs);
 		
 		mute.setVisibility (show ? View.VISIBLE : View.GONE);
+		if (!show)
+			setMute (false);
 	}
 	
 	private void setMute (boolean m)
@@ -675,17 +743,6 @@ public class WebReviewActivity extends Activity {
 		d = m ? muteDrawable : notMutedDrawable;
 	    muteH.setImageDrawable (d);
 		mute.setImageDrawable (d);
-	}
-	
-	/**
-	 * Updates the layout, according to the current preferences
-	 * @param prefs the preferences
-	 */
-	private void updateLayout (SharedPreferences prefs)
-	{
-		showEnterKey = SettingsActivity.getEnter (prefs);
-		if (kbstatus == KeyboardStatus.VISIBLE)
-			show ();
 	}
 	
 	/**
@@ -844,7 +901,11 @@ public class WebReviewActivity extends Activity {
 	private void showNative ()
 	{
 		InputMethodManager imm;
+		View view;
 		
+		view = findViewById (R.id.keyboard);
+		view.setVisibility (View.GONE);
+
 		showMuteButtons (muteH, true);
 		imm = (InputMethodManager) getSystemService (Context.INPUT_METHOD_SERVICE);
 		imm.showSoftInput (wv, InputMethodManager.SHOW_IMPLICIT);		
