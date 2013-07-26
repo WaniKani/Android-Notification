@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
@@ -16,6 +17,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
+import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
@@ -404,7 +406,7 @@ public class WebReviewActivity extends Activity {
 	};
 
 	/** The web view, where the web contents are rendered */
-	WebView wv;
+	FocusWebView wv;
 	
 	/** The view containing a splash screen. Visible when we want to display 
 	 * some message to the user */ 
@@ -438,7 +440,7 @@ public class WebReviewActivity extends Activity {
 			"   ltextbox = document.getElementById (\"" + WKConfig.LESSON_ANSWER_BOX_EN + "\"); " +
 			"}" +
 			"if (textbox != null && !textbox.disabled) {" +
-			"	wknKeyboard.show ();" +
+			"   wknKeyboard.show (); " +
 			"} else if (ltextbox != null) {" +
 			"   wknKeyboard.showLessons ();" +
 			"} else if (lessobj != null) {" +
@@ -538,7 +540,7 @@ public class WebReviewActivity extends Activity {
 	
 	/** The menu handler */
 	private MenuHandler mh;
-
+	
 	/**
 	 * Called when the action is initially displayed. It initializes the objects
 	 * and starts loading the review page.
@@ -571,7 +573,7 @@ public class WebReviewActivity extends Activity {
 		splashView = findViewById (R.id.wv_splash);
 		contentView = findViewById (R.id.wv_content);
 		msgw = (TextView) findViewById (R.id.tv_message);
-		wv = (WebView) findViewById (R.id.wv_reviews);
+		wv = (FocusWebView) findViewById (R.id.wv_reviews);
 
 		wv.getSettings ().setJavaScriptEnabled (true);
 		wv.getSettings().setJavaScriptCanOpenWindowsAutomatically (true);
@@ -866,7 +868,8 @@ public class WebReviewActivity extends Activity {
 		showMuteButtons (muteH, false);
 		kbstatus = KeyboardStatus.HIDDEN;
 		view = findViewById (R.id.keyboard);
-		view.setVisibility (View.GONE);					
+		view.setVisibility (View.GONE);
+		wv.enableFocus ();
 	}
 	 
 	/**
@@ -910,6 +913,8 @@ public class WebReviewActivity extends Activity {
 		InputMethodManager imm;
 		View view;
 		
+		wv.enableFocus ();
+		
 		view = findViewById (R.id.keyboard);
 		view.setVisibility (View.GONE);
 
@@ -928,6 +933,8 @@ public class WebReviewActivity extends Activity {
 		View view, key;
 		int i;
 		
+		wv.disableFocus ();
+
 		showMuteButtons (muteH, false);
 		for (i = 0; i < key_table.length; i++) {
 			key = findViewById (key_table [i]);
