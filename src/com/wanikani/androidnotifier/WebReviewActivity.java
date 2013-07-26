@@ -482,7 +482,7 @@ public class WebReviewActivity extends Activity {
 
 	/** The alt keyboard (loaded when the user presses the '123' button). 
 	 *  This is the sequence of keys from left to right, from top to bottom */
-	private static final String KB_ALT = "1234567890-";
+	private static final String KB_ALT = "1234567890-.";
 	
 	/** A table that maps key position (left to right, top to bottom) to button IDs for the
 	 *  ordinary keys */
@@ -828,6 +828,9 @@ public class WebReviewActivity extends Activity {
 			
 		case '-':
 			return KeyEvent.KEYCODE_MINUS;
+			
+		case '.':
+			return KeyEvent.KEYCODE_PERIOD;			
 		}
 		
 		return KeyEvent.KEYCODE_SPACE;
