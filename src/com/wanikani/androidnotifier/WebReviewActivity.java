@@ -709,12 +709,16 @@ public class WebReviewActivity extends Activity {
 		}					
 
 		for (i = 0; i < meta_table.length; i++) {
-			key = findViewById (key_table [i]);
+			key = findViewById (meta_table [i]);
 			lp = key.getLayoutParams ();
 			lp.height = height;
 			key.setLayoutParams(lp);
 		}					
 		
+		lp = mute.getLayoutParams ();
+		lp.height = height;
+		mute.setLayoutParams(lp);
+				
 		showEnterKey = SettingsActivity.getEnter (prefs);
 		if (kbstatus == KeyboardStatus.VISIBLE)
 			show ();
