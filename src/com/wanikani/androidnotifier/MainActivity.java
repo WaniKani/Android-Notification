@@ -686,7 +686,7 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	 */
 	public void run ()
 	{
-		refresh (Tab.RefreshType.FULL);
+		refresh (Tab.RefreshType.LIGHT);
 	}
 
 	/**
