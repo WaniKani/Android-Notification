@@ -79,7 +79,7 @@ public class FocusWebView extends WebView {
 		
 		if (disable) {
 			w = getFocusedChild ();
-			if (w != null)
+			if (w != null && w.getApplicationWindowToken () != null)
 				imm.hideSoftInputFromWindow (w.getApplicationWindowToken (), 0);
 		}
 	}
