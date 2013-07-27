@@ -818,7 +818,7 @@ public class MainActivity extends FragmentActivity implements Runnable {
 		
 		/* May happen if local clock is not perfectly synchronized with WK clock */
 		if (delay < 1000)
-			delay = 1000;
+			delay = 10000;
 		
 		alarm.schedule (this, delay);
 	}
