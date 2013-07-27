@@ -62,6 +62,8 @@ public class SettingsActivity
 	private static final String KEY_PREF_42PLUS = "pref_42plus";
 	/** Wanikani review URL */
 	private static final String KEY_URL = "pref_review_url";
+	/** Embedded keyboard message has been read and acknowledged */
+	private static final String KEY_TIP_ACK = "key_tip_ack";
 	
 	/** Mute review */
 	private static final String KEY_MUTE = "mute";
@@ -327,6 +329,16 @@ public class SettingsActivity
 		return prefs.getBoolean (KEY_MUTE, false);
 	}
 	
+	public static boolean getTipAck (SharedPreferences prefs)
+	{
+		return prefs.getBoolean (KEY_TIP_ACK, false);
+	}
+	
+	public static boolean setTipAck (SharedPreferences prefs, boolean value)
+	{
+		return prefs.edit ().putBoolean (KEY_TIP_ACK, value).commit ();
+	}
+
 	public static String getURL (SharedPreferences prefs)
 	{
 		String s;

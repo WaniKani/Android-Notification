@@ -1,10 +1,12 @@
 package com.wanikani.androidnotifier;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
@@ -17,7 +19,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
-import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
@@ -101,7 +102,7 @@ public class WebReviewActivity extends Activity {
 		static final String LESSONS_OBJ = "nav-lesson";
 		
 		/** Reviews div */
-		static final String REVIEWS_DIV = "reviews";
+		static final String REVIEWS_DIV = "reviews";		
 	};
 	
 	/**
@@ -369,6 +370,23 @@ public class WebReviewActivity extends Activity {
 			}
 		}
 	};
+		
+	/**
+	 * The listener attached to the embedded keyboard tip message.
+	 * When the user taps the ok button, we write on the property
+	 * that it has been acknowleged, so it won't show up any more. 
+	 */
+	private class OkListener implements DialogInterface.OnClickListener {
+		
+		@Override
+		public void onClick (DialogInterface ifc, int which)
+		{
+			SharedPreferences prefs;
+			
+			prefs = PreferenceManager.getDefaultSharedPreferences (WebReviewActivity.this);
+			SettingsActivity.setTipAck (prefs, true);
+		}		
+	}
 	
 
 	/**
@@ -541,6 +559,9 @@ public class WebReviewActivity extends Activity {
 	/** The menu handler */
 	private MenuHandler mh;
 	
+	/** Set if visible */
+	private boolean visible;
+	
 	/**
 	 * Called when the action is initially displayed. It initializes the objects
 	 * and starts loading the review page.
@@ -597,6 +618,8 @@ public class WebReviewActivity extends Activity {
 		
 		super.onResume ();
 
+		visible = true;
+		
 		prefs = PreferenceManager.getDefaultSharedPreferences (this);
 		if (SettingsActivity.getMute (prefs) &&
 			SettingsActivity.getShowMute (prefs))
@@ -609,6 +632,8 @@ public class WebReviewActivity extends Activity {
 		LocalBroadcastManager lbm;
 		Intent intent;
 		SharedPreferences prefs;
+
+		visible = false;
 
 		super.onPause ();
 		lbm = LocalBroadcastManager.getInstance (this);
@@ -902,10 +927,31 @@ public class WebReviewActivity extends Activity {
 		embedded = kbstatus == KeyboardStatus.VISIBLE ?
 				SettingsActivity.getShowReviewsKeyboard (prefs) :
 				SettingsActivity.getShowLessonsKeyboard (prefs);
+		if (embedded && kbstatus == KeyboardStatus.VISIBLE)
+			showEmbeddedKeyboardMessage (prefs);
+				
 		if (embedded)
 			showEmbedded (showEnter);
 		else
 			showNative ();
+	}
+	
+	protected void showEmbeddedKeyboardMessage (SharedPreferences prefs)
+	{
+		AlertDialog.Builder builder;
+		Dialog dialog;
+					
+		if (!visible || SettingsActivity.getTipAck (prefs))
+			return;
+		
+		builder = new AlertDialog.Builder (this);
+		builder.setTitle (R.string.kbd_message_title);
+		builder.setMessage (R.string.kbd_message_text);
+		builder.setPositiveButton (R.string.kbd_message_ok, new OkListener ());
+		
+		dialog = builder.create ();
+		
+		dialog.show ();		
 	}
 	
 	private void showNative ()

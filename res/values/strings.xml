@@ -145,4 +145,14 @@
     <string name="rec_vocab_w">Storing vocab history</string>
     <string name="rec_end">Merging with master facts table</string>
     <string name="rec_error">Something went wrong. Check connectivity and retry</string>
+    
+    <string name="kbd_message_title">Did you know?</string>
+    <string name="kbd_message_text">
+        You can use the enter button on the embedded keyboard instead of
+        the submit button on the web page. This solves the problem, found
+        on some devices, of the soft keyboard popping up from time to time.
+        You can also disable the embedded keyboard and give a try with your
+        default keyboard (uncheck Settings/Embedded reviews kbd).
+    </string>
+    <string name="kbd_message_ok">Ok, got it</string>
 </resources>
