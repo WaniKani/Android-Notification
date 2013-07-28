@@ -28,7 +28,7 @@
         <activity android:name="SettingsActivity" />
 
         <activity android:name="WebReviewActivity"
-            	  android:configChanges="orientation|keyboardHidden" />
+            	  android:configChanges="orientation|keyboardHidden" android:launchMode="singleTop"/>
         
         <receiver
             android:name="NotificationService$Receiver"
