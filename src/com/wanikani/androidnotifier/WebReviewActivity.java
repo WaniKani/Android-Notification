@@ -492,7 +492,7 @@ public class WebReviewActivity extends Activity {
 			"if (ltextbox == null) {" +
 			"   ltextbox = document.getElementById (\"" + WKConfig.LESSON_ANSWER_BOX_EN + "\"); " +
 			"}" +
-			"if (textbox != null) {" +
+			"if (textbox != null && textbox.value.length > 0) {" +
 		    "   buttons = document.getElementsByTagName('button'); " +
 		    "   buttons [0].click (); " +
 			"}";
