@@ -59,6 +59,7 @@
     
     <string name="em_refresh">Refresh</string>
     <string name="em_settings">Settings</string>
+    <string name="em_dashboard">Dashboard</string>
     <string name="pref_enabled_descr">Show event icon when you have reviews</string>
     <string name="status_msg_error">Error connecting to WaniKani</string>
     <string name="status_msg_partial">Network error. Partial results</string>
@@ -154,5 +155,5 @@
         You can also disable the embedded keyboard and give a try with your
         default keyboard (uncheck Settings/Embedded reviews kbd).
     </string>
-    <string name="kbd_message_ok">Ok, got it</string>
+    <string name="kbd_message_ok">OK, got it</string>
 </resources>
