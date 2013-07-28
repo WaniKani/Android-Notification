@@ -624,6 +624,8 @@ public class WebReviewActivity extends Activity {
 		if (SettingsActivity.getMute (prefs) &&
 			SettingsActivity.getShowMute (prefs))
 			setMute (true);
+
+		wv.acquire ();
 	}
 	
 	@Override
@@ -648,6 +650,8 @@ public class WebReviewActivity extends Activity {
 		prefs = PreferenceManager.getDefaultSharedPreferences (this);		
 		if (SettingsActivity.getMute (prefs))
 			setMute (false);
+		
+		wv.release ();
 	}
 	
 	/**

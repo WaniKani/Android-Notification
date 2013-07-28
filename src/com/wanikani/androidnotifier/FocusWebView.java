@@ -17,6 +17,8 @@ package com.wanikani.androidnotifier;
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import java.lang.reflect.Method;
+
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.View;
@@ -34,6 +36,12 @@ public class FocusWebView extends WebView {
 	
 	/// If set, the soft keyboard should not be shown
 	private boolean disable;
+	
+	/// The onPause method
+	private Method onPause_m;
+	
+	/// The onResume method
+	private Method onResume_m;
 
 	/**
 	 * Constructor
@@ -45,6 +53,13 @@ public class FocusWebView extends WebView {
 		super (ctxt, attrs);
 
 		imm = (InputMethodManager) ctxt.getSystemService (Context.INPUT_METHOD_SERVICE);
+		
+		try {
+			onPause_m = getClass ().getMethod ("onPause");
+			onResume_m = getClass ().getMethod ("onResume");
+		} catch (Throwable t) {
+			onPause_m = onResume_m = null;
+		}
 	}
 
 	/**
@@ -84,4 +99,33 @@ public class FocusWebView extends WebView {
 		}
 	}
 
+	/**
+	 * Does its best to release all the resources. Should be called by
+	 * enclosing activity in its own {@link Activity#onPause} implementation
+	 * to avoid consuming CPU when hidden. 
+	 */
+	public void release ()
+	{
+		try {
+			if (onPause_m != null)
+				onPause_m.invoke (this);
+		} catch (Throwable t) {
+			/* empty */
+		}
+	}
+	
+	/**
+	 * Acquires all the resources previously released by {@link #release()}. 
+	 * Should be called by enclosing activity in its own 
+	 * {@link Activity#onResume} implementation. 
+	 */
+	public void acquire ()
+	{
+		try {
+			if (onResume_m != null)
+				onResume_m.invoke (this);
+		} catch (Throwable t) {
+			/* empty */
+		}
+	}
 }
