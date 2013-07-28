@@ -68,4 +68,10 @@ public interface Tab {
 	 * @return true if it does
 	 */
 	 public boolean scrollLock ();
+	 
+	 /**
+	  * Called when the back button is pressed.
+	  * @return <tt>true</tt> if the event has been handled by the fragment
+	  */
+	 public boolean backButton ();
 }

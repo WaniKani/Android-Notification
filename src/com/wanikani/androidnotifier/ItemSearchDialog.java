@@ -432,6 +432,21 @@ public class ItemSearchDialog {
 	}
 
 	/**
+	 * Sets visibility
+	 * @param visibile if true, the dialog is shown, otherwise it is hidden
+	 * @return true if visibility has changed
+	 */
+	public boolean setVisibility (boolean visible)
+	{
+		if (iss.visible == visible)
+			return false;
+		
+		toggleVisibility ();
+		
+		return true;
+	}
+	
+	/**
 	 * Toggles visibility of the search dialog
 	 */
 	public void toggleVisibility ()

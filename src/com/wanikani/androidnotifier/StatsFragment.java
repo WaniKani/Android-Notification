@@ -1005,4 +1005,14 @@ public class StatsFragment extends Fragment implements Tab {
 			rlist = null;
 		}
 	}
+	
+	/**
+	 * The back button is not handled.
+	 * 	@return false
+	 */
+	@Override
+	public boolean backButton ()
+	{
+		return false;
+	}	
 }

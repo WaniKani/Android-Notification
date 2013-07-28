@@ -170,6 +170,15 @@ public class MainActivity extends FragmentActivity implements Runnable {
 			 
 			 return -1;
 		 }
+		 
+		 public boolean backButton ()
+		 {
+			 int idx;
+			 
+			 idx = pager.getCurrentItem ();
+			 return idx >= 0 && idx < tabs.size () ?
+					 tabs.get (idx).backButton () : false;
+		 }
     }
 
 	/**
@@ -1082,5 +1091,12 @@ public class MainActivity extends FragmentActivity implements Runnable {
 		showSearch ();
 		
 		return true;
+	}
+	
+	@Override
+	public void onBackPressed ()
+	{
+		if (!pad.backButton())
+			super.onBackPressed ();
 	}
 }

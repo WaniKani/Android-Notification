@@ -601,4 +601,14 @@ public class DashboardFragment extends Fragment implements Tab {
 	{
 		 return false;
 	}
+	
+	/**
+	 * The back button is not handled.
+	 * 	@return false
+	 */
+	@Override
+	public boolean backButton ()
+	{
+		return false;
+	}
 }
