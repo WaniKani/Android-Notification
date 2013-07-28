@@ -55,6 +55,14 @@ public class MenuHandler {
 			/* empty */
 		}
 		
+		/**
+		 * Dashboard item called
+		 */
+		public void dashboard ()
+		{
+			/* empty */
+		}
+		
 	}
 	
 	/**
@@ -115,7 +123,11 @@ public class MenuHandler {
 		case R.id.em_settings:
 			settings ();
 			break;
-		
+
+		case R.id.em_dashboard:
+			listener.dashboard ();
+			break;
+			
 		default:
 			return false;
 		}

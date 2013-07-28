@@ -401,6 +401,14 @@ public class WebReviewActivity extends Activity {
 		{
 			updateLayout (PreferenceManager.getDefaultSharedPreferences (WebReviewActivity.this));
 		}
+		
+		/**
+		 * The dashboard listener exits the activity
+		 */
+		public void dashboard ()
+		{
+			finish ();
+		}
 	}
 	
 	/**
@@ -653,6 +661,15 @@ public class WebReviewActivity extends Activity {
 		
 		wv.release ();
 	}
+	
+	@Override
+	public void onBackPressed ()
+	{
+		if (wv.canGoBack ())
+			wv.goBack ();
+		else
+			super.onBackPressed ();
+	}	
 	
 	/**
 	 * Associates the menu description to the menu key (or action bar).
