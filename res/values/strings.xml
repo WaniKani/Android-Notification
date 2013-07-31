@@ -111,12 +111,23 @@
     <string name="tag_sort_srs">SRS</string>
     <string name="tag_sort_errors">errors</string>
     <string name="tag_sort_time">unlock date</string>
+    <string name="tag_sort_available">next review date</string>
     
-    <string name="fmt_ii_less_than_one_hour">&lt; 1 hour ago</string>
-    <string name="fmt_ii_one_hour">1 hour ago</string>
-    <string name="fmt_ii_hours">%d hours ago</string>
-    <string name="fmt_ii_one_day">1 day ago</string>
-    <string name="fmt_ii_days">%d days</string>
+    <string name="fmt_ii_less_than_one_hour">&lt; one hour ago unlocked</string>
+    <string name="fmt_ii_one_hour">one hour ago unlocked</string>
+    <string name="fmt_ii_hours">%d hours ago unlocked</string>
+    <string name="fmt_ii_one_day">one day ago unlocked</string>
+    <string name="fmt_ii_days">%d days ago unlocked</string>
+    
+    <string name="fmt_ni_less_than_one_minute">in &lt; one minute is due</string>
+    <string name="fmt_ni_one_minute">in one minute is due</string>
+    <string name="fmt_ni_minutes">in %d minutes is due</string>
+    <string name="fmt_ni_one_hour">in one hour is due</string>
+    <string name="fmt_ni_hours">in  %d hours is due</string>
+    <string name="fmt_ni_one_day">in one day is due</string>
+    <string name="fmt_ni_days">in %d days is due</string>
+    <string name="fmt_ni_one_month">in one month is due</string>
+    <string name="fmt_ni_months">in %d months is due</string>
     
     <string name="fmt_ii_percent">%d%%</string>
     <string name="fmt_ii_percent_full">%1$d%% (%2$d%%M, %3$d%%R)</string>

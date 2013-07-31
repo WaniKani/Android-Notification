@@ -90,18 +90,61 @@ public abstract class Item {
 
 			ula = a.getUnlockedDate ();
 			ulb = b.getUnlockedDate ();
-			/* Not-unlocked items should always appear last */
-			if (ula == null)
-				ula = a.instanceCreationDate;
-			if (ulb == null)
-				ulb = b.instanceCreationDate;
-			
-			ans = ula.compareTo (ulb);
+
+			/* Non-unlocked items should always appear last */
+			if (ula != null) {
+				if (ulb != null)
+					ans = ula.compareTo (ulb);
+				else
+					return -1;
+			} else {
+				if (ulb != null)
+					return 1;
+				else
+					return 0;
+			}
 			
 			return ascending ? ans : -ans;
 		}
 	}
 	
+	public static class SortByAvailable implements Comparator<Item> {
+		
+		boolean ascending;
+
+		public final static SortByAvailable INSTANCE = new SortByAvailable (false);
+
+		public final static SortByAvailable INSTANCE_ASCENDING = new SortByAvailable (true);
+		
+		private SortByAvailable (boolean ascending)
+		{
+			this.ascending = ascending;
+		}
+		
+		public int compare (Item a, Item b)
+		{
+			Date ala, alb;
+			int ans;
+
+			ala = a.getAvailableDate ();
+			alb = b.getAvailableDate ();
+			/* Non-unlocked items should always appear last */
+			if (ala != null) {
+				if (alb != null)
+					ans = -ala.compareTo (alb);
+				else
+					return -1;
+			} else {
+				if (alb != null)
+					return 1;
+				else
+					return 0;
+			}
+			
+			return ascending ? ans : -ans;
+		}
+	}
+
 	public static class SortBySRS implements Comparator<Item> {
 		
 		boolean ascending;
@@ -115,7 +158,8 @@ public abstract class Item {
 		private SortBySRS (boolean ascending)
 		{
 			this.ascending = ascending;
-			secondKey = ascending ? SortByTime.INSTANCE_ASCENDING : SortByTime.INSTANCE;
+			secondKey = ascending ? SortByAvailable.INSTANCE_ASCENDING : 
+					SortByAvailable.INSTANCE;
 		}
 		
 		public SortBySRS (boolean ascending, Comparator<Item> secondKey)
@@ -348,6 +392,11 @@ public abstract class Item {
 					stats == null ? null : stats.unlockedDate;
 	}
 	
+	public Date getAvailableDate ()
+	{
+		return stats == null ? null : stats.availableDate;
+	}
+
 	protected boolean hasReading ()
 	{
 		return true;

@@ -109,6 +109,58 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 		},
 		
 		/**
+		 * Display time before next review. If the item has not
+		 * been unlocked yet (or if available date is not available), 
+		 * it returns an empty string.
+		 */
+		AVAILABLE {
+			public String getInfo (Resources res, Item i)
+			{
+				Date date;
+				long now, fw;
+				
+				date = i.getAvailableDate ();
+				if (date == null)
+					return "";
+				
+				now = System.currentTimeMillis ();
+				fw = date.getTime () - now;
+
+				/* Express fw in seconds */
+				fw /= 1000;
+				if (fw < 60)
+					return res.getString (R.string.fmt_ni_less_than_one_minute);
+
+				/* Express fw in minutes */
+				fw /= 60;
+				if (fw == 1)
+					return res.getString (R.string.fmt_ni_one_minute);
+				if (fw < 60)
+					return res.getString (R.string.fmt_ni_minutes);
+				
+				/* Express fw in hours */
+				fw = Math.round (((float) fw) / 60);
+				if (fw == 1) 
+					return res.getString (R.string.fmt_ni_one_hour);
+				if (fw < 24) 
+					return res.getString (R.string.fmt_ni_hours, fw);
+				
+				/* Express age in days */
+				fw = Math.round (((float) fw) / 24);
+				if (fw == 1) 
+					return res.getString (R.string.fmt_ni_one_day);
+				if (fw < 30)
+					return res.getString (R.string.fmt_ni_days, fw);
+
+				fw /= 30;
+				if (fw == 1) 
+					return res.getString (R.string.fmt_ni_one_month);
+				
+				return res.getString (R.string.fmt_ni_months, fw);
+			}
+		},
+
+		/**
 		 * Displays the percentage of correct answers.
 		 * If intermediate (meaning & reading) stats are available, they
 		 * are displayed too.
@@ -626,6 +678,10 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 			case R.id.btn_sort_time:
 				sortByTime ();
 				break;
+				
+			case R.id.btn_sort_available:
+				sortByAvailable ();
+				break;
 
 			case R.id.btn_sort_type:
 				sortByType ();
@@ -641,7 +697,7 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 			
 			rg = (RadioGroup) parent.findViewById (R.id.rg_order);
 			rg.check (R.id.btn_sort_srs);
-			iad.setComparator (Item.SortBySRS.INSTANCE, ItemInfo.AGE);				
+			iad.setComparator (Item.SortBySRS.INSTANCE, ItemInfo.AVAILABLE);				
 		}
 		
 		/**
@@ -654,6 +710,18 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 			rg = (RadioGroup) parent.findViewById (R.id.rg_order);
 			rg.check (R.id.btn_sort_time);
 			iad.setComparator (Item.SortByTime.INSTANCE, ItemInfo.AGE);				
+		}
+
+		/**
+		 * Switches to next review sort order, fixing both ListView and radio buttons.
+		 */
+		private void sortByAvailable ()
+		{
+			RadioGroup rg;
+			
+			rg = (RadioGroup) parent.findViewById (R.id.rg_order);
+			rg.check (R.id.btn_sort_available);
+			iad.setComparator (Item.SortByAvailable.INSTANCE, ItemInfo.AVAILABLE);				
 		}
 
 		/**
@@ -677,7 +745,7 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 			
 			rg = (RadioGroup) parent.findViewById (R.id.rg_order);
 			rg.check (R.id.btn_sort_type);
-			iad.setComparator (Item.SortByType.INSTANCE, ItemInfo.AGE);
+			iad.setComparator (Item.SortByType.INSTANCE, ItemInfo.AVAILABLE);
 		}
 
 	}
@@ -898,7 +966,7 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
     	unselectedColor = res.getColor (R.color.unselected);
 
     	lad = new LevelListAdapter ();
-		iad = new ItemListAdapter (Item.SortByType.INSTANCE, ItemInfo.AGE);
+		iad = new ItemListAdapter (Item.SortByType.INSTANCE, ItemInfo.AVAILABLE);
 		
 		iss = new ItemSearchDialog.State ();
 	}
@@ -1333,7 +1401,7 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 	}
 	
 	@Override
-	public void enableSorting (boolean errors, boolean unlock)
+	public void enableSorting (boolean errors, boolean unlock, boolean available)
 	{
 		View view;
 		
@@ -1342,6 +1410,9 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 
 		view = parent.findViewById (R.id.btn_sort_time);
 		view.setEnabled (unlock);
+		
+		view = parent.findViewById (R.id.btn_sort_available);
+		view.setEnabled (available);		
 	}
 	
 	/**

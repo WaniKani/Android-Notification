@@ -241,7 +241,7 @@ public class LevelFilter implements Filter {
 		ptask = pending.get (level);
 		ans = ht.get (level);
 		
-		itemf.enableSorting (true, true);
+		itemf.enableSorting (true, true, true);
 		if (ans != null) {
 			itemf.setData (this, filter (ans), true);
 			itemf.selectLevel (this, level, false);
