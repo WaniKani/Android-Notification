@@ -136,7 +136,7 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 				if (fw == 1)
 					return res.getString (R.string.fmt_ni_one_minute);
 				if (fw < 60)
-					return res.getString (R.string.fmt_ni_minutes);
+					return res.getString (R.string.fmt_ni_minutes, fw);
 				
 				/* Express fw in hours */
 				fw = Math.round (((float) fw) / 60);
