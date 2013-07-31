@@ -687,6 +687,11 @@ public class WebReviewActivity extends Activity {
 		wv.release ();
 	}
 	
+	/*
+	 * Too buggy to use it. When pressed at lessons time, it moves to the
+	 * first lesson. When pressed at reviews time, it hangs
+	 */
+	/*
 	@Override
 	public void onBackPressed ()
 	{
@@ -694,7 +699,8 @@ public class WebReviewActivity extends Activity {
 			wv.goBack ();
 		else
 			super.onBackPressed ();
-	}	
+	}
+	*/	
 	
 	/**
 	 * Associates the menu description to the menu key (or action bar).
