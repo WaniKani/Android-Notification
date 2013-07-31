@@ -34,6 +34,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
+import com.wanikani.androidnotifier.Tab.RefreshType;
 import com.wanikani.wklib.AuthenticationException;
 import com.wanikani.wklib.Connection;
 import com.wanikani.wklib.Item;
@@ -204,6 +205,7 @@ public class MainActivity extends FragmentActivity implements Runnable {
 		@Override
 		public void onReceive (Context ctxt, Intent i)
 		{
+			Tab.RefreshType rtype;
 			UserLogin ul;
 			String action;
 			
@@ -225,8 +227,11 @@ public class MainActivity extends FragmentActivity implements Runnable {
 				enableNotifications (i.getBooleanExtra (SettingsActivity.E_ENABLED, true));
 			} else if (action.equals (SettingsActivity.ACT_NOTIFY))
 				enableNotifications (i.getBooleanExtra (SettingsActivity.E_ENABLED, true));			
-			else if (action.equals (ACTION_REFRESH))
-				refresh (Tab.RefreshType.MEDIUM);
+			else if (action.equals (ACTION_REFRESH)) {
+				rtype = i.getBooleanExtra (E_FLUSH_CACHES, true) ? 
+						Tab.RefreshType.FULL : Tab.RefreshType.MEDIUM;
+				refresh (rtype);
+			}
 		}
 		
 	}
@@ -465,7 +470,13 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	/** An action that should be invoked to force refresh. This is used typically
 	 *  when reviews complete
 	 */
-	public static final String ACTION_REFRESH = PREFIX + "REFRESH"; 
+	public static final String ACTION_REFRESH = PREFIX + "REFRESH";
+	
+	/**
+	 * Extra parameter to {@link #ACTION_REFRESH}, to tell if caches should be flushed 
+	 * or not.
+	 */
+	public static final String E_FLUSH_CACHES = PREFIX + "flushCaches";
 	
 	/** 
 	 * Called when the activity is first created.  We register the

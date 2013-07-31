@@ -230,15 +230,19 @@ public class WebReviewActivity extends Activity {
 		
 		/**
 		 * Hides/shows the keyboard. Invoked by the UI thread.
+		 * As a side effect, we update the {@link WebReviewActivity#flushCaches}
+		 * bit.
 		 */
 		public void run ()
 		{
 			switch (kbstatus) {
 			case VISIBLE:
+				flushCaches = true;
 				show ();
 				break;
 
 			case VISIBLE_LESSONS:
+				flushCaches = true;
 				showLessons (); 
 				break;
 				
@@ -248,6 +252,7 @@ public class WebReviewActivity extends Activity {
 				
 			case ICONIZED:
 			case ICONIZED_LESSONS:
+				flushCaches = true;
 				iconize (kbstatus);
 				break;
 			}
@@ -455,6 +460,9 @@ public class WebReviewActivity extends Activity {
 	/** Open action, invoked to start this action */
 	public static final String OPEN_ACTION = PREFIX + "OPEN";
 	
+	/** Flush caches bundle key */
+	private static final String KEY_FLUSH_CACHES = PREFIX + "flushCaches";
+	
 	/** Javascript to be called each time an HTML page is loaded. It hides or shows the keyboard */
 	private static final String JS_INIT_KBD = 
 			"var textbox, lessobj, ltextbox, reviews;" +
@@ -570,6 +578,9 @@ public class WebReviewActivity extends Activity {
 	/** Set if visible */
 	private boolean visible;
 	
+	/** Set if we have reviewed or had some lessons, so caches should be flushed */
+	private boolean flushCaches;
+	
 	/**
 	 * Called when the action is initially displayed. It initializes the objects
 	 * and starts loading the review page.
@@ -637,6 +648,19 @@ public class WebReviewActivity extends Activity {
 	}
 	
 	@Override
+	protected void onSaveInstanceState (Bundle bundle)
+	{
+		bundle.putBoolean (KEY_FLUSH_CACHES, flushCaches);
+	}
+	
+	@Override 
+	protected void onRestoreInstanceState (Bundle bundle)
+	{
+		if (bundle != null && bundle.containsKey (KEY_FLUSH_CACHES))
+			flushCaches = bundle.getBoolean (KEY_FLUSH_CACHES);
+	}
+	
+	@Override
 	protected void onPause ()
 	{
 		LocalBroadcastManager lbm;
@@ -648,6 +672,7 @@ public class WebReviewActivity extends Activity {
 		super.onPause ();
 		lbm = LocalBroadcastManager.getInstance (this);
 		intent = new Intent (MainActivity.ACTION_REFRESH);
+		intent.putExtra (MainActivity.E_FLUSH_CACHES, flushCaches);
 		lbm.sendBroadcast (intent);
 
 		/* Alert the notification service too (the main action may not be active) */
