@@ -10,10 +10,13 @@ import java.util.Map;
 import java.util.Vector;
 
 import android.app.Activity;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -491,10 +494,10 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 			TextView tw;
 			
 			otw = (TextView) row.findViewById (R.id.it_onyomi);
-			otw.setText (kanji.onyomi);
+			otw.setText (showAnswers ? kanji.onyomi : "");
 
 			ktw = (TextView) row.findViewById (R.id.it_kunyomi);
-			ktw.setText (kanji.kunyomi);
+			ktw.setText (showAnswers ? kanji.kunyomi : "");
 			
 			switch (kanji.importantReading) {
 			case ONYOMI:
@@ -579,7 +582,7 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 			tw.setText (iinfo.getInfo (getResources (), item));
 			
 			tw = (TextView) row.findViewById (R.id.it_meaning);
-			tw.setText (item.meaning);
+			tw.setText (showAnswers ? item.meaning : "");
 			
 			icl = new ItemClickListener (this, item.getURL ());
 			
@@ -624,6 +627,10 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 			case R.id.btn_item_sort:
 				if (!sortV)
 					sortW.setVisibility (View.VISIBLE);
+				break;
+				
+			case R.id.btn_item_view:
+				toggleShowAnswers ();
 				break;
 				
 			case R.id.btn_item_search:
@@ -823,6 +830,12 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 		}
 	}
 
+	/// Constants
+	private static final String PREFIX = "com.wanikani.androidnotifier.ItemsFragment.";
+	
+	/// The show all key
+	private static final String KEY_SHOW_ANSWERS = "SHOW_ANSWERS";
+	
 	/// The main activity
 	MainActivity main;
 	
@@ -883,6 +896,9 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 	/// True if the apprentice filter is set (i.e. we are displaying only apprentice
 	/// items
 	boolean apprentice;
+	
+	/// Show sensitive information that may break SRS
+	boolean showAnswers;
 	
 	/// Item Search State
 	ItemSearchDialog.State iss;
@@ -1008,6 +1024,8 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 		btn.setOnClickListener (mpl);
 		btn = (ImageButton) parent.findViewById (R.id.btn_item_sort);
 		btn.setOnClickListener (mpl);
+		btn = (ImageButton) parent.findViewById (R.id.btn_item_view);
+		btn.setOnClickListener (mpl);
 		btn = (ImageButton) parent.findViewById (R.id.btn_item_search);
 		btn.setOnClickListener (mpl);
 		
@@ -1031,6 +1049,11 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 	{
 		super.onResume ();
 
+		SharedPreferences prefs;
+		
+		prefs = PreferenceManager.getDefaultSharedPreferences (getActivity ());
+		showAnswers = prefs.getBoolean (KEY_SHOW_ANSWERS, true);
+		
 		/* Make sure that refreshCompleted has been called at least once */
 		if (levels > 0)
 			redrawAll ();
@@ -1187,6 +1210,27 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 	{
 		if (isd != null)
 			isd.itemFilterChanged (currentFilter);
+	}
+	
+	/**
+	 * Toggle show answer flag
+	 */
+	protected void toggleShowAnswers ()
+	{
+		SharedPreferences prefs;
+		Context ctxt;
+		
+		ctxt = getActivity ();
+		if (ctxt == null)
+			return;
+		
+		showAnswers ^= true;
+		
+		prefs = PreferenceManager.getDefaultSharedPreferences (ctxt);
+		prefs.edit ().putBoolean (KEY_SHOW_ANSWERS, showAnswers).commit ();
+		
+		if (iad != null)
+			iad.filterChanged ();
 	}
 
 	/**

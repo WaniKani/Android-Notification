@@ -63,6 +63,11 @@
                 android:src="@drawable/sort" />
 
             <ImageButton
+                android:id="@+id/btn_item_view"
+                style="@style/ItemButton"
+                android:src="@drawable/view" />
+            
+            <ImageButton
                 android:id="@+id/btn_item_search"
                 style="@style/ItemButton"
                 android:src="@drawable/search" />            
