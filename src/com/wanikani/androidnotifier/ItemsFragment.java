@@ -126,7 +126,10 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 				now = System.currentTimeMillis ();
 				fw = date.getTime () - now;
 
-				/* Express fw in seconds */
+				if (fw <= 0)
+					return res.getString (R.string.fmt_ni_now);
+				
+				/* Express fw in seconds */				
 				fw /= 1000;
 				if (fw < 60)
 					return res.getString (R.string.fmt_ni_less_than_one_minute);

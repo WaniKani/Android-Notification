@@ -119,6 +119,7 @@
     <string name="fmt_ii_one_day">unlocked one day ago</string>
     <string name="fmt_ii_days">unlocked %d days ago</string>
     
+    <string name="fmt_ni_now">available now</string>
     <string name="fmt_ni_less_than_one_minute">&lt; one minute</string>
     <string name="fmt_ni_one_minute">one minute</string>
     <string name="fmt_ni_minutes">%d minutes</string>
