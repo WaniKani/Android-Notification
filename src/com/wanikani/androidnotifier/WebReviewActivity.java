@@ -512,7 +512,7 @@ public class WebReviewActivity extends Activity {
 		    "   buttons = document.getElementsByTagName('button'); " +
 		    "   buttons [0].click (); " +
 			"}";
-
+	
 	/** The default keyboard. This is the sequence of keys from left to right, from top to bottom */
 	private static final String KB_LATIN = "qwertyuiopasdfghjkl'zxcvbnm";
 
@@ -687,20 +687,21 @@ public class WebReviewActivity extends Activity {
 		wv.release ();
 	}
 	
-	/*
-	 * Too buggy to use it. When pressed at lessons time, it moves to the
-	 * first lesson. When pressed at reviews time, it hangs
-	 */
-	/*
 	@Override
 	public void onBackPressed ()
 	{
+		// We don't use it anymore because it's too buggy
+		/*
 		if (wv.canGoBack ())
 			wv.goBack ();
-		else
-			super.onBackPressed ();
+		else*/
+		
+		/* We do this strange thing to stop a memory leakage when the last
+		 * displayed page is the review summary */
+		wv.loadUrl ("about:blank");
+		
+		super.onBackPressed ();
 	}
-	*/	
 	
 	/**
 	 * Associates the menu description to the menu key (or action bar).
