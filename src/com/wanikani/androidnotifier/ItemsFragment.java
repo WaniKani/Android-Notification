@@ -527,7 +527,7 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 			TextView tw;
 			
 			tw = (TextView) row.findViewById (R.id.it_reading);
-			tw.setText (vocab.kana);
+			tw.setText (showAnswers ? vocab.kana : "");
 
 			tw = (TextView) row.findViewById (R.id.it_glyph);
 			tw.setText (vocab.character);
