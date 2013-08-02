@@ -63,7 +63,7 @@ public class SettingsActivity
 	/** Wanikani review URL */
 	private static final String KEY_URL = "pref_review_url";
 	/** Waninaki review URL counter */
-	private static final String KEY_URL_VERSION = "rev_review_url_version";
+	private static final String KEY_URL_VERSION = "review_url_version";
 	
 	/** Embedded keyboard message has been read and acknowledged */
 	private static final String KEY_TIP_ACK = "key_tip_ack";
