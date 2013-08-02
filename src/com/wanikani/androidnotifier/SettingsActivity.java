@@ -62,6 +62,9 @@ public class SettingsActivity
 	private static final String KEY_PREF_42PLUS = "pref_42plus";
 	/** Wanikani review URL */
 	private static final String KEY_URL = "pref_review_url";
+	/** Waninaki review URL counter */
+	private static final String KEY_URL_VERSION = "rev_review_url_version";
+	
 	/** Embedded keyboard message has been read and acknowledged */
 	private static final String KEY_TIP_ACK = "key_tip_ack";
 	
@@ -342,17 +345,19 @@ public class SettingsActivity
 	public static String getURL (SharedPreferences prefs)
 	{
 		String s;
+		int version;
 		
-		s = prefs.getString (KEY_URL, WebReviewActivity.WKConfig.OBSOLETE_REVIEW_START);
-		if (s.equals (WebReviewActivity.WKConfig.OBSOLETE_REVIEW_START))
-			setURL (prefs, s = WebReviewActivity.WKConfig.CURRENT_REVIEW_START);
+		s = prefs.getString (KEY_URL, WebReviewActivity.WKConfig.CURRENT_REVIEW_START);
+		version = prefs.getInt (KEY_URL_VERSION, 0);
+		if (s.equals (WebReviewActivity.WKConfig.OBSOLETE_REVIEW_START) && version < 1)
+			setURL (prefs, s = WebReviewActivity.WKConfig.CURRENT_REVIEW_START, 1);
 		
 		return s;
 	}
 	
-	public static void setURL (SharedPreferences prefs, String url)
+	public static void setURL (SharedPreferences prefs, String url, int version)
 	{
-		prefs.edit ().putString (KEY_URL, url).commit ();
+		prefs.edit ().putString (KEY_URL, url).putInt (KEY_URL_VERSION, version).commit ();
 	}
 
 	public static boolean toggleMute (SharedPreferences prefs)
