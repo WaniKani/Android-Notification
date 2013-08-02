@@ -344,7 +344,7 @@ public class SettingsActivity
 		String s;
 		
 		s = prefs.getString (KEY_URL, WebReviewActivity.WKConfig.OBSOLETE_REVIEW_START);
-		if (s.equals (WebReviewActivity.WKConfig.CURRENT_REVIEW_START))
+		if (s.equals (WebReviewActivity.WKConfig.OBSOLETE_REVIEW_START))
 			setURL (prefs, s = WebReviewActivity.WKConfig.CURRENT_REVIEW_START);
 		
 		return s;
