@@ -19,10 +19,12 @@ package com.wanikani.androidnotifier;
 
 import java.lang.reflect.Method;
 
+import android.app.Activity;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.webkit.CookieSyncManager;
 import android.webkit.WebView;
 
 /**
@@ -112,6 +114,8 @@ public class FocusWebView extends WebView {
 		} catch (Throwable t) {
 			/* empty */
 		}
+		pauseTimers ();
+		CookieSyncManager.getInstance ().stopSync ();
 	}
 	
 	/**
@@ -127,5 +131,7 @@ public class FocusWebView extends WebView {
 		} catch (Throwable t) {
 			/* empty */
 		}
+		resumeTimers ();
+		CookieSyncManager.getInstance ().startSync ();
 	}
 }

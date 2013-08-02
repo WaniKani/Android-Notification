@@ -14,12 +14,14 @@ import android.media.AudioManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
+import android.util.Xml.Encoding;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
 import android.view.inputmethod.InputMethodManager;
+import android.webkit.CookieSyncManager;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
@@ -237,12 +239,12 @@ public class WebReviewActivity extends Activity {
 		{
 			switch (kbstatus) {
 			case VISIBLE:
-				flushCaches = true;
+				reviewsSession ();
 				show ();
 				break;
 
 			case VISIBLE_LESSONS:
-				flushCaches = true;
+				reviewsSession ();
 				showLessons (); 
 				break;
 				
@@ -252,10 +254,16 @@ public class WebReviewActivity extends Activity {
 				
 			case ICONIZED:
 			case ICONIZED_LESSONS:
-				flushCaches = true;
+				reviewsSession ();
 				iconize (kbstatus);
 				break;
 			}
+		}
+		
+		private void reviewsSession ()
+		{
+			flushCaches = true;
+			CookieSyncManager.getInstance ().sync ();
 		}
 		
 	}
@@ -594,6 +602,8 @@ public class WebReviewActivity extends Activity {
 		SharedPreferences prefs;
 		Resources res;
 		
+		CookieSyncManager.createInstance (this);
+		
 		mh = new MenuHandler (this, new MenuListener ());
 		
 		setContentView (R.layout.web_review);
@@ -698,7 +708,7 @@ public class WebReviewActivity extends Activity {
 		
 		/* We do this strange thing to stop a memory leakage when the last
 		 * displayed page is the review summary */
-		wv.loadUrl ("about:blank");
+		wv.loadData ("", "text/plain", Encoding.UTF_8.toString ());
 		
 		super.onBackPressed ();
 	}
