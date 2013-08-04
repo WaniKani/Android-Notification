@@ -902,6 +902,11 @@ public class WebReviewActivity extends Activity {
 		}
 	}
 	
+	/**
+	 * Makes sure the lessons text box is focused out. This is necessary
+	 * to avoid a very strange behaviour: if the user taps on the lessons answer
+	 * box, then kana are not formed in the correct way. 
+	 */
 	private void focusOut ()
 	{
 		MotionEvent mev;
