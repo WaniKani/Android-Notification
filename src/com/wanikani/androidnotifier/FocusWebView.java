@@ -78,6 +78,7 @@ public class FocusWebView extends WebView {
 	public void disableFocus ()
 	{
 		disable = true;
+		hideNative ();
 	}
 	
 	/**
@@ -90,15 +91,23 @@ public class FocusWebView extends WebView {
 	@Override
 	protected void onMeasure (int widthMeasureSpec, int heightMeasureSpec) 
 	{
-		View w;
-
 		super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 		
-		if (disable) {
-			w = getFocusedChild ();
-			if (w != null && w.getApplicationWindowToken () != null)
-				imm.hideSoftInputFromWindow (w.getApplicationWindowToken (), 0);
-		}
+		if (disable)
+			hideNative ();
+	}
+	
+	/**
+	 * Hides native keyboard, if shown
+	 */
+	protected void hideNative ()
+	{
+		View w;
+
+		w = getFocusedChild ();
+		if (w != null && w.getApplicationWindowToken () != null)
+			imm.hideSoftInputFromWindow (w.getApplicationWindowToken (), 0);
+		
 	}
 
 	/**
