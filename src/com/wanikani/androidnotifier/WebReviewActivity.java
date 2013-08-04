@@ -658,6 +658,14 @@ public class WebReviewActivity extends Activity {
 	}
 	
 	@Override
+	public void onDestroy ()
+	{
+		super.onDestroy ();
+		
+		System.exit (0);
+	}
+	
+	@Override
 	protected void onSaveInstanceState (Bundle bundle)
 	{
 		bundle.putBoolean (KEY_FLUSH_CACHES, flushCaches);
@@ -673,17 +681,15 @@ public class WebReviewActivity extends Activity {
 	@Override
 	protected void onPause ()
 	{
-		LocalBroadcastManager lbm;
 		Intent intent;
 		SharedPreferences prefs;
 
 		visible = false;
 
 		super.onPause ();
-		lbm = LocalBroadcastManager.getInstance (this);
 		intent = new Intent (MainActivity.ACTION_REFRESH);
 		intent.putExtra (MainActivity.E_FLUSH_CACHES, flushCaches);
-		lbm.sendBroadcast (intent);
+		sendBroadcast (intent);
 
 		/* Alert the notification service too (the main action may not be active) */
 		intent = new Intent (this, NotificationService.class);
@@ -708,8 +714,6 @@ public class WebReviewActivity extends Activity {
 		
 		/* We do this strange thing to stop a memory leakage when the last
 		 * displayed page is the review summary */
-		wv.loadData ("", "text/plain", Encoding.UTF_8.toString ());
-		
 		super.onBackPressed ();
 	}
 	

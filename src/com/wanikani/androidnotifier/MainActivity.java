@@ -653,6 +653,9 @@ public class MainActivity extends FragmentActivity implements Runnable {
 		filter.addAction (SettingsActivity.ACT_NOTIFY);
 		filter.addAction (ACTION_REFRESH);
 		lbm.registerReceiver (receiver, filter);
+		
+		filter = new IntentFilter (ACTION_REFRESH);
+		registerReceiver (receiver, filter);
 	}
 	
 	/**
