@@ -114,7 +114,7 @@ public class NotifierStateMachine {
 					if (cdd.nextReviewDate == null)
 						fsm.schedule (T_NO_REVIEWS);
 					else if (cdd.nextReviewDate.after (new Date ()))
-						fsm.schedule (cdd.nextReviewDate, 5000);
+						fsm.schedule (cdd.nextReviewDate, 10000);
 					else
 						fsm.schedule (T_INT_CLOCK_COMPENSATION); 
 				}
