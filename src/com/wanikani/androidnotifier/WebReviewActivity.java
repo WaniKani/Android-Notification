@@ -662,7 +662,11 @@ public class WebReviewActivity extends Activity {
 	{
 		super.onDestroy ();
 		
-		System.exit (0);
+		SharedPreferences prefs;
+		
+		prefs = PreferenceManager.getDefaultSharedPreferences (this);
+		if (SettingsActivity.getLeakKludge (prefs))
+			System.exit (0);
 	}
 	
 	@Override

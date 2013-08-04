@@ -64,6 +64,8 @@ public class SettingsActivity
 	private static final String KEY_URL = "pref_review_url";
 	/** Waninaki review URL counter */
 	private static final String KEY_URL_VERSION = "review_url_version";
+	/** The infamous CPU/memory leak kludge */
+	private static final String KEY_LEAK_KLUDGE = "pref_leak_kludge";
 	
 	/** Embedded keyboard message has been read and acknowledged */
 	private static final String KEY_TIP_ACK = "key_tip_ack";
@@ -342,6 +344,11 @@ public class SettingsActivity
 		return prefs.edit ().putBoolean (KEY_TIP_ACK, value).commit ();
 	}
 
+	public static boolean getLeakKludge (SharedPreferences prefs)
+	{
+		return prefs.getBoolean (KEY_LEAK_KLUDGE, true);
+	}
+	
 	public static String getURL (SharedPreferences prefs)
 	{
 		String s;

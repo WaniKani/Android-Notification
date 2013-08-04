@@ -35,6 +35,9 @@
     <string name="pref_42plus_descr">Hide real number of lessons/reviews when too big</string>
     <string name="pref_show_mute">Mute button</string>
     <string name="pref_show_mute_desc">Show mute button when reviewing</string>
+    <string name="pref_leak_kludge">Leak workaround</string>
+    <string name="pref_leak_kludge_descr">
+        	Enables CPU/memory leak workaround (see WK post)</string>
     <string name="tag_next_review">Next Review</string>
     <string name="tag_reviews_now">Now</string>
     <string name="tag_next_hour">Next hour</string>
@@ -168,4 +171,5 @@
         default keyboard (uncheck Settings/Embedded reviews kbd).
     </string>
     <string name="kbd_message_ok">OK, got it</string>
-</resources>
+    
+ </resources>
