@@ -12,12 +12,12 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.preference.PreferenceManager;
-import android.support.v4.content.LocalBroadcastManager;
-import android.util.Xml.Encoding;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
 import android.view.inputmethod.InputMethodManager;
@@ -890,14 +890,35 @@ public class WebReviewActivity extends Activity {
 			js (JS_ENTER);
 		else if (keycode == KeyEvent.KEYCODE_DPAD_DOWN)
 			iconize (KeyboardStatus.ICONIZED_LESSONS);
-		else {
-			if (kbstatus == KeyboardStatus.VISIBLE_LESSONS)
+		else {			
+			if (kbstatus == KeyboardStatus.VISIBLE_LESSONS) {
+				focusOut ();
 				js (JS_FOCUS);
+			}
 			kdown = new KeyEvent (KeyEvent.ACTION_DOWN, keycode);
 			wv.dispatchKeyEvent (kdown);				
 			kup = new KeyEvent (KeyEvent.ACTION_UP, keycode);
 			wv.dispatchKeyEvent (kup);
 		}
+	}
+	
+	private void focusOut ()
+	{
+		MotionEvent mev;
+		float x, y;
+		long tstamp;
+
+		tstamp = SystemClock.uptimeMillis ();
+		x = wv.getWidth () + 10;
+		y = wv.getHeight () + 10;
+		mev = MotionEvent.obtain (tstamp, tstamp + 100, MotionEvent.ACTION_DOWN,
+								  x, y, 0);
+		wv.dispatchTouchEvent (mev);
+		mev.recycle ();
+		mev = MotionEvent.obtain (tstamp, tstamp + 100, MotionEvent.ACTION_UP,
+				  x, y, 0);
+		wv.dispatchTouchEvent (mev);
+		mev.recycle ();
 	}
 	
 	/**
