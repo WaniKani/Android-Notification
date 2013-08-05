@@ -76,9 +76,6 @@ public class WebReviewActivity extends Activity {
 	 */
 	public static class WKConfig {
 		
-		/** Review start page. Old version. Kept just to clear old configuration entries */
-		static final String OBSOLETE_REVIEW_START = "http://www.wanikani.com/review/session/start";
-
 		/** New review start page. This is the start page when client side reviews will be deployed */
 		static final String CURRENT_REVIEW_START = "http://www.wanikani.com/review";
 

@@ -356,7 +356,7 @@ public class SettingsActivity
 		
 		s = prefs.getString (KEY_URL, WebReviewActivity.WKConfig.CURRENT_REVIEW_START);
 		version = prefs.getInt (KEY_URL_VERSION, 0);
-		if (s.equals (WebReviewActivity.WKConfig.OBSOLETE_REVIEW_START) && version < 1)
+		if (version < 1)
 			setURL (prefs, s = WebReviewActivity.WKConfig.CURRENT_REVIEW_START, 1);
 		
 		return s;
