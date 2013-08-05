@@ -625,6 +625,7 @@ public class MainActivity extends FragmentActivity implements Runnable {
 		
 		unregisterIntents ();		
 		alarm.stopAlarm ();
+		mh.unregister (this);
 	}
 
 	/**
@@ -663,6 +664,7 @@ public class MainActivity extends FragmentActivity implements Runnable {
 		lbm = LocalBroadcastManager.getInstance (this);
 		
 		lbm.unregisterReceiver (receiver);
+		unregisterReceiver (receiver);
 	}
 	
 	/**

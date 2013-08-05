@@ -86,6 +86,9 @@ public class MenuHandler {
 	/** The listener */
 	Listener listener;
 	
+	/** The receiver */
+	SettingsReceiver recv;
+	
 	/**
 	 * Constructor
 	 * @param ctxt the context
@@ -98,12 +101,22 @@ public class MenuHandler {
 		
 		IntentFilter filter;
 
-		filter = new IntentFilter (SettingsActivity.ACT_CHANGED);
-		ctxt.registerReceiver (new SettingsReceiver (), filter);
+		recv = new SettingsReceiver ();
 		
+		filter = new IntentFilter (SettingsActivity.ACT_CHANGED);
+		ctxt.registerReceiver (recv, filter);		
 	}
 
-
+	
+	/**
+	 * Must be called when the handler is not needed any more, to prevent
+	 * leakages
+	 */
+	public void unregister (Context ctxt)
+	{
+		ctxt.unregisterReceiver (recv);
+	}
+	
 	/**
 	 * Activities should call this method in their 
 	 * implementation of {@link Activity#onOptionsItemSelected}. 
