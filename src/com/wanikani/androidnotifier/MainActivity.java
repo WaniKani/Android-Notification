@@ -10,7 +10,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -23,7 +22,6 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Looper;
-import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
@@ -34,7 +32,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
-import com.wanikani.androidnotifier.Tab.RefreshType;
 import com.wanikani.wklib.AuthenticationException;
 import com.wanikani.wklib.Connection;
 import com.wanikani.wklib.Item;
@@ -495,7 +492,6 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	@Override
 	public void onCreate (Bundle bundle) 
 	{	
-		SharedPreferences prefs;
 		List<Tab> tabs;
 		
 	    super.onCreate (bundle);
@@ -526,11 +522,10 @@ public class MainActivity extends FragmentActivity implements Runnable {
 
         registerIntents ();
 	    
-	    prefs = PreferenceManager.getDefaultSharedPreferences (this);
-	    if (!SettingsActivity.credentialsAreValid (prefs))
+	    if (!SettingsActivity.credentialsAreValid (this))
 	    	mh.settings ();
 
-	    conn = new Connection (SettingsActivity.getLogin (prefs));
+	    conn = new Connection (SettingsActivity.getLogin (this));
 
 	    if (bundle != null && bundle.containsKey (BUNDLE_VALID)) {
 	    	dd = new DashboardData (bundle);
@@ -806,7 +801,6 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	 */
 	private void refreshComplete (DashboardData dd, boolean intermediate)
 	{
-		SharedPreferences prefs;
 		long delay, refresh;
 
 		if (!intermediate)
@@ -829,8 +823,7 @@ public class MainActivity extends FragmentActivity implements Runnable {
 		
 		pad.refreshComplete (dd);
 						
-		prefs = PreferenceManager.getDefaultSharedPreferences (this);
-		refresh = SettingsActivity.getRefreshTimeout (prefs) * 60 * 1000; 
+		refresh = SettingsActivity.getRefreshTimeout (this) * 60 * 1000; 
 		if (dd.nextReviewDate != null)
 			delay = dd.nextReviewDate.getTime () - System.currentTimeMillis ();
 		else
@@ -908,7 +901,6 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	 */
 	private void error (int id)
 	{
-		SharedPreferences prefs;
 		Resources res;
 		String s;
 		TextView tw;
@@ -924,10 +916,9 @@ public class MainActivity extends FragmentActivity implements Runnable {
 			pad.spin (false);
 		
 		res = getResources ();
-		if (id == R.string.status_msg_unauthorized) {
-			prefs = PreferenceManager.getDefaultSharedPreferences (this);
-			s = SettingsActivity.diagnose (prefs, res);
-		} else
+		if (id == R.string.status_msg_unauthorized)
+			s = SettingsActivity.diagnose (this, res);
+		else
 			s = res.getString (id);
 	
 		tw = (TextView) findViewById (R.id.tv_alert);
@@ -942,15 +933,13 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	 */
 	public void review ()
 	{
-		SharedPreferences prefs;
 		Intent intent;
 		
-		prefs = PreferenceManager.getDefaultSharedPreferences (this);
 		intent = new Intent (MainActivity.this, NotificationService.class);			
 		intent.setAction (NotificationService.ACTION_HIDE_NOTIFICATION);			
 		startService (intent);
 		
-		open (SettingsActivity.getURL (prefs));
+		open (SettingsActivity.getURL (this));
 	}
 	
 	/**
@@ -979,11 +968,9 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	 */
 	protected void open (String url)
 	{
-		SharedPreferences prefs;
 		Intent intent;
 			
-		prefs = PreferenceManager.getDefaultSharedPreferences (MainActivity.this);
-		if (SettingsActivity.getUseIntegratedBrowser (prefs)) {
+		if (SettingsActivity.getUseIntegratedBrowser (this)) {
 			intent = new Intent (MainActivity.this, WebReviewActivity.class);
 			intent.setAction (WebReviewActivity.OPEN_ACTION);
 		} else

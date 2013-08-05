@@ -17,7 +17,6 @@ import android.database.SQLException;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 
 import com.wanikani.androidnotifier.NotifierStateMachine.Event;
@@ -190,12 +189,10 @@ public class NotificationService
 	@Override
 	public void onHandleIntent (Intent intent)
 	{
-		SharedPreferences prefs;
 		String action;
 		boolean enabled;
 		
-		prefs = PreferenceManager.getDefaultSharedPreferences (this);
-		enabled = SettingsActivity.getEnabled (prefs);
+		enabled = SettingsActivity.getEnabled (this);
 		action = intent.getAction ();
 		
 		/* ACTION_HIDE_NOTIFICATION and ACTION_(LESSONS_)TAP are special, 
@@ -242,7 +239,7 @@ public class NotificationService
 		boolean ok;
 		
 		now = System.currentTimeMillis ();
-		prefs = PreferenceManager.getDefaultSharedPreferences (this);
+		prefs = SettingsActivity.prefs (this);
 
 		next = prefs.getLong (PREFS_CRON_NEXT, normalize (now));
 		if (now >= next) {
@@ -288,15 +285,13 @@ public class NotificationService
 	 */
 	protected boolean runDailyJobs ()
 	{
-		SharedPreferences prefs;
 		SRSDistribution srs;
 		UserInformation ui;
 		Connection conn;
 		UserLogin login;
 		
 		try {
-			prefs = PreferenceManager.getDefaultSharedPreferences (this);
-			login = SettingsActivity.getLogin (prefs);
+			login = SettingsActivity.getLogin (this);
 		
 			conn = new Connection (login);
 			
@@ -453,15 +448,13 @@ public class NotificationService
 	 */
 	private void feed (NotifierStateMachine fsm, Event event)
 	{
-		SharedPreferences prefs;
 		UserLogin login;
 		UserInformation ui;
 		Connection conn;
 		DashboardData dd;
 		StudyQueue sq;
 		
-		prefs = PreferenceManager.getDefaultSharedPreferences (this);
-		login = SettingsActivity.getLogin (prefs);
+		login = SettingsActivity.getLogin (this);
 		
 		conn = new Connection (login);
 		try {
@@ -469,7 +462,7 @@ public class NotificationService
 			/* This call does not cause network traffic */
 			ui = conn.getUserInformation ();
 			dd = new DashboardData (ui, sq);
-			if (SettingsActivity.getLessonsEnabled (prefs))
+			if (SettingsActivity.getLessonsEnabled (this))
 				showLessons (dd.lessonsAvailable);
 			else
 				showLessons (0);
@@ -491,7 +484,6 @@ public class NotificationService
 	{
 		NotificationManager nmanager;
 		NotificationCompat.Builder builder;
-		SharedPreferences prefs;
 		Notification not;
 		PendingIntent pint;
 		Intent intent;
@@ -503,8 +495,6 @@ public class NotificationService
 			nmanager.cancel (NOT_LESSONS_ID);
 			return;
 		}
-
-		prefs = PreferenceManager.getDefaultSharedPreferences (this); 
 			
 		intent = new Intent (this, NotificationService.class);
 		intent.setAction (ACTION_LESSONS_TAP);
@@ -514,7 +504,7 @@ public class NotificationService
 		builder = new NotificationCompat.Builder (this);
 		builder.setSmallIcon (R.drawable.not_lessons);
 		
-		if (SettingsActivity.get42plus (prefs) && lessons > DashboardFragment.LESSONS_42P)
+		if (SettingsActivity.get42plus (this) && lessons > DashboardFragment.LESSONS_42P)
 			text = getString (R.string.new_lessons_42plus, DashboardFragment.LESSONS_42P);
 		else
 			text = getString (lessons == 1 ? 
@@ -538,7 +528,6 @@ public class NotificationService
 	{
 		NotificationManager nmanager;
 		NotificationCompat.Builder builder;
-		SharedPreferences prefs;
 		Notification not;
 		PendingIntent pint;
 		Intent intent;
@@ -546,8 +535,6 @@ public class NotificationService
 
 		nmanager = (NotificationManager) 
 				getSystemService (Context.NOTIFICATION_SERVICE);
-			
-		prefs = PreferenceManager.getDefaultSharedPreferences (this); 
 			
 		intent = new Intent (this, NotificationService.class);
 		intent.setAction (ACTION_TAP);
@@ -557,7 +544,7 @@ public class NotificationService
 		builder = new NotificationCompat.Builder (this);
 		builder.setSmallIcon (R.drawable.not_icon);
 		
-		if (SettingsActivity.get42plus (prefs) && reviews > DashboardFragment.LESSONS_42P)
+		if (SettingsActivity.get42plus (this) && reviews > DashboardFragment.LESSONS_42P)
 			text = getString (R.string.new_reviews_42plus, DashboardFragment.LESSONS_42P);
 		else
 			text = getString (reviews == 1 ? 
@@ -613,7 +600,7 @@ public class NotificationService
 		}
 		
 		next = date.getTime ();
-		prefs = PreferenceManager.getDefaultSharedPreferences (this);
+		prefs = SettingsActivity.prefs (this);
 		chron = prefs.getLong (PREFS_CRON_NEXT, next);
 		if (next > chron)
 			next = chron;
@@ -630,17 +617,15 @@ public class NotificationService
 	 */
 	protected void openBrowser (boolean reviews)
 	{		
-		SharedPreferences prefs;
 		Intent intent;
 		String url;
 		
-		prefs = PreferenceManager.getDefaultSharedPreferences (this);
-		if (SettingsActivity.getUseIntegratedBrowser (prefs)) {
+		if (SettingsActivity.getUseIntegratedBrowser (this)) {
 			intent = new Intent (this, WebReviewActivity.class);
 			intent.setAction (WebReviewActivity.OPEN_ACTION);
 		} else
 			intent = new Intent (Intent.ACTION_VIEW);
-		url = reviews ? SettingsActivity.getURL (prefs) : WebReviewActivity.WKConfig.LESSON_START;
+		url = reviews ? SettingsActivity.getURL (this) : WebReviewActivity.WKConfig.LESSON_START;
 		intent.setData (Uri.parse (url));
 		intent.setFlags (Intent.FLAG_ACTIVITY_NEW_TASK);
 		

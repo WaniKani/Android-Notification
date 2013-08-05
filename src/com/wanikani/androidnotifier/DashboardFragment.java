@@ -3,7 +3,7 @@ package com.wanikani.androidnotifier;
 import java.util.Date;
 
 import android.app.Activity;
-import android.content.SharedPreferences;
+import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -13,7 +13,6 @@ import android.graphics.PorterDuffXfermode;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.text.Html;
 import android.view.LayoutInflater;
@@ -354,14 +353,14 @@ public class DashboardFragment extends Fragment implements Tab {
 	 */
 	public void refreshComplete (DashboardData dd)
 	{
-		SharedPreferences prefs;
+		Context ctxt;
 		ImageView iw;
 		String s;
-
-		if (!isResumed () || dd == null)
-			return;
 		
-		prefs = PreferenceManager.getDefaultSharedPreferences (main);
+		ctxt = getActivity ();
+
+		if (!isResumed () || dd == null || ctxt == null)
+			return;
 		
 		iw = (ImageView) parent.findViewById (R.id.iv_gravatar);
 		if (dd.gravatar != null)
@@ -371,7 +370,7 @@ public class DashboardFragment extends Fragment implements Tab {
 		setText (R.id.tv_level, getString (R.string.fmt_level, dd.level));
 		setText (R.id.tv_title, getString (R.string.fmt_title, dd.title));
 		
-		if (SettingsActivity.get42plus (prefs) && dd.reviewsAvailable > LESSONS_42P)
+		if (SettingsActivity.get42plus (ctxt) && dd.reviewsAvailable > LESSONS_42P)
 			setText (R.id.reviews_val, LESSONS_42P + "+");
 		else
 			setText (R.id.reviews_val, Integer.toString (dd.reviewsAvailable));
@@ -389,7 +388,7 @@ public class DashboardFragment extends Fragment implements Tab {
 			setVisibility (R.id.btn_review, View.GONE);
 		}
 		
-		if (SettingsActivity.get42plus (prefs) && dd.lessonsAvailable > LESSONS_42P)
+		if (SettingsActivity.get42plus (ctxt) && dd.lessonsAvailable > LESSONS_42P)
 			setText (R.id.lessons_available, 
 					 getString (R.string.fmt_lessons_42p, LESSONS_42P));
 		if (dd.lessonsAvailable > 1) {

@@ -13,7 +13,6 @@ import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.SystemClock;
-import android.preference.PreferenceManager;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -112,10 +111,7 @@ public class WebReviewActivity extends Activity {
 		@Override
 		public void onClick (View w)
 		{
-			SharedPreferences prefs;
-			
-			prefs = PreferenceManager.getDefaultSharedPreferences (WebReviewActivity.this);
-			setMute (SettingsActivity.toggleMute (prefs)); 
+			setMute (SettingsActivity.toggleMute (WebReviewActivity.this)); 
 		}
 	}
 
@@ -391,10 +387,7 @@ public class WebReviewActivity extends Activity {
 		@Override
 		public void onClick (DialogInterface ifc, int which)
 		{
-			SharedPreferences prefs;
-			
-			prefs = PreferenceManager.getDefaultSharedPreferences (WebReviewActivity.this);
-			SettingsActivity.setTipAck (prefs, true);
+			SettingsActivity.setTipAck (WebReviewActivity.this, true);
 		}		
 	}
 	
@@ -403,14 +396,6 @@ public class WebReviewActivity extends Activity {
 	 * Our implementation of a menu listener. We listen for configuration changes. 
 	 */
 	private class MenuListener extends MenuHandler.Listener {
-		
-		/**
-		 * When preferences change, we update the layout. 
-		 */
-		public void settingsChanged ()
-		{
-			updateLayout (PreferenceManager.getDefaultSharedPreferences (WebReviewActivity.this));
-		}
 		
 		/**
 		 * The dashboard listener exits the activity
@@ -605,8 +590,8 @@ public class WebReviewActivity extends Activity {
 		
 		setContentView (R.layout.web_review);
 		
-		prefs = PreferenceManager.getDefaultSharedPreferences (this);
-		showEnterKey = SettingsActivity.getEnter (prefs);
+		prefs = SettingsActivity.prefs (this);
+		showEnterKey = SettingsActivity.getEnter (this);
 
 		res = getResources ();
 		muteDrawable = res.getDrawable(R.drawable.ic_mute);
@@ -640,18 +625,17 @@ public class WebReviewActivity extends Activity {
 	@Override
 	protected void onResume ()
 	{
-		SharedPreferences prefs;
-		
 		super.onResume ();
 
 		visible = true;
 		
-		prefs = PreferenceManager.getDefaultSharedPreferences (this);
-		if (SettingsActivity.getMute (prefs) &&
-			SettingsActivity.getShowMute (prefs))
+		if (SettingsActivity.getMute (this) &&
+			SettingsActivity.getShowMute (this))
 			setMute (true);
 
 		wv.acquire ();
+		
+		updateLayout (SettingsActivity.prefs (WebReviewActivity.this));		
 	}
 	
 	@Override
@@ -659,10 +643,7 @@ public class WebReviewActivity extends Activity {
 	{
 		super.onDestroy ();
 		
-		SharedPreferences prefs;
-		
-		prefs = PreferenceManager.getDefaultSharedPreferences (this);
-		if (SettingsActivity.getLeakKludge (prefs))
+		if (SettingsActivity.getLeakKludge (this))
 			System.exit (0);
 	}
 	
@@ -683,8 +664,6 @@ public class WebReviewActivity extends Activity {
 	protected void onPause ()
 	{
 		Intent intent;
-		SharedPreferences prefs;
-
 		visible = false;
 
 		super.onPause ();
@@ -697,8 +676,7 @@ public class WebReviewActivity extends Activity {
 		intent.setAction (NotificationService.ACTION_NEW_DATA);
 		startService (intent);
 		
-		prefs = PreferenceManager.getDefaultSharedPreferences (this);		
-		if (SettingsActivity.getMute (prefs))
+		if (SettingsActivity.getMute (this))
 			setMute (false);
 		
 		wv.release ();
@@ -795,7 +773,7 @@ public class WebReviewActivity extends Activity {
 		View key;
 		int i;
 
-		height = SettingsActivity.getLargeKeyboard (prefs) ? tallKey : shortKey;
+		height = SettingsActivity.getLargeKeyboard (this) ? tallKey : shortKey;
 		for (i = 0; i < key_table.length; i++) {
 			key = findViewById (key_table [i]);
 			lp = key.getLayoutParams ();
@@ -814,17 +792,14 @@ public class WebReviewActivity extends Activity {
 		lp.height = height;
 		mute.setLayoutParams(lp);
 				
-		showEnterKey = SettingsActivity.getEnter (prefs);
+		showEnterKey = SettingsActivity.getEnter (this);
 		if (kbstatus == KeyboardStatus.VISIBLE)
 			show ();
 	}
 	
 	private void showMuteButtons (View mute, boolean show)
 	{
-		SharedPreferences prefs;
-		
-		prefs = PreferenceManager.getDefaultSharedPreferences (this);
-		show &= SettingsActivity.getShowMute (prefs);
+		show &= SettingsActivity.getShowMute (this);
 		
 		mute.setVisibility (show ? View.VISIBLE : View.GONE);
 		if (!show)
@@ -1017,10 +992,10 @@ public class WebReviewActivity extends Activity {
 		boolean embedded;
 		
 		this.kbstatus = kbstatus;
-		prefs = PreferenceManager.getDefaultSharedPreferences (this);
+		prefs = SettingsActivity.prefs (this);
 		embedded = kbstatus == KeyboardStatus.VISIBLE ?
-				SettingsActivity.getShowReviewsKeyboard (prefs) :
-				SettingsActivity.getShowLessonsKeyboard (prefs);
+				SettingsActivity.getShowReviewsKeyboard (this) :
+				SettingsActivity.getShowLessonsKeyboard (this);
 		if (embedded && kbstatus == KeyboardStatus.VISIBLE)
 			showEmbeddedKeyboardMessage (prefs);
 				
@@ -1035,7 +1010,7 @@ public class WebReviewActivity extends Activity {
 		AlertDialog.Builder builder;
 		Dialog dialog;
 					
-		if (!visible || SettingsActivity.getTipAck (prefs))
+		if (!visible || SettingsActivity.getTipAck (this))
 			return;
 		
 		builder = new AlertDialog.Builder (this);

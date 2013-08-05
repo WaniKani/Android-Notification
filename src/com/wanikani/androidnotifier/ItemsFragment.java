@@ -16,7 +16,6 @@ import android.content.res.Resources;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -830,9 +829,6 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 		}
 	}
 
-	/// Constants
-	private static final String PREFIX = "com.wanikani.androidnotifier.ItemsFragment.";
-	
 	/// The show all key
 	private static final String KEY_SHOW_ANSWERS = "SHOW_ANSWERS";
 	
@@ -1051,7 +1047,7 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 
 		SharedPreferences prefs;
 		
-		prefs = PreferenceManager.getDefaultSharedPreferences (getActivity ());
+		prefs = SettingsActivity.prefs (getActivity ());
 		showAnswers = prefs.getBoolean (KEY_SHOW_ANSWERS, true);
 		
 		/* Make sure that refreshCompleted has been called at least once */
@@ -1226,7 +1222,7 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 		
 		showAnswers ^= true;
 		
-		prefs = PreferenceManager.getDefaultSharedPreferences (ctxt);
+		prefs = SettingsActivity.prefs (ctxt);
 		prefs.edit ().putBoolean (KEY_SHOW_ANSWERS, showAnswers).commit ();
 		
 		if (iad != null)

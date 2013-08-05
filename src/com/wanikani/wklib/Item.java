@@ -350,7 +350,7 @@ public abstract class Item {
 	
 	private Date unlockedDate;
 		
-	private Date instanceCreationDate;
+	public Date instanceCreationDate;
 	
 	protected Item (JSONObject obj, Type type)
 		throws JSONException

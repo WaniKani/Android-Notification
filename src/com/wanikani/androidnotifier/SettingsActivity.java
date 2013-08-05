@@ -1,5 +1,6 @@
 package com.wanikani.androidnotifier;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
@@ -126,7 +127,7 @@ public class SettingsActivity
 	    
 	    addPreferencesFromResource (R.xml.preferences);
 	    
-		prefs = PreferenceManager.getDefaultSharedPreferences (this);
+		prefs = prefs (this);
 		login = getLogin (prefs);
 		enabled = getEnabled (prefs);
 		lessonsEnabled = getLessonsEnabled (prefs);
@@ -246,12 +247,19 @@ public class SettingsActivity
 		                  getShowReviewsKeyboard (prefs)) && getUseIntegratedBrowser (prefs));	
 	}
 	
-	public static String diagnose (SharedPreferences prefs, Resources res)
+	public static SharedPreferences prefs (Context ctxt)
 	{
+		return PreferenceManager.getDefaultSharedPreferences (ctxt.getApplicationContext ());
+	}
+	
+	public static String diagnose (Context ctxt, Resources res)
+	{
+			SharedPreferences prefs;
 			StringBuffer sb;
 			String key, fmt;
 			int delta;
 			
+			prefs = prefs (ctxt);
 			sb = new StringBuffer (res.getString (R.string.status_msg_unauthorized));
 			key = prefs.getString (KEY_PREF_USERKEY, "");
 			delta = key.length () - EXPECTED_KEYLEN;
@@ -268,88 +276,128 @@ public class SettingsActivity
 			return sb.toString ();
 	}
 	
-	public static UserLogin getLogin (SharedPreferences prefs)
+	public static UserLogin getLogin (Context ctxt)
+	{
+		return getLogin (prefs (ctxt));
+	}
+	
+	private static UserLogin getLogin (SharedPreferences prefs)
 	{
 		return new UserLogin (prefs.getString (KEY_PREF_USERKEY, ""));		
 	}
+
+	public static boolean getEnabled (Context ctxt)
+	{
+		return getEnabled (prefs (ctxt));
+	}
 	
-	public static boolean getEnabled (SharedPreferences prefs)
+	private static boolean getEnabled (SharedPreferences prefs)
 	{
 		return prefs.getBoolean (KEY_PREF_ENABLED, true);	
 	}
 	
-	public static boolean getLessonsEnabled (SharedPreferences prefs)
+	public static boolean getLessonsEnabled (Context ctxt)
+	{
+		return getLessonsEnabled (prefs (ctxt));
+	}
+	
+	private static boolean getLessonsEnabled (SharedPreferences prefs)
 	{
 		return getEnabled (prefs) && prefs.getBoolean (KEY_PREF_LESSONS_ENABLED, false);	
 	}
 
-	public static boolean getUseIntegratedBrowser (SharedPreferences prefs)
+	public static boolean getUseIntegratedBrowser (Context ctxt)
+	{
+		return getUseIntegratedBrowser (prefs (ctxt));
+	}
+	
+	private static boolean getUseIntegratedBrowser (SharedPreferences prefs)
 	{
 		return prefs.getBoolean (KEY_PREF_USE_INTEGRATED_BROWSER, true);	
 	}
 
-	public static boolean credentialsAreValid (SharedPreferences prefs)
+	public static final boolean credentialsAreValid (Context ctxt)
+	{
+		return credentialsAreValid (prefs (ctxt));
+	}
+	
+	private static boolean credentialsAreValid (SharedPreferences prefs)
 	{
 		return prefs.getString (KEY_PREF_USERKEY, "").length () > 0;
 	}
 	
-	public static int getRefreshTimeout (SharedPreferences prefs)
+	public static int getRefreshTimeout (Context ctxt)
 	{
-		return getInt (prefs, KEY_PREF_REFRESH_TIMEOUT, DEFAULT_REFRESH_TIMEOUT);
+		return getInt (prefs (ctxt), KEY_PREF_REFRESH_TIMEOUT, DEFAULT_REFRESH_TIMEOUT);
 	}
 	
-	public static boolean getShowReviewsKeyboard (SharedPreferences prefs)
+	public static boolean getShowReviewsKeyboard (Context ctxt)
+	{
+		return getShowReviewsKeyboard (prefs (ctxt));
+	}
+	
+	private static boolean getShowReviewsKeyboard (SharedPreferences prefs)
 	{
 		return prefs.getBoolean (KEY_PREF_SHOW_REVIEWS_KEYBOARD, true);
 	}
 	
-	public static boolean getShowLessonsKeyboard (SharedPreferences prefs)
+	public static boolean getShowLessonsKeyboard (Context ctxt)
+	{
+		return getShowLessonsKeyboard (prefs (ctxt));
+	}
+	
+	private static boolean getShowLessonsKeyboard (SharedPreferences prefs)
 	{
 		return prefs.getBoolean (KEY_PREF_SHOW_LESSONS_KEYBOARD, 
 								 getShowReviewsKeyboard (prefs));
 	}
 
-	public static boolean getShowMute (SharedPreferences prefs)
+	public static boolean getShowMute (Context ctxt)
 	{
-		return prefs.getBoolean (KEY_PREF_SHOW_MUTE, true);
+		return prefs (ctxt).getBoolean (KEY_PREF_SHOW_MUTE, true);
 	}
 	
-	public static boolean getLargeKeyboard (SharedPreferences prefs)
+	public static boolean getLargeKeyboard (Context ctxt)
 	{
-		return prefs.getBoolean (KEY_PREF_LARGE_KEYBOARD, false);
+		return prefs (ctxt).getBoolean (KEY_PREF_LARGE_KEYBOARD, false);
 	}
 	
-	public static boolean getEnter (SharedPreferences prefs)
+	public static boolean getEnter (Context ctxt)
 	{
-		return prefs.getBoolean (KEY_PREF_ENTER, true);
+		return prefs (ctxt).getBoolean (KEY_PREF_ENTER, true);
 	}
 	
-	public static boolean get42plus (SharedPreferences prefs)
+	public static boolean get42plus (Context ctxt)
 	{
-		return prefs.getBoolean (KEY_PREF_42PLUS, false);
+		return prefs (ctxt).getBoolean (KEY_PREF_42PLUS, false);
 	}
 	
-	public static boolean getMute (SharedPreferences prefs)
+	public static boolean getMute (Context ctxt)
 	{
-		return prefs.getBoolean (KEY_MUTE, false);
+		return prefs (ctxt).getBoolean (KEY_MUTE, false);
 	}
 	
-	public static boolean getTipAck (SharedPreferences prefs)
+	public static boolean getTipAck (Context ctxt)
 	{
-		return prefs.getBoolean (KEY_TIP_ACK, false);
+		return prefs (ctxt).getBoolean (KEY_TIP_ACK, false);
 	}
 	
-	public static boolean setTipAck (SharedPreferences prefs, boolean value)
+	public static boolean setTipAck (Context ctxt, boolean value)
 	{
-		return prefs.edit ().putBoolean (KEY_TIP_ACK, value).commit ();
+		return prefs (ctxt).edit ().putBoolean (KEY_TIP_ACK, value).commit ();
 	}
 
-	public static boolean getLeakKludge (SharedPreferences prefs)
+	public static boolean getLeakKludge (Context ctxt)
 	{
-		return prefs.getBoolean (KEY_LEAK_KLUDGE, true);
+		return prefs (ctxt).getBoolean (KEY_LEAK_KLUDGE, true);
 	}
 	
-	public static String getURL (SharedPreferences prefs)
+	public static String getURL (Context ctxt)
+	{
+		return getURL (prefs (ctxt));
+	}
+	
+	private static String getURL (SharedPreferences prefs)
 	{
 		String s;
 		int version;
@@ -362,16 +410,18 @@ public class SettingsActivity
 		return s;
 	}
 	
-	public static void setURL (SharedPreferences prefs, String url, int version)
+	private static void setURL (SharedPreferences prefs, String url, int version)
 	{
 		prefs.edit ().putString (KEY_URL, url).putInt (KEY_URL_VERSION, version).commit ();
 	}
 
-	public static boolean toggleMute (SharedPreferences prefs)
+	public static boolean toggleMute (Context ctxt)
 	{
+		SharedPreferences prefs;
 		boolean v;
 
-		v = !getMute (prefs);
+		prefs = prefs (ctxt);
+		v = !getMute (ctxt);
 		prefs.edit ().putBoolean(KEY_MUTE, v).commit ();
 		
 		return v;
