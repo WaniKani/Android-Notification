@@ -422,7 +422,7 @@ public class SettingsActivity
 
 		if (inited) {
 			i = new Intent (ACT_CHANGED);
-			lbm.sendBroadcast (i);
+			sendBroadcast (i);
 		}
 	}
 }

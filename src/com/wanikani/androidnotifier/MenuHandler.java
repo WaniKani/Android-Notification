@@ -4,7 +4,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.support.v4.content.LocalBroadcastManager;
 import android.view.MenuItem;
 
 /* 
@@ -97,12 +96,10 @@ public class MenuHandler {
 		this.ctxt = ctxt;
 		this.listener = listener;
 		
-		LocalBroadcastManager lbm;
 		IntentFilter filter;
 
-		lbm = LocalBroadcastManager.getInstance (ctxt);
 		filter = new IntentFilter (SettingsActivity.ACT_CHANGED);
-		lbm.registerReceiver (new SettingsReceiver (), filter);
+		ctxt.registerReceiver (new SettingsReceiver (), filter);
 		
 	}
 
