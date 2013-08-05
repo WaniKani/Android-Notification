@@ -37,6 +37,22 @@ public interface Tab {
 		/// Full refresh: clear all data
 		FULL
 	}
+	
+	/**
+	 * The tab information
+	 */
+	public enum Contents {
+		
+		/// Dashboard
+		DASHBOARD,
+		
+		/// Stats 
+		STATS,
+		
+		/// Items
+		ITEMS
+		
+	}
 
 	/**
 	 * Returns the tab name
@@ -74,4 +90,11 @@ public interface Tab {
 	  * @return <tt>true</tt> if the event has been handled by the fragment
 	  */
 	 public boolean backButton ();
+	 
+	 /**
+	  * Tells if this tab contains the given contents
+	  * @param c the contents
+	  * @return <tt>true</tt> if it does
+	  */
+	 public boolean contains (Contents c);
 }

@@ -29,6 +29,7 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 
+import com.wanikani.androidnotifier.Tab.Contents;
 import com.wanikani.wklib.Item;
 import com.wanikani.wklib.Kanji;
 import com.wanikani.wklib.Radical;
@@ -1547,4 +1548,9 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 		return isd.setVisibility (false);
 	}
 
+	@Override
+    public boolean contains (Contents c)
+	{
+		return c == Contents.ITEMS;
+	}
 }

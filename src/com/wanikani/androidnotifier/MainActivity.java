@@ -156,14 +156,14 @@ public class MainActivity extends FragmentActivity implements Runnable {
 		 
 		 /**
 		  * Returns the index of a tab.
-		  * @param class the class
+		  * @param c its contents
 		  */
-		 public int getTabIndex (Tab tab)
+		 public int getTabIndex (Tab.Contents c)
 		 {
 			 int i;
 			 
 			 for (i = 0; i < tabs.size (); i++)
-				 if (tabs.get (i) == tab)
+				 if (tabs.get (i).contains (c))
 					 return i;
 			 
 			 return -1;
@@ -449,6 +449,9 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	/** Private prefix */
 	private static final String PREFIX = "com.wanikani.androidnotifier.DashboardData.";
 	
+	/** The dashboard-stats combo fragment */
+	DashboardStatsFragment dsf; 
+	
 	/** The dashboard fragment */
 	DashboardFragment dashboardf;
 	
@@ -502,15 +505,22 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	    
 	    tabs = new Vector<Tab> ();
 
+	    if (dsf == null)
+	    	dsf = new DashboardStatsFragment ();
 	    if (dashboardf == null)
 	    	dashboardf = new DashboardFragment ();
 	    if (itemsf == null)
 	    	itemsf = new ItemsFragment ();
 	    if (statsf == null)
 	    	statsf = new StatsFragment ();
-	    tabs.add (statsf);
-	    tabs.add (dashboardf);
-	    tabs.add (itemsf);
+	    if (true) {
+	    	tabs.add (dsf);
+	    	tabs.add (itemsf);
+	    } else {
+	    	tabs.add (statsf);
+	    	tabs.add (dashboardf);
+	    	tabs.add (itemsf);
+	    }
 	    
         pad = new PagerAdapter (getSupportFragmentManager (), tabs);
 		setContentView (R.layout.main);
@@ -531,7 +541,7 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	    	dd = new DashboardData (bundle);
 			pager.setCurrentItem (bundle.getInt (CURRENT_TAB));
 	    } else
-	    	pager.setCurrentItem (pad.getTabIndex (dashboardf), false);
+	    	pager.setCurrentItem (pad.getTabIndex (Tab.Contents.DASHBOARD), false);
 	}
 	
 	void register (Tab tab)
@@ -991,7 +1001,7 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	 */
 	public void showRemaining (Item.Type type)
 	{
-		pager.setCurrentItem (pad.getTabIndex (itemsf), true);
+		pager.setCurrentItem (pad.getTabIndex (Tab.Contents.ITEMS), true);
 		itemsf.setLevelFilter (dd.level, true, type);
 	}
 
@@ -1001,7 +1011,7 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	 */
 	public void showCritical ()
 	{
-		pager.setCurrentItem (pad.getTabIndex (itemsf), true);
+		pager.setCurrentItem (pad.getTabIndex (Tab.Contents.ITEMS), true);
 		itemsf.setCriticalFilter ();
 	}
 
@@ -1012,9 +1022,9 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	{
 		int idx;
 		
-		idx = pad.getTabIndex (itemsf);
+		idx = pad.getTabIndex (Tab.Contents.ITEMS);
 		if (pager.getCurrentItem () != idx) {
-			pager.setCurrentItem (pad.getTabIndex (itemsf), true);
+			pager.setCurrentItem (pad.getTabIndex (Tab.Contents.ITEMS), true);
 			itemsf.showSearchDialog (true);
 		} else
 			itemsf.showSearchDialog (false);

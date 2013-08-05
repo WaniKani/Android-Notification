@@ -22,6 +22,7 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.wanikani.androidnotifier.Tab.Contents;
 import com.wanikani.wklib.Item;
 
 /* 
@@ -610,4 +611,11 @@ public class DashboardFragment extends Fragment implements Tab {
 	{
 		return false;
 	}
+	
+	@Override
+    public boolean contains (Contents c)
+	{
+		return c == Contents.DASHBOARD;
+	}
+
 }
