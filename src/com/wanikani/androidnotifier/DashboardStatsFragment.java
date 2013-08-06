@@ -46,5 +46,16 @@ public class DashboardStatsFragment extends TabsFragment {
 	{
 		return R.string.tag_dashboard; 
 	}
+
+	@Override
+	public void spin (boolean enable)
+	{
+		if (enable) {
+			if (fragments.size () > 0)
+				fragments.get (0).spin (enable);
+		} else
+			super.spin (enable);
+	}
+
 	
 }
