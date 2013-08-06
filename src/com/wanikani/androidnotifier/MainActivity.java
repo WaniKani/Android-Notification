@@ -467,6 +467,9 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	/** Is this activity visible? */
 	boolean visible;
 	
+	/** Current layout */
+	SettingsActivity.Layout layout;
+	
 	/** An action that should be invoked to force refresh. This is used typically
 	 *  when reviews complete
 	 */
@@ -537,7 +540,9 @@ public class MainActivity extends FragmentActivity implements Runnable {
 		
 	    tabs = new Vector<Tab> ();
 
-	    switch (SettingsActivity.getLayout (this)) {
+	    layout = SettingsActivity.getLayout (this);
+	    
+	    switch (layout) {
 	    case AUTO:
 	    case SMALL:
 	    	tabs.add (statsf);
@@ -621,6 +626,23 @@ public class MainActivity extends FragmentActivity implements Runnable {
 				
 		alarm.screenOn ();
 		visible = true;
+
+		if (layout != SettingsActivity.getLayout (this))
+			reboot ();
+	}
+	
+	/**
+	 * Restarts the activity
+	 */
+	private void reboot ()
+	{
+		Intent i;
+		
+		i = new Intent (this, getClass ());
+		i.setAction (Intent.ACTION_MAIN);
+		
+		startActivity (i);
+		finish ();
 	}
 	
 	/**
