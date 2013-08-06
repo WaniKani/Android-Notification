@@ -538,6 +538,13 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	    	pager.setCurrentItem (pad.getTabIndex (Tab.Contents.DASHBOARD), false);
 	}
 	
+	/**
+	 * Wraps {@link SettingsActivity#getLayout(Context)} making sure
+	 * that {@link SettingsActivity.Layout#AUTO} is never returned.
+	 * It is translated into one of the concrete enums by looking at the size
+	 * of the device.
+	 * @return the layout
+	 */
 	protected SettingsActivity.Layout getLayout ()
 	{
 		SettingsActivity.Layout ans;
@@ -556,6 +563,9 @@ public class MainActivity extends FragmentActivity implements Runnable {
 				SettingsActivity.Layout.LARGE : SettingsActivity.Layout.SMALL;
 	}
 
+	/**
+	 * Populates the adapter and enforces the layout, using the preferences.
+	 */
 	void setLayout ()
 	{
 		List<Tab> tabs;
@@ -580,10 +590,14 @@ public class MainActivity extends FragmentActivity implements Runnable {
         pager.setAdapter (pad);
 	}
 	
+	/**
+	 * Called by each tab to register itself to the activity and get called
+	 * when something interesting happens
+	 * @param tab the tab
+	 */
 	void register (Tab tab)
 	{
-		if (pad != null)
-			
+		if (pad != null)			
 			pad.replace (tab);
 		
 		if (tab instanceof DashboardStatsFragment)
