@@ -3,10 +3,8 @@ package com.wanikani.androidnotifier;
 import java.util.List;
 import java.util.Vector;
 
-import com.wanikani.androidnotifier.Tab.Contents;
-
+import android.app.Activity;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 
 public abstract class TabsFragment extends Fragment implements Tab {
 	
@@ -15,6 +13,14 @@ public abstract class TabsFragment extends Fragment implements Tab {
 	public TabsFragment ()
 	{
 		fragments = new Vector<Tab> ();
+	}
+	
+	@Override
+	public void onAttach (Activity main)
+	{
+		super.onAttach (main);
+		
+		((MainActivity) main).register (this);			
 	}
 	
 	@Override
