@@ -29,7 +29,6 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 
-import com.wanikani.androidnotifier.Tab.Contents;
 import com.wanikani.wklib.Item;
 import com.wanikani.wklib.Kanji;
 import com.wanikani.wklib.Radical;

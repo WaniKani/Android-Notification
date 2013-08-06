@@ -16,7 +16,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.wanikani.androidnotifier.Tab.Contents;
 import com.wanikani.androidnotifier.db.HistoryDatabase;
 import com.wanikani.androidnotifier.db.HistoryDatabaseCache;
 import com.wanikani.androidnotifier.db.HistoryDatabaseCache.PageSegment;
