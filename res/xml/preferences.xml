@@ -73,6 +73,6 @@
         	android:defaultValue="true"/>
     <EditTextPreference android:key="pref_review_url" 
         	android:title="@string/pref_url" android:summary="@string/pref_url_desc"
-        	android:defaultValue="http://www.wanikani.com/review" />
+        	android:defaultValue="http://www.wanikani.com/review/session" />
     </PreferenceCategory>
 </PreferenceScreen>

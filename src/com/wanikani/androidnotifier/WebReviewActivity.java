@@ -76,7 +76,7 @@ public class WebReviewActivity extends Activity {
 	public static class WKConfig {
 		
 		/** New review start page. This is the start page when client side reviews will be deployed */
-		static final String CURRENT_REVIEW_START = "http://www.wanikani.com/review";
+		static final String CURRENT_REVIEW_START = "http://www.wanikani.com/review/session";
 
 		/** Review start page. Of course must be inside of @link {@link #REVIEW_SPACE} */
 		static final String LESSON_START = "http://www.wanikani.com/lesson";
