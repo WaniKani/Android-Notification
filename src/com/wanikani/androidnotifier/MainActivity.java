@@ -27,6 +27,7 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.content.LocalBroadcastManager;
+import android.util.DisplayMetrics;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -449,6 +450,9 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	/** Private prefix */
 	private static final String PREFIX = "com.wanikani.androidnotifier.DashboardData.";
 	
+	/** The dashboard height, in dip */
+	private int DASHBOARD_HEIGHT = 430;
+	
 	/** The dashboard-stats combo fragment */
 	DashboardStatsFragment dsf; 
 	
@@ -533,6 +537,24 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	    } else
 	    	pager.setCurrentItem (pad.getTabIndex (Tab.Contents.DASHBOARD), false);
 	}
+	
+	protected SettingsActivity.Layout getLayout ()
+	{
+		SettingsActivity.Layout ans;
+		DisplayMetrics dm;
+		float hdip;
+
+		ans = SettingsActivity.getLayout (this);
+		if (ans != SettingsActivity.Layout.AUTO)
+			return ans;
+					
+		dm = new DisplayMetrics ();
+		getWindowManager ().getDefaultDisplay ().getMetrics (dm);
+		hdip = (Math.max (dm.heightPixels, dm.widthPixels)) / dm.density;
+			
+		return hdip >= DASHBOARD_HEIGHT * 1.5 ? 
+				SettingsActivity.Layout.LARGE : SettingsActivity.Layout.SMALL;
+	}
 
 	void setLayout ()
 	{
@@ -540,7 +562,7 @@ public class MainActivity extends FragmentActivity implements Runnable {
 		
 	    tabs = new Vector<Tab> ();
 
-	    layout = SettingsActivity.getLayout (this);
+	    layout = getLayout ();
 	    
 	    switch (layout) {
 	    case AUTO:
@@ -561,6 +583,7 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	void register (Tab tab)
 	{
 		if (pad != null)
+			
 			pad.replace (tab);
 		
 		if (tab instanceof DashboardStatsFragment)
@@ -627,12 +650,12 @@ public class MainActivity extends FragmentActivity implements Runnable {
 		alarm.screenOn ();
 		visible = true;
 
-		if (layout != SettingsActivity.getLayout (this))
+		if (layout != getLayout ())
 			reboot ();
 	}
-	
+		
 	/**
-	 * Restarts the activity
+	 * Restarts the activity 
 	 */
 	private void reboot ()
 	{
@@ -719,6 +742,7 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	public boolean onCreateOptionsMenu(Menu menu) 
 	{
 		getMenuInflater().inflate (R.menu.main, menu);
+		
 		return true;
 	}
 	
