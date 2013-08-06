@@ -495,16 +495,12 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	@Override
 	public void onCreate (Bundle bundle) 
 	{	
-		List<Tab> tabs;
-		
 	    super.onCreate (bundle);
 
 	    receiver = new Receiver ();
 	    alarm = new Alarm ();
 	    mh = new MenuHandler (this, new MenuListener ());
 	    
-	    tabs = new Vector<Tab> ();
-
 	    if (dsf == null)
 	    	dsf = new DashboardStatsFragment ();
 	    if (dashboardf == null)
@@ -513,23 +509,14 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	    	itemsf = new ItemsFragment ();
 	    if (statsf == null)
 	    	statsf = new StatsFragment ();
-	    if (true) {
-	    	tabs.add (dsf);
-	    	tabs.add (itemsf);
-	    } else {
-	    	tabs.add (statsf);
-	    	tabs.add (dashboardf);
-	    	tabs.add (itemsf);
-	    }
 	    
-        pad = new PagerAdapter (getSupportFragmentManager (), tabs);
 		setContentView (R.layout.main);
 		switchTo (R.id.f_splash);
-		
+
 		pager = (LowPriorityViewPager) findViewById (R.id.pager);
         pager.setMain (this);
-        pager.setAdapter (pad);
-
+	    setLayout ();
+	    		
         registerIntents ();
 	    
 	    if (!SettingsActivity.credentialsAreValid (this))
@@ -543,11 +530,36 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	    } else
 	    	pager.setCurrentItem (pad.getTabIndex (Tab.Contents.DASHBOARD), false);
 	}
+
+	void setLayout ()
+	{
+		List<Tab> tabs;
+		
+	    tabs = new Vector<Tab> ();
+
+	    switch (SettingsActivity.getLayout (this)) {
+	    case AUTO:
+	    case SMALL:
+	    	tabs.add (statsf);
+	    	tabs.add (dashboardf);
+	    	tabs.add (itemsf);
+	    	break;
+	    	
+	    case LARGE:
+	    	tabs.add (dsf);
+	    	tabs.add (itemsf);
+	    }		
+        pad = new PagerAdapter (getSupportFragmentManager (), tabs);
+        pager.setAdapter (pad);
+	}
 	
 	void register (Tab tab)
 	{
 		if (pad != null)
 			pad.replace (tab);
+		
+		if (tab instanceof DashboardStatsFragment)
+			dsf = (DashboardStatsFragment) tab;
 		else if (tab instanceof DashboardFragment)
 			dashboardf = (DashboardFragment) tab;
 		else if (tab instanceof ItemsFragment)

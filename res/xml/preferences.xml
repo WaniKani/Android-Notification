@@ -15,6 +15,15 @@
 	</PreferenceCategory>
 	<PreferenceCategory
 	    	android:title="@string/tpref_dashboard">
+    	
+	    <ListPreference
+	        android:key="pref_layout"
+	        android:title="@string/pref_layout"
+	        android:summary="@string/pref_layout_desc"
+	        android:defaultValue="0"
+	        android:entries="@array/layouts"
+	        android:entryValues="@array/layoutValues"/>
+	        
     	<EditTextPreference  
         	android:title="@string/pref_refresh_timeout" 
         	android:key="pref_refresh_timeout"

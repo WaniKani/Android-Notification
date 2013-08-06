@@ -39,6 +39,12 @@ public class SettingsActivity
 	extends PreferenceActivity 
 	implements SharedPreferences.OnSharedPreferenceChangeListener {
 	
+	static enum Layout {
+		
+		AUTO, SMALL, LARGE
+		
+	};
+	
 	/** Preferences enabled key. Must match preferences.xml */
 	private static final String KEY_PREF_ENABLED = "pref_enabled";
 	/** Enable lessons. Must match preferences.xml */
@@ -67,6 +73,8 @@ public class SettingsActivity
 	private static final String KEY_URL_VERSION = "review_url_version";
 	/** The infamous CPU/memory leak kludge */
 	private static final String KEY_LEAK_KLUDGE = "pref_leak_kludge";
+	/** The layout type */
+	private static final String KEY_LAYOUT = "pref_layout";
 	
 	/** Embedded keyboard message has been read and acknowledged */
 	private static final String KEY_TIP_ACK = "key_tip_ack";
@@ -395,6 +403,30 @@ public class SettingsActivity
 	public static String getURL (Context ctxt)
 	{
 		return getURL (prefs (ctxt));
+	}
+	
+	public static Layout getLayout (Context ctxt)
+	{
+		int i;
+		
+		try { 
+			i = Integer.parseInt (prefs (ctxt).getString (KEY_LAYOUT, "0"));
+		} catch (NumberFormatException e) {
+			i = 0;
+		}
+			
+		switch (i) {
+		case 0:
+			return Layout.AUTO;
+			
+		case 1:
+			return Layout.SMALL;
+			
+		case 2:
+			return Layout.LARGE;
+		}
+		
+		return Layout.AUTO;
 	}
 	
 	private static String getURL (SharedPreferences prefs)

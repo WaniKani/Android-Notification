@@ -38,6 +38,8 @@
     <string name="pref_leak_kludge">Leak workaround</string>
     <string name="pref_leak_kludge_descr">
         	Enables CPU/memory leak workaround (see WK post)</string>
+    <string name="pref_layout">Layout</string>
+    <string name="pref_layout_desc">Choose best layout for your screen size</string>
     <string name="tag_next_review">Next Review</string>
     <string name="tag_reviews_now">Now</string>
     <string name="tag_next_hour">Next hour</string>
