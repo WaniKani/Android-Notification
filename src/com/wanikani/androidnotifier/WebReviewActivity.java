@@ -230,27 +230,9 @@ public class WebReviewActivity extends Activity {
 		 */
 		public void run ()
 		{
-			switch (kbstatus) {
-			case VISIBLE:
-				reviewsSession ();
-				show ();
-				break;
-
-			case VISIBLE_LESSONS:
-				reviewsSession ();
-				showLessons (); 
-				break;
-				
-			case HIDDEN:
-				hide ();
-				break;
-				
-			case ICONIZED:
-			case ICONIZED_LESSONS:
-				reviewsSession ();
-				iconize (kbstatus);
-				break;
-			}
+			kbstatus.apply (WebReviewActivity.this);
+			if (kbstatus.isRelevantPage ())
+				reviewsSession ();			
 		}
 		
 		private void reviewsSession ()
@@ -273,7 +255,7 @@ public class WebReviewActivity extends Activity {
 		@JavascriptInterface
 		public void show ()
 		{
-			new ShowHideKeyboard (KeyboardStatus.VISIBLE);
+			new ShowHideKeyboard (KeyboardStatus.REVIEWS_MAXIMIZED);
 		}
 
 		/**
@@ -283,7 +265,7 @@ public class WebReviewActivity extends Activity {
 		@JavascriptInterface
 		public void showLessons ()
 		{
-			new ShowHideKeyboard (KeyboardStatus.VISIBLE_LESSONS);
+			new ShowHideKeyboard (KeyboardStatus.LESSONS_MAXIMIZED);
 		}
 
 		/**
@@ -292,7 +274,7 @@ public class WebReviewActivity extends Activity {
 		@JavascriptInterface
 		public void hide ()
 		{
-			new ShowHideKeyboard (KeyboardStatus.HIDDEN);
+			new ShowHideKeyboard (KeyboardStatus.INVISIBLE);
 		}
 
 		/**
@@ -301,7 +283,7 @@ public class WebReviewActivity extends Activity {
 		@JavascriptInterface
 		public void iconize ()
 		{
-			new ShowHideKeyboard (KeyboardStatus.ICONIZED);
+			new ShowHideKeyboard (KeyboardStatus.REVIEWS_ICONIZED);
 		}
 
 		/**
@@ -310,7 +292,7 @@ public class WebReviewActivity extends Activity {
 		@JavascriptInterface
 		public void iconizeLessons ()
 		{
-			new ShowHideKeyboard (KeyboardStatus.ICONIZED_LESSONS);
+			new ShowHideKeyboard (KeyboardStatus.LESSONS_ICONIZED);
 		}	
 	}
 	
@@ -410,20 +392,83 @@ public class WebReviewActivity extends Activity {
 	 * Keyboard visiblity status.
 	 */
 	enum KeyboardStatus {
+		
 		/** Keyboard visible, all keys visible */
-		VISIBLE, 
+		REVIEWS_MAXIMIZED {
+			 public void apply (WebReviewActivity wav) { wav.show (this); }
+
+			 public boolean isEmbedded (WebReviewActivity wav)
+			 {
+				 return SettingsActivity.getShowReviewsKeyboard (wav);
+			 }
+		},
 		
 		/** Keyboard visible, all keys but ENTER visible */
-		VISIBLE_LESSONS, 
+		LESSONS_MAXIMIZED {
+			public void apply (WebReviewActivity wav) { wav.showLessons (this); } 
+			
+			public boolean isEmbedded (WebReviewActivity wav)
+			{
+				return SettingsActivity.getShowLessonsKeyboard (wav);				
+			}
+		},
 
-		/** Keyboard invisible */
-		HIDDEN, 
-		
 		/** Keyboard visible, just "Show" and "Enter" keys are visible */ 
-		ICONIZED,
+		REVIEWS_ICONIZED {
+			public void apply (WebReviewActivity wav) { wav.iconize (this); }
+			
+			public void maximize (WebReviewActivity wav) { REVIEWS_MAXIMIZED.apply (wav); }
+			
+			 public boolean isEmbedded (WebReviewActivity wav)
+			 {
+				 return SettingsActivity.getShowReviewsKeyboard (wav);
+			 }
+
+			 public boolean isIconized () { return true; }			
+		},
 
 		/** Keyboard visible, just "Show" and "Enter" keys are visible, in lessons mode */ 
-		ICONIZED_LESSONS
+		LESSONS_ICONIZED {
+			public void apply (WebReviewActivity wav) { wav.iconize (this); }
+			
+			public void maximize (WebReviewActivity wav) { LESSONS_MAXIMIZED.apply (wav); }
+			
+			public boolean isIconized () { return true; }
+
+			public boolean isEmbedded (WebReviewActivity wav)
+			{
+				return SettingsActivity.getShowLessonsKeyboard (wav);				
+			}			
+		},
+		
+		/** Keyboard invisible */
+		INVISIBLE {
+			public void apply (WebReviewActivity wav) { wav.hide (this); }
+			
+			public boolean isRelevantPage () { return false; }
+		};
+		
+		public abstract void apply (WebReviewActivity wav);
+		
+		public void maximize (WebReviewActivity wav)
+		{
+			/* empty */
+		}
+		
+		public boolean isIconized ()
+		{
+			return false;
+		}
+		
+		public boolean isEmbedded (WebReviewActivity wav)
+		{
+			return false;
+		}
+		
+		public boolean isRelevantPage ()
+		{
+			return true;
+		}
 	};
 
 	/** The web view, where the web contents are rendered */
@@ -740,7 +785,7 @@ public class WebReviewActivity extends Activity {
 		setMute (false);	// resume will take care of that
 		showMuteButtons (mute, true);
 		
-		kbstatus = KeyboardStatus.HIDDEN;
+		kbstatus = KeyboardStatus.INVISIBLE;
 		loadKeyboard (KB_LATIN);		
 
 		klist = new KeyListener ();
@@ -795,8 +840,7 @@ public class WebReviewActivity extends Activity {
 		mute.setLayoutParams(lp);
 				
 		showEnterKey = SettingsActivity.getEnter (this);
-		if (kbstatus == KeyboardStatus.VISIBLE)
-			show ();
+		kbstatus.apply (this);
 	}
 	
 	private void showMuteButtons (View mute, boolean show)
@@ -858,18 +902,16 @@ public class WebReviewActivity extends Activity {
 	
 		if (keycode == KeyEvent.KEYCODE_NUM) {
 			/* Num == meta -> if iconized, it means "Show"*/
-			if (kbstatus == KeyboardStatus.ICONIZED)
-				show ();
-			else if (kbstatus == KeyboardStatus.ICONIZED_LESSONS)
-				showLessons ();
+			if (kbstatus.isIconized ())
+				kbstatus.maximize (this);
 			else
 				loadKeyboard (keyboard == KB_ALT ? KB_LATIN : KB_ALT);
 		} else if (keycode == KeyEvent.KEYCODE_ENTER)
 			js (JS_ENTER);
 		else if (keycode == KeyEvent.KEYCODE_DPAD_DOWN)
-			iconize (KeyboardStatus.ICONIZED_LESSONS);
+			iconize (KeyboardStatus.LESSONS_ICONIZED);
 		else {			
-			if (kbstatus == KeyboardStatus.VISIBLE_LESSONS) {
+			if (kbstatus == KeyboardStatus.LESSONS_MAXIMIZED) {
 				focusOut ();
 				js (JS_FOCUS);
 			}
@@ -956,16 +998,19 @@ public class WebReviewActivity extends Activity {
 	
 	/**
 	 * Hides the keyboard
+	 * @param kbstatus the new keyboard status
 	 */
-	protected void hide ()
+	protected void hide (KeyboardStatus kbstatus)
 	{
 		View view;
 		
+		this.kbstatus = kbstatus;
+		
 		showMuteButtons (muteH, false);
-		kbstatus = KeyboardStatus.HIDDEN;
 		view = findViewById (R.id.keyboard);
 		view.setVisibility (View.GONE);
-		wv.enableFocus ();
+		if (wv != null)
+			wv.enableFocus ();
 	}
 	 
 	/**
@@ -973,19 +1018,21 @@ public class WebReviewActivity extends Activity {
 	 * called after the keyboard has been hidden, and when it is simply
 	 * iconized. To do this, in addition to changing its visibility,
 	 * we show the keys. 
+	 * @param kbstatus the new keyboard status
 	 */
-	protected void show ()
+	protected void show (KeyboardStatus kbstatus)
 	{
-		showCommon (KeyboardStatus.VISIBLE, showEnterKey);
+		showCommon (kbstatus, showEnterKey);
 	}
 
 	/**
 	 * Shows the keyboard, hiding the enter key, which is problematic
 	 * on lessons. 
+	 * @param kbstatus the new keyboard status
 	 */
-	protected void showLessons ()
+	protected void showLessons (KeyboardStatus kbstatus)
 	{
-		showCommon (KeyboardStatus.VISIBLE_LESSONS, false);
+		showCommon (kbstatus, false);
 	}
 	
 	protected void showCommon (KeyboardStatus kbstatus, boolean showEnter)
@@ -995,10 +1042,8 @@ public class WebReviewActivity extends Activity {
 		
 		this.kbstatus = kbstatus;
 		prefs = SettingsActivity.prefs (this);
-		embedded = kbstatus == KeyboardStatus.VISIBLE ?
-				SettingsActivity.getShowReviewsKeyboard (this) :
-				SettingsActivity.getShowLessonsKeyboard (this);
-		if (embedded && kbstatus == KeyboardStatus.VISIBLE)
+		embedded = kbstatus.isEmbedded (this);
+		if (embedded && kbstatus == KeyboardStatus.REVIEWS_MAXIMIZED)
 			showEmbeddedKeyboardMessage (prefs);
 				
 		if (embedded)
@@ -1099,13 +1144,13 @@ public class WebReviewActivity extends Activity {
 		
 		key = findViewById (R.id.kb_enter);
 		/* If in ICONIZED_LESSON status, hide enter key (it does not work :) */
-		key.setVisibility (kbs == KeyboardStatus.ICONIZED ? View.VISIBLE : View.GONE);
+		key.setVisibility (kbs == KeyboardStatus.REVIEWS_ICONIZED ? View.VISIBLE : View.GONE);
 		
 		key = findViewById (R.id.kb_meta);
 		key.setVisibility (View.VISIBLE);
 		((Button) key).setText (R.string.key_show);
 
 		view = findViewById (R.id.keyboard);
-		view.setVisibility (View.VISIBLE);					
+		view.setVisibility (kbs.isEmbedded (this) ? View.VISIBLE : View.GONE);					
 	}
 }
