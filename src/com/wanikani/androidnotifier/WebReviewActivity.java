@@ -397,7 +397,9 @@ public class WebReviewActivity extends Activity {
 		REVIEWS_MAXIMIZED {
 			 public void apply (WebReviewActivity wav) { wav.show (this); }
 
-			 public boolean isEmbedded (WebReviewActivity wav)
+			 public void iconize (WebReviewActivity wav) { REVIEWS_ICONIZED.apply (wav); }
+
+ 			 public boolean isEmbedded (WebReviewActivity wav)
 			 {
 				 return SettingsActivity.getShowReviewsKeyboard (wav);
 			 }
@@ -407,6 +409,8 @@ public class WebReviewActivity extends Activity {
 		LESSONS_MAXIMIZED {
 			public void apply (WebReviewActivity wav) { wav.showLessons (this); } 
 			
+			public void iconize (WebReviewActivity wav) { LESSONS_ICONIZED.apply (wav); }
+
 			public boolean isEmbedded (WebReviewActivity wav)
 			{
 				return SettingsActivity.getShowLessonsKeyboard (wav);				
@@ -455,6 +459,11 @@ public class WebReviewActivity extends Activity {
 			/* empty */
 		}
 		
+		public void iconize (WebReviewActivity wav)
+		{
+			/* empty */
+		}
+
 		public boolean isIconized ()
 		{
 			return false;
@@ -909,7 +918,7 @@ public class WebReviewActivity extends Activity {
 		} else if (keycode == KeyEvent.KEYCODE_ENTER)
 			js (JS_ENTER);
 		else if (keycode == KeyEvent.KEYCODE_DPAD_DOWN)
-			iconize (KeyboardStatus.LESSONS_ICONIZED);
+			kbstatus.iconize (this);
 		else {			
 			if (kbstatus == KeyboardStatus.LESSONS_MAXIMIZED) {
 				focusOut ();
