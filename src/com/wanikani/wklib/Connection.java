@@ -319,7 +319,7 @@ public class Connection {
 			rd = ir.read (buf, 0, buf.length);
 			if (rd < 0)
 				break;
-			sb.append (buf);
+			sb.append (buf, 0, rd);
 		}
 		return sb.toString ();
 	}
