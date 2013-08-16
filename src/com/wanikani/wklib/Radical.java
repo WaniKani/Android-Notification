@@ -3,8 +3,6 @@ package com.wanikani.wklib;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.graphics.Bitmap;
-
 public class Radical extends Item {
 
 	private static class Factory implements Item.Factory<Radical> {
@@ -28,8 +26,6 @@ public class Radical extends Item {
 	public static final Item.Factory<Radical> FACTORY = new Factory ();
 
 	public static final Item.Factory<Item> ITEM_FACTORY = new ItemFactory ();
-
-	public Bitmap bitmap;
 	
 	public String image;
 	
@@ -52,7 +48,7 @@ public class Radical extends Item {
 		return false;
 	}
 
-	protected String getItemURLComponent ()
+	public String getItemURLComponent ()
 	{
 		return hyphenatedMeaning;
 	}

@@ -110,13 +110,13 @@ public class NoFilter implements Filter {
 			 * shown as soon as possible (img radicals can be quite a few) */
 			for (Radical r : imgrad) {
 				try {
-					conn.loadImage (r);
+					itemf.loadRadicalImage (r);
 				} catch (IOException e) {
 					r.character = "?";
 					ok = false;
 				}				
 				lpublishProgress (new ItemLibrary<Item> (r));
-			}
+			}	
 			
 			return ok;
 		}	

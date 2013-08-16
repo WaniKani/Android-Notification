@@ -1,5 +1,6 @@
 package com.wanikani.androidnotifier;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -472,11 +473,15 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 				tw.setText (radical.character);
 				tw.setVisibility (View.VISIBLE);
 				fw.setVisibility (View.GONE);
-			} else if (radical.bitmap != null) {		
-				iw.setImageBitmap (radical.bitmap);
-				tw.setVisibility (View.GONE);
-				fw.setVisibility (View.VISIBLE);				
-			} /* else { should never happen! } */
+			} else {
+				try {
+					iw.setImageBitmap (rimg.getImage (getActivity (), radical));
+					tw.setVisibility (View.GONE);
+					fw.setVisibility (View.VISIBLE);
+				} catch (IOException e) {
+					/* Should not happen */
+				}
+			} 
 
 		}
 
@@ -889,6 +894,9 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 	/// The items' list view
 	ListView iview;
 	
+	/// The radical images cache
+	RadicalImages rimg;
+	
 	/* ---------- Sort/filter stuff ---------- */
 
 	/// The popup menu listener
@@ -937,6 +945,8 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 	
 	public ItemsFragment ()
 	{
+		rimg = new RadicalImages ();
+		
 		try {
 			jtf = Typeface.createFromFile (JAPANESE_TYPEFACE_FONT);
 		} catch (Exception e) {
@@ -1303,6 +1313,13 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 			return;
 		
 		alert (ok);
+	}
+	
+	@Override
+	public void loadRadicalImage (Radical r)
+		throws IOException
+	{
+		rimg.getImage (getActivity (), r);
 	}
 	
 	/**

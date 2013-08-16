@@ -105,13 +105,13 @@ public class LevelFilter implements Filter {
 			
 			for (Radical r : imgrad) {
 				try {
-					conn.loadImage (r);
+					itemf.loadRadicalImage (r);
 				} catch (IOException e) {
 					r.character = "?";
 					ok = false;
 				}				
 				lpublishProgress (new ItemLibrary<Item> (r));
-			}
+			}	
 			
 			lib = new ItemLibrary<Item> ();
 			try {

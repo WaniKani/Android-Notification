@@ -99,7 +99,7 @@ public class CriticalFilter implements Filter {
 			
 			for (Radical r : imgrad) {
 				try {
-					conn.loadImage (r);
+					itemf.loadRadicalImage (r);
 				} catch (IOException e) {
 					r.character = "?";
 					ok = false;

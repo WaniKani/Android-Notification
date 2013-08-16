@@ -1,8 +1,10 @@
 package com.wanikani.androidnotifier;
 
+import java.io.IOException;
 import java.util.List;
 
 import com.wanikani.wklib.Item;
+import com.wanikani.wklib.Radical;
 
 /* 
  *  Copyright (c) 2013 Alberto Cuda
@@ -117,6 +119,13 @@ public interface Filter {
 		 */
 		void enableSorting (boolean errors, boolean unlock, 
 				    	    boolean available, boolean level);
+		
+		/**
+		 * Places a radical image into the cache, downloading it if necessary
+		 * @param a radical  
+		 */
+		public void loadRadicalImage (Radical r)
+			throws IOException;
 	}
 
 	/** 

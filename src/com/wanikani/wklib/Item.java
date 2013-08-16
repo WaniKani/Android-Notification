@@ -437,7 +437,7 @@ public abstract class Item {
 		return true;
 	}
 	
-	protected String getItemURLComponent ()
+	public String getItemURLComponent ()
 	{
 		return character;
 	}
