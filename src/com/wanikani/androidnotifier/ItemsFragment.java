@@ -232,8 +232,6 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 	/**
 	 * This listener is registered to the level's ListView.
 	 * When an item is clicked, all the items of that level are displayed.
-	 * So far, the "apprentice" filter and the ordering is kept as it was
-	 * beforehand (don't know if it's a good idea).
 	 */
 	class LevelClickListener implements AdapterView.OnItemClickListener {
 	
@@ -658,14 +656,9 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 			switch (view.getId ()) {
 			case R.id.btn_filter_all:
 				sortBySRS ();
-				setLevelFilter (currentLevel, false);
+				setLevelFilter (currentLevel);
 				break;
 
-			case R.id.btn_filter_missing:
-				sortByType ();
-				setLevelFilter (currentLevel, true);
-				break;
-				
 			case R.id.btn_filter_critical:
 				sortByErrors ();
 				setCriticalFilter ();
@@ -889,10 +882,6 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 	/// A SRS level to turtle icon map
 	EnumMap<SRSLevel, Drawable> srsht;
 
-	/// True if the apprentice filter is set (i.e. we are displaying only apprentice
-	/// items
-	boolean apprentice;
-	
 	/// Show sensitive information that may break SRS
 	boolean showAnswers;
 	
@@ -1112,53 +1101,26 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 	}
 
 	/**
-	 * Switches to level list filter. The apprentice filter is kept
-	 * only if we are just switching from a level to another level.
-	 * If we are switching e.g. from unlock filter to level filter,
-	 * it is cleared.
+	 * Switches to level list filter. 
 	 * @param level the level to display 
 	 */
-	private void setLevelFilter (int level)
-	{
-		if (currentFilter != levelf)
-			apprentice = false;
-		setLevelFilter (level, apprentice);
-	}
-
-	/**
-	 * Switches to level list filter. 
-	 * @param level the level to display
-	 * @param apprentice the apprentice flag 
-	 */
-	public void setLevelFilter (int level, boolean apprentice)
-	{
-		setLevelFilter (level, apprentice, null);
-	}
-	
-	/**
-	 * Switches to level list filter. 
-	 * @param level the level to display
-	 * @param apprentice the apprentice flag
-	 * @param type item type to be displayed 
-	 */
-	public void setLevelFilter (int level, boolean apprentice, Item.Type type)
+	public void setLevelFilter (int level)
 	{
 		RadioGroup fg;
 		
-		this.apprentice = apprentice;
 		currentFilter = levelf;
 
 		if (parent != null) {
 			fg = (RadioGroup) parent.findViewById (R.id.rg_filter);
-			fg.check (apprentice ? R.id.btn_filter_missing : R.id.btn_filter_all); 
+			fg.check (R.id.btn_filter_all); 
 		
-			levelf.select (main.getConnection (), level, apprentice, type);
+			levelf.select (main.getConnection (), level);
 			iview.setSelection (0);
 		}
 		
 		filterChanged ();
 	}
-
+	
 	/**
 	 * Switches to critical items filter. 
 	 */
@@ -1510,7 +1472,7 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 		if (currentFilter == criticalf)
 			criticalf.select (main.getConnection ());
 		else if (currentFilter == levelf && currentLevel > 0)
-			levelf.select (main.getConnection (), currentLevel, apprentice, null);
+			levelf.select (main.getConnection (), currentLevel);
 		else if (currentFilter == unlockf)
 			unlockf.select (main.getConnection ());
 		
@@ -1530,9 +1492,17 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 	/**
 	 * Shows the search dialog.
 	 * @param switching <tt>true</tt> if the activity was in background
+	 * @param level the level to be selected (or <tt>null</tt> if no SRS filter should be set)
+	 * @param type the item type to be selected (or <tt>null</tt> if all types should
+	 * be shown).
 	 */
-	public void showSearchDialog (boolean switching)
+	public void showSearchDialog (boolean switching, SRSLevel level, Item.Type type)
 	{
+		if (level != null)
+			iss.set (level);
+		if (type != null)
+			iss.set (type);
+		
 		isd.show (!switching);
 	}
 	

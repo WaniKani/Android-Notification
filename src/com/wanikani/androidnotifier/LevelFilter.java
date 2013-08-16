@@ -12,7 +12,6 @@ import com.wanikani.wklib.Connection;
 import com.wanikani.wklib.Item;
 import com.wanikani.wklib.ItemLibrary;
 import com.wanikani.wklib.Radical;
-import com.wanikani.wklib.SRSLevel;
 
 /* 
  *  Copyright (c) 2013 Alberto Cuda
@@ -199,12 +198,6 @@ public class LevelFilter implements Filter {
 	/// The task currently going on
 	Task task;
 	
-	/// Apprentice flag of the last request
-	boolean apprentice;
-	
-	/// Item type filter
-	Item.Type type;
-	
 	/**
 	 * Constructor.
 	 * @param itemf the fragment that will be notified
@@ -226,24 +219,18 @@ public class LevelFilter implements Filter {
 	 * as possible.
 	 * @param conn a WKLib Connection
 	 * @param level the level
-	 * @param apprentice the apprentice flag
-	 * @param type filter by item type. If set to <code>null</code>, all items
-	 * 	  are displayed
 	 */
-	public void select (Connection conn, int level, boolean apprentice, Item.Type type)
+	public void select (Connection conn, int level)
 	{
 		List<Item> ans;
 		Task ptask;
 	
-		this.apprentice = apprentice;
-		this.type = type;
-		
 		ptask = pending.get (level);
 		ans = ht.get (level);
 		
 		itemf.enableSorting (true, true, true);
 		if (ans != null) {
-			itemf.setData (this, filter (ans), true);
+			itemf.setData (this, ans, true);
 			itemf.selectLevel (this, level, false);
 			task = null;
 		} else if (ptask == null) {
@@ -269,7 +256,7 @@ public class LevelFilter implements Filter {
 	private void update (Task stask, List<Item> items)
 	{
 		if (stask == task)
-			itemf.addData (this, filter (items));
+			itemf.addData (this, items);
 	}
 	
 	/**
@@ -299,37 +286,6 @@ public class LevelFilter implements Filter {
 	public void stopTask ()
 	{
 		task = null;
-	}
-
-	/**
-	 * Used to filter away all the non-relevant items, according to
-	 * {@link #apprentice} and {@link #type} filter fields. 
-	 * This method may return the same collection, but it will never 
-	 *  alter its contents: if items must be discarded, a new List is created.
-	 * @param items the input collection
-	 * @return the filtered collection
-	 */
-	private List<Item> filter (List<Item> items)
-	{
-		Iterator<Item> i;
-		Item item;
-		
-		if (apprentice || type != null) {
-			items = new Vector<Item> (items);
-			i = items.iterator ();
-			while (i.hasNext ()) {
-				item = i.next ();
-				
-				if (apprentice && 
-					item.stats != null && item.stats.srs != SRSLevel.APPRENTICE)
-					i.remove ();
-				else if (type != null && item.type != type)
-					i.remove ();
-
-			}
-		}
-		
-		return items;
 	}
 
 	/**

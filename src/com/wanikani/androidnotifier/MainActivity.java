@@ -39,6 +39,7 @@ import com.wanikani.wklib.Item;
 import com.wanikani.wklib.ItemLibrary;
 import com.wanikani.wklib.LevelProgression;
 import com.wanikani.wklib.SRSDistribution;
+import com.wanikani.wklib.SRSLevel;
 import com.wanikani.wklib.StudyQueue;
 import com.wanikani.wklib.UserInformation;
 import com.wanikani.wklib.UserLogin;
@@ -1074,7 +1075,8 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	public void showRemaining (Item.Type type)
 	{
 		pager.setCurrentItem (pad.getTabIndex (Tab.Contents.ITEMS), true);
-		itemsf.setLevelFilter (dd.level, true, type);
+		itemsf.setLevelFilter (dd.level);
+		itemsf.showSearchDialog (true, SRSLevel.APPRENTICE, type);
 	}
 
 	/**
@@ -1097,9 +1099,9 @@ public class MainActivity extends FragmentActivity implements Runnable {
 		idx = pad.getTabIndex (Tab.Contents.ITEMS);
 		if (pager.getCurrentItem () != idx) {
 			pager.setCurrentItem (pad.getTabIndex (Tab.Contents.ITEMS), true);
-			itemsf.showSearchDialog (true);
+			itemsf.showSearchDialog (true, null, null);
 		} else
-			itemsf.showSearchDialog (false);
+			itemsf.showSearchDialog (false, null, null);
 	}
 
 	/**

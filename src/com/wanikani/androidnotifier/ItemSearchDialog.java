@@ -113,7 +113,28 @@ public class ItemSearchDialog {
 		public void toggle (SRSLevel level)
 		{
 			srses.put (level, !srses.get (level));
-		}				
+		}		
+		
+		/**
+		 * Sets filter to a specific item type (and none other)
+		 * @param type the item type
+		 */
+		public void set (Item.Type type)
+		{
+			for (Item.Type t : types.keySet ())
+				types.put (t, t == type);
+		}
+		
+		/**
+		 * Sets filter to a specific SRS level (and none other)
+		 * @param srs the item level
+		 */
+		public void set (SRSLevel level)
+		{
+			for (SRSLevel l : srses.keySet ())
+				srses.put (l, l == level);
+		}
+		
 	}
 	
 	/**
@@ -525,8 +546,12 @@ public class ItemSearchDialog {
 	{
 		if (!iss.visible)
 			toggleVisibility ();
-		else if (focusIfShown)
-			filter.requestFocus ();
+		else {
+			syncFromISS ();			
+			updateFilter ();			
+			if (focusIfShown)
+				filter.requestFocus ();
+		}
 	}
 	
 	/**

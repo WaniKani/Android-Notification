@@ -106,7 +106,6 @@
     
     <string name="tag_filter_by">Show</string>
     <string name="tag_filter_all">all</string>
-    <string name="tag_filter_missing">apprentice</string>
     <string name="tag_filter_unlocks">recent unlocks</string>
     <string name="tag_filter_critical">critical items</string>
     <string name="tag_filter_search">search&#8230;</string>

@@ -120,12 +120,6 @@
                         android:text="@string/tag_filter_all" />
 
                     <RadioButton
-                        android:id="@+id/btn_filter_missing"
-                        style="@style/ItemButton"
-                        android:layout_width="wrap_content"
-                        android:text="@string/tag_filter_missing" />
-
-                    <RadioButton
                         android:id="@+id/btn_filter_unlocks"
                         style="@style/ItemButton"
                         android:layout_width="wrap_content"
