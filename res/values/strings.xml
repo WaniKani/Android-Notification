@@ -105,7 +105,8 @@
     <string name="tag_stats">Stats</string>
     
     <string name="tag_filter_by">Show</string>
-    <string name="tag_filter_all">all</string>
+    <string name="tag_filter_none">all</string>
+    <string name="tag_filter_by_level">by level</string>
     <string name="tag_filter_unlocks">recent unlocks</string>
     <string name="tag_filter_critical">critical items</string>
     <string name="tag_filter_search">search&#8230;</string>
@@ -116,6 +117,7 @@
     <string name="tag_sort_errors">errors</string>
     <string name="tag_sort_time">unlock date</string>
     <string name="tag_sort_available">next review date</string>
+    <string name="tag_sort_level">level</string>
     
     <string name="fmt_ii_less_than_one_hour">unlocked &lt; one hour ago</string>
     <string name="fmt_ii_one_hour">unlocked one hour ago</string>

@@ -47,15 +47,15 @@
                 android:layout_weight="1"
                 android:visibility="gone" />
 
-            <ImageButton
-                android:id="@+id/btn_item_filter"
-                style="@style/ItemButton"
-                android:src="@drawable/filter" />
-
             <ProgressBar
                 android:id="@+id/pb_item_filter"
                 style="@style/ItemButton"
                 android:visibility="gone" />
+
+            <ImageButton
+                android:id="@+id/btn_item_filter"
+                style="@style/ItemButton"
+                android:src="@drawable/filter" />
 
             <ImageButton
                 android:id="@+id/btn_item_sort"
@@ -114,10 +114,16 @@
                     android:orientation="vertical" >
 
                     <RadioButton
-                        android:id="@+id/btn_filter_all"
+                        android:id="@+id/btn_filter_none"
                         style="@style/ItemButton"
                         android:layout_width="wrap_content"
-                        android:text="@string/tag_filter_all" />
+                        android:text="@string/tag_filter_none" />
+                    
+                    <RadioButton
+                        android:id="@+id/btn_filter_by_level"
+                        style="@style/ItemButton"
+                        android:layout_width="wrap_content"
+                        android:text="@string/tag_filter_by_level" />
 
                     <RadioButton
                         android:id="@+id/btn_filter_unlocks"
@@ -183,7 +189,13 @@
                         android:id="@+id/btn_sort_available"
                         style="@style/ItemButton"
                         android:layout_width="wrap_content"
-                        android:text="@string/tag_sort_available" />                    
+                        android:text="@string/tag_sort_available" />
+                    
+                    <RadioButton
+                        android:id="@+id/btn_sort_level"
+                        style="@style/ItemButton"
+                        android:layout_width="wrap_content"
+                        android:text="@string/tag_sort_level" />                                       
                 </RadioGroup>
             </LinearLayout>
         </RelativeLayout>

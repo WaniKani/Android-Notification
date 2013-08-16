@@ -141,6 +141,22 @@ public class Connection {
 		}
 	}
 	
+	private int [] getAllLevels ()
+		throws IOException
+	{
+		UserInformation ui;
+		int ans [];
+		int i;
+		
+		ui = getUserInformation ();
+		
+		ans = new int [ui.level];
+		for (i = 0; i < ans.length; i++)
+			ans [i] = i + 1;
+		
+		return ans;
+	}
+	
 	private static String levelList (int level [])
 	{
 		StringBuffer sb;
@@ -197,6 +213,12 @@ public class Connection {
 		}
 	}
 	
+	public ItemLibrary<Radical> getRadicals ()
+			throws IOException
+	{		
+		return getRadicals (getAllLevels ());
+	}
+		
 	public void loadImage (Radical r)
 		throws IOException
 	{
@@ -268,6 +290,12 @@ public class Connection {
 		}
 	}
 		
+	public ItemLibrary<Kanji> getKanji ()
+			throws IOException
+	{		
+		return getKanji (getAllLevels ());
+	}
+	
 	public ItemLibrary<Vocabulary> getVocabulary (int level)
 		throws IOException
 	{
@@ -311,6 +339,12 @@ public class Connection {
 		}
 	}
 	
+	public ItemLibrary<Vocabulary> getVocabulary ()
+			throws IOException
+	{		
+		return getVocabulary (getAllLevels ());
+	}
+
 	public ItemLibrary<Item> getRecentUnlocks (int count)
 		throws IOException
 	{

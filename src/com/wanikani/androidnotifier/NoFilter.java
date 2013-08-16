@@ -30,17 +30,11 @@ import com.wanikani.wklib.Radical;
  */
 
 /**
- * A filter that shows only critical items. This is done through the
- * "Critical Items" WK API, so not all the information may be available.
- * Items are published following these steps:
- * <ul>
- * <li>One single chunk, containing all the items that have an unicode character
- * <li>Each radical that has no unicode (one at a time, as they are "resolved")
- * </ul>
- * Caching is enabled, so if two consecutive requests are issued, the second
- * one will be almost immediate.
+ * A filter that shows all the items up to the user's level.
+ * This is done through the "Radicals/Kanji/Vocab" WK API, 
+ * so all the information should be available.
  */
-public class CriticalFilter implements Filter {
+public class NoFilter implements Filter {
 
 	/**
 	 * The asynchronous task that performs the real job. 
@@ -55,12 +49,12 @@ public class CriticalFilter implements Filter {
 		
 		/**
 		 * Constructor.
-		 * @param conn the connection
+		 * @param conn WKLib connection
 		 */
 		public Task (Connection conn)
 		{
 			this.conn = conn;
-
+			
 			allItems = new Vector<Item> ();
 		}
 		
@@ -74,7 +68,7 @@ public class CriticalFilter implements Filter {
 		{
 			ItemLibrary<Item> lib;
 			List<Radical> imgrad;
-			Item item;
+			Radical rad;
 			Iterator<Item> i;
 			boolean ok;
 			
@@ -82,21 +76,38 @@ public class CriticalFilter implements Filter {
 			lib = new ItemLibrary<Item> ();
 			imgrad = new Vector<Radical> ();
 			try {
-				lib = conn.getCriticalItems ();
+				lib.add (conn.getRadicals ());
 				i = lib.list.iterator ();
 				while (i.hasNext ()) {
-					item = i.next ();
-					if (item.character == null &&
-						item.type == Item.Type.RADICAL) {
-						imgrad.add ((Radical) item);
+					rad = (Radical) i.next ();
+					if (rad.character == null) {
+						imgrad.add (rad);
 						i.remove ();
 					}
 				}
-				lpublishProgress (new ItemLibrary<Item> (lib));
+				lpublishProgress (new ItemLibrary<Item> ().add (lib));
 			} catch (IOException e) {
 				ok = false;
 			}
 			
+			lib = new ItemLibrary<Item> ();
+			try {
+				lib.add (conn.getKanji ());
+				lpublishProgress (lib);
+			} catch (IOException e) {
+				ok = false;
+			}
+			
+			lib = new ItemLibrary<Item> ();
+			try {
+				lib.add (conn.getVocabulary ());
+				lpublishProgress (lib);
+			} catch (IOException e) {
+				ok = false;
+			}			
+
+			/* Moved at the end, because I want all the regular items to be
+			 * shown as soon as possible (img radicals can be quite a few) */
 			for (Radical r : imgrad) {
 				try {
 					conn.loadImage (r);
@@ -105,10 +116,10 @@ public class CriticalFilter implements Filter {
 					ok = false;
 				}				
 				lpublishProgress (new ItemLibrary<Item> (r));
-			}	
+			}
 			
 			return ok;
-		}
+		}	
 		
 		/**
 		 * Publishes a new library. This method is essentially equivalent
@@ -121,12 +132,12 @@ public class CriticalFilter implements Filter {
 		{
 			publishProgress (lib);
 		}
-		
+
 		/**
 		 * Called when some new item becomes available. We inform the GUI
 		 * and add them to @link {@link #allItems}.
 		 * @param lib the new items
-		 */
+		 */		
 		@Override
 		protected void onProgressUpdate (ItemLibrary<Item>... lib)
 		{
@@ -143,7 +154,7 @@ public class CriticalFilter implements Filter {
 		{
 			done (this, allItems, ok);
 		}
-		
+
 		/**
 		 * Called when the fragment requests the information again
 		 * <i>and</i> this instance has not completed its task yet.
@@ -160,9 +171,6 @@ public class CriticalFilter implements Filter {
 	/// The fragment which will receive updates
 	Filter.Callback itemf;
 	
-	/// Cached information
-	List<Item> citems;
-	
 	/// The task that performs the real job, or <code>null</code> if idle
 	Task task;
 	
@@ -170,7 +178,7 @@ public class CriticalFilter implements Filter {
 	 * Constructor.
 	 * @param itemf the fragment that will be notified
 	 */
-	public CriticalFilter (Filter.Callback itemf)	
+	public NoFilter (Filter.Callback itemf)	
 	{
 		this.itemf = itemf;
 	}
@@ -187,10 +195,8 @@ public class CriticalFilter implements Filter {
 	public void select (Connection conn)
 	{
 		itemf.enableSorting (true, false, false, true);
-		if (citems != null) {
-			itemf.setData (this, citems, true);
-			itemf.selectOtherFilter (this, false);
-		} else if (task != null) {
+		
+		if (task != null) {
 			itemf.clearData (this);
 			itemf.selectOtherFilter (this, true);			
 			task.reissue ();
@@ -222,10 +228,7 @@ public class CriticalFilter implements Filter {
 	 * @param ok set if everything went smoothly
 	 */
 	private void done (Task stask, List<Item> allItems, boolean ok)
-	{
-		if (ok)
-			citems = allItems;
-
+	{		
 		if (stask == task) {
 			task = null;
 			itemf.noMoreData (this, ok);
@@ -246,12 +249,12 @@ public class CriticalFilter implements Filter {
 	@Override
 	public void flush ()
 	{
-		citems = null;
+		/* empty */
 	}
 	
 	@Override
 	public boolean hasSRSLevelInfo ()
 	{
-		return false;
+		return true;
 	}
 }

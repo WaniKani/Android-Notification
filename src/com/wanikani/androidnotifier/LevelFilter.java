@@ -41,8 +41,6 @@ import com.wanikani.wklib.Radical;
  * <li>One single chunk, containing all the kanji
  * <li>One single chunk, containing all the vocab words
  * </ul>
- * Caching is enabled, so if two consecutive requests are issued, the second
- * one will be almost immediate.
  */
 public class LevelFilter implements Filter {
 	
@@ -222,7 +220,7 @@ public class LevelFilter implements Filter {
 	
 		ptask = pending.get (level);
 		
-		itemf.enableSorting (true, true, true);
+		itemf.enableSorting (true, true, true, false);
 		if (ptask == null) {
 			itemf.clearData (this);
 			itemf.selectLevel (this, level, true);

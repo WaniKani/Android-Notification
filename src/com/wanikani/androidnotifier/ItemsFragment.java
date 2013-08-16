@@ -244,7 +244,7 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 		}
 		
 	}
-
+	
 	/**
 	 * The implementation of the levels' ViewList. Pretty straightforward.
 	 * No sorting or filtering.
@@ -654,7 +654,13 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 			sortW.setVisibility (View.GONE);
 			
 			switch (view.getId ()) {
-			case R.id.btn_filter_all:
+
+			case R.id.btn_filter_none:
+				sortByLevel ();
+				setNoFilter ();
+				break;			
+			
+			case R.id.btn_filter_by_level:
 				sortBySRS ();
 				setLevelFilter (currentLevel);
 				break;
@@ -684,12 +690,27 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 			case R.id.btn_sort_available:
 				sortByAvailable ();
 				break;
+				
+			case R.id.btn_sort_level:
+				sortByLevel ();
 
 			case R.id.btn_sort_type:
 				sortByType ();
 			}
 		}
 		
+		/**
+		 * Switches to level sort order, fixing both ListView and radio buttons.
+		 */
+		private void sortByLevel ()
+		{
+			RadioGroup rg;
+			
+			rg = (RadioGroup) parent.findViewById (R.id.rg_order);
+			rg.check (R.id.btn_sort_level);
+			iad.setComparator (Item.SortByLevel.INSTANCE, ItemInfo.AVAILABLE);				
+		}
+
 		/**
 		 * Switches to SRS sort order, fixing both ListView and radio buttons.
 		 */
@@ -893,6 +914,9 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 
 	/* ---------- Filters ---------- */
 	
+	/// The "no filter" instance
+	NoFilter nof;
+	
 	/// The level filter instance
 	LevelFilter levelf;	
 
@@ -946,6 +970,7 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 
 		setRetainInstance (true);
 
+		nof = new NoFilter (this);
 		levelf = new LevelFilter (this);
 		criticalf = new CriticalFilter (this);
 		unlockf = new UnlockFilter (this);
@@ -1017,13 +1042,15 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 		rg = (RadioGroup) parent.findViewById (R.id.rg_filter);
 		for (i = 0; i < rg.getChildCount (); i++)
 			rg.getChildAt (i).setOnClickListener (rgl);
-		rg.check (R.id.btn_filter_all);
+		rg.check (R.id.btn_filter_none);
 		
 		rg = (RadioGroup) parent.findViewById (R.id.rg_order);
 		for (i = 0; i < rg.getChildCount (); i++)
 			rg.getChildAt (i).setOnClickListener (rgl);
 		rg.check (R.id.btn_sort_type);
 		
+		enableSorting (true, true, true, false);
+				
     	return parent;
     }
 	
@@ -1065,7 +1092,9 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 		lad.replace (l);
 		lad.notifyDataSetChanged ();
 		
-		if (currentFilter == levelf)
+		if (currentFilter == nof)
+			setNoFilter ();
+		else if (currentFilter == levelf)
 			setLevelFilter (currentLevel);
 		else if (currentFilter == criticalf)
 			setCriticalFilter ();
@@ -1094,12 +1123,35 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 	{
 		super.onDetach ();
 		
+		nof.stopTask ();
 		levelf.stopTask ();
 		criticalf.stopTask ();
 		unlockf.stopTask ();
 		isd = null;
 	}
 
+	/**
+	 * Switched to "no filter" view
+	 */
+	public void setNoFilter ()
+	{
+		RadioButton btn;
+		
+		currentFilter = nof;
+
+		if (parent != null) {
+			btn = (RadioButton) parent.findViewById (R.id.btn_filter_none); 
+			btn.setChecked (true);
+
+			nof.select (main.getConnection ());
+			iview.setSelection (0);
+		}
+		
+		filterChanged ();
+	}
+	
+	
+	
 	/**
 	 * Switches to level list filter. 
 	 * @param level the level to display 
@@ -1112,7 +1164,7 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 
 		if (parent != null) {
 			fg = (RadioGroup) parent.findViewById (R.id.rg_filter);
-			fg.check (R.id.btn_filter_all); 
+			fg.check (R.id.btn_filter_by_level); 
 		
 			levelf.select (main.getConnection (), level);
 			iview.setSelection (0);
@@ -1381,20 +1433,16 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 	 */
 	public void selectOtherFilter (boolean selected, boolean spinning)
 	{
-		View filterPB, filterBtn, levels, filler;
+		View filterPB, levels, filler;
 		
-		filterBtn = parent.findViewById (R.id.btn_item_filter);
 		filterPB = parent.findViewById (R.id.pb_item_filter);
 		levels = parent.findViewById (R.id.lv_levels);
 		filler = parent.findViewById (R.id.lv_filler);
 		
-		if (spinning) {
-			filterBtn.setVisibility (View.GONE);
+		if (spinning)
 			filterPB.setVisibility (View.VISIBLE);
-		} else {
-			filterBtn.setVisibility (View.VISIBLE);
+		else
 			filterPB.setVisibility (View.GONE);			
-		}
 		
 		if (selected) {
 			levels.setVisibility (View.GONE);
@@ -1406,7 +1454,8 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 	}
 	
 	@Override
-	public void enableSorting (boolean errors, boolean unlock, boolean available)
+	public void enableSorting (boolean errors, boolean unlock, 
+			                   boolean available, boolean level)
 	{
 		View view;
 		
@@ -1417,7 +1466,10 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 		view.setEnabled (unlock);
 		
 		view = parent.findViewById (R.id.btn_sort_available);
-		view.setEnabled (available);		
+		view.setEnabled (available);
+		
+		view = parent.findViewById (R.id.btn_sort_level);
+		view.setEnabled (available);				
 	}
 	
 	/**
@@ -1460,6 +1512,7 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 			break;
 			
 		case FULL:
+			nof.flush ();
 			levelf.flush ();
 			/* Fall through */
 
@@ -1469,7 +1522,9 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 		}
 		
 		/* Note that this resets the kanji vs radical filter */
-		if (currentFilter == criticalf)
+		if (currentFilter == nof)
+			nof.select (main.getConnection ());
+		else if (currentFilter == criticalf)
 			criticalf.select (main.getConnection ());
 		else if (currentFilter == levelf && currentLevel > 0)
 			levelf.select (main.getConnection (), currentLevel);

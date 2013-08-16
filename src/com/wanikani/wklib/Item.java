@@ -144,6 +144,41 @@ public abstract class Item {
 			return ascending ? ans : -ans;
 		}
 	}
+	
+	public static class SortByLevel implements Comparator<Item> {
+		
+		boolean ascending;
+		
+		Comparator<Item> secondKey;
+		
+		public final static SortByLevel INSTANCE = new SortByLevel (false);
+
+		public final static SortByLevel INSTANCE_ASCENDING = new SortByLevel (true);
+
+		private SortByLevel (boolean ascending)
+		{
+			this.ascending = ascending;
+			secondKey = ascending ? SortByType.INSTANCE_ASCENDING : 
+					SortByType.INSTANCE;
+		}
+		
+		public SortByLevel (boolean ascending, Comparator<Item> secondKey)
+		{
+			this.ascending = ascending;
+			this.secondKey = secondKey;
+		}
+
+		public int compare (Item a, Item b)
+		{
+			int ans;
+			
+			ans = a.level - b.level;
+			
+			ans = ascending ? ans : -ans;
+
+			return ans == 0 ? secondKey.compare (a, b) : ans;
+		}
+	}
 
 	public static class SortBySRS implements Comparator<Item> {
 		

@@ -112,9 +112,11 @@ public interface Filter {
 		 * errors is not possible.
 		 * @param errors enables or disables sort by errors
 		 * @param unlock enables or disables unlock date
-		 * @param available anables or disables available date
+		 * @param available enables or disables available date
+		 * @param level enables or disables level
 		 */
-		void enableSorting (boolean errors, boolean unlock, boolean available);
+		void enableSorting (boolean errors, boolean unlock, 
+				    	    boolean available, boolean level);
 	}
 
 	/** 
