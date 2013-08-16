@@ -67,15 +67,24 @@ public class Connection {
 	
 	UserInformation ui;
 	
+	ItemsCache cache;
+	
 	public Connection (UserLogin login, Config config)
 	{
 		this.login = login;
 		this.config = config;
+		cache = new ItemsCache ();
 	}
 	
 	public Connection (UserLogin ulogin)
 	{
 		this (ulogin, Config.DEFAULT);
+		cache = new ItemsCache ();
+	}
+	
+	public void flush ()
+	{
+		cache = new ItemsCache ();
 	}
 	
 	public UserInformation getUserInformation ()
@@ -148,12 +157,18 @@ public class Connection {
 	public ItemLibrary<Radical> getRadicals (int level)
 			throws IOException
 	{
+		ItemLibrary<Radical> ans;
 		Response res;
 			
+		ans = cache.radicals.get (level);
+		if (ans != null)
+			return ans;
+		
 		try {
 			res = call ("radicals", true, Integer.toString (level));
 
-			return new ItemLibrary<Radical> (Radical.FACTORY, res.infoAsArray);
+			return cache.radicals.put 
+					(new ItemLibrary<Radical> (Radical.FACTORY, res.infoAsArray));
 				
 		} catch (JSONException e) {
 			throw new ParseException ();
@@ -163,12 +178,19 @@ public class Connection {
 	public ItemLibrary<Radical> getRadicals (int levels [])
 		throws IOException
 	{
+		ItemLibrary<Radical> ans;
 		Response res;
+		
+		ans = new ItemLibrary<Radical> ();
+		levels = cache.radicals.get (ans, levels);
+		if (levels.length == 0)
+			return ans;
 
 		try {
 			res = call ("radicals", true, levelList (levels));
 
-			return new ItemLibrary<Radical> (Radical.FACTORY, res.infoAsArray);
+			return ans.add (cache.radicals.put 
+						(new ItemLibrary<Radical> (Radical.FACTORY, res.infoAsArray)));
 			
 		} catch (JSONException e) {
 			throw new ParseException ();
@@ -182,6 +204,10 @@ public class Connection {
 		InputStream is;
 		URL url;
 		int code;
+
+		/* Cached elsewhere */
+		if (r.bitmap != null)
+			return;
 		
 		conn = null;
 
@@ -199,16 +225,21 @@ public class Connection {
 		}
 	}
 
-
 	public ItemLibrary<Kanji> getKanji (int level)
 		throws IOException
 	{
+		ItemLibrary<Kanji> ans;
 		Response res;
+		
+		ans = cache.kanji.get (level);
+		if (ans != null)
+			return ans;
 		
 		try {
 			res = call ("kanji", true, Integer.toString (level));
 
-			return new ItemLibrary<Kanji> (Kanji.FACTORY, res.infoAsArray);
+			return cache.kanji.put 
+				(new ItemLibrary<Kanji> (Kanji.FACTORY, res.infoAsArray));
 			
 		} catch (JSONException e) {
 			throw new ParseException ();
@@ -218,12 +249,19 @@ public class Connection {
 	public ItemLibrary<Kanji> getKanji (int level [])
 		throws IOException
 	{
+		ItemLibrary<Kanji> ans;
 		Response res;
 			
+		ans = new ItemLibrary<Kanji> ();
+		level = cache.kanji.get (ans, level);
+		if (level.length == 0)
+			return ans;
+		
 		try {
 			res = call ("kanji", true, levelList (level));
 
-			return new ItemLibrary<Kanji> (Kanji.FACTORY, res.infoAsArray);
+			return ans.add (cache.kanji.put
+					(new ItemLibrary<Kanji> (Kanji.FACTORY, res.infoAsArray)));
 				
 		} catch (JSONException e) {
 			throw new ParseException ();
@@ -233,12 +271,18 @@ public class Connection {
 	public ItemLibrary<Vocabulary> getVocabulary (int level)
 		throws IOException
 	{
+		ItemLibrary<Vocabulary> ans;
 		Response res;
+		
+		ans = cache.vocab.get (level);
+		if (ans != null)
+			return ans;
 		
 		try {
 			res = call ("vocabulary", true, Integer.toString (level));
 
-			return new ItemLibrary<Vocabulary> (Vocabulary.FACTORY, res.infoAsArray);
+			return cache.vocab.put
+					(new ItemLibrary<Vocabulary> (Vocabulary.FACTORY, res.infoAsArray));
 			
 		} catch (JSONException e) {
 			throw new ParseException ();
@@ -248,12 +292,19 @@ public class Connection {
 	public ItemLibrary<Vocabulary> getVocabulary (int level [])
 			throws IOException
 	{
-		Response res;
-			
+		ItemLibrary<Vocabulary> ans;
+		Response res;		
+		
+		ans = new ItemLibrary<Vocabulary> ();
+		level = cache.vocab.get (ans, level);
+		if (level.length == 0)
+			return ans;
+		
 		try {
 			res = call ("vocabulary", true, levelList (level));
 
-			return new ItemLibrary<Vocabulary> (Vocabulary.FACTORY, res.infoAsArray);
+			return ans.add (cache.vocab.put
+					(new ItemLibrary<Vocabulary> (Vocabulary.FACTORY, res.infoAsArray)));
 			
 		} catch (JSONException e) {
 			throw new ParseException ();

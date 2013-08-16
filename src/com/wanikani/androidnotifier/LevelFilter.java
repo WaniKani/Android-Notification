@@ -192,9 +192,6 @@ public class LevelFilter implements Filter {
 	/// the result.
 	Hashtable<Integer, Task> pending;
 
-	/// Items cache
-	Hashtable<Integer, List<Item>> ht;
-	
 	/// The task currently going on
 	Task task;
 	
@@ -207,7 +204,6 @@ public class LevelFilter implements Filter {
 		this.itemf = itemf;
 		
 		pending = new Hashtable<Integer, Task> ();
-		ht = new Hashtable<Integer, List<Item>> ();		
 	}
 	
 	/**
@@ -222,18 +218,12 @@ public class LevelFilter implements Filter {
 	 */
 	public void select (Connection conn, int level)
 	{
-		List<Item> ans;
 		Task ptask;
 	
 		ptask = pending.get (level);
-		ans = ht.get (level);
 		
 		itemf.enableSorting (true, true, true);
-		if (ans != null) {
-			itemf.setData (this, ans, true);
-			itemf.selectLevel (this, level, false);
-			task = null;
-		} else if (ptask == null) {
+		if (ptask == null) {
 			itemf.clearData (this);
 			itemf.selectLevel (this, level, true);
 
@@ -268,8 +258,6 @@ public class LevelFilter implements Filter {
 	 */
 	private void done (Task stask, List<Item> allItems, int level, boolean ok)
 	{
-		if (ok)
-			ht.put (level, allItems);
 		pending.remove (level);
 		
 		if (stask == task) {
@@ -294,7 +282,7 @@ public class LevelFilter implements Filter {
 	 */
 	public void flush ()
 	{
-		ht.clear ();
+		/* empty */
 	}
 	
 	@Override

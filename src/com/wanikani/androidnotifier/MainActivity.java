@@ -152,6 +152,17 @@ public class MainActivity extends FragmentActivity implements Runnable {
 		  */
 		 public void flush (Tab.RefreshType rtype)
 		 {
+			 if (conn != null) {
+				 switch (rtype) {
+				 case FULL:				 
+					 conn.flush ();
+					 /* fall through */
+				 
+				 case MEDIUM:				 				 
+				 case LIGHT:
+				 }
+			 }
+			 
 			 for (Tab tab : tabs)
 				 tab.flush (rtype);			 
 		 }
