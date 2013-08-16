@@ -186,7 +186,7 @@ public class CriticalFilter implements Filter {
 	 */
 	public void select (Connection conn)
 	{
-		itemf.enableSorting (true, false, false, true);
+		itemf.enableSorting (true, false, false);
 		if (citems != null) {
 			itemf.setData (this, citems, true);
 			itemf.selectOtherFilter (this, false);

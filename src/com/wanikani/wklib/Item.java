@@ -158,8 +158,7 @@ public abstract class Item {
 		private SortByLevel (boolean ascending)
 		{
 			this.ascending = ascending;
-			secondKey = ascending ? SortByType.INSTANCE_ASCENDING : 
-					SortByType.INSTANCE;
+			secondKey = ascending ? SortBySRS.INSTANCE_ASCENDING : SortBySRS.INSTANCE;
 		}
 		
 		public SortByLevel (boolean ascending, Comparator<Item> secondKey)
@@ -232,7 +231,7 @@ public abstract class Item {
 
 		private SortByType (boolean ascending)
 		{
-			secondKey = ascending ? SortBySRS.INSTANCE_ASCENDING : SortBySRS.INSTANCE;
+			secondKey = ascending ? SortByLevel.INSTANCE_ASCENDING : SortByLevel.INSTANCE;
 		}
 		
 		public SortByType (boolean ascending, Comparator<Item> secondKey)

@@ -661,12 +661,12 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 			switch (view.getId ()) {
 
 			case R.id.btn_filter_none:
-				sortByLevel ();
+				sortByType ();
 				setNoFilter ();
 				break;			
 			
 			case R.id.btn_filter_by_level:
-				sortBySRS ();
+				sortByType ();
 				setLevelFilter (currentLevel);
 				break;
 
@@ -696,26 +696,11 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 				sortByAvailable ();
 				break;
 				
-			case R.id.btn_sort_level:
-				sortByLevel ();
-
 			case R.id.btn_sort_type:
 				sortByType ();
 			}
 		}
 		
-		/**
-		 * Switches to level sort order, fixing both ListView and radio buttons.
-		 */
-		private void sortByLevel ()
-		{
-			RadioGroup rg;
-			
-			rg = (RadioGroup) parent.findViewById (R.id.rg_order);
-			rg.check (R.id.btn_sort_level);
-			iad.setComparator (Item.SortByLevel.INSTANCE, ItemInfo.AVAILABLE);				
-		}
-
 		/**
 		 * Switches to SRS sort order, fixing both ListView and radio buttons.
 		 */
@@ -1059,7 +1044,7 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 			rg.getChildAt (i).setOnClickListener (rgl);
 		rg.check (R.id.btn_sort_type);
 		
-		enableSorting (true, true, true, false);
+		enableSorting (true, true, true);
 				
     	return parent;
     }
@@ -1471,8 +1456,7 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 	}
 	
 	@Override
-	public void enableSorting (boolean errors, boolean unlock, 
-			                   boolean available, boolean level)
+	public void enableSorting (boolean errors, boolean unlock, boolean available)
 	{
 		View view;
 		
@@ -1484,9 +1468,6 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 		
 		view = parent.findViewById (R.id.btn_sort_available);
 		view.setEnabled (available);
-		
-		view = parent.findViewById (R.id.btn_sort_level);
-		view.setEnabled (available);				
 	}
 	
 	/**

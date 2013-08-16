@@ -190,12 +190,6 @@
                         style="@style/ItemButton"
                         android:layout_width="wrap_content"
                         android:text="@string/tag_sort_available" />
-                    
-                    <RadioButton
-                        android:id="@+id/btn_sort_level"
-                        style="@style/ItemButton"
-                        android:layout_width="wrap_content"
-                        android:text="@string/tag_sort_level" />                                       
                 </RadioGroup>
             </LinearLayout>
         </RelativeLayout>

@@ -115,10 +115,8 @@ public interface Filter {
 		 * @param errors enables or disables sort by errors
 		 * @param unlock enables or disables unlock date
 		 * @param available enables or disables available date
-		 * @param level enables or disables level
 		 */
-		void enableSorting (boolean errors, boolean unlock, 
-				    	    boolean available, boolean level);
+		void enableSorting (boolean errors, boolean unlock, boolean available);
 		
 		/**
 		 * Places a radical image into the cache, downloading it if necessary
