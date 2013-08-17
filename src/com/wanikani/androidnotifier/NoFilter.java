@@ -194,7 +194,7 @@ public class NoFilter implements Filter {
 	 */
 	public void select (Connection conn)
 	{
-		itemf.enableSorting (true, false, false);
+		itemf.enableSorting (true, true, true);
 		
 		if (task != null) {
 			itemf.clearData (this);
