@@ -67,7 +67,7 @@ public class Connection {
 	
 	UserInformation ui;
 	
-	ItemsCache cache;
+	public ItemsCache cache;
 	
 	public Connection (UserLogin login, Config config)
 	{

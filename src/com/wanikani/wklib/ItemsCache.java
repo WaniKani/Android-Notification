@@ -1,13 +1,18 @@
 package com.wanikani.wklib;
 
+import java.io.Serializable;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
-public class ItemsCache {
+public class ItemsCache implements Serializable {
 	
-	public class LevelCache<T extends Item> {
+	public static final long serialVersionUID = 1L;
+	
+	public class LevelCache<T extends Item> implements Serializable {
+		
+		public static final long serialVersionUID = 1L;		
 		
 		Map<Integer, ItemLibrary<T>> ht;
 		

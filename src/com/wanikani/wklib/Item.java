@@ -1,5 +1,6 @@
 package com.wanikani.wklib;
 
+import java.io.Serializable;
 import java.util.Comparator;
 import java.util.Date;
 
@@ -23,7 +24,9 @@ import org.json.JSONObject;
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-public abstract class Item {
+public abstract class Item implements Serializable {
+	
+	public static final long serialVersionUID = 1L;
 	
 	public static class SortByErrors implements Comparator<Item> {
 		
@@ -293,7 +296,9 @@ public abstract class Item {
 
 	}
 	
-	public static class Performance {
+	public static class Performance implements Serializable {
+				
+		public static final long serialVersionUID = 1L;
 		
 		public int correct;
 		
@@ -316,6 +321,8 @@ public abstract class Item {
 	
 	public static class Stats {
 		
+		public static final long serialVersionUID = 1L;
+
 		public SRSLevel srs;
 		
 		private Date unlockedDate;

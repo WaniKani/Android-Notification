@@ -37,6 +37,7 @@ import com.wanikani.wklib.AuthenticationException;
 import com.wanikani.wklib.Connection;
 import com.wanikani.wklib.Item;
 import com.wanikani.wklib.ItemLibrary;
+import com.wanikani.wklib.ItemsCache;
 import com.wanikani.wklib.LevelProgression;
 import com.wanikani.wklib.SRSDistribution;
 import com.wanikani.wklib.SRSLevel;
@@ -433,6 +434,11 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	private static final String BUNDLE_VALID = "bundle_valid";
 	
 	/**
+	 * The key stored into the bundle to keep the items cache
+	 */
+	private static final String ITEMS_CACHE = "ITEMS_CACHE";
+	
+	/**
 	 * The key stored into the bundle to keep the track of the current tab
 	 */
 	private static final String CURRENT_TAB = "current_tab";
@@ -546,6 +552,11 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	    if (bundle != null && bundle.containsKey (BUNDLE_VALID)) {
 	    	dd = new DashboardData (bundle);
 			pager.setCurrentItem (bundle.getInt (CURRENT_TAB));
+			try {
+				conn.cache = (ItemsCache) bundle.getSerializable (ITEMS_CACHE);
+			} catch (Throwable t) {
+				/* In case serialization fails (e.g. version mismatch during upgrade) */
+			}
 	    } else
 	    	pager.setCurrentItem (pad.getTabIndex (Tab.Contents.DASHBOARD), false);
 	}
@@ -659,6 +670,8 @@ public class MainActivity extends FragmentActivity implements Runnable {
 		if (dd != null) {
 			dd.serialize (bundle);
 			bundle.putBoolean (BUNDLE_VALID, true);
+			if (conn != null)
+				bundle.putSerializable (ITEMS_CACHE, conn.cache);
 			bundle.putInt (CURRENT_TAB, pager.getCurrentItem ());
 		}
 	}
