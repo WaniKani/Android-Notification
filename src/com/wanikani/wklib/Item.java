@@ -319,7 +319,7 @@ public abstract class Item implements Serializable {
 		
 	};
 	
-	public static class Stats {
+	public static class Stats implements Serializable {
 		
 		public static final long serialVersionUID = 1L;
 
