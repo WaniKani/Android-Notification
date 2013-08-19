@@ -348,6 +348,261 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 			return view;
 		}
 	}
+	
+	/**
+	 * The item list holder. Keeps all the references to relevant views and
+	 * takes care of updating the fields of each row. It is meant to be set
+	 * as a tag (@see {@link View#setTag(Object)}, according to the holder pattern,
+	 * though this is not done directly by this class.
+	 */
+	private abstract class ItemListHolder {
+		
+		/// The item type
+		public Item.Type type;
+		
+		/// The row view, parent of each field
+		public View row;
+		
+		/// Glyph, as a text
+		public TextView glyphText;
+				
+		/// Reading
+		public TextView reading;
+		
+		/// SRS image
+		public ImageView srs;
+		
+		/// Additional (filter/order dependent) information
+		public TextView info;
+		
+		/// Meanining
+		public TextView meaning;
+		
+		/// Level
+		public TextView level;
+		
+		/// The scroll view, needed fro scroll interaction
+		public HiPriorityScrollView hpsw;
+		
+		/// The click listener associated to the row
+		public ItemClickListener icl;
+		
+		/**
+		 * Constructor
+		 * @param ila the list adapter that will receive high priority scroll view
+		 * events
+		 * @param inflater the inflater
+		 * @param parent scroll view
+		 * @param type the item type represented by this holder
+		 */
+		public ItemListHolder (ItemListAdapter ila, LayoutInflater inflater, 
+							   ViewGroup parent, Item.Type type)		
+		{
+			this.type = type;
+
+			row = inflater.inflate (getLayout (), parent, false);			
+			glyphText = (TextView) row.findViewById (R.id.it_glyph);
+			reading = (TextView) row.findViewById (R.id.it_reading);
+			srs = (ImageView) row.findViewById (R.id.img_srs);
+			info = (TextView) row.findViewById (R.id.it_info);
+			meaning = (TextView) row.findViewById (R.id.it_meaning);
+			hpsw = (HiPriorityScrollView) row.findViewById (R.id.hsv_item);
+			level = (TextView) row.findViewById (R.id.it_level);
+			
+			icl = new ItemClickListener (ila);
+			hpsw.setCallback (icl);
+			row.setOnClickListener (icl);
+			
+			if (jtf != null)
+				glyphText.setTypeface (jtf);			
+		}
+		
+		/**
+		 * Returns the resource ID of the layout representing this object
+		 * @return the layout id
+		 */
+		protected abstract int getLayout ();
+		
+		/**
+		 * Updates the row fields.
+		 * @param item the item
+		 * @param iinfo additional (filter/sort order dependent) information
+		 */
+		public void fill (Item item, String iinfo)
+		{
+			if (currentFilter != levelf)
+				level.setText (Integer.toString (item.level));				
+			
+			if (item.stats != null) {
+				srs.setImageDrawable (srsht.get (item.stats.srs));
+				srs.setVisibility (View.VISIBLE);
+			} else
+				srs.setVisibility (View.INVISIBLE);
+			
+			info.setText (iinfo);			
+			meaning.setText (showAnswers ? item.meaning : "");
+			
+			icl.setURL (item.getURL ());
+		}
+	}
+	
+	/**
+	 * Implementation of the holder for radical item rows.
+	 */
+	private class RadicalHolder extends ItemListHolder {
+
+		/// The glyph, as an image
+		ImageView glyphImage;
+
+		/// Glyph view
+		View glyphView;
+		
+		/**
+		 * Constructor.
+		 * @param ila the list adapter that will receive high priority scroll view
+		 * events
+		 * @param inflater the inflater
+		 * @param parent scroll view
+		 */
+		public RadicalHolder (ItemListAdapter ila, LayoutInflater inflater, ViewGroup parent)
+		{
+			super (ila, inflater, parent, Item.Type.RADICAL);
+			
+			glyphImage = (ImageView) row.findViewById (R.id.img_glyph);			
+			glyphView = row.findViewById (R.id.f_glyph);						
+		}
+		
+		@Override
+		protected int getLayout ()
+		{
+			return R.layout.items_radical;
+		}
+		
+		@Override
+		public void fill (Item item, String iinfo)
+		{
+			Radical radical;
+			
+			radical = (Radical) item;
+			
+			super.fill (radical, iinfo);
+			
+			if (radical.character != null) {
+				glyphText.setText (radical.character);
+				glyphText.setVisibility (View.VISIBLE);
+				glyphView.setVisibility (View.GONE);
+			} else {
+				try {
+					glyphImage.setImageBitmap (rimg.getImage (getActivity (), radical));
+					glyphText.setVisibility (View.GONE);
+					glyphView.setVisibility (View.VISIBLE);
+				} catch (IOException e) {
+					/* Should not happen */
+				}
+			} 
+
+		}
+		
+	}
+
+	/**
+	 * Implementation of the holder for kanji item rows.
+	 */
+	private class KanjiHolder extends ItemListHolder {
+
+		public TextView onyomi;
+		
+		public TextView kunyomi;
+		
+		/**
+		 * Constructor.
+		 * @param ila the list adapter that will receive high priority scroll view
+		 * events
+		 * @param inflater the inflater
+		 * @param parent scroll view
+		 */
+		public KanjiHolder (ItemListAdapter ila, LayoutInflater inflater, ViewGroup parent)
+		{
+			super (ila, inflater, parent, Item.Type.KANJI);
+			
+			onyomi = (TextView) row.findViewById (R.id.it_onyomi);
+			kunyomi = (TextView) row.findViewById (R.id.it_kunyomi);
+		}
+		
+		@Override
+		protected int getLayout ()
+		{
+			return R.layout.items_kanji;
+		}
+		
+		@Override
+		public void fill (Item item, String iinfo)
+		{
+			Kanji kanji;
+			
+			kanji = (Kanji) item;
+			
+			super.fill (kanji, iinfo);
+			
+			onyomi.setText (showAnswers ? kanji.onyomi : "");
+
+			kunyomi.setText (showAnswers ? kanji.kunyomi : "");
+			
+			switch (kanji.importantReading) {
+			case ONYOMI:
+				onyomi.setTextColor (importantColor);
+				kunyomi.setTextColor (normalColor);
+				break;
+
+			case KUNYOMI:
+				onyomi.setTextColor (normalColor);
+				kunyomi.setTextColor (importantColor);
+				break;
+			}
+
+			glyphText.setText (kanji.character);
+		}
+		
+	}
+
+	/**
+	 * Implementation of the holder for vocab item rows.
+	 */
+	private class VocabHolder extends ItemListHolder {
+		
+		/**
+		 * Constructor.
+		 * @param ila the list adapter that will receive high priority scroll view
+		 * events
+		 * @param inflater the inflater
+		 * @param parent scroll view
+		 */
+		public VocabHolder (ItemListAdapter ila, LayoutInflater inflater, ViewGroup parent)
+		{
+			super (ila, inflater, parent, Item.Type.VOCABULARY);			
+		}
+		
+		@Override
+		protected int getLayout ()
+		{
+			return R.layout.items_vocab;
+		}
+		
+		@Override
+		public void fill (Item item, String iinfo)
+		{
+			Vocabulary vocab;
+			
+			vocab = (Vocabulary) item;
+			
+			super.fill (vocab, iinfo);
+			
+			reading.setText (showAnswers ? vocab.kana : "");
+
+			glyphText.setText (vocab.character);
+		}
+		
+	}
 
 	/**
 	 * The implementation of the items' ViewList. Items are instances
@@ -454,148 +709,38 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 			notifyDataSetChanged ();
 		}
 		
-		/**
-		 * Fills the specific fields for a radical layout.
-		 * @param row the view to fill
-		 * @param radical the radical to describe
-		 */
-		protected void fillRadical (View row, Radical radical)
-		{
-			ImageView iw;
-			TextView tw;
-			View fw;
-			
-			tw = (TextView) row.findViewById (R.id.it_glyph);
-			iw = (ImageView) row.findViewById (R.id.img_glyph);
-			fw = row.findViewById (R.id.f_glyph);
-			if (radical.character != null) {
-				tw = (TextView) row.findViewById (R.id.it_glyph);
-				tw.setText (radical.character);
-				tw.setVisibility (View.VISIBLE);
-				fw.setVisibility (View.GONE);
-			} else {
-				try {
-					iw.setImageBitmap (rimg.getImage (getActivity (), radical));
-					tw.setVisibility (View.GONE);
-					fw.setVisibility (View.VISIBLE);
-				} catch (IOException e) {
-					/* Should not happen */
-				}
-			} 
-
-		}
-
-		/**
-		 * Fills the specific fields for a kanji layout.
-		 * @param row the view to fill
-		 * @param radical the kanji to describe
-		 */
-		protected void fillKanji (View row, Kanji kanji)
-		{
-			TextView ktw, otw;
-			TextView tw;
-			
-			otw = (TextView) row.findViewById (R.id.it_onyomi);
-			otw.setText (showAnswers ? kanji.onyomi : "");
-
-			ktw = (TextView) row.findViewById (R.id.it_kunyomi);
-			ktw.setText (showAnswers ? kanji.kunyomi : "");
-			
-			switch (kanji.importantReading) {
-			case ONYOMI:
-				otw.setTextColor (importantColor);
-				ktw.setTextColor (normalColor);
-				break;
-
-			case KUNYOMI:
-				otw.setTextColor (normalColor);
-				ktw.setTextColor (importantColor);
-				break;
-			}
-
-			tw = (TextView) row.findViewById (R.id.it_glyph);
-			tw.setText (kanji.character);
-			if (jtf != null)
-				tw.setTypeface (jtf);
-		}
-		
-		/**
-		 * Fills the specific fields for a vocab layout.
-		 * @param row the view to fill
-		 * @param radical the vocab to describe
-		 */
-		protected void fillVocab (View row, Vocabulary vocab)
-		{
-			TextView tw;
-			
-			tw = (TextView) row.findViewById (R.id.it_reading);
-			tw.setText (showAnswers ? vocab.kana : "");
-
-			tw = (TextView) row.findViewById (R.id.it_glyph);
-			tw.setText (vocab.character);
-
-			if (jtf != null)
-				tw.setTypeface (jtf);
-		}
-
 		@Override
 		public View getView (int position, View row, ViewGroup parent) 
 		{
-			HiPriorityScrollView hpsw;
 			LayoutInflater inflater;
-			ItemClickListener icl;
-			ImageView iw;
-			TextView tw;
+			ItemListHolder holder;
 			Item item;
 
-			inflater = main.getLayoutInflater ();			
-
 			item = getItem (position);
-			switch (item.type) {
-			case RADICAL:
-				row = inflater.inflate (R.layout.items_radical, parent, false);
-				fillRadical (row, (Radical) item);
-				break;
-									
-			case KANJI:
-				row = inflater.inflate (R.layout.items_kanji, parent, false);
-				fillKanji (row, (Kanji) item);
-				break;
+			holder = row != null ? (ItemListHolder) row.getTag () : null;
+			if (holder == null || holder.type != item.type) {
+				inflater = main.getLayoutInflater ();			
 
-			case VOCABULARY:
-				row = inflater.inflate (R.layout.items_vocab, parent, false);
-				fillVocab (row, (Vocabulary) item);
-				break;
+				switch (item.type) {
+				case RADICAL:
+					holder = new RadicalHolder (this, inflater, parent);
+					break;
+					
+				case KANJI:
+					holder = new KanjiHolder (this, inflater, parent);
+					break;
+					
+				case VOCABULARY:
+					holder = new VocabHolder (this, inflater, parent);
+					break;					
+				}
+				
+				holder.row.setTag (holder);
 			}
 
-			if (currentFilter != levelf) {
-				tw = (TextView) row.findViewById (R.id.it_level);
-				tw.setText (Integer.toString (item.level));				
-			}
+			holder.fill (item, iinfo.getInfo (getResources (), item));
 			
-			iw = (ImageView) row.findViewById (R.id.img_srs);
-			if (item.stats != null) {
-				iw.setImageDrawable (srsht.get (item.stats.srs));
-				iw.setVisibility (View.VISIBLE);
-			} else
-				iw.setVisibility (View.INVISIBLE);
-			
-			tw = (TextView) row.findViewById (R.id.it_info);
-			tw.setText (iinfo.getInfo (getResources (), item));
-			
-			tw = (TextView) row.findViewById (R.id.it_meaning);
-			tw.setText (showAnswers ? item.meaning : "");
-			
-			icl = new ItemClickListener (this, item.getURL ());
-			
-			hpsw = (HiPriorityScrollView) row.findViewById (R.id.hsv_item);
-			hpsw.setCallback (icl);
-			
-			/* The row may be larger that the scroller */
-			row.setClickable (true);
-			row.setOnClickListener (icl);
-			
-			return row;
+			return holder.row;
 		}		
 	}
 	
@@ -783,18 +928,27 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 		/**
 		 * Constructor.
 		 * @param ila the item list adapter
-		 * @param url the url to open when clicked
 		 */
-		public ItemClickListener (ItemListAdapter ila, String url)
+		public ItemClickListener (ItemListAdapter ila)
 		{
 			this.ila = ila;
+		}
+		
+		/**
+		 * Updates the URL to open
+		 * @param url the new URL to open
+		 */
+		public void setURL (String url)
+		{
 			this.url = url;
 		}
+		
 		
 		@Override
 		public void onClick (View view)
 		{
-			main.item (url);
+			if (url != null)
+				main.item (url);
 		}
 		
 		/**
