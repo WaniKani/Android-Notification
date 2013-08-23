@@ -1111,6 +1111,7 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	{
 		pager.setCurrentItem (pad.getTabIndex (Tab.Contents.ITEMS), true);
 		itemsf.setCriticalFilter ();
+		itemsf.hideSearchDialog ();
 	}
 
 	/**

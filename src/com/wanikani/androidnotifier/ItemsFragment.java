@@ -1725,7 +1725,15 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 		
 		isd.show (!switching);
 	}
-	
+
+	/**
+	 * Hides the search dialog.
+	 */
+	public void hideSearchDialog ()
+	{
+		isd.setVisibility (false);
+	}
+
 	/**
 	 * The back button is handled only if the search dialog is shown.
 	 * In that case, it is hidden
