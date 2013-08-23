@@ -1311,9 +1311,7 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 		
 		filterChanged ();
 	}
-	
-	
-	
+			
 	/**
 	 * Switches to level list filter. 
 	 * @param level the level to display 
@@ -1679,24 +1677,24 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 		case FULL:
 			nof.flush ();
 			levelf.flush ();
+
+			if (currentFilter == nof)
+				nof.select (main.getConnection ());
+			else if (currentFilter == levelf && currentLevel > 0)
+				levelf.select (main.getConnection (), currentLevel);
+
 			/* Fall through */
 
 		case MEDIUM:
 			criticalf.flush ();
-			unlockf.flush ();			
+			unlockf.flush ();
+			
+			if (currentFilter == criticalf)
+				criticalf.select (main.getConnection ());
+			else if (currentFilter == unlockf)
+				unlockf.select (main.getConnection ());
+			
 		}
-		
-		/* Note that this resets the kanji vs radical filter */
-		if (currentFilter == nof)
-			nof.select (main.getConnection ());
-		else if (currentFilter == criticalf)
-			criticalf.select (main.getConnection ());
-		else if (currentFilter == levelf && currentLevel > 0)
-			levelf.select (main.getConnection (), currentLevel);
-		else if (currentFilter == unlockf)
-			unlockf.select (main.getConnection ());
-		
-		filterChanged ();
 	}
 
 	/**
