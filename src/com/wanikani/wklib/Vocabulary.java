@@ -40,6 +40,8 @@ public class Vocabulary extends Item {
 		}
 	}
 
+	public static final long serialVersionUID = 1L;	
+
 	public final static Item.Factory<Vocabulary> FACTORY = new Factory ();
 	
 	public final static Item.Factory<Item> ITEM_FACTORY = new ItemFactory ();

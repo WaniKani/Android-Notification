@@ -21,7 +21,7 @@ import org.json.JSONObject;
  */
 
 public class Kanji extends Item {
-
+	
 	static class Factory implements Item.Factory<Kanji> {
 
 		public Kanji deserialize (JSONObject obj)
@@ -61,6 +61,8 @@ public class Kanji extends Item {
 		}
 	};
 	
+	public static final long serialVersionUID = 1L;
+
 	public String onyomi;
 	
 	public String kunyomi;

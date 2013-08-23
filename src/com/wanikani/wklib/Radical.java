@@ -23,6 +23,8 @@ public class Radical extends Item {
 		}
 	}
 
+	public static final long serialVersionUID = 1L;
+	
 	public static final Item.Factory<Radical> FACTORY = new Factory ();
 
 	public static final Item.Factory<Item> ITEM_FACTORY = new ItemFactory ();
