@@ -293,12 +293,18 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 		/**
 		 * Replaces the items in the list with a new set.
 		 * @param levels the new list
+		 * @return if the new levels are different from the old ones
 		 */
-		public void replace (List<Level> levels)
+		public boolean replace (List<Level> levels)
 		{
+			if (this.levels.size () == levels.size ())
+				return false;
+			
 			clear ();
 			this.levels.addAll (levels);
 			notifyDataSetChanged ();
+			
+			return true;
 		}
 				
 		@Override
@@ -1225,6 +1231,7 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 	 */
 	private void redrawAll ()
 	{
+		boolean refresh;
 		List<Level> l;
 		Level level;
 		int i;
@@ -1238,17 +1245,23 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 			level = new Level (i);
 			l.add (level);
 		}
-		lad.replace (l);
-		lad.notifyDataSetChanged ();
 		
-		if (currentFilter == nof)
-			setNoFilter ();
-		else if (currentFilter == levelf)
-			setLevelFilter (currentLevel);
-		else if (currentFilter == criticalf)
-			setCriticalFilter ();
-		else if (currentFilter == unlockf)
-			setUnlockFilter ();
+		refresh = lad.replace (l); 
+		if (refresh)
+			lad.notifyDataSetChanged ();
+		
+		refresh |= iad.isEmpty ();
+		
+		if (refresh) {
+			if (currentFilter == nof)
+				setNoFilter ();
+			else if (currentFilter == levelf)
+				setLevelFilter (currentLevel);
+			else if (currentFilter == criticalf)
+				setCriticalFilter ();
+			else if (currentFilter == unlockf)
+				setUnlockFilter ();
+		}
 	}
 	
 	/**
