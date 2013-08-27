@@ -393,6 +393,13 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 		/// The click listener associated to the row
 		public ItemClickListener icl;
 		
+		// --- Now stuff that gets changed while scrolling the list -- //
+		/// The current item
+		Item item;
+		
+		/// The item information
+		ItemInfo iinfo;
+		
 		/**
 		 * Constructor
 		 * @param ila the list adapter that will receive high priority scroll view
@@ -431,10 +438,23 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 		
 		/**
 		 * Updates the row fields.
+		 * @param res the resources
 		 * @param item the item
 		 * @param iinfo additional (filter/sort order dependent) information
 		 */
-		public void fill (Item item, String iinfo)
+		public void fill (Resources res, Item item, ItemInfo iinfo)
+		{
+			this.item = item;
+			this.iinfo = iinfo;
+			
+			refresh (res);
+		}
+		
+		/**
+		 * Updates the row fields, using cached data.
+		 * @param res the resources
+		 */
+		public void refresh (Resources res)
 		{
 			if (currentFilter != levelf)
 				level.setText (Integer.toString (item.level));				
@@ -445,7 +465,7 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 			} else
 				srs.setVisibility (View.INVISIBLE);
 			
-			info.setText (iinfo);			
+			info.setText (iinfo.getInfo (res, item));			
 			meaning.setText (showAnswers ? item.meaning : "");
 			
 			icl.setURL (item.getURL ());
@@ -485,13 +505,13 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 		}
 		
 		@Override
-		public void fill (Item item, String iinfo)
+		public void refresh (Resources res)
 		{
 			Radical radical;
 			
 			radical = (Radical) item;
 			
-			super.fill (radical, iinfo);
+			super.refresh (res);
 			
 			if (radical.character != null) {
 				glyphText.setText (radical.character);
@@ -542,13 +562,13 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 		}
 		
 		@Override
-		public void fill (Item item, String iinfo)
+		public void refresh (Resources res)
 		{
 			Kanji kanji;
 			
 			kanji = (Kanji) item;
 			
-			super.fill (kanji, iinfo);
+			super.refresh (res);
 			
 			onyomi.setText (showAnswers ? kanji.onyomi : "");
 
@@ -595,13 +615,13 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 		}
 		
 		@Override
-		public void fill (Item item, String iinfo)
+		public void refresh (Resources res)
 		{
 			Vocabulary vocab;
 			
 			vocab = (Vocabulary) item;
 			
-			super.fill (vocab, iinfo);
+			super.refresh (res);
 			
 			reading.setText (showAnswers ? vocab.kana : "");
 
@@ -744,7 +764,7 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 				holder.row.setTag (holder);
 			}
 
-			holder.fill (item, iinfo.getInfo (getResources (), item));
+			holder.fill (getResources (), item, iinfo);
 			
 			return holder.row;
 		}		
@@ -791,6 +811,34 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 					isd.toggleVisibility ();
 			}
 		}
+	}
+	
+	/**
+	 * The task that periodically refreshes the contents of the list view.
+	 */
+	class RefreshTask implements Runnable {
+		
+		@Override
+		public void run ()
+		{
+			ItemListHolder holder;
+			Resources res;
+			View row;
+			int i;
+			
+			res = getResources ();
+			if (iview != null) {
+				for (i = iview.getChildCount () - 1; i >= 0; i--) {
+					row = iview.getChildAt (i);
+					holder = (ItemListHolder) row.getTag ();
+					if (holder != null)
+						holder.refresh (res);
+				}
+			}
+			
+			scheduleRefresh ();				
+		}
+		
 	}
 	
 	/**
@@ -1001,6 +1049,15 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 	
 	/// The root view of the fragment
 	View parent;
+	
+	/// The periodical refresh alarm	
+	Alarm alarm;
+	
+	/// The refresh task
+	RefreshTask refreshTask;
+	
+	/// The refresh period (must be one minute)
+	private static final int REFRESH_DELAY = 60 * 1000;
 
 	/* ---------- Levels stuff ---------- */
 	
@@ -1094,6 +1151,8 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 	public ItemsFragment ()
 	{
 		rimg = new RadicalImages ();
+		alarm = new Alarm ();
+		refreshTask = new RefreshTask ();
 		
 		try {
 			jtf = Typeface.createFromFile (JAPANESE_TYPEFACE_FONT);
@@ -1111,7 +1170,7 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 		
 		this.main = (MainActivity) main;
 
-		this.main.register (this);			
+		this.main.register (this);
 	}
 	
 	/**
@@ -1175,6 +1234,8 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 		int i;
 		
 		super.onCreateView (inflater, container, bundle);
+
+		scheduleRefresh ();
 		
 		parent = inflater.inflate(R.layout.items, container, false);
 		
@@ -1224,6 +1285,8 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 		prefs = SettingsActivity.prefs (getActivity ());
 		showAnswers = prefs.getBoolean (KEY_SHOW_ANSWERS, true);
 		
+		alarm.screenOn ();
+		
 		/* Make sure that refreshCompleted has been called at least once */
 		if (levels > 0)
 			redrawAll ();
@@ -1270,6 +1333,14 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 	}
 	
 	/**
+	 * Called when the internal refresh task must be rescheduled.
+	 */
+	protected void scheduleRefresh ()
+	{
+		alarm.schedule (refreshTask, REFRESH_DELAY);
+	}
+	
+	/**
 	 * Called when data has been refreshed. Actually the only field we
 	 * are intested in is the user's level, so we store it even if it
 	 * the view has not been created yet.  
@@ -1290,6 +1361,7 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 	{
 		super.onDetach ();
 		
+		alarm.cancel ();
 		resumeRefresh = currentFilter.stopTask ();
 		
 		nof.stopTask ();
