@@ -35,6 +35,8 @@
     <string name="pref_42plus_descr">Hide real number of lessons/reviews when too big</string>
     <string name="pref_show_mute">Mute button</string>
     <string name="pref_show_mute_desc">Show mute button when reviewing</string>
+    <string name="pref_lock_screen">Lock screen</string>
+    <string name="pref_lock_screen_descr">Keep screen awake during lessons and reviews</string>
     <string name="pref_leak_kludge">Leak workaround</string>
     <string name="pref_leak_kludge_descr">
         	Enables CPU/memory leak workaround (see WK post)</string>

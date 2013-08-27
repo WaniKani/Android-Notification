@@ -71,6 +71,8 @@ public class SettingsActivity
 	private static final String KEY_URL = "pref_review_url";
 	/** Waninaki review URL counter */
 	private static final String KEY_URL_VERSION = "review_url_version";
+	/** Lock screen during reviews */
+	private static final String KEY_LOCK_SCREEN = "pref_lock_screen";
 	/** The infamous CPU/memory leak kludge */
 	private static final String KEY_LEAK_KLUDGE = "pref_leak_kludge";
 	/** The layout type */
@@ -393,6 +395,11 @@ public class SettingsActivity
 	public static boolean setTipAck (Context ctxt, boolean value)
 	{
 		return prefs (ctxt).edit ().putBoolean (KEY_TIP_ACK, value).commit ();
+	}
+	
+	public static boolean getLockScreen (Context ctxt)
+	{
+		return prefs (ctxt).getBoolean (KEY_LOCK_SCREEN, true);
 	}
 
 	public static boolean getLeakKludge (Context ctxt)

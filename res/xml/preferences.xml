@@ -67,6 +67,11 @@
         	android:summary="@string/pref_enter_descr"
         	android:defaultValue="true" />
     <CheckBoxPreference
+        	android:key="pref_lock_screen"
+        	android:title="@string/pref_lock_screen"
+        	android:summary="@string/pref_lock_screen_descr"
+        	android:defaultValue="true" />
+    <CheckBoxPreference
         	android:key="pref_leak_kludge"
         	android:title="@string/pref_leak_kludge"
         	android:summary="@string/pref_leak_kludge_descr"

@@ -18,7 +18,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.WindowManager;
 import android.view.ViewGroup.LayoutParams;
+import android.view.Window;
 import android.view.inputmethod.InputMethodManager;
 import android.webkit.CookieSyncManager;
 import android.webkit.JavascriptInterface;
@@ -679,8 +681,16 @@ public class WebReviewActivity extends Activity {
 	@Override
 	protected void onResume ()
 	{
+		Window window;
+		
 		super.onResume ();
 
+		window = getWindow ();
+		if (SettingsActivity.getLockScreen (this))
+			window.addFlags (WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+		else
+			window.clearFlags (WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+		
 		visible = true;
 		
 		if (SettingsActivity.getMute (this) &&
