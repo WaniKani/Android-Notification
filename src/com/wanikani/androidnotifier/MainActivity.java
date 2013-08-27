@@ -901,6 +901,35 @@ public class MainActivity extends FragmentActivity implements Runnable {
 			}
 		}
 	}
+	
+	/**
+	 * Schedules a new refresh. Should be called right after
+	 * a refresh operation completes
+	 */
+	protected void reschedule ()
+	{
+		long delay, refresh;
+
+		/* Should not happen, because rescheduling makes sense only
+		 * when at least one successful retrieval completes. However...*/
+		if (dd == null)
+			return;
+		
+		refresh = SettingsActivity.getRefreshTimeout (this) * 60 * 1000; 
+		if (dd.nextReviewDate != null)
+			delay = dd.nextReviewDate.getTime () - System.currentTimeMillis ();
+		else
+			delay = refresh;
+		
+		if (delay > refresh || dd.reviewsAvailable > 0)
+			delay = refresh;
+		
+		/* May happen if local clock is not perfectly synchronized with WK clock */
+		if (delay < 1000)
+			delay = 10000;
+		
+		alarm.schedule (this, delay);		
+	}
 
 	/**
 	 * Called by {@link RefreshTask} when asynchronous data 
@@ -910,8 +939,6 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	 */
 	private void refreshComplete (DashboardData dd, boolean intermediate)
 	{
-		long delay, refresh;
-
 		if (!intermediate)
 			pad.spin (false);
 
@@ -931,21 +958,8 @@ public class MainActivity extends FragmentActivity implements Runnable {
 			restoreAvatar (dd);
 		
 		pad.refreshComplete (dd);
-						
-		refresh = SettingsActivity.getRefreshTimeout (this) * 60 * 1000; 
-		if (dd.nextReviewDate != null)
-			delay = dd.nextReviewDate.getTime () - System.currentTimeMillis ();
-		else
-			delay = refresh;
-		
-		if (delay > refresh || dd.reviewsAvailable > 0)
-			delay = refresh;
-		
-		/* May happen if local clock is not perfectly synchronized with WK clock */
-		if (delay < 1000)
-			delay = 10000;
-		
-		alarm.schedule (this, delay);
+
+		reschedule ();
 	}
 
 	/**
@@ -1021,8 +1035,10 @@ public class MainActivity extends FragmentActivity implements Runnable {
 		
 		if (dd == null)
 			switchTo (R.id.f_error);
-		else
+		else {
 			pad.spin (false);
+			reschedule ();
+		}
 		
 		res = getResources ();
 		if (id == R.string.status_msg_unauthorized)
