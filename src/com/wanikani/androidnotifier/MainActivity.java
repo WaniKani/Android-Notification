@@ -424,6 +424,9 @@ public class MainActivity extends FragmentActivity implements Runnable {
 		}		
 	}
 
+	/** The prefix */
+	private static final String PREFIX = MainActivity.class + ".";
+	
 	/*** The avatar bitmap filename */
 	private static final String AVATAR_FILENAME = "avatar.png";
 		
@@ -431,17 +434,22 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	 *  sure that the statistics contained in the bundle are valid
 	 * @see #onCreate
 	 * @see #onSaveInstanceState */
-	private static final String BUNDLE_VALID = "bundle_valid";
+	private static final String BUNDLE_VALID = PREFIX + "bundle_valid";
 	
 	/**
 	 * The key stored into the bundle to keep the items cache
 	 */
-	private static final String ITEMS_CACHE = "ITEMS_CACHE";
+	private static final String ITEMS_CACHE = PREFIX + "ITEMS_CACHE";
 	
 	/**
-	 * The key stored into the bundle to keep the track of the current tab
+	 * The key stored into the bundle to keep track of the current tab
 	 */
-	private static final String CURRENT_TAB = "current_tab";
+	private static final String CURRENT_TAB = PREFIX + "current_tab";
+	
+	/**
+	 * The key stored into the bundle to keep track of refresh operations
+	 */
+	private static final String REFRESHING = PREFIX + "refreshing";
 
 	/** The broadcast receiver that handles all the actions */
 	private Receiver receiver;
@@ -464,10 +472,7 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	
 	/** Pager adapter instance */
 	PagerAdapter pad;
-	
-	/** Private prefix */
-	private static final String PREFIX = "com.wanikani.androidnotifier.DashboardData.";
-	
+		
 	/** The dashboard height, in dip */
 	private int DASHBOARD_HEIGHT = 430;
 	
@@ -491,6 +496,9 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	
 	/** Current layout */
 	SettingsActivity.Layout layout;
+	
+	/** Was the last instance of this activity refreshing before being destroyed? */
+	boolean resumeRefresh;
 	
 	/** An action that should be invoked to force refresh. This is used typically
 	 *  when reviews complete
@@ -557,6 +565,8 @@ public class MainActivity extends FragmentActivity implements Runnable {
 			} catch (Throwable t) {
 				/* In case serialization fails (e.g. version mismatch during upgrade) */
 			}
+			
+			resumeRefresh = bundle.getBoolean (REFRESHING);				
 	    } else
 	    	pager.setCurrentItem (pad.getTabIndex (Tab.Contents.DASHBOARD), false);
 	}
@@ -648,7 +658,9 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	    	dd = null;
 	    	if (ldd != null) {
 	    		refreshComplete (ldd, false);
-	    		if (ldd.isIncomplete ())
+	    		if (resumeRefresh)
+	    			refresh (Tab.RefreshType.LIGHT);
+	    		else if (ldd.isIncomplete ())
 	    			refreshOptional ();
 	    	} else
 	    		refresh (Tab.RefreshType.LIGHT);
@@ -673,6 +685,7 @@ public class MainActivity extends FragmentActivity implements Runnable {
 			if (conn != null)
 				bundle.putSerializable (ITEMS_CACHE, conn.cache);
 			bundle.putInt (CURRENT_TAB, pager.getCurrentItem ());
+			bundle.putBoolean (REFRESHING, rtask != null);
 		}
 	}
 	
