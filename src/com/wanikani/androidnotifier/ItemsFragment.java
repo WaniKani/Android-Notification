@@ -1321,6 +1321,8 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 		refresh |= resumeRefresh;
 		
 		if (refresh) {
+			resumeRefresh = false;
+			
 			if (currentFilter == nof)
 				setNoFilter ();
 			else if (currentFilter == levelf)

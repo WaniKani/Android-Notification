@@ -665,6 +665,8 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	    	} else
 	    		refresh (Tab.RefreshType.LIGHT);
 	    }
+	    
+	    resumeRefresh = false;
 	}
 	
 	/**
