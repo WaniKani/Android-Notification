@@ -238,9 +238,13 @@ public class CriticalFilter implements Filter {
 	 * items any more. This does not cancel possible pending tasks,
 	 * but it simply makes its callbacks ineffective.
 	 */
-	public void stopTask ()
+	public boolean stopTask ()
 	{
-		task = null;
+		if (task != null) {
+			task = null;
+			return true;
+		} else
+			return false;
 	}
 	
 	@Override

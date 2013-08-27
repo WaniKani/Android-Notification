@@ -1085,6 +1085,9 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 	/// The japanese typeface
 	private Typeface jtf;
 	
+	/// Need to restart refresh
+	private boolean resumeRefresh;
+	
 	/// The japanese typeface path
 	private final String JAPANESE_TYPEFACE_FONT = "/system/fonts/MTLmr3m.ttf";
 	
@@ -1252,6 +1255,8 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 		
 		refresh |= iad.isEmpty ();
 		
+		refresh |= resumeRefresh;
+		
 		if (refresh) {
 			if (currentFilter == nof)
 				setNoFilter ();
@@ -1284,6 +1289,8 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 	public void onDestroyView ()
 	{
 		super.onDetach ();
+		
+		resumeRefresh = currentFilter.stopTask ();
 		
 		nof.stopTask ();
 		levelf.stopTask ();

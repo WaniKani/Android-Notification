@@ -129,9 +129,10 @@ public interface Filter {
 	/** 
 	 * Called to cancel any pending data retrieval task.
 	 * Implementation should not call any notification method, until
-	 * a new select request is issued 
+	 * a new select request is issued
+	 * 	@return <tt>true</tt> if a running task was actually stopped 
 	 */
-	public void stopTask ();
+	public boolean stopTask ();
 	
 	/**
 	 * Clears the cache. Pending requests are not cancelled.
