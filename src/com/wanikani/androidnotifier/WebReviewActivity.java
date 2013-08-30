@@ -953,8 +953,8 @@ public class WebReviewActivity extends Activity {
 		long tstamp;
 
 		tstamp = SystemClock.uptimeMillis ();
-		x = wv.getWidth () + 10;
-		y = wv.getHeight () + 10;
+		x = wv.getWidth () - 1;
+		y = 1;
 		mev = MotionEvent.obtain (tstamp, tstamp + 100, MotionEvent.ACTION_DOWN,
 								  x, y, 0);
 		wv.dispatchTouchEvent (mev);
