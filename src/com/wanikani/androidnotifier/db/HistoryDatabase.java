@@ -363,10 +363,16 @@ public class HistoryDatabase {
 			args = new String [] { Integer.toString (day) };
 		 	
 			/* First of all we must make sure that gaps do exist */
-			c = db.query (TABLE, cols, WHERE_DAY_LTE, args, null, null, null);
-			if (c.moveToNext () && !c.isNull (0)) {
-				if (c.getInt (0) == day + 1)
-					return;
+			c = null;
+			try {
+				c = db.query (TABLE, cols, WHERE_DAY_LTE, args, null, null, null);
+				if (c.moveToNext () && !c.isNull (0)) {
+					if (c.getInt (0) == day + 1)
+						return;
+				}
+			} finally {
+				if (c != null)
+					c.close ();
 			}
 			
 			/* Yeah, I know, using rowcount I could identify where gaps lie, 
@@ -488,7 +494,8 @@ public class HistoryDatabase {
 			} catch (SQLException e) {
 				cs = new CoreStats (0, 0, 0, 0, 0, 0, null);
 			} finally {
-				c.close ();
+				if (c != null)
+					c.close ();
 			}
 			
 			return cs;
@@ -1013,9 +1020,15 @@ public class HistoryDatabase {
 			cols = new String [] { C_LEVEL, C_DAY };
 			ans = new Hashtable<Integer, Integer> ();
 			
-			c = db.query (TABLE, cols, null, null, null, null, null);
-			while (c.moveToNext ())
-				ans.put (c.getInt (0), c.getInt (1));
+			c = null;
+			try {
+				c = db.query (TABLE, cols, null, null, null, null, null);
+				while (c.moveToNext ())
+					ans.put (c.getInt (0), c.getInt (1));
+			} finally {
+				if (c != null)
+					c.close ();
+			}
 					
 			return ans;
 		}
