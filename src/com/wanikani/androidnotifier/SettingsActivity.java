@@ -69,6 +69,8 @@ public class SettingsActivity
 	private static final String KEY_PREF_42PLUS = "pref_42plus";
 	/** Wanikani review URL */
 	private static final String KEY_URL = "pref_review_url";
+	/** Wanikani lesson URL */
+	private static final String KEY_LESSON_URL = "pref_lesson_url";
 	/** Waninaki review URL counter */
 	private static final String KEY_URL_VERSION = "review_url_version";
 	/** Lock screen during reviews */
@@ -81,6 +83,9 @@ public class SettingsActivity
 	/** Embedded keyboard message has been read and acknowledged */
 	private static final String KEY_TIP_ACK = "key_tip_ack";
 	
+	/** Lessons message has been read and acknowledged */
+	private static final String KEY_TIP_LESSON = "key_tip_lesson";
+
 	/** Mute review */
 	private static final String KEY_MUTE = "mute";
 	
@@ -201,8 +206,13 @@ public class SettingsActivity
 			if (s.length () == 0)
 				pref.getEditor ().putString (KEY_URL, 
 						WebReviewActivity.WKConfig.CURRENT_REVIEW_START).commit ();
+		} else if (key.equals (KEY_LESSON_URL)) {
+			s = getLessonURL (prefs);
+			if (s.length () == 0)
+				pref.getEditor ().putString (KEY_LESSON_URL, 
+						WebReviewActivity.WKConfig.CURRENT_LESSON_START).commit ();
 		}
-		
+		 
 		updateConfig (prefs);
 	}
 	
@@ -397,6 +407,16 @@ public class SettingsActivity
 		return prefs (ctxt).edit ().putBoolean (KEY_TIP_ACK, value).commit ();
 	}
 	
+	public static boolean getTipLessons (Context ctxt)
+	{
+		return prefs (ctxt).getBoolean (KEY_TIP_LESSON, false);
+	}
+	
+	public static boolean setTipLessons (Context ctxt, boolean value)
+	{
+		return prefs (ctxt).edit ().putBoolean (KEY_TIP_LESSON, value).commit ();
+	}
+
 	public static boolean getLockScreen (Context ctxt)
 	{
 		return prefs (ctxt).getBoolean (KEY_LOCK_SCREEN, true);
@@ -449,6 +469,16 @@ public class SettingsActivity
 		return s;
 	}
 	
+	public static String getLessonURL (Context ctxt)
+	{
+		return getLessonURL (prefs (ctxt));
+	}
+
+	private static String getLessonURL (SharedPreferences prefs)
+	{
+		return prefs.getString (KEY_LESSON_URL, WebReviewActivity.WKConfig.CURRENT_LESSON_START);
+	}
+
 	private static void setURL (SharedPreferences prefs, String url, int version)
 	{
 		prefs.edit ().putString (KEY_URL, url).putInt (KEY_URL_VERSION, version).commit ();

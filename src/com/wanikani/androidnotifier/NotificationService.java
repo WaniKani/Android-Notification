@@ -625,7 +625,8 @@ public class NotificationService
 			intent.setAction (WebReviewActivity.OPEN_ACTION);
 		} else
 			intent = new Intent (Intent.ACTION_VIEW);
-		url = reviews ? SettingsActivity.getURL (this) : WebReviewActivity.WKConfig.LESSON_START;
+		url = reviews ? SettingsActivity.getURL (this) : 
+				SettingsActivity.getLessonURL (this);
 		intent.setData (Uri.parse (url));
 		intent.setFlags (Intent.FLAG_ACTIVITY_NEW_TASK);
 		
