@@ -1,10 +1,13 @@
 package com.wanikani.androidnotifier;
 
+import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.view.MenuItem;
+
+import com.wanikani.androidnotifier.db.CSVFormat;
 
 /* 
  *  Copyright (c) 2013 Alberto Cuda
@@ -37,6 +40,18 @@ public class MenuHandler {
 	 * their behaviour is to do nothing.
 	 */
 	public static class Listener {
+			
+		/// The context we are running in
+		protected Context ctxt;
+		
+		/**
+		 * Constructor
+		 * @param ctxt the context we are running in
+		 */
+		public Listener (Context ctxt)
+		{
+			this.ctxt = ctxt;
+		}
 		
 		/**
 		 * The user has requested data to be refreshed.
@@ -60,6 +75,14 @@ public class MenuHandler {
 		public void dashboard ()
 		{
 			/* empty */
+		}
+		
+		/**
+		 * Export item called
+		 */
+		public void export ()
+		{
+			DataExporter.INSTANCE.export (ctxt, CSVFormat.newInstance (ctxt));
 		}
 		
 	}
@@ -137,6 +160,9 @@ public class MenuHandler {
 		case R.id.em_dashboard:
 			listener.dashboard ();
 			break;
+			
+		case R.id.em_export:
+			listener.export ();
 			
 		default:
 			return false;

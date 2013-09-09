@@ -414,6 +414,11 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	 */
 	private class MenuListener extends MenuHandler.Listener {
 		
+		public MenuListener ()
+		{
+			super (MainActivity.this);
+		}
+		
 		@Override
 		public void refresh ()
 		{

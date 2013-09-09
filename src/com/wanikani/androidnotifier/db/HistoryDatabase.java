@@ -440,6 +440,18 @@ public class HistoryDatabase {
 		}
 
 		/**
+		 * Returns a cursor referring to the whole db.
+		 * @param db the sql database
+		 * @return the cursor
+		 * @throws SQLException
+		 */
+		public static Cursor select (SQLiteDatabase db)
+				throws SQLException
+		{
+			return db.query (TABLE, null, null, null, null, null, C_DAY);
+		}
+
+		/**
 		 * Returns a cursor referring to an interval of rows.
 		 * @param db the sql database
 		 * @param from the first day to be selected 
@@ -1155,6 +1167,19 @@ public class HistoryDatabase {
 	}
 
 	/**
+	 * Returns a cursor on the facts table, returning all the rows.
+	 * Rows are ordered by day, in ascending order.
+	 * Callers should deserialize the contents of each row through
+	 * {@link Facts}' convenience methods
+	 * @return a cursor
+	 */
+	public Cursor selectFacts ()
+		throws SQLException
+	{
+		return Facts.select (db);
+	}
+
+	/**
 	 * Starts the reconstruction process. If successful, the
 	 * process must be ended by calling {@link #endReconstructing(ReconstructTable)}.
 	 * Note that all the methods involve I/O activity, so should be
@@ -1259,5 +1284,14 @@ public class HistoryDatabase {
 		} finally {
 			hdb.close ();
 		}		
+	}
+	
+	/**
+	 * Retruns the levelups hashtable
+	 * @return the levels-day mapping
+	 */
+	public Map<Integer, Integer> getLevelups ()
+	{
+		return Levels.getLevelups (db);		
 	}
 }

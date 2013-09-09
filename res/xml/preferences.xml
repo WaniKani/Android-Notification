@@ -83,4 +83,20 @@
         	android:title="@string/pref_lesson_url" android:summary="@string/pref_lesson_url_desc"
         	android:defaultValue="http://www.wanikani.com/lesson" />
     </PreferenceCategory>
+	<PreferenceCategory
+	    	android:title="@string/tpref_export">
+	    <ListPreference
+	        android:key="pref_export_dest"
+	        android:title="@string/pref_export_dest"
+	        android:summary="@string/pref_export_dest_desc"
+	        android:defaultValue="0"
+	        android:entries="@array/exports"
+	        android:entryValues="@array/exportValues"/>
+	        
+    	<EditTextPreference  
+        	android:title="@string/pref_export_file" 
+        	android:key="pref_export_file"
+        	android:summary="@string/pref_export_file_desc"
+        	android:defaultValue=""/>
+	</PreferenceCategory>    
 </PreferenceScreen>

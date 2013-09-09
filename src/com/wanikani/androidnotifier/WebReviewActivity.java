@@ -381,6 +381,11 @@ public class WebReviewActivity extends Activity {
 	 */
 	private class MenuListener extends MenuHandler.Listener {
 		
+		public MenuListener ()
+		{
+			super (WebReviewActivity.this);
+		}
+		
 		/**
 		 * The dashboard listener exits the activity
 		 */

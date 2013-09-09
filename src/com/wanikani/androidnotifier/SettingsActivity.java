@@ -1,10 +1,14 @@
 package com.wanikani.androidnotifier;
 
+import java.io.File;
+
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
@@ -79,6 +83,10 @@ public class SettingsActivity
 	private static final String KEY_LEAK_KLUDGE = "pref_leak_kludge";
 	/** The layout type */
 	private static final String KEY_LAYOUT = "pref_layout";
+	/** The export destination */
+	private static final String KEY_PREF_EXPORT_DEST = "pref_export_dest";
+	/** The export file */
+	private static final String KEY_PREF_EXPORT_FILE = "pref_export_file";
 	
 	/** Embedded keyboard message has been read and acknowledged */
 	private static final String KEY_TIP_ACK = "key_tip_ack";
@@ -154,6 +162,8 @@ public class SettingsActivity
 		onSharedPreferenceChanged (prefs, KEY_PREF_SHOW_REVIEWS_KEYBOARD);
 		onSharedPreferenceChanged (prefs, KEY_PREF_SHOW_LESSONS_KEYBOARD);
 		onSharedPreferenceChanged (prefs, KEY_PREF_ENTER);
+		onSharedPreferenceChanged (prefs, KEY_PREF_EXPORT_DEST);
+		onSharedPreferenceChanged (prefs, KEY_PREF_EXPORT_FILE);
 		inited = true;
 		
 		prefs.registerOnSharedPreferenceChangeListener (this);
@@ -211,10 +221,19 @@ public class SettingsActivity
 			if (s.length () == 0)
 				pref.getEditor ().putString (KEY_LESSON_URL, 
 						WebReviewActivity.WKConfig.CURRENT_LESSON_START).commit ();
+		} else if (key.equals (KEY_PREF_EXPORT_DEST))
+			runExportDestHooks (prefs);
+		else if (key.equals (KEY_PREF_EXPORT_FILE)) {
+			s = getExportFile (prefs);			
+			if (s.length () == 0)
+				pref.getEditor ().putString (KEY_PREF_EXPORT_FILE, 
+						DataExporter.getDefaultExportFile (this)).commit ();
 		}
 		 
 		updateConfig (prefs);
 	}
+	
+
 	
 	@SuppressWarnings ("deprecation")
 	private void enableNotificationCheck (SharedPreferences prefs)
@@ -266,7 +285,16 @@ public class SettingsActivity
 		pref.setEnabled ((getShowLessonsKeyboard (prefs) ||
 		                  getShowReviewsKeyboard (prefs)) && getUseIntegratedBrowser (prefs));	
 	}
-	
+
+	@SuppressWarnings ("deprecation")
+	private void runExportDestHooks (SharedPreferences prefs)
+	{
+		Preference pref;
+		
+		pref = findPreference (KEY_PREF_EXPORT_FILE);
+		pref.setEnabled (getExportDestination (prefs) == DataExporter.Destination.FILESYSTEM);
+	}
+
 	public static SharedPreferences prefs (Context ctxt)
 	{
 		return PreferenceManager.getDefaultSharedPreferences (ctxt.getApplicationContext ());
@@ -456,6 +484,40 @@ public class SettingsActivity
 		return Layout.AUTO;
 	}
 	
+	public static DataExporter.Destination getExportDestination (Context ctxt)
+	{
+		return getExportDestination (prefs (ctxt));
+	}
+	
+	public static DataExporter.Destination getExportDestination (SharedPreferences prefs)
+	{
+		int i;
+		
+		try { 
+			i = Integer.parseInt (prefs.getString (KEY_PREF_EXPORT_DEST, "0"));
+		} catch (NumberFormatException e) {
+			i = 0;
+		}
+			
+		switch (i) {
+		case 0:
+			return DataExporter.Destination.BLUETOOTH;
+			
+		case 1:
+			return DataExporter.Destination.CHOOSE;
+			
+		case 2:
+			return DataExporter.Destination.FILESYSTEM;
+		}
+		
+		return DataExporter.Destination.BLUETOOTH;
+	}
+	
+	public String getExportFile (SharedPreferences prefs)
+	{
+		return prefs.getString (KEY_PREF_EXPORT_FILE, "");
+	}
+
 	private static String getURL (SharedPreferences prefs)
 	{
 		String s;
