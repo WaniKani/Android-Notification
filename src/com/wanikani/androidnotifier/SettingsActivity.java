@@ -1,14 +1,11 @@
 package com.wanikani.androidnotifier;
 
-import java.io.File;
-
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
+import android.preference.EditTextPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
@@ -226,14 +223,21 @@ public class SettingsActivity
 		else if (key.equals (KEY_PREF_EXPORT_FILE)) {
 			s = getExportFile (prefs);			
 			if (s.length () == 0)
-				pref.getEditor ().putString (KEY_PREF_EXPORT_FILE, 
-						DataExporter.getDefaultExportFile (this)).commit ();
-		}
+				setString (pref, KEY_PREF_EXPORT_FILE, DataExporter.getDefaultExportFile (this));
+		}				
 		 
 		updateConfig (prefs);
 	}
 	
-
+	private void setString (Preference pref, String key, String value)
+	{
+		EditTextPreference etp;
+		
+		pref.getEditor ().putString (key, value).commit ();
+		
+		etp = (EditTextPreference) pref;
+		etp.setText (value);
+	}
 	
 	@SuppressWarnings ("deprecation")
 	private void enableNotificationCheck (SharedPreferences prefs)
@@ -513,7 +517,12 @@ public class SettingsActivity
 		return DataExporter.Destination.BLUETOOTH;
 	}
 	
-	public String getExportFile (SharedPreferences prefs)
+	public static String getExportFile (Context ctxt)
+	{
+		return getExportFile (prefs (ctxt));
+	}
+
+	public static String getExportFile (SharedPreferences prefs)
 	{
 		return prefs.getString (KEY_PREF_EXPORT_FILE, "");
 	}
