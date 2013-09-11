@@ -2,5 +2,5 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
     <item android:id="@+id/em_dashboard" android:title="@string/em_dashboard" android:icon="@drawable/ic_menu_home"/>
     <item android:id="@id/em_settings" android:title="@string/em_settings" android:icon="@drawable/ic_menu_preferences"/>
-    <item android:id="@id/em_export" android:title="@string/em_export"/>
+    <item android:id="@id/em_export" android:title="@string/em_export" android:icon="@drawable/ic_menu_save"/>
 </menu>

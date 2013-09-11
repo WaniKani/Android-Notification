@@ -198,6 +198,5 @@
     <string name="lesson_message_ok">OK, got it</string>
     
     <string name="exp_no_bluetooth">No bluetooth adapter found</string>
-    <string name="exp_internal_failure">Internal error: %s</string>
-    
+    <string name="exp_to_file">Db exported to %s</string>
     </resources>

@@ -1,6 +1,7 @@
 package com.wanikani.androidnotifier;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
@@ -39,12 +40,72 @@ public class DataExporter {
 	
 	public enum Destination {
 		
-		BLUETOOTH,
+		BLUETOOTH {
 		
-		CHOOSE,
+			public void testPrerequisites (Context ctxt)
+				throws IOException
+			{
+				if (BluetoothAdapter.getDefaultAdapter () == null)
+					throw new IOException (ctxt.getString (R.string.exp_no_bluetooth));
+			}
+			
+			public void finalize (Context ctxt, Format fmt)
+			{
+				send (ctxt, this, getFile (ctxt), fmt.getType ());
+			}
+			
+			public void fixupIntent (Context ctxt, Intent intent)
+			{
+				setBluetoothService (ctxt, intent);
+			}
+		},
 		
-		FILESYSTEM
+		CHOOSE {
+			public void finalize (Context ctxt, Format fmt)
+			{
+				send (ctxt, this, getFile (ctxt), fmt.getType ());
+			}
+		},
 		
+		FILESYSTEM {
+			public OutputStream getOutputStream (Context ctxt)
+				throws IOException
+			{
+				return new FileOutputStream (SettingsActivity.getExportFile (ctxt));
+			}
+			
+			public void finalize (Context ctxt, Format fmt)
+			{
+				msg (ctxt, ctxt.getString (R.string.exp_to_file, SettingsActivity.getExportFile (ctxt)));
+			}
+		};
+		
+		public void testPrerequisites (Context ctxt)
+			throws IOException
+		{
+			/* empty */
+		}
+		
+		public OutputStream getOutputStream (Context ctxt)
+			throws IOException
+		{
+			return ctxt.openFileOutput (FILENAME, Context.MODE_WORLD_READABLE);
+		}
+		
+		public File getFile (Context ctxt)
+		{
+			return ctxt.getFileStreamPath (FILENAME);
+		}
+		
+		public void finalize (Context ctxt, Format fmt)
+		{
+			/* empty */
+		}
+		
+		public void fixupIntent (Context ctxt, Intent intent)
+		{
+			/* empty */
+		}
 	};
 	
 	private static final String FILENAME = "dbexport.csv";
@@ -80,28 +141,24 @@ public class DataExporter {
 	
 	public synchronized void export (Context ctxt, Format fmt)
 	{	
+		Destination dest;
 		OutputStream os;
-		File file;
 		
-		if (BluetoothAdapter.getDefaultAdapter () == null) {
-			msg (ctxt, R.string.exp_no_bluetooth);
-			return;
-		}
-		
-		
-		file = null;
 		os = null;
+		dest = SettingsActivity.getExportDestination (ctxt);
 		try {
-			os = ctxt.openFileOutput (FILENAME, Context.MODE_WORLD_READABLE);
-			file = ctxt.getFileStreamPath (FILENAME);
+			dest.testPrerequisites (ctxt);
+			
+			os = dest.getOutputStream (ctxt);
 			fmt.export (os);
 			os.close ();
+			
 			os = null;
 			
-			send (ctxt, file, fmt.getType ());
-			
+			dest.finalize (ctxt, fmt);
+						
 		} catch (Exception e) {
-			msg (ctxt, R.string.exp_internal_failure, e.getMessage ());
+			msg (ctxt, e.getMessage ());
 		} finally {
 			try {
 				if (os != null)
@@ -112,7 +169,7 @@ public class DataExporter {
 		}
 	}
 	
-	protected void send (Context ctxt, File file, String type)
+	protected static void send (Context ctxt, Destination dest, File file, String type)
 	{
 		Intent intent;
 		
@@ -121,12 +178,12 @@ public class DataExporter {
 		intent.setType (type);
 		intent.putExtra (Intent.EXTRA_STREAM, Uri.fromFile (file));
 		
-		setBluetoothService (ctxt, intent);			
+		dest.fixupIntent (ctxt, intent);			
 		
 		ctxt.startActivity (intent);
 	}
 	
-	protected void setBluetoothService (Context ctxt, Intent intent)
+	protected static void setBluetoothService (Context ctxt, Intent intent)
 	{
 		PackageManager pkgm;
 		List<ResolveInfo> apps;
@@ -141,11 +198,11 @@ public class DataExporter {
 		}
 	}
 	
-	protected void msg (Context ctxt, int id, String... fmt)
+	protected static void msg (Context ctxt, String msg)
 	{
 		Toast toast;
 		
-		toast = Toast.makeText (ctxt, ctxt.getString (id, (Object []) fmt), Toast.LENGTH_SHORT);
+		toast = Toast.makeText (ctxt, msg, Toast.LENGTH_SHORT);
 		toast.show ();		
 	}	
 }
