@@ -33,7 +33,7 @@ import android.graphics.BitmapFactory;
  */
 
 public class Connection {
-
+	
 	class Response {
 		
 		UserInformation ui;
@@ -58,6 +58,10 @@ public class Connection {
 			}
 		}
 	}
+	
+	public static final int CONNECT_TIMEOUT = 20000;
+	
+	public static final int READ_TIMEOUT = 60000;
 	
 	UserLogin login;
 	
@@ -400,6 +404,7 @@ public class Connection {
 		tok = null;
 		try {
 			conn = (HttpURLConnection) url.openConnection ();
+			setTimeouts (conn);
 			is = conn.getInputStream ();
 			tok = new JSONTokener (readStream (is));
 		} finally {
@@ -426,6 +431,7 @@ public class Connection {
 				url = new URL (config.gravatarUrl + "/" + ui.gravatar + 
 							   "?s=" + size + "&d=404");
 				conn = (HttpURLConnection) url.openConnection ();
+				setTimeouts (conn);
 				code = conn.getResponseCode ();
 				if (code == 200) {
 					is = conn.getInputStream ();
@@ -450,5 +456,11 @@ public class Connection {
 			ans += "/" + arg;
 							 
 		return ans;
+	}
+	
+	private void setTimeouts (HttpURLConnection conn)
+	{
+		conn.setConnectTimeout (CONNECT_TIMEOUT);
+		conn.setReadTimeout (READ_TIMEOUT);
 	}
 }
