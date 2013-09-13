@@ -1,13 +1,44 @@
-WaniKani Notifier for Android
-=============================
+     WaniKani Mobile for Android
+=======================================
+(formerly known as "Wanikani Notifier")
 
 WaniKani (http://www.wanikani.com) is a kanji learning web app that
 uses radical, mnemonics, and SRS (Spaced Repetition Software).
 
-This (unofficial) app for Android shows a notification icon whenever you
-have pending reviews. It also featues a small dashboard, giving a 
-summary of your study queue and your progress.
+This (unofficial) app for Android tailors WaniKani to Android devices:
+- Notify when new reviews (and optionally lessons) become available
+- Integrated reviews and lessons, with small embedded keyboard to fix possible
+  incompatibilities between WK and android browser
+- SRS distribution plots and progress plots (data can be exported)
+- Dashboard showing level progression and study queue
+- Item browser
 
 You can download the binary package from Google Play:
 
     https://play.google.com/store/apps/details?id=com.wanikani.androidnotifier
+
+There are many ways you can contribute:
+- Suggest new features you'd like to be added: the most popular features in this app
+  come from Wanikaners' suggestions
+- Report any bugs you encounter. Please do! There's a huge number of Android devices, 
+  combined with different Android OS versions, hardware capabilities and screen sizes.
+  Most issues don't get fixed simply because I'm not aware of them.
+- If the app crashes or stops being resposive, and Android offers sending a bug report,
+  please accept. All I receive is a stack trace and your message. I don't receive
+  any personal information about you. If possible, please contact me using one of 
+  the methods below: usually I need some more info to fix it properly.  
+- Of course any code contribution is well accepted. If you have any doubts, feel free
+  to ask.
+ 
+You can interact with me either using:
+- GitHub
+- Wanikani http://www.wanikani.com/chat/api-and-third-party-apps/2225
+- Or send me an email (the address is on the Google play app page)
+
+Of course you are welcome to mention a bug or an issue directly on the reviews page of 
+Google play, but please also use one of the methods above to contact me. Though I try to 
+give useful hints, the interaction on that page is clumsy and often I simply can't 
+fix the app, because I can't gather enough information.
+
+    Have fun
+  

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
-    <string name="app_name">WaniKani Notifier</string>
+    <string name="app_name">WaniKani Mobile</string>
     <string name="new_reviews_42plus">You have %d+ reviews</string>
     <string name="new_reviews">You have %d reviews</string>
     <string name="new_review">You have one review</string>
