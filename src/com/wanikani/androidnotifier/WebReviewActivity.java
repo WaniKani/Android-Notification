@@ -410,6 +410,11 @@ public class WebReviewActivity extends Activity {
 			 {
 				 return SettingsActivity.getShowReviewsKeyboard (wav);
 			 }
+ 			 
+ 			public void open (WebReviewActivity wav)
+ 			{
+ 				wav.js (String.format (JS_OPEN_ANSWERBOX, WKConfig.ANSWER_BOX));
+ 			} 			 
 		},
 		
 		/** Keyboard visible, all keys but ENTER visible */
@@ -421,6 +426,12 @@ public class WebReviewActivity extends Activity {
 			public boolean isEmbedded (WebReviewActivity wav)
 			{
 				return SettingsActivity.getShowLessonsKeyboard (wav);				
+			}
+			
+			public void open (WebReviewActivity wav)
+			{
+				wav.js (String.format (JS_OPEN_ANSWERBOX, WKConfig.LESSON_ANSWER_BOX_EN));
+				wav.js (String.format (JS_OPEN_ANSWERBOX, WKConfig.LESSON_ANSWER_BOX_JP));
 			}
 		},
 
@@ -435,7 +446,13 @@ public class WebReviewActivity extends Activity {
 				 return SettingsActivity.getShowReviewsKeyboard (wav);
 			 }
 
-			 public boolean isIconized () { return true; }			
+			 public boolean isIconized () { return true; }
+			 
+			public void open (WebReviewActivity wav)
+			{
+				wav.js (String.format (JS_OPEN_ANSWERBOX, WKConfig.ANSWER_BOX));
+			}
+			 
 		},
 
 		/** Keyboard visible, just "Show" and "Enter" keys are visible, in lessons mode */ 
@@ -449,6 +466,12 @@ public class WebReviewActivity extends Activity {
 			public boolean isEmbedded (WebReviewActivity wav)
 			{
 				return SettingsActivity.getShowLessonsKeyboard (wav);				
+			}			
+			
+			public void open (WebReviewActivity wav)
+			{
+				wav.js (String.format (JS_OPEN_ANSWERBOX, WKConfig.LESSON_ANSWER_BOX_EN));
+				wav.js (String.format (JS_OPEN_ANSWERBOX, WKConfig.LESSON_ANSWER_BOX_JP));
 			}			
 		},
 		
@@ -484,6 +507,11 @@ public class WebReviewActivity extends Activity {
 		public boolean isRelevantPage ()
 		{
 			return true;
+		}
+		
+		public void open (WebReviewActivity wav)
+		{
+			/* empty */
 		}
 	};
 
@@ -547,6 +575,11 @@ public class WebReviewActivity extends Activity {
 			"    ltextbox.focus (); " +
 			"}";
 	
+	private static final String JS_OPEN_ANSWERBOX =
+			"var textbox;" +
+			"textbox = document.getElementById (\"%s\");" +
+			"textbox.disabled = false;";
+	
 	/** Javascript to be invoked to simulate a click on the submit (heart-shaped) button.
 	 *  It also handles keyboard show/iconize logic. If the textbox is enabled, then this
 	 *  is an answer, so we iconize the keyboard. Otherwise we are entering the new question,
@@ -585,7 +618,7 @@ public class WebReviewActivity extends Activity {
 	/** A table that maps key positions (left to right, top to bottom) to button IDs for the
 	 *  meta keys */
 	private static final int meta_table [] = new int [] {
-		R.id.kb_backspace, R.id.kb_meta, R.id.kb_space, R.id.kb_enter, R.id.kb_hide		
+		R.id.kb_backspace, R.id.kb_meta, R.id.kb_space, R.id.kb_unlock, R.id.kb_hide		
 	};
 	
 	/** A table that maps key positions (left to right, top to bottom) to keycodes for the meta
@@ -931,7 +964,7 @@ public class WebReviewActivity extends Activity {
 			else
 				loadKeyboard (keyboard == KB_ALT ? KB_LATIN : KB_ALT);
 		} else if (keycode == KeyEvent.KEYCODE_ENTER)
-			js (JS_ENTER);
+			kbstatus.open (this);
 		else if (keycode == KeyEvent.KEYCODE_DPAD_DOWN)
 			kbstatus.iconize (this);
 		else {			
@@ -1138,7 +1171,7 @@ public class WebReviewActivity extends Activity {
 		view = findViewById (R.id.keyboard);
 		view.setVisibility (View.VISIBLE);
 		
-		key = findViewById (R.id.kb_enter);
+		key = findViewById (R.id.kb_unlock);
 		key.setVisibility (showEnter ? View.VISIBLE : View.GONE);
 
 		key = findViewById (R.id.kb_hide);
@@ -1166,7 +1199,7 @@ public class WebReviewActivity extends Activity {
 			key.setVisibility (View.GONE);
 		}
 		
-		key = findViewById (R.id.kb_enter);
+		key = findViewById (R.id.kb_unlock);
 		/* If in ICONIZED_LESSON status, hide enter key (it does not work :) */
 		key.setVisibility (kbs == KeyboardStatus.REVIEWS_ICONIZED ? View.VISIBLE : View.GONE);
 		

@@ -249,12 +249,13 @@
                     android:id="@+id/kb_space"
                     style="@style/kb_key"
                     android:layout_weight="5" />
-
-                <ImageButton
-                    android:id="@+id/kb_enter"
+                
+                <Button
+                    android:id="@+id/kb_unlock"
                     style="@style/kb_key"
-                    android:layout_weight="1.5"
-                    android:src="@drawable/enter" />
+                    android:text="Unlock"
+                    android:layout_weight="1.5" />
+
                 <Button
                     android:id="@+id/kb_hide"
                     style="@style/kb_key"
