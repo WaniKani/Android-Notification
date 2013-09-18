@@ -552,14 +552,15 @@ public class WebReviewActivity extends Activity {
 	 *  is an answer, so we iconize the keyboard. Otherwise we are entering the new question,
 	 *  so we need to show it  */
 	private static final String JS_ENTER =
-			"var textbox, ltextbox, form, submit;" +
+			"var i, textbox, form, submit, tags;" +
 			"textbox = document.getElementById (\"" + WKConfig.ANSWER_BOX + "\"); " +
 		    "form = document.getElementById (\"new_lesson\"); " +
-			"ltextbox = document.getElementById (\"" + WKConfig.LESSON_ANSWER_BOX_JP + "\"); " +
-			"if (ltextbox == null) {" +
-			"   ltextbox = document.getElementById (\"" + WKConfig.LESSON_ANSWER_BOX_EN + "\"); " +
-			"}" +
 			"if (textbox != null && textbox.value.length > 0) {" +
+			"   tags = document.getElementsByTagName ('audio');" +
+			"   for (i = 0; i < tags.length; i++) {" +
+			"         tags [i].muted = true;" +
+			"         tags [i].play (); " +
+			"   } " +
 		    "   buttons = document.getElementsByTagName('button'); " +
 		    "   buttons [0].click (); " +
 			"}";
@@ -935,39 +936,14 @@ public class WebReviewActivity extends Activity {
 		else if (keycode == KeyEvent.KEYCODE_DPAD_DOWN)
 			kbstatus.iconize (this);
 		else {			
-			if (kbstatus == KeyboardStatus.LESSONS_MAXIMIZED) {
-				focusOut ();
+			if (kbstatus == KeyboardStatus.LESSONS_MAXIMIZED)
 				js (JS_FOCUS);
-			}
+			
 			kdown = new KeyEvent (KeyEvent.ACTION_DOWN, keycode);
 			wv.dispatchKeyEvent (kdown);				
 			kup = new KeyEvent (KeyEvent.ACTION_UP, keycode);
 			wv.dispatchKeyEvent (kup);
 		}
-	}
-	
-	/**
-	 * Makes sure the lessons text box is focused out. This is necessary
-	 * to avoid a very strange behaviour: if the user taps on the lessons answer
-	 * box, then kana are not formed in the correct way. 
-	 */
-	private void focusOut ()
-	{
-		MotionEvent mev;
-		float x, y;
-		long tstamp;
-
-		tstamp = SystemClock.uptimeMillis ();
-		x = wv.getWidth () - 1;
-		y = 1;
-		mev = MotionEvent.obtain (tstamp, tstamp + 100, MotionEvent.ACTION_DOWN,
-								  x, y, 0);
-		wv.dispatchTouchEvent (mev);
-		mev.recycle ();
-		mev = MotionEvent.obtain (tstamp, tstamp + 100, MotionEvent.ACTION_UP,
-				  x, y, 0);
-		wv.dispatchTouchEvent (mev);
-		mev.recycle ();
 	}
 	
 	/**
