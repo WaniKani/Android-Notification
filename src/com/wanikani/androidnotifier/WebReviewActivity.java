@@ -245,6 +245,19 @@ public class WebReviewActivity extends Activity {
 		
 	}
 	
+	private class FocusOut implements Runnable {
+		
+		FocusOut ()
+		{
+			runOnUiThread (this);
+		}
+		
+		public void run ()
+		{
+			focusOut ();
+		}
+	}
+
 	/**
 	 * This class implements the <code>wknKeyboard</code> javascript object.
 	 * It implements the @link {@link #show} and {@link #hide} methods. 
@@ -296,6 +309,12 @@ public class WebReviewActivity extends Activity {
 		{
 			new ShowHideKeyboard (KeyboardStatus.LESSONS_ICONIZED);
 		}	
+		
+		@JavascriptInterface
+		public void focusOut ()
+		{
+			new FocusOut ();
+		}
 	}
 	
 	/**
@@ -544,6 +563,9 @@ public class WebReviewActivity extends Activity {
 			"   ltextbox = document.getElementById (\"" + WKConfig.LESSON_ANSWER_BOX_EN + "\"); " +
 			"}" +
 			"if (ltextbox != null) {" +
+			"    if (ltextbox.value.length == 0) {" +
+			"        wknKeyboard.focusOut ();" +
+			"    }" +
 			"    ltextbox.focus (); " +
 			"}";
 	
@@ -945,6 +967,31 @@ public class WebReviewActivity extends Activity {
 			wv.dispatchKeyEvent (kup);
 		}
 	}
+	
+	/**
+	 * Makes sure the lessons text box is focused out. This is necessary
+	 * to avoid a very strange behaviour: if the user taps on the lessons answer
+	 * box, then kana are not formed in the correct way. 
+	 */
+	private void focusOut ()
+	{
+		MotionEvent mev;
+		float x, y;
+		long tstamp;
+
+		tstamp = SystemClock.uptimeMillis ();
+		x = wv.getWidth () - 1;
+		y = 1;
+		mev = MotionEvent.obtain (tstamp, tstamp + 100, MotionEvent.ACTION_DOWN,
+								  x, y, 0);
+		wv.dispatchTouchEvent (mev);
+		mev.recycle ();
+		mev = MotionEvent.obtain (tstamp, tstamp + 100, MotionEvent.ACTION_UP,
+				  x, y, 0);
+		wv.dispatchTouchEvent (mev);
+		mev.recycle ();
+	}
+	
 	
 	/**
 	 * A simple ASCII to Android Keycode translation function. It is meant to work
