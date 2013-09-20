@@ -762,9 +762,11 @@ public class WebReviewActivity extends Activity {
 		
 		wv.loadUrl (getIntent ().getData ().toString ());
 		
-		reaper = new TimerThreadsReaper ();
-		rtask = reaper.createTask (new Handler (), 2, 7000);
-		rtask.setListener (new ReaperTaskListener ());
+		if (SettingsActivity.getTimerReaper (this)) {
+			reaper = new TimerThreadsReaper ();
+			rtask = reaper.createTask (new Handler (), 2, 7000);
+			rtask.setListener (new ReaperTaskListener ());
+		}
 	}
 	
 	@Override
@@ -788,7 +790,8 @@ public class WebReviewActivity extends Activity {
 		
 		updateLayout (SettingsActivity.prefs (WebReviewActivity.this));		
 		
-		rtask.resume ();
+		if (rtask != null)
+			rtask.resume ();
 	}
 	
 	@Override
@@ -798,7 +801,8 @@ public class WebReviewActivity extends Activity {
 
 		mh.unregister (this);
 
-		reaper.stopAll ();
+		if (reaper != null)
+			reaper.stopAll ();
 		
 		if (SettingsActivity.getLeakKludge (this))
 			System.exit (0);
@@ -837,7 +841,8 @@ public class WebReviewActivity extends Activity {
 		
 		wv.release ();
 		
-		rtask.pause ();
+		if (rtask != null)
+			rtask.pause ();
 	}
 	
 	@Override

@@ -80,6 +80,8 @@ public class SettingsActivity
 	private static final String KEY_LOCK_SCREEN = "pref_lock_screen";
 	/** The infamous CPU/memory leak kludge */
 	private static final String KEY_LEAK_KLUDGE = "pref_leak_kludge";
+	/** The even more infamous timer reaper kludge */
+	private static final String KEY_TIMER_REAPER = "pref_timer_reaper";
 	/** The layout type */
 	private static final String KEY_LAYOUT = "pref_layout";
 	/** The export destination */
@@ -466,6 +468,11 @@ public class SettingsActivity
 		return prefs (ctxt).getBoolean (KEY_LEAK_KLUDGE, true);
 	}
 	
+	public static boolean getTimerReaper (Context ctxt)
+	{
+		return prefs (ctxt).getBoolean (KEY_TIMER_REAPER, true);
+	}
+
 	public static String getURL (Context ctxt)
 	{
 		return getURL (prefs (ctxt));
