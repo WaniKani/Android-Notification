@@ -12,15 +12,16 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.SystemClock;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.WindowManager;
 import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
+import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.webkit.CookieSyncManager;
 import android.webkit.JavascriptInterface;
@@ -503,8 +504,23 @@ public class WebReviewActivity extends Activity {
 		public boolean isRelevantPage ()
 		{
 			return true;
-		}
+		} 
 	};
+	
+	private class ReaperTaskListener implements TimerThreadsReaper.ReaperTaskListener {
+		
+		Button button;
+		
+		public ReaperTaskListener ()
+		{
+			button = (Button) findViewById (R.id.kb_space);
+		}
+		
+		public void reaped (int count, int total)
+		{
+			button.setText ("[" + total + "]");
+		}		
+	}
 
 	/** The web view, where the web contents are rendered */
 	FocusWebView wv;
@@ -574,15 +590,10 @@ public class WebReviewActivity extends Activity {
 	 *  is an answer, so we iconize the keyboard. Otherwise we are entering the new question,
 	 *  so we need to show it  */
 	private static final String JS_ENTER =
-			"var i, textbox, form, submit, tags;" +
+			"var textbox, form, submit;" +
 			"textbox = document.getElementById (\"" + WKConfig.ANSWER_BOX + "\"); " +
 		    "form = document.getElementById (\"new_lesson\"); " +
 			"if (textbox != null && textbox.value.length > 0) {" +
-			"   tags = document.getElementsByTagName ('audio');" +
-			"   for (i = 0; i < tags.length; i++) {" +
-			"         tags [i].muted = true;" +
-			"         tags [i].play (); " +
-			"   } " +
 		    "   buttons = document.getElementsByTagName('button'); " +
 		    "   buttons [0].click (); " +
 			"}";
@@ -618,6 +629,12 @@ public class WebReviewActivity extends Activity {
 		KeyEvent.KEYCODE_SPACE, KeyEvent.KEYCODE_ENTER,
 		KeyEvent.KEYCODE_DPAD_DOWN
 	};
+
+	/** The threads reaper */
+	TimerThreadsReaper reaper;
+	
+	/** Thread reaper task */
+	TimerThreadsReaper.ReaperTask rtask;
 	
 	/** The current keyboard. It may be set to either {@link #KB_LATIN} or {@link #KB_ALT} */
 	private String keyboard;
@@ -673,7 +690,7 @@ public class WebReviewActivity extends Activity {
 		mh = new MenuHandler (this, new MenuListener ());
 		
 		setContentView (R.layout.web_review);
-		
+
 		prefs = SettingsActivity.prefs (this);
 		showEnterKey = SettingsActivity.getEnter (this);
 
@@ -704,6 +721,10 @@ public class WebReviewActivity extends Activity {
 		wv.setWebChromeClient (new WebChromeClientImpl ());		
 		
 		wv.loadUrl (getIntent ().getData ().toString ());
+		
+		reaper = new TimerThreadsReaper ();
+		rtask = reaper.createTask (new Handler (), 2, 7000);
+		rtask.setListener (new ReaperTaskListener ());
 	}
 	
 	@Override
@@ -728,6 +749,8 @@ public class WebReviewActivity extends Activity {
 		wv.acquire ();
 		
 		updateLayout (SettingsActivity.prefs (WebReviewActivity.this));		
+		
+		rtask.resume ();
 	}
 	
 	@Override
@@ -737,6 +760,8 @@ public class WebReviewActivity extends Activity {
 
 		mh.unregister (this);
 
+		reaper.stopAll ();
+		
 		if (SettingsActivity.getLeakKludge (this))
 			System.exit (0);
 	}
@@ -774,6 +799,8 @@ public class WebReviewActivity extends Activity {
 			setMute (false);
 		
 		wv.release ();
+		
+		rtask.pause ();
 	}
 	
 	@Override
@@ -953,9 +980,9 @@ public class WebReviewActivity extends Activity {
 				kbstatus.maximize (this);
 			else
 				loadKeyboard (keyboard == KB_ALT ? KB_LATIN : KB_ALT);
-		} else if (keycode == KeyEvent.KEYCODE_ENTER)
+		} else if (keycode == KeyEvent.KEYCODE_ENTER) {
 			js (JS_ENTER);
-		else if (keycode == KeyEvent.KEYCODE_DPAD_DOWN)
+		} else if (keycode == KeyEvent.KEYCODE_DPAD_DOWN)
 			kbstatus.iconize (this);
 		else {			
 			if (kbstatus == KeyboardStatus.LESSONS_MAXIMIZED)
