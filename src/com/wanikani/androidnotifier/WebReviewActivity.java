@@ -114,7 +114,8 @@ public class WebReviewActivity extends Activity {
 		@Override
 		public void onClick (View w)
 		{
-			setMute (SettingsActivity.toggleMute (WebReviewActivity.this)); 
+			SettingsActivity.toggleMute (WebReviewActivity.this);
+			applyMuteSettings ();
 		}
 	}
 
@@ -430,6 +431,16 @@ public class WebReviewActivity extends Activity {
 			 {
 				 return SettingsActivity.getShowReviewsKeyboard (wav);
 			 }
+
+ 			 public boolean canMute ()
+ 			 {
+ 				 return true;
+ 			 }
+ 			
+ 			public boolean isMuteEmbedded ()
+ 			{
+ 				return true;
+ 			}
 		},
 		
 		/** Keyboard visible, all keys but ENTER visible */
@@ -455,7 +466,17 @@ public class WebReviewActivity extends Activity {
 				 return SettingsActivity.getShowReviewsKeyboard (wav);
 			 }
 
-			 public boolean isIconized () { return true; }			
+			 public boolean isIconized () { return true; }
+			 
+ 			 public boolean canMute ()
+ 			 {
+ 				 return true;
+ 			 }
+ 			
+ 			 public boolean isMuteEmbedded ()
+ 			 {
+ 			 	 return false;
+ 			 }			 
 		},
 
 		/** Keyboard visible, just "Show" and "Enter" keys are visible, in lessons mode */ 
@@ -505,6 +526,16 @@ public class WebReviewActivity extends Activity {
 		{
 			return true;
 		} 
+		
+		public boolean canMute ()
+		{
+			 return false;
+		}
+			
+		public boolean isMuteEmbedded ()
+		{
+			return false;
+		}
 	};
 	
 	private class ReaperTaskListener implements TimerThreadsReaper.ReaperTaskListener {
@@ -672,6 +703,9 @@ public class WebReviewActivity extends Activity {
 	/** Set if we have reviewed or had some lessons, so caches should be flushed */
 	private boolean flushCaches;
 	
+	/** Is mute enabled */
+	private boolean isMuted;
+	
 	/**
 	 * Called when the action is initially displayed. It initializes the objects
 	 * and starts loading the review page.
@@ -742,10 +776,8 @@ public class WebReviewActivity extends Activity {
 		
 		visible = true;
 		
-		if (SettingsActivity.getMute (this) &&
-			SettingsActivity.getShowMute (this))
-			setMute (true);
-
+		applyMuteSettings ();
+		
 		wv.acquire ();
 		
 		updateLayout (SettingsActivity.prefs (WebReviewActivity.this));		
@@ -795,8 +827,7 @@ public class WebReviewActivity extends Activity {
 		intent.setAction (NotificationService.ACTION_NEW_DATA);
 		startService (intent);
 		
-		if (SettingsActivity.getMute (this))
-			setMute (false);
+		setMute (false);
 		
 		wv.release ();
 		
@@ -853,13 +884,12 @@ public class WebReviewActivity extends Activity {
 		muteH = (ImageButton) findViewById (R.id.kb_mute_h);
 		mute = (ImageButton) findViewById (R.id.kb_mute);
 		
+		kbstatus = KeyboardStatus.INVISIBLE;
 		mutel = new MuteListener ();
 		muteH.setOnClickListener (mutel);
 		mute.setOnClickListener (mutel);
-		setMute (false);	// resume will take care of that
-		showMuteButtons (mute, true);
-		
-		kbstatus = KeyboardStatus.INVISIBLE;
+		applyMuteSettings ();
+				
 		loadKeyboard (KB_LATIN);		
 
 		klist = new KeyListener ();
@@ -917,13 +947,17 @@ public class WebReviewActivity extends Activity {
 		kbstatus.apply (this);
 	}
 	
-	private void showMuteButtons (View mute, boolean show)
+	private void applyMuteSettings ()
 	{
-		show &= SettingsActivity.getShowMute (this);
+		boolean show, embedded;
 		
-		mute.setVisibility (show ? View.VISIBLE : View.GONE);
-		if (!show)
-			setMute (false);
+		show = kbstatus.canMute () && SettingsActivity.getShowMute (this);
+		embedded = kbstatus.isEmbedded (this) && kbstatus.isMuteEmbedded ();
+		
+		(embedded ? mute : muteH).setVisibility (show ? View.VISIBLE : View.GONE);
+		(embedded ? muteH : mute).setVisibility (View.GONE);
+		
+		setMute (show && SettingsActivity.getMute (this));
 	}
 	
 	private void setMute (boolean m)
@@ -931,12 +965,17 @@ public class WebReviewActivity extends Activity {
 		AudioManager am;
 		Drawable d;
 		
-		am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-	    
-		am.setStreamMute (AudioManager.STREAM_MUSIC, m);
 		d = m ? muteDrawable : notMutedDrawable;
 	    muteH.setImageDrawable (d);
 		mute.setImageDrawable (d);
+
+		if (isMuted != m) {
+			isMuted = m;
+		
+			am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+	    
+			am.setStreamMute (AudioManager.STREAM_MUSIC, m);
+		}
 	}
 	
 	/**
@@ -1080,7 +1119,7 @@ public class WebReviewActivity extends Activity {
 		
 		this.kbstatus = kbstatus;
 		
-		showMuteButtons (muteH, false);
+		applyMuteSettings ();
 		view = findViewById (R.id.keyboard);
 		view.setVisibility (View.GONE);
 		if (wv != null)
@@ -1154,7 +1193,7 @@ public class WebReviewActivity extends Activity {
 		view = findViewById (R.id.keyboard);
 		view.setVisibility (View.GONE);
 
-		showMuteButtons (muteH, true);
+		applyMuteSettings ();
 		imm = (InputMethodManager) getSystemService (Context.INPUT_METHOD_SERVICE);
 		imm.showSoftInput (wv, InputMethodManager.SHOW_IMPLICIT);		
 	}
@@ -1171,7 +1210,7 @@ public class WebReviewActivity extends Activity {
 		
 		wv.disableFocus ();
 
-		showMuteButtons (muteH, false);
+		applyMuteSettings ();
 		for (i = 0; i < key_table.length; i++) {
 			key = findViewById (key_table [i]);
 			key.setVisibility (View.VISIBLE);
