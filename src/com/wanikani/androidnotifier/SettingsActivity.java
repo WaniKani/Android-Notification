@@ -62,6 +62,8 @@ public class SettingsActivity
 	private static final String KEY_PREF_SHOW_LESSONS_KEYBOARD = "pref_show_lessons_keyboard";
 	/** Enable tall keyboard. Must match preferences.xml */
 	private static final String KEY_PREF_LARGE_KEYBOARD = "pref_large_keyboard";
+	/** Enabled embedded keyboard vibration */
+	private static final String KEY_PREF_VIBRATE = "pref_vibrate";
 	/** Enable enter keyboard key. Must match preferences.xml */
 	private static final String KEY_PREF_ENTER = "pref_enter";
 	/** Show mute button. Must match preferences.xml */
@@ -414,6 +416,11 @@ public class SettingsActivity
 		return prefs (ctxt).getBoolean (KEY_PREF_LARGE_KEYBOARD, false);
 	}
 	
+	public static boolean getVibrate (Context ctxt)
+	{
+		return prefs (ctxt).getBoolean (KEY_PREF_VIBRATE, false);
+	}
+
 	public static boolean getEnter (Context ctxt)
 	{
 		return prefs (ctxt).getBoolean (KEY_PREF_ENTER, true);

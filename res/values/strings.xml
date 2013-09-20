@@ -50,6 +50,8 @@
     <string name="pref_export_file">Filename</string>
     <string name="pref_export_file_desc">Name of file where exported DB files will be saved
         when Export dest is set to filesystem</string>
+    <string name="pref_vibrate">Key vibration</string>
+    <string name="pref_vibrate_desc">Vibrate when pressing keys in the embedded keyboard</string>
     <string name="tag_next_review">Next Review</string>
     <string name="tag_reviews_now">Now</string>
     <string name="tag_next_hour">Next hour</string>

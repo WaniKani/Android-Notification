@@ -14,6 +14,7 @@ import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
+import android.os.Vibrator;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -346,7 +347,7 @@ public class WebReviewActivity extends Activity {
 					break;
 				}
 			}
-		}
+		}		
 	};
 
 	/**
@@ -706,6 +707,10 @@ public class WebReviewActivity extends Activity {
 	/** Is mute enabled */
 	private boolean isMuted;
 	
+	/** Vibrator service */
+	Vibrator vibrator;
+	
+	
 	/**
 	 * Called when the action is initially displayed. It initializes the objects
 	 * and starts loading the review page.
@@ -720,7 +725,8 @@ public class WebReviewActivity extends Activity {
 		Resources res;
 		
 		CookieSyncManager.createInstance (this);
-		
+		vibrator = (Vibrator) getSystemService (Context.VIBRATOR_SERVICE) ;
+		 
 		mh = new MenuHandler (this, new MenuListener ());
 		
 		setContentView (R.layout.web_review);
@@ -1013,6 +1019,9 @@ public class WebReviewActivity extends Activity {
 	{
 		KeyEvent kdown, kup;
 	
+		if (vibrator != null && SettingsActivity.getVibrate (this))
+			vibrator.vibrate (50);
+		
 		if (keycode == KeyEvent.KEYCODE_NUM) {
 			/* Num == meta -> if iconized, it means "Show"*/
 			if (kbstatus.isIconized ())
