@@ -726,6 +726,7 @@ public class WebReviewActivity extends Activity {
 		
 		CookieSyncManager.createInstance (this);
 		vibrator = (Vibrator) getSystemService (Context.VIBRATOR_SERVICE) ;
+		setVolumeControlStream (AudioManager.STREAM_MUSIC);
 		 
 		mh = new MenuHandler (this, new MenuListener ());
 		
