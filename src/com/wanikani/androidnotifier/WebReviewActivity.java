@@ -540,17 +540,10 @@ public class WebReviewActivity extends Activity {
 	};
 	
 	private class ReaperTaskListener implements TimerThreadsReaper.ReaperTaskListener {
-		
-		Button button;
-		
-		public ReaperTaskListener ()
-		{
-			button = (Button) findViewById (R.id.kb_space);
-		}
-		
+				
 		public void reaped (int count, int total)
 		{
-			button.setText ("[" + total + "]");
+			/* Here we could keep some stats. Currently unused */
 		}		
 	}
 
