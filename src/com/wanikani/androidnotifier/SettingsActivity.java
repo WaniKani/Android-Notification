@@ -418,6 +418,11 @@ public class SettingsActivity
 		return prefs (ctxt).getBoolean (KEY_PREF_LARGE_KEYBOARD, false);
 	}
 	
+	public static boolean getNativeIME (Context ctxt)
+	{
+		return true;
+	}
+	
 	public static boolean getVibrate (Context ctxt)
 	{
 		return prefs (ctxt).getBoolean (KEY_PREF_VIBRATE, false);

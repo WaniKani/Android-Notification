@@ -52,6 +52,20 @@
               android:layout_alignParentTop="true"
               android:layout_alignParentLeft="true"
               android:src="@drawable/ic_mute" />
+        <LinearLayout
+            android:id="@+id/ime_div"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/m_rythm"
+            android:visibility="gone"
+            android:orientation="horizontal"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginTop="200dip">
+            <EditText 
+                android:id="@+id/ime"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"/>
+        </LinearLayout>
         </RelativeLayout>
         <LinearLayout
             android:id="@+id/keyboard"

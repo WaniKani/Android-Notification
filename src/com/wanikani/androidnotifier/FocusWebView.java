@@ -143,4 +143,13 @@ public class FocusWebView extends WebView {
 		resumeTimers ();
 		CookieSyncManager.getInstance ().startSync ();
 	}
+	
+	/**
+	 * Executes a javascript on the web page.
+	 * @param js the javascript statements. This method wraps it into a function
+	 */
+	public void js (String s)
+	{
+       loadUrl ("javascript:(function() { " + s + "})()");
+	}
 }
