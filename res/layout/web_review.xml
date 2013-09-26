@@ -15,12 +15,16 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:visibility="gone" >
+        android:visibility="gone" 
+        android:layout_margin="0dip"
+        android:padding="0dip">
         <TextView
             android:id="@+id/tv_message"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center_vertical|center_horizontal" />
+            android:gravity="center_vertical|center_horizontal"
+            android:layout_margin="0dip"
+        	android:padding="0dip" />
 
         <ImageView
             android:layout_width="match_parent"
@@ -54,13 +58,12 @@
               android:src="@drawable/ic_mute" />
         <LinearLayout
             android:id="@+id/ime_div"
-            android:layout_width="match_parent"
+            android:layout_width="300dip"
             android:layout_height="@dimen/m_rythm"
             android:visibility="gone"
             android:orientation="horizontal"
             android:layout_alignParentLeft="true"
-            android:layout_alignParentTop="true"
-            android:layout_marginTop="200dip">
+            android:layout_alignParentTop="true">
             <EditText 
                 android:id="@+id/ime"
                 android:layout_width="match_parent"

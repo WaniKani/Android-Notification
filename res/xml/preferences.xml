@@ -41,11 +41,13 @@
         	android:key="pref_use_integrated_browser"
         	android:title="@string/pref_use_integrated_browser"
         	android:defaultValue="true" />
-    <CheckBoxPreference
-        	android:key="pref_show_keyboard"
-        	android:title="@string/pref_show_keyboard"
-        	android:summary="@string/pref_show_keyboard_desc"
-        	android:defaultValue="true" />
+    <ListPreference
+	        android:key="pref_reviews_keyboard"
+	        android:title="@string/pref_keyboard"
+	        android:summary="@string/pref_keyboard_desc"
+	        android:defaultValue="0"
+	        android:entries="@array/keyboards"
+	        android:entryValues="@array/keyboardValues"/>
     <CheckBoxPreference
         	android:key="pref_show_lessons_keyboard"
         	android:title="@string/pref_show_lessons_keyboard"

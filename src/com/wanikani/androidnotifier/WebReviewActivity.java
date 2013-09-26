@@ -324,9 +324,9 @@ public class WebReviewActivity extends Activity {
 
 			 public void iconize (WebReviewActivity wav) { REVIEWS_ICONIZED.apply (wav); }
 
- 			 public boolean isEmbedded (WebReviewActivity wav)
+ 			 public SettingsActivity.Keyboard getKeyboard (WebReviewActivity wav)
 			 {
-				 return SettingsActivity.getShowReviewsKeyboard (wav);
+				 return SettingsActivity.getReviewsKeyboard (wav);
 			 }
 
  			 public boolean canMute ()
@@ -351,9 +351,9 @@ public class WebReviewActivity extends Activity {
 			
 			public void iconize (WebReviewActivity wav) { LESSONS_ICONIZED.apply (wav); }
 
-			public boolean isEmbedded (WebReviewActivity wav)
+			public SettingsActivity.Keyboard getKeyboard (WebReviewActivity wav)
 			{
-				return SettingsActivity.getShowLessonsKeyboard (wav);				
+				return SettingsActivity.getLessonsKeyboard (wav);				
 			}
 		},
 
@@ -363,9 +363,9 @@ public class WebReviewActivity extends Activity {
 			
 			public void maximize (WebReviewActivity wav) { REVIEWS_MAXIMIZED.apply (wav); }
 			
-			 public boolean isEmbedded (WebReviewActivity wav)
+			 public SettingsActivity.Keyboard getKeyboard (WebReviewActivity wav)
 			 {
-				 return SettingsActivity.getShowReviewsKeyboard (wav);
+				 return SettingsActivity.getReviewsKeyboard (wav);
 			 }
 
 			 public boolean isIconized () { return true; }
@@ -394,9 +394,9 @@ public class WebReviewActivity extends Activity {
 			
 			public boolean isIconized () { return true; }
 
-			public boolean isEmbedded (WebReviewActivity wav)
+			public SettingsActivity.Keyboard getKeyboard (WebReviewActivity wav)
 			{
-				return SettingsActivity.getShowLessonsKeyboard (wav);				
+				return SettingsActivity.getLessonsKeyboard (wav);				
 			}			
 		},
 		
@@ -405,6 +405,11 @@ public class WebReviewActivity extends Activity {
 			public void apply (WebReviewActivity wav) { wav.hide (this); }
 			
 			public boolean isRelevantPage () { return false; }
+			
+			public SettingsActivity.Keyboard getKeyboard (WebReviewActivity wav)
+			{
+				return SettingsActivity.Keyboard.NATIVE;
+			}
 		};
 		
 		public abstract void apply (WebReviewActivity wav);
@@ -424,10 +429,7 @@ public class WebReviewActivity extends Activity {
 			return false;
 		}
 		
-		public boolean isEmbedded (WebReviewActivity wav)
-		{
-			return false;
-		}
+		public abstract SettingsActivity.Keyboard getKeyboard (WebReviewActivity wav);
 		
 		public boolean isRelevantPage ()
 		{
@@ -543,6 +545,9 @@ public class WebReviewActivity extends Activity {
 	
 	/** The native keyboard */
 	private Keyboard nativeKeyboard;
+	
+	/** The local IME keyboard */
+	private Keyboard localIMEKeyboard;
 		
 	/**
 	 * Called when the action is initially displayed. It initializes the objects
@@ -596,9 +601,11 @@ public class WebReviewActivity extends Activity {
 		
 		embeddedKeyboard = new EmbeddedKeyboard (this, wv);
 		nativeKeyboard = new NativeKeyboard (this, wv);
+		localIMEKeyboard = new LocalIMEKeyboard (this, wv);
 		
 		embeddedKeyboard.getMuteButton ().setOnClickListener (new MuteListener ());
 		nativeKeyboard.getMuteButton ().setOnClickListener (new MuteListener ());
+		localIMEKeyboard.getMuteButton ().setOnClickListener (new MuteListener ());
 
 		if (SettingsActivity.getTimerReaper (this)) {
 			reaper = new TimerThreadsReaper ();
@@ -728,13 +735,22 @@ public class WebReviewActivity extends Activity {
 	{
 		Keyboard oldk;
 		
-		/*
-		if (SettingsActivity.getNativeIME (this))
-			return null;
-		*/
-		
 		oldk = keyboard;
-		keyboard = kbstatus.isEmbedded (this) ? embeddedKeyboard : nativeKeyboard;
+		
+		switch (kbstatus.getKeyboard (this)) {
+		case LOCAL_IME:
+			keyboard = localIMEKeyboard;
+			break;
+			
+		case EMBEDDED:
+			keyboard = embeddedKeyboard;
+			break;
+			
+		case NATIVE:
+			keyboard = nativeKeyboard;
+			break;
+		}
+				
 		if (keyboard != oldk && oldk != null)
 			oldk.hide ();
 	}
@@ -802,9 +818,6 @@ public class WebReviewActivity extends Activity {
 
 	protected void iconize (KeyboardStatus kbs)
 	{
-		View view, key;
-		int i;
-		
 		kbstatus = kbs;
 		
 		keyboard.iconize (kbstatus.hasEnter (this));

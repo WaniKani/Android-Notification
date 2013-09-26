@@ -46,6 +46,10 @@ public class SettingsActivity
 		
 	};
 	
+	static enum Keyboard {
+		LOCAL_IME, EMBEDDED, NATIVE
+	};
+	
 	/** Preferences enabled key. Must match preferences.xml */
 	private static final String KEY_PREF_ENABLED = "pref_enabled";
 	/** Enable lessons. Must match preferences.xml */
@@ -57,7 +61,7 @@ public class SettingsActivity
 	/** Refresh timeout. Must match preferences.xml */
 	private static final String KEY_PREF_REFRESH_TIMEOUT = "pref_refresh_timeout";
 	/** Enable reviews keyboard. Must match preferences.xml */
-	private static final String KEY_PREF_SHOW_REVIEWS_KEYBOARD = "pref_show_keyboard";
+	private static final String KEY_PREF_REVIEWS_KEYBOARD = "pref_reviews_keyboard";
 	/** Enable lessons keyboard Must match preferences.xml */
 	private static final String KEY_PREF_SHOW_LESSONS_KEYBOARD = "pref_show_lessons_keyboard";
 	/** Enable tall keyboard. Must match preferences.xml */
@@ -160,7 +164,7 @@ public class SettingsActivity
 		onSharedPreferenceChanged (prefs, KEY_PREF_ENABLED);
 		onSharedPreferenceChanged (prefs, KEY_PREF_REFRESH_TIMEOUT);
 		onSharedPreferenceChanged (prefs, KEY_PREF_USE_INTEGRATED_BROWSER);
-		onSharedPreferenceChanged (prefs, KEY_PREF_SHOW_REVIEWS_KEYBOARD);
+		onSharedPreferenceChanged (prefs, KEY_PREF_REVIEWS_KEYBOARD);
 		onSharedPreferenceChanged (prefs, KEY_PREF_SHOW_LESSONS_KEYBOARD);
 		onSharedPreferenceChanged (prefs, KEY_PREF_ENTER);
 		onSharedPreferenceChanged (prefs, KEY_PREF_EXPORT_DEST);
@@ -194,7 +198,7 @@ public class SettingsActivity
 							 R.string.pref_use_external_browser_desc);
 			runIntegratedBrowserHook (prefs);
 		} else if (key.equals (KEY_PREF_SHOW_LESSONS_KEYBOARD) ||
-			  key.equals (KEY_PREF_SHOW_REVIEWS_KEYBOARD)) {
+			  key.equals (KEY_PREF_REVIEWS_KEYBOARD)) {
 			runShowKeyboardHooks (prefs);
 		} else if (key.equals (KEY_PREF_USERKEY)) {
 			s = prefs.getString (KEY_PREF_USERKEY, "").trim ();
@@ -268,7 +272,7 @@ public class SettingsActivity
 	{
 		Preference pref;
 		
-		pref = findPreference (KEY_PREF_SHOW_REVIEWS_KEYBOARD);
+		pref = findPreference (KEY_PREF_REVIEWS_KEYBOARD);
 		pref.setEnabled (getUseIntegratedBrowser (prefs));
 
 		pref = findPreference (KEY_PREF_SHOW_MUTE);
@@ -286,12 +290,12 @@ public class SettingsActivity
 		Preference pref;
 		
 		pref = findPreference (KEY_PREF_ENTER);
-		pref.setEnabled ((getShowLessonsKeyboard (prefs) ||
-				          getShowReviewsKeyboard (prefs)) && getUseIntegratedBrowser (prefs));	
+		pref.setEnabled ((getLessonsKeyboard (prefs) == Keyboard.EMBEDDED ||
+				          getReviewsKeyboard (prefs) == Keyboard.EMBEDDED) && getUseIntegratedBrowser (prefs));	
 
 		pref = findPreference (KEY_PREF_LARGE_KEYBOARD);
-		pref.setEnabled ((getShowLessonsKeyboard (prefs) ||
-		                  getShowReviewsKeyboard (prefs)) && getUseIntegratedBrowser (prefs));	
+		pref.setEnabled ((getLessonsKeyboard (prefs) == Keyboard.EMBEDDED ||
+		                  getReviewsKeyboard (prefs) == Keyboard.EMBEDDED) && getUseIntegratedBrowser (prefs));	
 	}
 
 	@SuppressWarnings ("deprecation")
@@ -387,25 +391,45 @@ public class SettingsActivity
 		return getInt (prefs (ctxt), KEY_PREF_REFRESH_TIMEOUT, DEFAULT_REFRESH_TIMEOUT);
 	}
 	
-	public static boolean getShowReviewsKeyboard (Context ctxt)
+	public static Keyboard getReviewsKeyboard (Context ctxt)
 	{
-		return getShowReviewsKeyboard (prefs (ctxt));
+		return getReviewsKeyboard (prefs (ctxt));
 	}
 	
-	private static boolean getShowReviewsKeyboard (SharedPreferences prefs)
+	private static Keyboard getReviewsKeyboard (SharedPreferences prefs)
 	{
-		return prefs.getBoolean (KEY_PREF_SHOW_REVIEWS_KEYBOARD, true);
+		int i;
+		
+		try { 
+			i = Integer.parseInt (prefs.getString (KEY_PREF_REVIEWS_KEYBOARD, "0"));
+		} catch (NumberFormatException e) {
+			i = 0;
+		}
+			
+		switch (i) {
+		case 0:
+			return Keyboard.LOCAL_IME;
+			
+		case 1:
+			return Keyboard.EMBEDDED;
+			
+		case 2:
+			return Keyboard.NATIVE;
+		}
+		
+		return Keyboard.LOCAL_IME;
 	}
 	
-	public static boolean getShowLessonsKeyboard (Context ctxt)
+	public static Keyboard getLessonsKeyboard (Context ctxt)
 	{
-		return getShowLessonsKeyboard (prefs (ctxt));
+		return getLessonsKeyboard (prefs (ctxt));
 	}
 	
-	private static boolean getShowLessonsKeyboard (SharedPreferences prefs)
+	private static Keyboard getLessonsKeyboard (SharedPreferences prefs)
 	{
 		return prefs.getBoolean (KEY_PREF_SHOW_LESSONS_KEYBOARD, 
-								 getShowReviewsKeyboard (prefs));
+								 getReviewsKeyboard (prefs) != Keyboard.NATIVE) ?
+										 Keyboard.EMBEDDED : Keyboard.NATIVE;
 	}
 
 	public static boolean getShowMute (Context ctxt)
