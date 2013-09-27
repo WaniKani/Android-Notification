@@ -70,6 +70,12 @@ public class NotifierStateMachine {
 	/** Cap polling timeout when reviews are availble (one hour) */
 	private static int T_CAP_REVIEWS = 60;
 	
+	/** Timeout when waiting for reviews */
+	private static int T_INT_WAITING_FOR_REVIEWS = 1; 
+	
+	/** Timeout when waiting for reviews */
+	private static int T_CAP_WAITING_FOR_REVIEWS = 30; 
+
 	/** Initial polling timeout when we can't contact the server.
 	 *  This interval is doubled and capped by {@link #T_CAP_ERROR} */
 	private static int T_INT_ERROR = 1;
@@ -121,6 +127,23 @@ public class NotifierStateMachine {
 		},
 
  		/**
+		 * The state machine enters this state when there are reviews, but 
+		 * they have not reached the threshold
+		 */
+		S_TOO_FEW_REVIEWS {
+			public void enter (NotifierStateMachine fsm, Event event, 
+							   State prev, DashboardData ldd, DashboardData cdd) 
+				{
+					fsm.ifc.hideNotification ();
+					if (prev != this)
+						fsm.schedule (NotifierStateMachine.T_INT_WAITING_FOR_REVIEWS);
+					else
+						fsm.schedule (NotifierStateMachine.T_INT_WAITING_FOR_REVIEWS,
+									  NotifierStateMachine.T_CAP_WAITING_FOR_REVIEWS);
+				}
+		},
+
+		/**
 		 * The state machine enters this state when there are
 		 * pending reviews. Here we have to poll.
 		 */
@@ -266,17 +289,22 @@ public class NotifierStateMachine {
 	 * Called when a timeout (or network connectivity change) event
 	 * is triggered <i>and</i> study queue data is available
 	 *  @param event the kind of event
+	 *  @param threshold the number of reviews needed to show a notification 
 	 *	@param dd the study queue
 	 */
-	public void next (Event event, DashboardData dd)
+	public void next (Event event, int threshold, DashboardData dd)
 	{
 		State cstate, llstate;
 		DashboardData lldd;
 		
 		try {
 			dd.wail ();
-			cstate = dd.reviewsAvailable > 0 ?
-					State.S_REVIEWS_AVAILABLE : State.S_NO_REVIEWS; 
+			if (dd.reviewsAvailable >= threshold)
+				cstate = State.S_REVIEWS_AVAILABLE;
+			else if (dd.reviewsAvailable > 0)
+				cstate = State.S_TOO_FEW_REVIEWS;
+			else
+				cstate = State.S_NO_REVIEWS;
 		
 		} catch (IOException e) {
 			cstate = State.S_ERROR;			
@@ -308,8 +336,8 @@ public class NotifierStateMachine {
  	/**
 	 * Schedule a timeout at a given point in time, using
 	 * the exponential backoff algorithm.
-	 *	@param delta the initial delay in milliseconds
-	 *	@param cal the backoff in milliseconds
+	 *	@param delta the initial delay in minutes
+	 *	@param cal the backoff in minutes
 	 */
 	void schedule (int delta, int cap)
 	{

@@ -406,7 +406,8 @@ public class NotificationService
 		fsm = new NotifierStateMachine (this);
 		if (intent.hasExtra (KEY_DD)) {
 			dd = new DashboardData (intent.getBundleExtra (KEY_DD));
-			fsm.next (NotifierStateMachine.Event.E_UNSOLICITED, dd);
+			fsm.next (NotifierStateMachine.Event.E_UNSOLICITED, 
+					  SettingsActivity.getReviewThreshold (this), dd);
 		} else
 			feed (fsm, NotifierStateMachine.Event.E_UNSOLICITED);
 	}
@@ -473,7 +474,7 @@ public class NotificationService
 			dd = new DashboardData (e);
 		}
 		
-		fsm.next (event, dd);
+		fsm.next (event, SettingsActivity.getReviewThreshold (this), dd);
 	}	
 	
 	/**

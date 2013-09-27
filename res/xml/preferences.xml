@@ -8,6 +8,11 @@
         		android:key="pref_enabled" 
         		android:title="@string/pref_enabled" 
         		android:defaultValue="true" android:summary="@string/pref_enabled_descr"/>
+    	<EditTextPreference  
+        		android:title="@string/pref_not_threshold" 
+        		android:key="pref_not_threshold"
+        		android:inputType="number"
+        		android:defaultValue="1"/>
     	<CheckBoxPreference    	    	
     	    	android:key="pref_lessons_enabled"
     	    	android:title="@string/pref_lessons_enabled"
@@ -34,7 +39,7 @@
         	android:title="@string/pref_42plus"
         	android:summary="@string/pref_42plus_descr"
         	android:defaultValue="false" />    	
-    </PreferenceCategory>   
+    	</PreferenceCategory>   
 	<PreferenceCategory
 	    	android:title="@string/tpref_reviews">
 	<CheckBoxPreference

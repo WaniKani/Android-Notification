@@ -48,6 +48,8 @@ public class SettingsActivity
 	
 	/** Preferences enabled key. Must match preferences.xml */
 	private static final String KEY_PREF_ENABLED = "pref_enabled";
+	/** Notify threshold */
+	private static final String KEY_PREF_NOT_THRESHOLD = "pref_not_threshold";
 	/** Enable lessons. Must match preferences.xml */
 	private static final String KEY_PREF_LESSONS_ENABLED = "pref_lessons_enabled";
 	/** Use integrated browser key. Must match preferences.xml */
@@ -113,6 +115,9 @@ public class SettingsActivity
 	/** The current lessons notification settings. Used to check whether it is toggled */ 
 	private boolean lessonsEnabled;
 	
+	/** The current threshold */
+	private int threshold;
+	
 	/** This flag is set when initialization is complete. From this point on,
 	 *  all the calls to {@link SettingsActivity#updateConfig} come from genuine
 	 *  changes to the menu preferences 
@@ -155,10 +160,12 @@ public class SettingsActivity
 		login = getLogin (prefs);
 		enabled = getEnabled (prefs);
 		lessonsEnabled = getLessonsEnabled (prefs);
+		threshold = getReviewThreshold (prefs);
 		
 		onSharedPreferenceChanged (prefs, KEY_PREF_USERKEY);
 		onSharedPreferenceChanged (prefs, KEY_PREF_ENABLED);
 		onSharedPreferenceChanged (prefs, KEY_PREF_REFRESH_TIMEOUT);
+		onSharedPreferenceChanged (prefs, KEY_PREF_NOT_THRESHOLD);
 		onSharedPreferenceChanged (prefs, KEY_PREF_USE_INTEGRATED_BROWSER);
 		onSharedPreferenceChanged (prefs, KEY_PREF_SHOW_REVIEWS_KEYBOARD);
 		onSharedPreferenceChanged (prefs, KEY_PREF_SHOW_LESSONS_KEYBOARD);
@@ -180,7 +187,7 @@ public class SettingsActivity
 	{
 		Resources res;
 		Preference pref;
-		int timeout;
+		int timeout, threshold;
 		String s;
 		
 		pref = findPreference (key);
@@ -211,6 +218,15 @@ public class SettingsActivity
 				s = res.getString (R.string.pref_refresh_descr, timeout);
 			else
 				s = res.getString (R.string.pref_refresh_one_min_descr);
+			pref.setSummary (s);
+		} else if (key.equals (KEY_PREF_NOT_THRESHOLD)) {
+			threshold = getInt (prefs, KEY_PREF_NOT_THRESHOLD, 1);
+			if (threshold <= 0)
+				threshold = 1;
+			if (threshold > 1)
+				s = res.getString (R.string.pref_not_threshold_desc, threshold);
+			else
+				s = res.getString (R.string.pref_not_threshold_one_desc);
 			pref.setSummary (s);
 		} else if (key.equals (KEY_URL)) {
 			s = getURL (prefs);
@@ -387,6 +403,16 @@ public class SettingsActivity
 		return getInt (prefs (ctxt), KEY_PREF_REFRESH_TIMEOUT, DEFAULT_REFRESH_TIMEOUT);
 	}
 	
+	public static int getReviewThreshold (Context ctxt)
+	{
+		return getReviewThreshold (prefs (ctxt));
+	}
+	
+	public static int getReviewThreshold (SharedPreferences prefs)
+	{
+		return getInt (prefs, KEY_PREF_NOT_THRESHOLD, 1);
+	}
+
 	public static boolean getShowReviewsKeyboard (Context ctxt)
 	{
 		return getShowReviewsKeyboard (prefs (ctxt));
@@ -599,14 +625,17 @@ public class SettingsActivity
 		LocalBroadcastManager lbm;
 		UserLogin llogin;
 		boolean lenabled, lLessonsEnabled;
+		int lthreshold;
 		Intent i;
-		
+				
 		llogin = getLogin (prefs);
 		lenabled = getEnabled (prefs);
 		lenabled &= findPreference (KEY_PREF_ENABLED).isEnabled ();
 		
 		lLessonsEnabled = getLessonsEnabled (prefs);
 		lLessonsEnabled &= findPreference (KEY_PREF_LESSONS_ENABLED).isEnabled ();
+		
+		lthreshold = getReviewThreshold (prefs);
 		
 		lbm = LocalBroadcastManager.getInstance (this);
 		if (!llogin.equals (login)) {
@@ -616,11 +645,13 @@ public class SettingsActivity
 			login = llogin;
 			lbm.sendBroadcast (i);
 		} else if (lenabled != enabled || 
-				   lLessonsEnabled != lessonsEnabled) {
+				   lLessonsEnabled != lessonsEnabled ||
+				   lthreshold != threshold) {
 			i = new Intent (ACT_NOTIFY);
 			i.putExtra (E_ENABLED, lenabled);
 			enabled = lenabled;
 			lessonsEnabled = lLessonsEnabled;
+			threshold = lthreshold;
 			lbm.sendBroadcast (i);
 		} 
 
