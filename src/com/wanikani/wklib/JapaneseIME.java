@@ -258,6 +258,13 @@ public class JapaneseIME {
 		put ("ja", "じゃ");
 		put ("ju", "じゅ");
 		put ("jo", "じょ");
+		
+		put ("-", "_", "ー");
+	}
+	
+	public String fixup (String s)
+	{
+		return s.replace ("n", "ん");
 	}
 
 	private void putI (String... s)
@@ -283,8 +290,8 @@ public class JapaneseIME {
 		
 		ja = s [s.length - 1];
 		for (i = 0; i < s.length - 1; i++) {
-			put (s + "u", ja);
-			put (s + "wa", ja + "ぁ");
+			put (s [i] + "u", ja);
+			put (s [i] + "wa", ja + "ぁ");
 		}
 	}
 	
