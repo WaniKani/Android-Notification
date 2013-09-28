@@ -2,18 +2,24 @@ package com.wanikani.androidnotifier;
 
 import android.graphics.Rect;
 import android.text.Editable;
+import android.text.InputType;
 import android.text.TextWatcher;
+import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.View;
-import android.view.ViewGroup.LayoutParams;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.webkit.JavascriptInterface;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
+import android.widget.TextView.OnEditorActionListener;
 
 import com.wanikani.wklib.JapaneseIME;
 
 public class LocalIMEKeyboard extends NativeKeyboard {
 	
-	private class IMEListener implements TextWatcher {
+	private class IMEListener implements TextWatcher, OnEditorActionListener {
 		
 	    boolean translate;
 	    
@@ -49,6 +55,25 @@ public class LocalIMEKeyboard extends NativeKeyboard {
 	    public void translate (boolean enable)
 	    {
 	    	translate = enable;
+	    }
+	    
+	    @Override
+	    public boolean onEditorAction(TextView tv, int actionId, KeyEvent event)
+	    {
+	    	String s;
+	    	
+	        if (actionId == EditorInfo.IME_ACTION_DONE) {
+	        	s = ew.getText ().toString ();
+	        	if (translate)
+	        		s = ime.fixup (s);
+	        	wv.js (String.format (JS_INJECT_ANSWER, s));
+	        	divw.setVisibility (View.GONE);
+	        	imm.hideSoftInputFromWindow (ew.getWindowToken(), 0);
+	        	ew.setText ("");
+	        	return true;
+	        }
+	        
+	        return false;
 	    }
 	}
 	
@@ -88,9 +113,13 @@ public class LocalIMEKeyboard extends NativeKeyboard {
 			"   rect = form.getBoundingClientRect ();" +
 			"   wknJSListener.newQuestion (qtype, rect.left, rect.top, rect.right, rect.bottom);" +
 			"};" +
-			"$.jStorage.listenKeyChange (\"currentItem\", window.wknNewQuestion);";
+			"$.jStorage.listenKeyChange (\"currentItem\", window.wknNewQuestion);" +
+			"window.wknNewQuestion ();";
 	private static final String JS_STOP_TRIGGERS =
 			"$.jStorage.stopListening (\"currentItem\", window.wknNewQuestion);";
+	private static final String JS_INJECT_ANSWER = 
+			"$(\"#user-response\").val (\"%s\");" +
+			"$(\"#answer-form button\").click ();";
 	
     JapaneseIME ime;
     
@@ -112,6 +141,9 @@ public class LocalIMEKeyboard extends NativeKeyboard {
 		divw = wav.findViewById (R.id.ime_div);
 		imel = new IMEListener ();		
 		ew.addTextChangedListener (imel);
+		ew.setInputType (InputType.TYPE_CLASS_TEXT);
+		ew.setOnEditorActionListener (imel);
+		ew.setGravity (Gravity.CENTER);
 		
 		jsl = new JSListener ();
 		wv.addJavascriptInterface (jsl, "wknJSListener");
@@ -122,7 +154,6 @@ public class LocalIMEKeyboard extends NativeKeyboard {
 		super.show (hasEnter);
 		
 		wv.js (JS_INIT_TRIGGERS);
-		divw.setVisibility (View.VISIBLE);
 	}
 	
 	public void hide ()
@@ -144,6 +175,10 @@ public class LocalIMEKeyboard extends NativeKeyboard {
 		rparams.width = rect.width ();
 		divw.setLayoutParams (rparams);
 		
-		divw.setVisibility (View.VISIBLE);		
+		divw.setVisibility (View.VISIBLE);
+		
+		ew.requestFocus ();
+
+		imm.showSoftInput (wv, InputMethodManager.SHOW_IMPLICIT);
 	}
 }
