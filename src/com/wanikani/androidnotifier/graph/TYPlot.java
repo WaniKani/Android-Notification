@@ -18,6 +18,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.DashPathEffect;
 import android.graphics.Paint;
+import android.graphics.Paint.FontMetrics;
 import android.graphics.Path;
 import android.graphics.RectF;
 import android.graphics.Shader;
@@ -126,6 +127,9 @@ public class TYPlot extends View {
 		/// The plot area
 		public RectF plotArea;
 		
+		/// The complete view area
+		public RectF viewArea;
+		
 		/// Actual margin around the diagram
 		public float margin;
 		
@@ -168,7 +172,6 @@ public class TYPlot extends View {
 			
 			dateLabelFontSize = TypedValue.applyDimension (TypedValue.COMPLEX_UNIT_SP, 
 					 									   dateLabelFontSize, dm);
-			
 			updateSize (new RectF ());
 		}
 
@@ -178,10 +181,21 @@ public class TYPlot extends View {
 		 */
 		public void updateSize (RectF rect)
 		{
+			viewArea = new RectF (rect);
 			plotArea = new RectF (rect);
 			
 			plotArea.top += margin;
 			plotArea.bottom -= margin;
+		}
+		
+		/**
+		 * Makes sure that the margin is large enough to display the time axis labels.
+		 * @param mm minimum margin
+		 */
+		public void ensureFontMargin (long mm)
+		{
+			margin = Math.max (DEFAULT_MARGIN, mm + tickSize);
+			updateSize (viewArea);
 		}
 		
 	}
@@ -220,6 +234,7 @@ public class TYPlot extends View {
 		 */
 		public PaintAssets (Resources res, AttributeSet attrs, Measures meas)
 		{
+			FontMetrics fm;
 			Bitmap bmp;
 			Shader shader;
 			float points [];
@@ -238,6 +253,9 @@ public class TYPlot extends View {
 			dateLabels.setTextAlign (Paint.Align.CENTER);
 			dateLabels.setTextSize ((int) meas.dateLabelFontSize);
 			dateLabels.setAntiAlias (true);
+			
+			fm = dateLabels.getFontMetrics ();
+			meas.ensureFontMargin ((int) (fm.bottom - fm.ascent));
 			
 			bmp = BitmapFactory.decodeResource (res, R.drawable.partial);
 			
@@ -760,7 +778,7 @@ public class TYPlot extends View {
 		float f, dateLabelBaseline, levelupBaseline;
 		Map<Integer, Pager.Marker> markers;
 		Pager.Marker marker;
-		int d, lo, hi;
+		int d, lo, hi, ascent;
 		DateFormat df;
 		String s;
 		Calendar cal;
@@ -774,9 +792,11 @@ public class TYPlot extends View {
 		
 		markers = pager.dsource.getMarkers ();
 		
-		dateLabelBaseline = meas.plotArea.bottom + meas.dateLabelFontSize + meas.tickSize / 2;
+		ascent = (int) pas.dateLabels.getFontMetrics ().ascent;
+		
+		dateLabelBaseline = meas.plotArea.bottom - ascent + meas.tickSize / 2;
 		levelupBaseline = meas.plotArea.top - meas.tickSize / 2;
-
+		
 		for (d = meas.yaxisGrid; vp.getY (d) >= meas.plotArea.top; d += meas.yaxisGrid)
 			canvas.drawLine (meas.plotArea.left, vp.getY (d), 
 							 meas.plotArea.right, vp.getY (d), pas.gridPaint);
