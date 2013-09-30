@@ -106,6 +106,22 @@ public class DashboardFragment extends Fragment implements Tab {
 	}
 
 	/**
+	 * Listener to clicks on the review summary link pages.
+	 */
+	private class ReviewSummaryClickListener implements View.OnClickListener {
+		
+		/**
+		 * Called when the button is clicked.
+		 * @param v the button 
+		 */
+		@Override
+		public void onClick (View v)
+		{
+			main.reviewSummary ();
+		}	
+	}
+	
+	/**
 	 * Listener for clicks on remaining items link. Causes the pager to 
 	 * switch to the item tab, and sets the apprentice items filter.
 	 */
@@ -245,7 +261,7 @@ public class DashboardFragment extends Fragment implements Tab {
 		view.setOnClickListener (new AlertsClickListener (R.id.lay_lessons_available));
 		
 		view = parent.findViewById (R.id.btn_result);
-		view.setOnClickListener (new ReviewClickListener ());
+		view.setOnClickListener (new ReviewSummaryClickListener ());
 		
 		view = parent.findViewById (R.id.btn_chat);
 		view.setOnClickListener (new ChatClickListener ());
