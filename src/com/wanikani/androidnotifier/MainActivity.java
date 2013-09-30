@@ -1157,6 +1157,14 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	}
 
 	/**
+	 * Called to open the review summary page.
+	 */
+	public void reviewSummary ()
+	{
+		open ("http://www.wanikani.com/review");
+	}
+
+	/**
 	 * Open an URL. Depending on the integrated browser key, it chooses
 	 * whether to use the internal or the external browser.
 	 * 	@param url the URL to open
