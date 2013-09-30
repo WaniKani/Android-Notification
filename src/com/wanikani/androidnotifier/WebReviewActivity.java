@@ -413,6 +413,14 @@ public class WebReviewActivity extends Activity {
 		 */
 		public void dashboard ()
 		{
+			Intent i;
+			
+			i = new Intent (WebReviewActivity.this, MainActivity.class);
+			i.setAction (Intent.ACTION_MAIN);
+			i.addFlags (Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+			
+			startActivity (i);
+
 			finish ();
 		}
 	}
@@ -499,6 +507,8 @@ public class WebReviewActivity extends Activity {
 			public void apply (WebReviewActivity wav) { wav.hide (this); }
 			
 			public boolean isRelevantPage () { return false; }
+			
+			public boolean backIsSafe () { return true; }
 		};
 		
 		public abstract void apply (WebReviewActivity wav);
@@ -534,6 +544,11 @@ public class WebReviewActivity extends Activity {
 		}
 			
 		public boolean isMuteEmbedded ()
+		{
+			return false;
+		}
+		
+		public boolean backIsSafe ()
 		{
 			return false;
 		}
@@ -839,18 +854,22 @@ public class WebReviewActivity extends Activity {
 			rtask.pause ();
 	}
 	
+	/**
+	 * Tells if calling {@link WebView#goBack()} is safe. On some WK pages we should not use it. 
+	 * @return <tt>true</tt> if it is safe.
+	 */
+	protected boolean backIsSafe ()
+	{
+		return kbstatus.backIsSafe ();
+	}
+	
 	@Override
 	public void onBackPressed ()
 	{
-		// We don't use it anymore because it's too buggy
-		/*
-		if (wv.canGoBack ())
+		if (wv.canGoBack () && backIsSafe ())
 			wv.goBack ();
-		else*/
-		
-		/* We do this strange thing to stop a memory leakage when the last
-		 * displayed page is the review summary */
-		super.onBackPressed ();
+		else		
+			super.onBackPressed ();
 	}
 	
 	/**
