@@ -1149,6 +1149,14 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	}
 	
 	/**
+	 * Called to open the forum page.
+	 */
+	public void chat ()
+	{
+		open ("http://www.wanikani.com/chat");
+	}
+
+	/**
 	 * Open an URL. Depending on the integrated browser key, it chooses
 	 * whether to use the internal or the external browser.
 	 * 	@param url the URL to open

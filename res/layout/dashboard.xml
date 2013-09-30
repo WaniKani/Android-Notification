@@ -117,12 +117,33 @@
             </LinearLayout>		   
         </LinearLayout>
         
-                    
+         <RelativeLayout 
+             android:orientation="horizontal"
+             android:layout_width="match_parent"
+             android:layout_height="wrap_content">
+            
+             <LinearLayout
+                 android:orientation="vertical"
+                 android:layout_alignParentLeft="true"
+                 android:layout_centerVertical="true"
+                 android:layout_width="wrap_content"
+                 android:layout_height="match_parent">
+		    	<ImageButton
+		    	    style="@style/AlertButton"
+		    	    android:id="@+id/btn_chat" 
+		    	    android:src="@drawable/chat"/>                          
+		    	<ImageButton
+		    	    style="@style/AlertButton"
+		    	    android:id="@+id/btn_result" 
+		    	    android:src="@drawable/check"/>                          
+		    	</LinearLayout>"
         
         <!-- Next review indicator -->
 
         <LinearLayout
             style="@style/Row"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
             android:layout_width="match_parent"
             android:orientation="vertical" >
             
@@ -141,6 +162,8 @@
                 android:layout_gravity="center"/>   	   	
             
          </LinearLayout>
+         
+        </RelativeLayout>
         
         <!-- The first (review) table -->
 
