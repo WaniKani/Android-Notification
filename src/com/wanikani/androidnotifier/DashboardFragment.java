@@ -88,6 +88,22 @@ public class DashboardFragment extends Fragment implements Tab {
 			main.lessons ();
 		}	
 	}
+	
+	/**
+	 * Listener to clicks on the forum link pages.
+	 */
+	private class ChatClickListener implements View.OnClickListener {
+		
+		/**
+		 * Called when the button is clicked.
+		 * @param v the button 
+		 */
+		@Override
+		public void onClick (View v)
+		{
+			main.chat ();
+		}	
+	}
 
 	/**
 	 * Listener for clicks on remaining items link. Causes the pager to 
@@ -227,6 +243,12 @@ public class DashboardFragment extends Fragment implements Tab {
 
 		view = parent.findViewById (R.id.btn_lessons);
 		view.setOnClickListener (new AlertsClickListener (R.id.lay_lessons_available));
+		
+		view = parent.findViewById (R.id.btn_result);
+		view.setOnClickListener (new ReviewClickListener ());
+		
+		view = parent.findViewById (R.id.btn_chat);
+		view.setOnClickListener (new ChatClickListener ());
 }
 	
 	/**
@@ -380,11 +402,13 @@ public class DashboardFragment extends Fragment implements Tab {
 		if (dd.reviewsAvailable > 0) {
 			setVisibility (R.id.tv_next_review, View.INVISIBLE);
 			setVisibility (R.id.tv_next_review_val, View.GONE);
+			setVisibility (R.id.btn_result, View.GONE);
 			setVisibility (R.id.btn_review, View.VISIBLE);
 		} else {
 			setText (R.id.tv_next_review_val, niceInterval (dd.nextReviewDate));
 			setVisibility (R.id.tv_next_review, View.VISIBLE);
 			setVisibility (R.id.tv_next_review_val, View.VISIBLE);
+			setVisibility (R.id.btn_result, View.VISIBLE);
 			setVisibility (R.id.btn_review, View.GONE);
 		}
 		

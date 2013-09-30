@@ -58,7 +58,7 @@ public class LocalIMEKeyboard extends NativeKeyboard {
 	    }
 	    
 	    @Override
-	    public boolean onEditorAction(TextView tv, int actionId, KeyEvent event)
+	    public boolean onEditorAction (TextView tv, int actionId, KeyEvent event)
 	    {
 	    	String s;
 	    	
@@ -144,6 +144,8 @@ public class LocalIMEKeyboard extends NativeKeyboard {
 		ew.setInputType (InputType.TYPE_CLASS_TEXT);
 		ew.setOnEditorActionListener (imel);
 		ew.setGravity (Gravity.CENTER);
+		ew.setImeActionLabel (">>", EditorInfo.IME_ACTION_DONE);
+		ew.setImeOptions (EditorInfo.IME_ACTION_DONE);
 		
 		jsl = new JSListener ();
 		wv.addJavascriptInterface (jsl, "wknJSListener");
@@ -176,9 +178,8 @@ public class LocalIMEKeyboard extends NativeKeyboard {
 		divw.setLayoutParams (rparams);
 		
 		divw.setVisibility (View.VISIBLE);
+		imm.showSoftInput (wv, 0);
 		
 		ew.requestFocus ();
-
-		imm.showSoftInput (wv, InputMethodManager.SHOW_IMPLICIT);
 	}
 }
