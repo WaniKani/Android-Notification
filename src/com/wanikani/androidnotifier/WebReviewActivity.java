@@ -860,7 +860,14 @@ public class WebReviewActivity extends Activity {
 	 */
 	protected boolean backIsSafe ()
 	{
-		return kbstatus.backIsSafe ();
+		String rpage, url;
+		
+		url = wv.getUrl ();		
+		rpage = SettingsActivity.getURL (this);
+		
+		return kbstatus.backIsSafe () &&
+				/* Need this because the reviews summary page is dangerous */
+				!(url.contains (rpage) || rpage.contains (url));
 	}
 	
 	@Override
