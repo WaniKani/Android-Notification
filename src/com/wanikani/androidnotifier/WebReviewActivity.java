@@ -867,7 +867,8 @@ public class WebReviewActivity extends Activity {
 		
 		return kbstatus.backIsSafe () &&
 				/* Need this because the reviews summary page is dangerous */
-				!(url.contains (rpage) || rpage.contains (url));
+				!(url.contains (rpage) || rpage.contains (url)) &&
+				!url.contains ("http://www.wanikani.com/quickview");
 	}
 	
 	@Override
