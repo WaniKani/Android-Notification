@@ -227,7 +227,7 @@ public class WebReviewActivity extends Activity {
 		 * bit.
 		 */
 		public void run ()
-		{
+		{			
 			kbstatus.apply (WebReviewActivity.this);
 			if (kbstatus.isRelevantPage ())
 				reviewsSession ();			
@@ -795,6 +795,7 @@ public class WebReviewActivity extends Activity {
 		boolean show;
 		
 		show = kbstatus.canMute () && SettingsActivity.getShowMute (this);
+		keyboard.getMuteButton ().setVisibility (show ? View.VISIBLE : View.GONE);
 		
 		setMute (show && SettingsActivity.getMute (this));
 	}
@@ -854,6 +855,10 @@ public class WebReviewActivity extends Activity {
 	protected void iconize (KeyboardStatus kbs)
 	{
 		kbstatus = kbs;
+		
+		selectKeyboard ();
+		
+		applyMuteSettings ();
 		
 		keyboard.iconize (kbstatus.hasEnter (this));
 	}	
