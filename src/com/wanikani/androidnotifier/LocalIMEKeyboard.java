@@ -4,11 +4,12 @@ import android.graphics.Rect;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
+import android.util.DisplayMetrics;
+import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
-import android.view.inputmethod.InputMethodManager;
 import android.webkit.JavascriptInterface;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
@@ -99,6 +100,11 @@ public class LocalIMEKeyboard extends NativeKeyboard {
 		@JavascriptInterface
 		public void newQuestion (String qtype, int left, int top, int right, int bottom)
 		{
+			left = (int) TypedValue.applyDimension (TypedValue.COMPLEX_UNIT_DIP, left, dm);
+			right = (int) TypedValue.applyDimension (TypedValue.COMPLEX_UNIT_DIP, right, dm);
+			top = (int) TypedValue.applyDimension (TypedValue.COMPLEX_UNIT_DIP, top, dm);
+			bottom = (int) TypedValue.applyDimension (TypedValue.COMPLEX_UNIT_DIP, bottom, dm);
+			
 			imel.translate (qtype.equals ("reading"));
 			new JSListenerShow (new Rect (left, top, right, bottom));
 		}
@@ -131,9 +137,13 @@ public class LocalIMEKeyboard extends NativeKeyboard {
     
     JSListener jsl;
     
+    DisplayMetrics dm;
+    
 	public LocalIMEKeyboard (WebReviewActivity wav, FocusWebView wv)
 	{
 		super (wav, wv);
+		
+		dm = wav.getResources ().getDisplayMetrics ();
 		
 		ime = new JapaneseIME ();
 		
