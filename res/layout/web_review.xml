@@ -58,6 +58,7 @@
               android:src="@drawable/ic_mute" />
         <LinearLayout
             android:id="@+id/ime_div"
+            android:background="#fff"
             android:layout_width="300dip"
             android:layout_height="@dimen/m_rythm"
             android:visibility="gone"
@@ -66,9 +67,15 @@
             android:layout_alignParentTop="true">
             <EditText 
                 android:id="@+id/ime"
-                android:layout_width="match_parent"
+                android:layout_weight="1"
+                android:layout_width="0dip"
                 android:layout_height="match_parent"/>
-        </LinearLayout>
+            <Button 
+                android:id="@+id/ime_next"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text=">"/>
+            </LinearLayout>
         </RelativeLayout>
         <LinearLayout
             android:id="@+id/keyboard"

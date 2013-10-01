@@ -11,6 +11,7 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.webkit.JavascriptInterface;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -20,7 +21,7 @@ import com.wanikani.wklib.JapaneseIME;
 
 public class LocalIMEKeyboard extends NativeKeyboard {
 	
-	private class IMEListener implements TextWatcher, OnEditorActionListener {
+	private class IMEListener implements TextWatcher, OnEditorActionListener, View.OnClickListener {
 		
 	    boolean translate;
 	    
@@ -61,20 +62,32 @@ public class LocalIMEKeyboard extends NativeKeyboard {
 	    @Override
 	    public boolean onEditorAction (TextView tv, int actionId, KeyEvent event)
 	    {
-	    	String s;
 	    	
 	        if (actionId == EditorInfo.IME_ACTION_DONE) {
-	        	s = ew.getText ().toString ();
-	        	if (translate)
-	        		s = ime.fixup (s);
-	        	wv.js (String.format (JS_INJECT_ANSWER, s));
-	        	divw.setVisibility (View.GONE);
-	        	imm.hideSoftInputFromWindow (ew.getWindowToken(), 0);
-	        	ew.setText ("");
+	        	next ();
 	        	return true;
 	        }
 	        
 	        return false;
+	    }
+	    
+	    @Override
+	    public void onClick (View view)
+	    {
+	    	next ();
+	    }
+	    
+	    private void next ()
+	    {
+	    	String s;
+	    	
+        	s = ew.getText ().toString ();
+        	if (translate)
+        		s = ime.fixup (s);
+        	wv.js (String.format (JS_INJECT_ANSWER, s));
+        	divw.setVisibility (View.GONE);
+        	imm.hideSoftInputFromWindow (ew.getWindowToken(), 0);
+        	ew.setText ("");
 	    }
 	}
 	
@@ -139,6 +152,8 @@ public class LocalIMEKeyboard extends NativeKeyboard {
     
     DisplayMetrics dm;
     
+    Button next;
+    
 	public LocalIMEKeyboard (WebReviewActivity wav, FocusWebView wv)
 	{
 		super (wav, wv);
@@ -156,6 +171,9 @@ public class LocalIMEKeyboard extends NativeKeyboard {
 		ew.setGravity (Gravity.CENTER);
 		ew.setImeActionLabel (">>", EditorInfo.IME_ACTION_DONE);
 		ew.setImeOptions (EditorInfo.IME_ACTION_DONE);
+		
+		next = (Button) wav.findViewById (R.id.ime_next);
+		next.setOnClickListener (imel);
 		
 		jsl = new JSListener ();
 		wv.addJavascriptInterface (jsl, "wknJSListener");
