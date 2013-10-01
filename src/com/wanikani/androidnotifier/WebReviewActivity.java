@@ -768,14 +768,22 @@ public class WebReviewActivity extends Activity {
 		wv.setScrollBarStyle (ScrollView.SCROLLBARS_OUTSIDE_OVERLAY);
 		wv.setWebViewClient (new WebViewClientImpl ());
 		wv.setWebChromeClient (new WebChromeClientImpl ());		
-		
-		wv.loadUrl (getIntent ().getData ().toString ());
-		
+
+		wv.loadUrl (getIntent ().getData ().toString ());		
+
 		if (SettingsActivity.getTimerReaper (this)) {
 			reaper = new TimerThreadsReaper ();
 			rtask = reaper.createTask (new Handler (), 2, 7000);
 			rtask.setListener (new ReaperTaskListener ());
 		}
+	}
+	
+	@Override
+	public void onNewIntent (Intent intent)
+	{
+		super.onNewIntent (intent);
+		
+		wv.loadUrl (intent.getData ().toString ());		
 	}
 	
 	@Override
