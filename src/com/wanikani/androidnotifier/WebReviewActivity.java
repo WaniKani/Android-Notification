@@ -630,6 +630,14 @@ public class WebReviewActivity extends Activity {
 	}
 	
 	@Override
+	public void onNewIntent (Intent intent)
+	{
+		super.onNewIntent (intent);
+		
+		wv.loadUrl (intent.getData ().toString ());		
+	}
+	
+	@Override
 	protected void onResume ()
 	{
 		Window window;
@@ -723,7 +731,8 @@ public class WebReviewActivity extends Activity {
 		
 		return kbstatus.backIsSafe () &&
 				/* Need this because the reviews summary page is dangerous */
-				!(url.contains (rpage) || rpage.contains (url));
+				!(url.contains (rpage) || rpage.contains (url)) &&
+				!url.contains ("http://www.wanikani.com/quickview");
 	}
 	
 	@Override
