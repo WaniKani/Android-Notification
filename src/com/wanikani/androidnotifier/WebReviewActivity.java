@@ -875,14 +875,19 @@ public class WebReviewActivity extends Activity {
 		
 		return kbstatus.backIsSafe () &&
 				/* Need this because the reviews summary page is dangerous */
-				!(url.contains (rpage) || rpage.contains (url)) &&
-				!url.contains ("http://www.wanikani.com/quickview");
+				!(url.contains (rpage) || rpage.contains (url));
 	}
 	
 	@Override
 	public void onBackPressed ()
 	{
-		if (wv.canGoBack () && backIsSafe ())
+		String url;
+		
+		url = wv.getUrl ();
+		
+		if (url.contains ("http://www.wanikani.com/quickview"))
+			wv.loadUrl (SettingsActivity.getLessonURL (this));
+		else if (wv.canGoBack () && backIsSafe ())
 			wv.goBack ();
 		else		
 			super.onBackPressed ();
