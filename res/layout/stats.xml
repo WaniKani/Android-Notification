@@ -24,6 +24,43 @@
             android:layout_alignParentLeft="true"
             android:layout_alignParentTop="true"
             android:orientation="vertical" >
+            
+            <TextView
+                android:id="@+id/ct_eta"
+                style="@style/ChartTitle"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:text="@string/ct_eta"
+                android:visibility="gone" />
+    
+    		<LinearLayout
+    		    android:id="@+id/ctab_eta"
+        		style="@style/Table"
+        		android:layout_width="match_parent"
+        		android:layout_height="wrap_content"
+        		android:orientation="vertical"
+        		android:visibility="gone">
+
+        		<TextView
+        		    android:id="@+id/tv_eta_l50"
+        		    style="@style/LegendValue"
+        		    android:layout_width="fill_parent"
+        		    android:layout_height="match_parent" />
+
+        		<TextView
+        		    android:id="@+id/tv_eta_avg"
+        		    style="@style/LegendValue"
+        		    android:layout_width="fill_parent"
+        		    android:layout_height="match_parent" />
+
+        		<TextView
+        		    android:id="@+id/tv_eta_next"
+        		    style="@style/LegendValue"
+        		    android:layout_width="fill_parent"
+        		    android:layout_height="match_parent" />
+
+        	</LinearLayout>
+            
 
             <com.wanikani.androidnotifier.graph.PieChart
                 android:id="@+id/pc_srs"
