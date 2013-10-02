@@ -1,5 +1,7 @@
 package com.wanikani.androidnotifier;
 
+import android.content.res.Resources;
+import android.graphics.Color;
 import android.graphics.Rect;
 import android.text.Editable;
 import android.text.InputType;
@@ -85,55 +87,120 @@ public class LocalIMEKeyboard extends NativeKeyboard {
         	if (translate)
         		s = ime.fixup (s);
         	wv.js (String.format (JS_INJECT_ANSWER, s));
-        	divw.setVisibility (View.GONE);
-        	imm.hideSoftInputFromWindow (ew.getWindowToken(), 0);
-        	ew.setText ("");
 	    }
+	}
+	
+	private class JSListenerSetClass implements Runnable {
+		
+		public boolean enable;
+		
+		public String clazz;
+		
+		public JSListenerSetClass (String clazz)
+		{
+			this.clazz = clazz;
+			
+			enable = true;
+			
+			wav.runOnUiThread (this);
+		}
+		
+		public JSListenerSetClass ()
+		{
+			enable = false;
+			
+			wav.runOnUiThread (this);
+		}
+
+		public void run ()
+		{
+			if (enable)
+				setClass (clazz);
+			else
+				unsetClass ();
+		}
+		
 	}
 	
 	private class JSListenerShow implements Runnable {
 		
-		Rect rect;
+		Rect frect, trect;
 		
-		public JSListenerShow (Rect rect)
+		public JSListenerShow (Rect frect, Rect trect)
 		{
-			this.rect = rect;
+			this.frect = frect;
+			this.trect = trect;
 			
 			wav.runOnUiThread (this);
 		}
 		
 		public void run ()
 		{
-			showIME (rect);
+			replace (frect, trect);
 		}
 	}
 	
 	private class JSListener {
 		
 		@JavascriptInterface
-		public void newQuestion (String qtype, int left, int top, int right, int bottom)
+		public void replace (int fleft, int ftop, int fright, int fbottom,
+							 int tleft, int ttop, int tright, int tbottom)
 		{
-			left = (int) TypedValue.applyDimension (TypedValue.COMPLEX_UNIT_DIP, left, dm);
-			right = (int) TypedValue.applyDimension (TypedValue.COMPLEX_UNIT_DIP, right, dm);
-			top = (int) TypedValue.applyDimension (TypedValue.COMPLEX_UNIT_DIP, top, dm);
-			bottom = (int) TypedValue.applyDimension (TypedValue.COMPLEX_UNIT_DIP, bottom, dm);
+			fleft = (int) TypedValue.applyDimension (TypedValue.COMPLEX_UNIT_DIP, fleft, dm);
+			fright = (int) TypedValue.applyDimension (TypedValue.COMPLEX_UNIT_DIP, fright, dm);
+			ftop = (int) TypedValue.applyDimension (TypedValue.COMPLEX_UNIT_DIP, ftop, dm);
+			fbottom = (int) TypedValue.applyDimension (TypedValue.COMPLEX_UNIT_DIP, fbottom, dm);
 			
-			imel.translate (qtype.equals ("reading"));
-			new JSListenerShow (new Rect (left, top, right, bottom));
+			tleft = (int) TypedValue.applyDimension (TypedValue.COMPLEX_UNIT_DIP, tleft, dm);
+			tright = (int) TypedValue.applyDimension (TypedValue.COMPLEX_UNIT_DIP, tright, dm);
+			ttop = (int) TypedValue.applyDimension (TypedValue.COMPLEX_UNIT_DIP, ttop, dm);
+			tbottom = (int) TypedValue.applyDimension (TypedValue.COMPLEX_UNIT_DIP, tbottom, dm);
+
+			new JSListenerShow (new Rect (fleft, ftop, fright, fbottom),
+								new Rect (tleft, ttop, tright, tbottom));
+		}
+
+		@JavascriptInterface
+		public void newQuestion (String qtype)
+		{
+			imel.translate (qtype.equals ("reading"));			
+			new JSListenerSetClass ();
 		}
 		
+		@JavascriptInterface
+		public void setClass (String clazz)
+		{
+			new JSListenerSetClass (clazz);
+		}
 	}
 
 	private static final String JS_INIT_TRIGGERS =
-			"window.wknNewQuestion = function (entry, type) {" +
-			"   var qtype, form, rect;" +
-			"   qtype = $.jStorage.get (\"questionType\");" +
+			"window.wknReplace = function () {" +
+			"   var form, frect, txt, trect;" +
 			"   form = document.getElementById (\"answer-form\");" +
-			"   rect = form.getBoundingClientRect ();" +
-			"   wknJSListener.newQuestion (qtype, rect.left, rect.top, rect.right, rect.bottom);" +
+			"   txt = document.getElementById (\"user-response\");" +
+			"   frect = form.getBoundingClientRect ();" +
+			"   trect = txt.getBoundingClientRect ();" +
+			"   wknJSListener.replace (frect.left, frect.top, frect.right, frect.bottom," +
+			"						   trect.left, trect.top, trect.right, trect.bottom);" +
+			"};" +
+			"window.wknNewQuestion = function (entry, type) {" +
+			"   var qtype;" +
+			"   qtype = $.jStorage.get (\"questionType\");" +
+			"   window.wknReplace ();" +
+			"   wknJSListener.newQuestion (qtype);" +
 			"};" +
 			"$.jStorage.listenKeyChange (\"currentItem\", window.wknNewQuestion);" +
-			"window.wknNewQuestion ();";
+			"window.wknNewQuestion ();" +
+			"var oldAddClass = jQuery.fn.addClass;" +
+			"jQuery.fn.addClass = function () {" +
+			"    var res;" +
+			"    res = oldAddClass.apply (this, arguments);" +
+			"    if (this.selector == \"#answer-form fieldset\")" +
+			"         wknJSListener.setClass (arguments [0]); " +
+			"    return res;" +
+			"};";
+	
 	private static final String JS_STOP_TRIGGERS =
 			"$.jStorage.stopListening (\"currentItem\", window.wknNewQuestion);";
 	private static final String JS_INJECT_ANSWER = 
@@ -154,9 +221,15 @@ public class LocalIMEKeyboard extends NativeKeyboard {
     
     Button next;
     
+    int correctFG, incorrectFG;
+    
+    int correctBG, incorrectBG;
+    
 	public LocalIMEKeyboard (WebReviewActivity wav, FocusWebView wv)
 	{
 		super (wav, wv);
+		
+		Resources res;
 		
 		dm = wav.getResources ().getDisplayMetrics ();
 		
@@ -177,6 +250,12 @@ public class LocalIMEKeyboard extends NativeKeyboard {
 		
 		jsl = new JSListener ();
 		wv.addJavascriptInterface (jsl, "wknJSListener");
+		
+		res = wav.getResources ();
+		correctFG = res.getColor (R.color.correctfg);
+		incorrectFG = res.getColor (R.color.incorrectfg);
+		correctBG = res.getColor (R.color.correctbg);
+		incorrectBG = res.getColor (R.color.incorrectbg);
 	}	
 	
 	public void show (boolean hasEnter)
@@ -194,20 +273,48 @@ public class LocalIMEKeyboard extends NativeKeyboard {
 		divw.setVisibility (View.GONE);
 	}
 
-	protected void showIME (Rect rect)
+	protected void replace (Rect frect, Rect trect)
 	{
 		RelativeLayout.LayoutParams rparams;
 
 		rparams = (RelativeLayout.LayoutParams) divw.getLayoutParams ();
-		rparams.topMargin = rect.top;
-		rparams.leftMargin = rect.left;
-		rparams.height = rect.height ();
-		rparams.width = rect.width ();
+		rparams.topMargin = frect.top;
+		rparams.leftMargin = frect.left;
+		rparams.height = frect.height ();
+		rparams.width = frect.width ();
 		divw.setLayoutParams (rparams);
 		
 		divw.setVisibility (View.VISIBLE);
-		imm.showSoftInput (wv, 0);
 		
 		ew.requestFocus ();
+	}
+	
+	public void setClass (String clazz)
+	{
+		if (clazz.equals ("correct"))
+			disable (correctFG, correctBG);
+		else if (clazz.equals ("incorrect"))
+			disable (incorrectFG, incorrectBG);
+	}
+	
+	public void unsetClass ()
+	{
+		enable ();
+	}
+	
+	private void disable (int fg, int bg)
+	{
+		ew.setTextColor (fg);
+		ew.setBackgroundColor (bg);
+		ew.setEnabled (false);
+	}
+
+	private void enable ()
+	{
+    	ew.setText ("");
+		ew.setTextColor (Color.BLACK);
+		ew.setBackgroundColor (Color.WHITE);
+		ew.setEnabled (true);
+		imm.showSoftInput (wv, 0);
 	}
 }
