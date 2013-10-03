@@ -10,6 +10,5 @@ public interface Keyboard {
 	
 	public void hide ();
 	
-	public ImageButton getMuteButton ();
-	
+	public ImageButton getMuteButton ();	
 }

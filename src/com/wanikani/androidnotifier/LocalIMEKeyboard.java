@@ -15,6 +15,7 @@ import android.view.inputmethod.EditorInfo;
 import android.webkit.JavascriptInterface;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
@@ -22,6 +23,15 @@ import android.widget.TextView.OnEditorActionListener;
 import com.wanikani.wklib.JapaneseIME;
 
 public class LocalIMEKeyboard extends NativeKeyboard {
+
+	private class WebViewListener implements FocusWebView.Listener {
+		
+		@Override
+		public void onScroll (int dx, int dy)
+		{
+			scroll (dx, dy);
+		}
+	}
 	
 	private class IMEListener implements TextWatcher, OnEditorActionListener, View.OnClickListener {
 		
@@ -176,13 +186,15 @@ public class LocalIMEKeyboard extends NativeKeyboard {
 
 	private static final String JS_INIT_TRIGGERS =
 			"window.wknReplace = function () {" +
-			"   var form, frect, txt, trect;" +
+			"   var form, frect, txt, trect, button, brect;" +
 			"   form = document.getElementById (\"answer-form\");" +
 			"   txt = document.getElementById (\"user-response\");" +
+			"   button = form.getElementsByTagName (\"button\") [0];" +
 			"   frect = form.getBoundingClientRect ();" +
 			"   trect = txt.getBoundingClientRect ();" +
+			"   brect = button.getBoundingClientRect ();" +
 			"   wknJSListener.replace (frect.left, frect.top, frect.right, frect.bottom," +
-			"						   trect.left, trect.top, trect.right, trect.bottom);" +
+			"						   trect.left, trect.top, brect.left, trect.bottom);" +
 			"};" +
 			"window.wknNewQuestion = function (entry, type) {" +
 			"   var qtype;" +
@@ -200,6 +212,9 @@ public class LocalIMEKeyboard extends NativeKeyboard {
 			"         wknJSListener.setClass (arguments [0]); " +
 			"    return res;" +
 			"};";
+	
+	private final String JS_REPLACE = 
+			"window.wknReplace ();";
 	
 	private static final String JS_STOP_TRIGGERS =
 			"$.jStorage.stopListening (\"currentItem\", window.wknNewQuestion);";
@@ -251,6 +266,8 @@ public class LocalIMEKeyboard extends NativeKeyboard {
 		jsl = new JSListener ();
 		wv.addJavascriptInterface (jsl, "wknJSListener");
 		
+		wv.registerListener (new WebViewListener ());
+		
 		res = wav.getResources ();
 		correctFG = res.getColor (R.color.correctfg);
 		incorrectFG = res.getColor (R.color.incorrectfg);
@@ -264,29 +281,57 @@ public class LocalIMEKeyboard extends NativeKeyboard {
 		
 		wv.js (JS_INIT_TRIGGERS);
 	}
-	
+
 	public void hide ()
 	{
 		super.hide ();
 
+		imm.hideSoftInputFromWindow (ew.getWindowToken (), 0);
 		wv.js (JS_STOP_TRIGGERS);
 		divw.setVisibility (View.GONE);
 	}
 
+	/* The commented-out sections are there until I find a way to resize the font as well */
 	protected void replace (Rect frect, Rect trect)
 	{
 		RelativeLayout.LayoutParams rparams;
+		LinearLayout.LayoutParams params;
 
 		rparams = (RelativeLayout.LayoutParams) divw.getLayoutParams ();
 		rparams.topMargin = frect.top;
 		rparams.leftMargin = frect.left;
-		rparams.height = frect.height ();
+//		rparams.height = frect.height ();
 		rparams.width = frect.width ();
+		rparams.addRule (RelativeLayout.ALIGN_PARENT_RIGHT);
+		rparams.addRule (RelativeLayout.ALIGN_PARENT_LEFT);
 		divw.setLayoutParams (rparams);
+	
+		params = (LinearLayout.LayoutParams) ew.getLayoutParams ();
+				
+//		params.topMargin = trect.top - frect.top;
+//		params.bottomMargin = frect.bottom - trect.bottom;
+		params.leftMargin = trect.left - frect.left;
+		params.rightMargin = params.leftMargin;
 		
+		ew.setLayoutParams (params);
+				
+		params = (LinearLayout.LayoutParams) next.getLayoutParams ();
+//		params.topMargin = trect.top - frect.top;
+//		params.bottomMargin = frect.bottom - trect.bottom;
+		next.setLayoutParams (params);		
+
 		divw.setVisibility (View.VISIBLE);
 		
 		ew.requestFocus ();
+	}
+	
+	protected void scroll (int dx, int dy)
+	{
+		RelativeLayout.LayoutParams rparams;
+
+		rparams = (RelativeLayout.LayoutParams) divw.getLayoutParams ();
+		rparams.topMargin -= dy;
+		divw.setLayoutParams (rparams);
 	}
 	
 	public void setClass (String clazz)
@@ -315,6 +360,8 @@ public class LocalIMEKeyboard extends NativeKeyboard {
 		ew.setTextColor (Color.BLACK);
 		ew.setBackgroundColor (Color.WHITE);
 		ew.setEnabled (true);
-		imm.showSoftInput (wv, 0);
+
+		imm.showSoftInput (ew, 0);
+		ew.requestFocus ();
 	}
 }

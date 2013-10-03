@@ -33,7 +33,7 @@ public class NativeKeyboard implements Keyboard {
 		
 		muteH.setVisibility (SettingsActivity.getShowMute (wav) ? View.VISIBLE : View.GONE);
 	}
-	
+		
 	public void iconize (boolean hasEnter)
 	{
 		/* empty */
@@ -48,5 +48,4 @@ public class NativeKeyboard implements Keyboard {
 	{
 		return muteH;
 	}
-
 }

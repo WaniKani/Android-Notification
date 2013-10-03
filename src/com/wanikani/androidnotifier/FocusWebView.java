@@ -18,6 +18,8 @@ package com.wanikani.androidnotifier;
  */
 
 import java.lang.reflect.Method;
+import java.util.List;
+import java.util.Vector;
 
 import android.app.Activity;
 import android.content.Context;
@@ -33,6 +35,12 @@ import android.webkit.WebView;
  */
 public class FocusWebView extends WebView {
 
+	public interface Listener {
+	
+		public void onScroll (int deltax, int deltay);
+		
+	}
+	
 	/// The input manager
 	private InputMethodManager imm;
 	
@@ -44,6 +52,9 @@ public class FocusWebView extends WebView {
 	
 	/// The onResume method
 	private Method onResume_m;
+	
+	/// List of registered listeners
+	private List<Listener> listeners;
 
 	/**
 	 * Constructor
@@ -55,6 +66,7 @@ public class FocusWebView extends WebView {
 		super (ctxt, attrs);
 
 		imm = (InputMethodManager) ctxt.getSystemService (Context.INPUT_METHOD_SERVICE);
+		listeners = new Vector<Listener> ();
 		
 		try {
 			onPause_m = getClass ().getMethod ("onPause");
@@ -82,6 +94,15 @@ public class FocusWebView extends WebView {
 	}
 	
 	/**
+	 * Registers a new listener.
+	 * @param listener the new listener
+	 */
+	public void registerListener (Listener listener)
+	{
+		listeners.add (listener);
+	}
+	
+	/**
 	 * This is the event we use to detect whether the keyboard is showing up.
 	 * Actually, this method is used in a lot of other cases, but the
 	 * operations done here are idempotent.
@@ -95,6 +116,19 @@ public class FocusWebView extends WebView {
 		
 		if (disable)
 			hideNative ();
+	}
+		
+	@Override
+	protected void onScrollChanged (int l, int t, int oldl, int oldt)
+	{
+		int dx, dy;
+		
+		super.onScrollChanged (l, t, oldl, oldt);
+		
+		dx = l - oldl;
+		dy = t - oldt;
+		for (Listener listener : listeners)
+			listener.onScroll (dx, dy);
 	}
 	
 	/**
