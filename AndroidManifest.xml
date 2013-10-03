@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.wanikani.androidnotifier"
-    android:versionCode="36"
-    android:versionName="1.5.1-lrev1">
+    android:versionCode="37"
+    android:versionName="1.5.1-lrev2">
 
     <uses-sdk
         android:minSdkVersion="7"
