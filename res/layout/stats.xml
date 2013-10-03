@@ -53,12 +53,6 @@
         		    android:layout_width="fill_parent"
         		    android:layout_height="match_parent" />
 
-        		<TextView
-        		    android:id="@+id/tv_eta_next"
-        		    style="@style/LegendValue"
-        		    android:layout_width="fill_parent"
-        		    android:layout_height="match_parent" />
-
         	</LinearLayout>
             
 
