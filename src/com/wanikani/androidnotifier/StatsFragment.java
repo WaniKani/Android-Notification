@@ -1,7 +1,12 @@
 package com.wanikani.androidnotifier;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Vector;
 
@@ -15,6 +20,7 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.wanikani.androidnotifier.db.HistoryDatabase;
 import com.wanikani.androidnotifier.db.HistoryDatabaseCache;
@@ -25,6 +31,7 @@ import com.wanikani.androidnotifier.graph.PieChart;
 import com.wanikani.androidnotifier.graph.PiePlot.DataSet;
 import com.wanikani.androidnotifier.graph.TYChart;
 import com.wanikani.wklib.SRSDistribution;
+import com.wanikani.wklib.UserInformation;
 
 /* 
  *  Copyright (c) 2013 Alberto Cuda
@@ -551,6 +558,205 @@ public class StatsFragment extends Fragment implements Tab {
 		}
 		
 	}
+	
+	/**
+	 * This class, given the core stats, calculates the expected completion time
+	 * of the fifty WK levels and of next level. This is done through an exponentially
+	 * weighted average. The exponent is different in the two cases.
+	 */
+	private class LevelEstimates {
+		
+		/// The exponent for l50 completion
+		private static final float WEXP_L50 = 0.707f;
+				
+		/// The exponent for next level completion
+		private static final float WEXP_NEXT = 0.42f;
+		
+		/// The corestats
+		HistoryDatabase.CoreStats cs;
+		
+		/// The dashboard data
+		DashboardData dd;
+		
+		/// The Date formatter
+		private DateFormat df;		
+		
+		public void setCoreStats (HistoryDatabase.CoreStats cs)
+		{
+			this.cs = cs;
+			
+			df = new SimpleDateFormat ("dd MMM yyyy", Locale.US);
+			update ();
+		}
+		
+		public void setDashboardData (DashboardData dd)
+		{
+			this.dd = dd;
+			
+			update ();
+		}
+		
+		private void update ()
+		{
+			Map<Integer, Integer> days;
+			boolean show;
+			int vity;
+			
+			if (cs == null || dd == null)
+				return;
+
+			days = getDays ();
+			show = false;
+			
+			show |= updateL50 (days);
+			show |= updateNextLevel (days);
+			vity = show ? View.VISIBLE : View.GONE;
+		
+			parent.findViewById (R.id.ct_eta).setVisibility (vity);
+			parent.findViewById (R.id.ctab_eta). setVisibility (vity);
+		}
+		
+		private boolean updateL50 (Map<Integer, Integer> days)
+		{
+			TextView tw;
+			Float delay;
+			Calendar cal;
+			String s;
+
+			delay = weight (days, WEXP_L50);
+			tw = (TextView) parent.findViewById (R.id.tv_eta_l50);
+			if (delay != null && dd.level < ALL_THE_LEVELS) {
+				cal = Calendar.getInstance ();
+				cal.setTime (dd.creation);				
+				cal.add (Calendar.DATE, (int) (delay * ALL_THE_LEVELS));
+				s = main.getString (R.string.fmt_eta_l50, df.format (cal.getTime ()));
+				tw.setText (s);
+				tw.setVisibility (View.VISIBLE);
+				
+				return true;
+			} else {
+				tw.setVisibility (View.GONE);
+				
+				return false;
+			}
+		}
+		
+		private boolean updateNextLevel (Map<Integer, Integer> days)
+		{
+			TextView tw, stw;
+			Integer lastlup;
+			Float delay;
+			Calendar cal;
+			String s;
+			
+			delay = weight (days, WEXP_NEXT);
+			tw = (TextView) parent.findViewById (R.id.tv_eta_avg);
+			stw = (TextView) parent.findViewById (R.id.tv_eta_next);
+			if (delay != null) {
+				s = beautify (delay);
+				tw.setText (main.getString (R.string.fmt_eta_avg, s));
+				tw.setVisibility (View.VISIBLE);
+				
+				lastlup = cs.levelups.get (dd.level);
+				if (lastlup != null) {
+					cal = Calendar.getInstance ();
+					cal.setTime (dd.creation);
+					cal.add (Calendar.DATE, lastlup);
+					delay -= ((float) System.currentTimeMillis () - cal.getTimeInMillis ()) / (24 * 3600 * 1000);
+					if (delay > 0)
+						s = main.getString (R.string.fmt_eta_next_future, beautify (delay));
+					else
+						s = main.getString (R.string.fmt_eta_next_past, beautify (-delay));
+					stw.setText (s);
+					stw.setVisibility (View.VISIBLE);
+				} else
+					stw.setVisibility (View.GONE);
+				
+				return true;
+				
+			} else {
+				tw.setVisibility (View.GONE);
+				stw.setVisibility (View.GONE);
+				
+				return false;
+			}
+		}
+		
+		public String beautify (float days)
+		{
+			long dfield, hfield;
+			Resources res;
+			String ds, hs;
+			
+			res = getResources ();
+			dfield = (long) days;
+			hfield = (long) ((days - dfield) * 24);
+			if (dfield > 1)
+				ds = res.getString (R.string.fmt_bd, dfield);
+			else if (dfield == 1)
+				ds = res.getString (R.string.fmt_bd_one);
+			else
+				ds = null;
+			
+			if (hfield > 1)
+				hs = res.getString (R.string.fmt_bh, hfield);
+			else if (hfield == 1)
+				hs = res.getString (R.string.fmt_bh_one);
+			else
+				hs = null;
+
+			if (ds != null)
+				if (hs != null)
+					return ds + ", " + hs;
+				else
+					return ds;
+			else
+				if (hs != null)
+					return hs;
+				else
+					return res.getString (R.string.fmt_bnow);
+				
+		}
+		
+		private Map<Integer, Integer> getDays ()
+		{
+			Map<Integer, Integer> ans;
+			Integer lday, cday;
+			int i;
+			
+			lday = 0;
+			ans = new Hashtable<Integer, Integer> ();
+			for (i = 1; i < dd.level; i++) {
+				cday = cs.levelups.get (i);
+				if (cday != null && lday != null && lday < cday)
+					ans.put (i, cday - lday);
+				lday = cday;
+			}
+				
+			return ans;
+		}
+		
+		private Float weight (Map<Integer, Integer> days, float wexp)
+		{
+			float cw, num, den;
+			Integer delta;
+			int i;
+			
+			num = den = 0;
+			cw = wexp;
+			for (i = dd.level - 1; i > 0; i--) {
+				delta = days.get (i);
+				if (delta != null) {
+					num += cw * delta;
+					den += cw;
+				}
+				cw *= wexp;
+			}
+			
+			return den != 0 ? num / den : null;
+		}
+				
+	}
 
 	/// The main activity
 	MainActivity main;
@@ -575,12 +781,18 @@ public class StatsFragment extends Fragment implements Tab {
 
 	/// The Vocab progress plot datasource
 	VocabDataSource vocabds;
+	
+	/// The level estimator
+	LevelEstimates les;
 
 	/// Overall number of kanji
 	private static final int ALL_THE_KANJI = 1700;
 	
 	/// Overall number of vocab items
 	private static final int ALL_THE_VOCAB = 5000;
+	
+	/// Overall number of levels
+	private static final int ALL_THE_LEVELS = 50;
 	
 	/// The database
 	HistoryDatabaseCache hdbc;
@@ -595,6 +807,7 @@ public class StatsFragment extends Fragment implements Tab {
 	{
 		this.charts = new Vector<TYChart> ();
 		hdbc = new HistoryDatabaseCache ();
+		les = new LevelEstimates ();
 	}
 	
 	@Override
@@ -635,6 +848,7 @@ public class StatsFragment extends Fragment implements Tab {
 		srsds.setCoreStats (cs);
 		kanjids.setCoreStats (cs);
 		vocabds.setCoreStats (cs);
+		les.setCoreStats (cs);
 		for (TYChart tyc : charts)
 			tyc.refresh ();
 	}
@@ -728,6 +942,7 @@ public class StatsFragment extends Fragment implements Tab {
 		if (dd == null || !isResumed ())
 			return;
 		
+		les.setDashboardData (dd);
 		switch (dd.od.srsStatus) {
 		case RETRIEVING:
 			break;

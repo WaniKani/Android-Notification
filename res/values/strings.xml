@@ -155,8 +155,20 @@
     <string name="fmt_ni_one_month">one month</string>
     <string name="fmt_ni_months">%d months</string>
     
+    <string name="fmt_bd">%d days</string>
+    <string name="fmt_bd_one">one day</string>
+    <string name="fmt_bh">%d hours</string>
+    <string name="fmt_bh_one">one hour</string>
+    <string name="fmt_bnow">~now</string>
+    
     <string name="fmt_ii_percent">%d%%</string>
     <string name="fmt_ii_percent_full">%1$d%% (%2$d%%M, %3$d%%R)</string>
+    
+    <string name="ct_eta">Estimates</string>
+    <string name="fmt_eta_l50">Level 50: %s</string>
+    <string name="fmt_eta_avg">Average levelup time: %s</string>
+    <string name="fmt_eta_next_future">which is in %s</string>
+    <string name="fmt_eta_next_past">which is %s ago</string>
     
     <string name="ct_srs_distribution">SRS Distribution</string>
     <string name="ct_kanji_progress">Kanji Progress</string>
