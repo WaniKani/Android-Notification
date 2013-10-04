@@ -220,9 +220,9 @@ public class JapaneseIME {
 	
 		put ("cha", "ちゃ");
 		putI ("ch", "ち");
-		put ("chu", "ちょ");
+		put ("cho", "ちょ");
 		put ("che", "ちぇ");
-		put ("cho", "ちゅ");		
+		put ("chu", "ちゅ");		
 		
 		put ("fa", "ふぁ");
 		putI ("f", "ふ");
