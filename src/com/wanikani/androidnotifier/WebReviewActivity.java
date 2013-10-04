@@ -884,8 +884,10 @@ public class WebReviewActivity extends Activity {
 		String url;
 		
 		url = wv.getUrl ();
-		
-		if (url.contains ("http://www.wanikani.com/quickview"))
+
+		if (url == null)
+			super.onBackPressed ();
+		else if (url.contains ("http://www.wanikani.com/quickview"))
 			wv.loadUrl (SettingsActivity.getLessonURL (this));
 		else if (wv.canGoBack () && backIsSafe ())
 			wv.goBack ();
