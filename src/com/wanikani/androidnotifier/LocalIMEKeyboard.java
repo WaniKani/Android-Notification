@@ -200,8 +200,10 @@ public class LocalIMEKeyboard extends NativeKeyboard {
 			"   var qtype, e;" +
 			"   qtype = $.jStorage.get (\"questionType\");" +
 			"   window.wknReplace ();" +
-			"   e = $(\"#character span\");" +
-			"   e.text (e.text ().replace (/〜/g, \"~\")); " +
+			"   if ($(\"#character\").hasClass (\"vocabulary\")) {" +
+			"        e = $(\"#character span\");" +
+			"        e.text (e.text ().replace (/〜/g, \"~\")); " +
+			"   }" +
 			"   wknJSListener.newQuestion (qtype);" +			
 			"};" +
 			"$.jStorage.listenKeyChange (\"currentItem\", window.wknNewQuestion);" +
