@@ -338,6 +338,10 @@ public class ReconstructDialog {
 
 				hdb.endReconstructing (rt);
 				
+				publishProgress (new Update ("First level 10 item encountered: " +
+								 rt.l10item.type + ": char = " + rt.l10item.character + 
+								 " meaning = " + rt.l10item.meaning + 
+								 " unlocked = " + rt.l10item.getUnlockedDate ()));
 				return hdb.getCoreStats ();
 				
 			} catch (SQLException e) {
@@ -480,7 +484,7 @@ public class ReconstructDialog {
 	private void complete (HistoryDatabase.CoreStats cs)
 	{		
 		if (cs != null) {
-			detach ();		
+		//	detach ();		
 			completed = true;
 			ifc.completed (cs);
 		}

@@ -220,6 +220,8 @@ public class TYChart extends LinearLayout {
 	{
 		String s;
 		
+		shown = true;
+		
 		if (shown) { 
 			s = getResources ().getString (R.string.alert_can_fill);
 			s = "<font color=\"blue\"><u>" + s + "</u></font>";

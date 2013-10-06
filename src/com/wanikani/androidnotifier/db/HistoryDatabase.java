@@ -747,6 +747,8 @@ public class HistoryDatabase {
 		/** The levelups hashtable, mapping levels to leveup days */
 		private Map<Integer, Integer> levelups;
 		
+		public Item l10item;
+		
 		/**
 		 * Constructor.
 		 * @param ui the user information 
@@ -763,6 +765,7 @@ public class HistoryDatabase {
 			db.execSQL (SQL_COPY_FROM_FACTS);			
 			
 			levelups = Levels.getLevelups (db);
+			levelups.remove (10);
 			
 			radicalStmtU = db.compileStatement 
 					(String.format (SQL_ABOVE, C_UNLOCKED_RADICALS));
@@ -825,8 +828,11 @@ public class HistoryDatabase {
 			
 			day = ui.getDay (unlock);
 			cday = levelups.get (i.level);
-			if (cday == null || cday > day)
-				levelups.put (i.level, day);
+			if (cday == null || cday > day) {
+				if (i.level == 10)
+					l10item = i;
+				levelups.put (i.level, day);				
+			}
 		}
 		
 		/**
