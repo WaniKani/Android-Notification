@@ -100,6 +100,24 @@ public class LocalIMEKeyboard extends NativeKeyboard {
 	    }
 	}
 	
+	private class JSSetText implements Runnable {
+		
+		public String text;
+		
+		public JSSetText (String text)
+		{
+			this.text = text;
+
+			wav.runOnUiThread (this);
+		}
+		
+		public void run ()
+		{
+			ew.setText (text);
+		}
+		
+	}
+
 	private class JSListenerSetClass implements Runnable {
 		
 		public boolean enable;
@@ -182,6 +200,16 @@ public class LocalIMEKeyboard extends NativeKeyboard {
 		{
 			new JSListenerSetClass (clazz);
 		}
+		
+		@JavascriptInterface
+		public void sync (boolean correct, boolean incorrect, String text)
+		{
+			if (correct)
+				new JSListenerSetClass ("correct");
+			if (incorrect)
+				new JSListenerSetClass ("incorrect");
+			new JSSetText (text);
+		}
 	}
 
 	private static final String JS_INIT_TRIGGERS =
@@ -207,7 +235,6 @@ public class LocalIMEKeyboard extends NativeKeyboard {
 			"   wknJSListener.newQuestion (qtype);" +			
 			"};" +
 			"$.jStorage.listenKeyChange (\"currentItem\", window.wknNewQuestion);" +
-			"window.wknNewQuestion ();" +
 			"var oldAddClass = jQuery.fn.addClass;" +
 			"jQuery.fn.addClass = function () {" +
 			"    var res;" +
@@ -215,7 +242,12 @@ public class LocalIMEKeyboard extends NativeKeyboard {
 			"    if (this.selector == \"#answer-form fieldset\")" +
 			"         wknJSListener.setClass (arguments [0]); " +
 			"    return res;" +
-			"};";
+			"};" +
+			"window.wknNewQuestion ();" +
+			"var form, tbox;" +
+			"form = $(\"#answer-form fieldset\");" +
+			"tbox = $(\"#user-response\");" +
+			"wknJSListener.sync (form.hasClass (\"correct\"), form.hasClass (\"incorrect\"), tbox.val ());";
 	
 	private final String JS_REPLACE = 
 			"window.wknReplace ();";
