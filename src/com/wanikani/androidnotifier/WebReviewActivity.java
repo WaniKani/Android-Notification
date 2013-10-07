@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
@@ -100,6 +101,21 @@ public class WebReviewActivity extends Activity {
 		static final String REVIEWS_DIV = "reviews";		
 	};
 	
+	/**
+	 * The listener attached to the ignore button tip message.
+	 * When the user taps the ok button, we write on the property
+	 * that it has been acknowleged, so it won't show up any more. 
+	 */
+	private class OkListener implements DialogInterface.OnClickListener {
+		
+		@Override
+		public void onClick (DialogInterface ifc, int which)
+		{
+			SettingsActivity.setIgnoreButtonMessage (WebReviewActivity.this, true);
+		}		
+	}
+	
+
 	/**
 	 * The listener that receives events from the mute buttons.
 	 */
@@ -325,6 +341,7 @@ public class WebReviewActivity extends Activity {
 		 */
 		public void ignore ()
 		{
+			showIgnoreButtonMessage ();
 			keyboard.ignore ();
 		}
 	}
@@ -902,4 +919,23 @@ public class WebReviewActivity extends Activity {
 	{
 		return false;
 	}
+	
+	protected void showIgnoreButtonMessage ()
+	{
+		AlertDialog.Builder builder;
+		Dialog dialog;
+					
+		if (!visible || SettingsActivity.getIgnoreButtonMessage (this))
+			return;
+		
+		builder = new AlertDialog.Builder (this);
+		builder.setTitle (R.string.ignore_button_message_title);
+		builder.setMessage (R.string.ignore_button_message_text);
+		builder.setPositiveButton (R.string.ignore_button_message_ok, new OkListener ());
+		
+		dialog = builder.create ();
+		
+		dialog.show ();		
+	}
+
 }

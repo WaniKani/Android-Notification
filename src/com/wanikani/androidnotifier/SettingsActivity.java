@@ -99,7 +99,8 @@ public class SettingsActivity
 	
 	/** Embedded keyboard message has been read and acknowledged */
 	private static final String KEY_TIP_ACK = "key_tip_ack";
-	
+	/** Ignore button message has been read and acknowledged */
+	private static final String KEY_IGNORE_BUTTON_MESSAGE_ACK = "key_ignore_button_message_ack";
 	/** Lessons message has been read and acknowledged */
 	private static final String KEY_TIP_LESSON = "key_tip_lesson";
 
@@ -513,6 +514,16 @@ public class SettingsActivity
 		return prefs (ctxt).edit ().putBoolean (KEY_TIP_ACK, value).commit ();
 	}
 	
+	public static boolean getIgnoreButtonMessage (Context ctxt)
+	{
+		return prefs (ctxt).getBoolean (KEY_IGNORE_BUTTON_MESSAGE_ACK, false);
+	}
+	
+	public static boolean setIgnoreButtonMessage (Context ctxt, boolean value)
+	{
+		return prefs (ctxt).edit ().putBoolean (KEY_IGNORE_BUTTON_MESSAGE_ACK, value).commit ();
+	}
+
 	public static boolean getTipLessons (Context ctxt)
 	{
 		return prefs (ctxt).getBoolean (KEY_TIP_LESSON, false);
