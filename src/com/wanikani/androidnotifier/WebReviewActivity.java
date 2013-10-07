@@ -319,6 +319,14 @@ public class WebReviewActivity extends Activity {
 
 			finish ();
 		}
+		
+		/**
+		 * Ignore button
+		 */
+		public void ignore ()
+		{
+			keyboard.ignore ();
+		}
 	}
 	
 	/**

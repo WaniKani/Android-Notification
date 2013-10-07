@@ -33,6 +33,8 @@
     <string name="pref_large_keyboard_desc">Display larger embedded keyboard</string>
     <string name="pref_enter">Review keyboard Enter</string>
     <string name="pref_enter_descr">Enable enter key in embedded keyboard</string>
+    <string name="pref_ignore_button">Ignore Button</string>
+    <string name="pref_ignore_button_descr">Enable porting of @ruipgpinheiro ignore button</string>
     <string name="pref_url">Review URL</string>
     <string name="pref_url_desc">Wanikani review URL</string>
     <string name="pref_lesson_url">Lessons URL</string>
@@ -85,6 +87,7 @@
     <string name="em_settings">Settings</string>
     <string name="em_dashboard">Dashboard</string>
     <string name="em_export">Export</string>
+    <string name="em_ignore">Ignore</string>
     <string name="pref_enabled_descr">Show event icon when you have reviews</string>
     <string name="status_msg_error">Error connecting to WaniKani</string>
     <string name="status_msg_partial">Network error. Partial results</string>

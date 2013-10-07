@@ -207,7 +207,7 @@ public class LocalIMEKeyboard extends NativeKeyboard {
 			if (correct)
 				new JSListenerSetClass ("correct");
 			if (incorrect)
-				new JSListenerSetClass ("incorrect");
+				new JSListenerSetClass ("incorrect");			
 			new JSSetText (text);
 		}
 	}
@@ -272,9 +272,9 @@ public class LocalIMEKeyboard extends NativeKeyboard {
     
     Button next;
     
-    int correctFG, incorrectFG;
+    int correctFG, incorrectFG, ignoredFG;
     
-    int correctBG, incorrectBG;
+    int correctBG, incorrectBG, ignoredBG;
     
 	public LocalIMEKeyboard (WebReviewActivity wav, FocusWebView wv)
 	{
@@ -307,8 +307,11 @@ public class LocalIMEKeyboard extends NativeKeyboard {
 		res = wav.getResources ();
 		correctFG = res.getColor (R.color.correctfg);
 		incorrectFG = res.getColor (R.color.incorrectfg);
+		ignoredFG = res.getColor (R.color.ignoredfg);
+		
 		correctBG = res.getColor (R.color.correctbg);
 		incorrectBG = res.getColor (R.color.incorrectbg);
+		ignoredBG = res.getColor (R.color.ignoredbg);
 	}	
 	
 	public void show (boolean hasEnter)
@@ -372,15 +375,28 @@ public class LocalIMEKeyboard extends NativeKeyboard {
 	
 	public void setClass (String clazz)
 	{
-		if (clazz.equals ("correct"))
+		if (clazz.equals ("correct")) {
+			enableIgnoreButton (false);
 			disable (correctFG, correctBG);
-		else if (clazz.equals ("incorrect"))
+		} else if (clazz.equals ("incorrect")) {
+			enableIgnoreButton (true);
 			disable (incorrectFG, incorrectBG);
+		} else if (clazz.equals ("WKO_ignored")) {
+			enableIgnoreButton (false);
+			disable (ignoredFG, ignoredBG);
+		}
+			
 	}
 	
 	public void unsetClass ()
 	{
+		enableIgnoreButton (false);
 		enable ();
+	}
+	
+	public void enableIgnoreButton (boolean enable)
+	{
+		/* empty */
 	}
 	
 	private void disable (int fg, int bg)
@@ -399,5 +415,10 @@ public class LocalIMEKeyboard extends NativeKeyboard {
 
 		imm.showSoftInput (ew, 0);
 		ew.requestFocus ();
+	}
+	
+	public void ignore ()
+	{
+		wv.js (IgnoreButton.JS_CODE);
 	}
 }

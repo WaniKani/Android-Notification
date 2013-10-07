@@ -16,4 +16,6 @@
     <color name="correctfg">#000</color>
     <color name="incorrectbg">#ff0000</color>
     <color name="incorrectfg">#fff</color>
+    <color name="ignoredfg">#fff</color>
+    <color name="ignoredbg">#cccc00</color>
 </resources>

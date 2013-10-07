@@ -48,4 +48,9 @@ public class NativeKeyboard implements Keyboard {
 	{
 		return muteH;
 	}
+	
+	public void ignore ()
+	{
+		/* Not supported */
+	}
 }

@@ -74,6 +74,8 @@ public class SettingsActivity
 	private static final String KEY_PREF_ENTER = "pref_enter";
 	/** Show mute button. Must match preferences.xml */
 	private static final String KEY_PREF_SHOW_MUTE = "pref_show_mute";
+	/** Ignore button */
+	private static final String KEY_PREF_IGNORE_BUTTON = "pref_ignore_button";
 	/** Enable 42+ mode. Must match preferences.xml */
 	private static final String KEY_PREF_42PLUS = "pref_42plus";
 	/** Wanikani review URL */
@@ -296,6 +298,9 @@ public class SettingsActivity
 		
 		pref = findPreference (KEY_PREF_SHOW_LESSONS_KEYBOARD);
 		pref.setEnabled (getUseIntegratedBrowser (prefs));
+		
+		pref = findPreference (KEY_PREF_IGNORE_BUTTON);
+		pref.setEnabled (getUseIntegratedBrowser (prefs));
 
 		runShowKeyboardHooks (prefs);
 	}
@@ -458,6 +463,11 @@ public class SettingsActivity
 										 Keyboard.EMBEDDED : Keyboard.NATIVE;
 	}
 
+	public static boolean getIgnoreButton (Context ctxt)
+	{
+		return prefs (ctxt).getBoolean (KEY_PREF_IGNORE_BUTTON, true);
+	}
+	
 	public static boolean getShowMute (Context ctxt)
 	{
 		return prefs (ctxt).getBoolean (KEY_PREF_SHOW_MUTE, true);

@@ -473,6 +473,9 @@ public class EmbeddedKeyboard implements Keyboard {
 		
 		dialog.show ();		
 	}
-	
 
+	public void ignore ()
+	{
+		/* Not supported */
+	}	
 }
