@@ -643,7 +643,7 @@ public class StatsFragment extends Fragment implements Tab {
 		
 		private boolean updateNextLevel (Map<Integer, Integer> days)
 		{
-			TextView tw, stw;
+			TextView tw;
 			Integer lastlup;
 			Float delay;
 			Calendar cal;
@@ -651,10 +651,8 @@ public class StatsFragment extends Fragment implements Tab {
 			
 			delay = weight (days, WEXP_NEXT);
 			tw = (TextView) parent.findViewById (R.id.tv_eta_avg);
-			stw = (TextView) parent.findViewById (R.id.tv_eta_next);
 			if (delay != null) {
-				s = beautify (delay);
-				tw.setText (main.getString (R.string.fmt_eta_avg, s));
+				s = main.getString (R.string.fmt_eta_avg, beautify (delay));
 				tw.setVisibility (View.VISIBLE);
 				
 				lastlup = cs.levelups.get (dd.level);
@@ -664,20 +662,18 @@ public class StatsFragment extends Fragment implements Tab {
 					cal.add (Calendar.DATE, lastlup);
 					delay -= ((float) System.currentTimeMillis () - cal.getTimeInMillis ()) / (24 * 3600 * 1000);
 					if (delay > 0)
-						s = main.getString (R.string.fmt_eta_next_future, beautify (delay));
+						s += ", " + main.getString (R.string.fmt_eta_next_future, beautify (delay));
 					else
-						s = main.getString (R.string.fmt_eta_next_past, beautify (-delay));
-					stw.setText (s);
-					stw.setVisibility (View.VISIBLE);
-				} else
-					stw.setVisibility (View.GONE);
+						s += ", " + main.getString (R.string.fmt_eta_next_past, beautify (-delay));
+				} 
 				
+				tw.setText (s);
+
 				return true;
 				
 			} else {
 				tw.setVisibility (View.GONE);
-				stw.setVisibility (View.GONE);
-				
+
 				return false;
 			}
 		}
@@ -721,17 +717,37 @@ public class StatsFragment extends Fragment implements Tab {
 		private Map<Integer, Integer> getDays ()
 		{
 			Map<Integer, Integer> ans;
-			Integer lday, cday;
-			int i;
+			Integer lday, cday, days;
+			int i, minl, maxl, minv, maxv;
 			
 			lday = 0;
 			ans = new Hashtable<Integer, Integer> ();
 			for (i = 1; i < dd.level; i++) {
 				cday = cs.levelups.get (i);
 				if (cday != null && lday != null && lday < cday)
-					ans.put (i, cday - lday);
+					ans.put (i - 1, cday - lday);
 				lday = cday;
 			}
+			
+			minl = maxl = minv = maxv = -1;			
+			for (i = 1; i < dd.level; i++) {
+				days = ans.get (i);
+				if (days != null) {
+					if (minv == -1 || days < minv) {
+						minl = i;
+						minv = days;						
+					}
+					if (maxv == -1 || days > maxv) {
+						maxl = i;
+						maxv = days;
+					}						
+				}
+			}
+			
+			if (minl > 0)
+				ans.remove (minl);
+			if (maxl > 0)
+				ans.remove (maxl);
 				
 			return ans;
 		}
