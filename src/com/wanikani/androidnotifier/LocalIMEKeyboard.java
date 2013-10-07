@@ -276,6 +276,8 @@ public class LocalIMEKeyboard extends NativeKeyboard {
     
     int correctBG, incorrectBG, ignoredBG;
     
+    boolean canIgnore;
+    
 	public LocalIMEKeyboard (WebReviewActivity wav, FocusWebView wv)
 	{
 		super (wav, wv);
@@ -396,7 +398,7 @@ public class LocalIMEKeyboard extends NativeKeyboard {
 	
 	public void enableIgnoreButton (boolean enable)
 	{
-		/* empty */
+		canIgnore = enable;
 	}
 	
 	private void disable (int fg, int bg)
@@ -420,5 +422,10 @@ public class LocalIMEKeyboard extends NativeKeyboard {
 	public void ignore ()
 	{
 		wv.js (IgnoreButton.JS_CODE);
+	}
+	
+	public boolean canIgnore ()
+	{
+		return canIgnore;
 	}
 }

@@ -770,7 +770,26 @@ public class WebReviewActivity extends Activity {
 		getMenuInflater().inflate (R.menu.review, menu);
 		return true;
 	}
+
+	/**
+	 * Need to hide/show the ignore button
+	 */
+	@Override
+	public boolean onPrepareOptionsMenu (Menu menu) 
+	{
+		MenuItem mi;
+		int i;
 		
+		for (i = 0; i < menu.size (); i++) {
+			mi = menu.getItem (i);
+			if (mi.getItemId () == R.id.em_ignore) {
+				mi.setVisible (keyboard.canIgnore ());
+				break;
+			}
+		}
+		
+		return true;
+	}
 	
 	/**
 	 * Menu handler. Relays the call to the common {@link MenuHandler}.
@@ -877,5 +896,10 @@ public class WebReviewActivity extends Activity {
 		applyMuteSettings ();
 		
 		keyboard.iconize (kbstatus.hasEnter (this));
-	}	
+	}
+	
+	public boolean canIgnore ()
+	{
+		return false;
+	}
 }

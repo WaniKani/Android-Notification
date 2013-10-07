@@ -478,4 +478,10 @@ public class EmbeddedKeyboard implements Keyboard {
 	{
 		/* Not supported */
 	}	
+
+	public boolean canIgnore ()
+	{
+		return false;
+	}
+
 }

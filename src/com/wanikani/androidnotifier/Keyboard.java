@@ -13,4 +13,6 @@ public interface Keyboard {
 	public ImageButton getMuteButton ();	
 	
 	public void ignore ();
+	
+	public boolean canIgnore ();
 }

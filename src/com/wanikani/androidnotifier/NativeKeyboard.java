@@ -53,4 +53,9 @@ public class NativeKeyboard implements Keyboard {
 	{
 		/* Not supported */
 	}
+	
+	public boolean canIgnore ()
+	{
+		return false;
+	}
 }
