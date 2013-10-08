@@ -12,4 +12,10 @@
     <color name="unlocked">#7f7f7f</color>
     <color name="burned">#555</color>
     <color name="levelup">#f00</color>
+    <color name="correctbg">#00cc00</color>
+    <color name="correctfg">#000</color>
+    <color name="incorrectbg">#ff0000</color>
+    <color name="incorrectfg">#fff</color>
+    <color name="ignoredfg">#fff</color>
+    <color name="ignoredbg">#cccc00</color>
 </resources>

@@ -46,11 +46,13 @@
         	android:key="pref_use_integrated_browser"
         	android:title="@string/pref_use_integrated_browser"
         	android:defaultValue="true" />
-    <CheckBoxPreference
-        	android:key="pref_show_keyboard"
-        	android:title="@string/pref_show_keyboard"
-        	android:summary="@string/pref_show_keyboard_desc"
-        	android:defaultValue="true" />
+    <ListPreference
+	        android:key="pref_reviews_keyboard"
+	        android:title="@string/pref_keyboard"
+	        android:summary="@string/pref_keyboard_desc"
+	        android:defaultValue="0"
+	        android:entries="@array/keyboards"
+	        android:entryValues="@array/keyboardValues"/>
     <CheckBoxPreference
         	android:key="pref_show_lessons_keyboard"
         	android:title="@string/pref_show_lessons_keyboard"
@@ -66,6 +68,11 @@
         	android:title="@string/pref_vibrate"
         	android:summary="@string/pref_vibrate_desc"
         	android:defaultValue="false"/>
+    <CheckBoxPreference
+        	android:key="pref_ignore_button"
+        	android:title="@string/pref_ignore_button"
+        	android:summary="@string/pref_ignore_button_descr"
+        	android:defaultValue="true" />
     <CheckBoxPreference
         	android:key="pref_show_mute"
         	android:title="@string/pref_show_mute"

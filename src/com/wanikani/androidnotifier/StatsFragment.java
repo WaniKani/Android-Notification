@@ -673,7 +673,7 @@ public class StatsFragment extends Fragment implements Tab {
 				
 			} else {
 				tw.setVisibility (View.GONE);
-				
+
 				return false;
 			}
 		}

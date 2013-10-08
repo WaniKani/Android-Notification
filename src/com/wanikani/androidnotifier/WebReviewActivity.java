@@ -13,14 +13,9 @@ import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.SystemClock;
-import android.os.Vibrator;
-import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
@@ -30,7 +25,6 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -108,6 +102,21 @@ public class WebReviewActivity extends Activity {
 	};
 	
 	/**
+	 * The listener attached to the ignore button tip message.
+	 * When the user taps the ok button, we write on the property
+	 * that it has been acknowleged, so it won't show up any more. 
+	 */
+	private class OkListener implements DialogInterface.OnClickListener {
+		
+		@Override
+		public void onClick (DialogInterface ifc, int which)
+		{
+			SettingsActivity.setIgnoreButtonMessage (WebReviewActivity.this, true);
+		}		
+	}
+	
+
+	/**
 	 * The listener that receives events from the mute buttons.
 	 */
 	private class MuteListener implements View.OnClickListener {
@@ -181,7 +190,7 @@ public class WebReviewActivity extends Activity {
 			bar.setVisibility (View.GONE);
 
 			if (url.startsWith ("http"))
-				js (JS_INIT_KBD);			
+				wv.js (JS_INIT_KBD);			
 	    }
 	}
 	
@@ -234,7 +243,7 @@ public class WebReviewActivity extends Activity {
 		 * bit.
 		 */
 		public void run ()
-		{
+		{			
 			kbstatus.apply (WebReviewActivity.this);
 			if (kbstatus.isRelevantPage ())
 				reviewsSession ();			
@@ -248,19 +257,6 @@ public class WebReviewActivity extends Activity {
 		
 	}
 	
-	private class FocusOut implements Runnable {
-		
-		FocusOut ()
-		{
-			runOnUiThread (this);
-		}
-		
-		public void run ()
-		{
-			focusOut ();
-		}
-	}
-
 	/**
 	 * This class implements the <code>wknKeyboard</code> javascript object.
 	 * It implements the @link {@link #show} and {@link #hide} methods. 
@@ -312,92 +308,8 @@ public class WebReviewActivity extends Activity {
 		{
 			new ShowHideKeyboard (KeyboardStatus.LESSONS_ICONIZED);
 		}	
-		
-		@JavascriptInterface
-		public void focusOut ()
-		{
-			new FocusOut ();
-		}
 	}
 	
-	/**
-	 * A button listener that handles all the meta keys on the keyboard.
-	 * Actually some buttons have nothing really special (like space, or apostrophe): 
-	 * the real definition of meta key, here, is a key that does not change
-	 * when the meta (123) button is pressed. 
-	 */
-	private class MetaListener implements View.OnClickListener {
-	
-		/**
-		 * Called when one of the keys is pressed.
-		 * Looks up in the @link {@link WebReviewActivity#meta_table} array
-		 * and inserts the appropriate key code.
-		 * 	@param v the keyboard view
-		 */
-		@Override
-		public void onClick (View v)
-		{
-			int i, id;
-		
-			id = v.getId ();
-		
-			for (i = 0; i < meta_table.length; i++) {
-				if (id == meta_table [i]) {
-					insert (meta_codes [i]);
-					break;
-				}
-			}
-		}		
-	};
-
-	/**
-	 * A listener that handles all the ordinary keys.
-	 */
-	private class KeyListener implements View.OnClickListener {
-		
-
-		/**
-		 * Called when one of the keys is pressed.
-		 * Looks up in the @link {@link WebReviewActivity#key_table} array
-		 * and inserts the appropriate key code. This is done by looking up
-		 * the appropriate character in the {@link WebReviewActivity#keyboard}
-		 * string, which is an ASCII string. Therefore, an additional translation
-		 * (ASCII to Keycodes) is performed, through 
-		 * {@link WebReviewActivity#charToKeyCode(char)}.
-		 * 	@param v the keyboard view
-		 */
-		@Override
-		public void onClick (View v)
-		{
-			int i, id;
-			
-			id = v.getId ();
-			
-			for (i = 0; i < key_table.length; i++) {
-				if (id == key_table [i]) {
-					if (i < keyboard.length ())
-						insert (charToKeyCode (keyboard.charAt (i)));
-					break;
-				}
-			}
-		}
-	};
-		
-	/**
-	 * The listener attached to the embedded keyboard tip message.
-	 * When the user taps the ok button, we write on the property
-	 * that it has been acknowleged, so it won't show up any more. 
-	 */
-	private class OkListener implements DialogInterface.OnClickListener {
-		
-		@Override
-		public void onClick (DialogInterface ifc, int which)
-		{
-			SettingsActivity.setTipAck (WebReviewActivity.this, true);
-		}		
-	}
-	
-
 	/**
 	 * Our implementation of a menu listener. We listen for configuration changes. 
 	 */
@@ -423,6 +335,15 @@ public class WebReviewActivity extends Activity {
 
 			finish ();
 		}
+		
+		/**
+		 * Ignore button
+		 */
+		public void ignore ()
+		{
+			showIgnoreButtonMessage ();
+			keyboard.ignore ();
+		}
 	}
 	
 	/**
@@ -436,9 +357,9 @@ public class WebReviewActivity extends Activity {
 
 			 public void iconize (WebReviewActivity wav) { REVIEWS_ICONIZED.apply (wav); }
 
- 			 public boolean isEmbedded (WebReviewActivity wav)
+ 			 public SettingsActivity.Keyboard getKeyboard (WebReviewActivity wav)
 			 {
-				 return SettingsActivity.getShowReviewsKeyboard (wav);
+				 return SettingsActivity.getReviewsKeyboard (wav);
 			 }
 
  			 public boolean canMute ()
@@ -450,17 +371,22 @@ public class WebReviewActivity extends Activity {
  			{
  				return true;
  			}
+ 			
+ 			public boolean hasEnter (WebReviewActivity wav)
+ 			{
+ 				return SettingsActivity.getEnter (wav);
+ 			}
 		},
 		
 		/** Keyboard visible, all keys but ENTER visible */
 		LESSONS_MAXIMIZED {
-			public void apply (WebReviewActivity wav) { wav.showLessons (this); } 
+			public void apply (WebReviewActivity wav) { wav.show (this); } 
 			
 			public void iconize (WebReviewActivity wav) { LESSONS_ICONIZED.apply (wav); }
 
-			public boolean isEmbedded (WebReviewActivity wav)
+			public SettingsActivity.Keyboard getKeyboard (WebReviewActivity wav)
 			{
-				return SettingsActivity.getShowLessonsKeyboard (wav);				
+				return SettingsActivity.getLessonsKeyboard (wav);				
 			}
 		},
 
@@ -470,9 +396,9 @@ public class WebReviewActivity extends Activity {
 			
 			public void maximize (WebReviewActivity wav) { REVIEWS_MAXIMIZED.apply (wav); }
 			
-			 public boolean isEmbedded (WebReviewActivity wav)
+			 public SettingsActivity.Keyboard getKeyboard (WebReviewActivity wav)
 			 {
-				 return SettingsActivity.getShowReviewsKeyboard (wav);
+				 return SettingsActivity.getReviewsKeyboard (wav);
 			 }
 
 			 public boolean isIconized () { return true; }
@@ -486,6 +412,11 @@ public class WebReviewActivity extends Activity {
  			 {
  			 	 return false;
  			 }			 
+ 			 
+  			public boolean hasEnter (WebReviewActivity wav)
+  			{
+  				return SettingsActivity.getEnter (wav);
+  			}
 		},
 
 		/** Keyboard visible, just "Show" and "Enter" keys are visible, in lessons mode */ 
@@ -496,9 +427,9 @@ public class WebReviewActivity extends Activity {
 			
 			public boolean isIconized () { return true; }
 
-			public boolean isEmbedded (WebReviewActivity wav)
+			public SettingsActivity.Keyboard getKeyboard (WebReviewActivity wav)
 			{
-				return SettingsActivity.getShowLessonsKeyboard (wav);				
+				return SettingsActivity.getLessonsKeyboard (wav);				
 			}			
 		},
 		
@@ -507,6 +438,11 @@ public class WebReviewActivity extends Activity {
 			public void apply (WebReviewActivity wav) { wav.hide (this); }
 			
 			public boolean isRelevantPage () { return false; }
+			
+			public SettingsActivity.Keyboard getKeyboard (WebReviewActivity wav)
+			{
+				return SettingsActivity.Keyboard.NATIVE;
+			}
 			
 			public boolean backIsSafe () { return true; }
 		};
@@ -528,10 +464,7 @@ public class WebReviewActivity extends Activity {
 			return false;
 		}
 		
-		public boolean isEmbedded (WebReviewActivity wav)
-		{
-			return false;
-		}
+		public abstract SettingsActivity.Keyboard getKeyboard (WebReviewActivity wav);
 		
 		public boolean isRelevantPage ()
 		{
@@ -548,6 +481,11 @@ public class WebReviewActivity extends Activity {
 			return false;
 		}
 		
+		public boolean hasEnter (WebReviewActivity wav)
+		{
+			return false;
+		}
+
 		public boolean backIsSafe ()
 		{
 			return false;
@@ -612,91 +550,15 @@ public class WebReviewActivity extends Activity {
 			"   reviews.style.overflow = \"visible\";" +
 			"} ";
 	
-	private static final String JS_FOCUS = 
-			"var ltextbox;" +
-			"ltextbox = document.getElementById (\"" + WKConfig.LESSON_ANSWER_BOX_JP + "\"); " +
-			"if (ltextbox == null) {" +
-			"   ltextbox = document.getElementById (\"" + WKConfig.LESSON_ANSWER_BOX_EN + "\"); " +
-			"}" +
-			"if (ltextbox != null) {" +
-			"    if (ltextbox.value.length == 0) {" +
-			"        wknKeyboard.focusOut ();" +
-			"    }" +
-			"    ltextbox.focus (); " +
-			"}";
-	
-	/** Javascript to be invoked to simulate a click on the submit (heart-shaped) button.
-	 *  It also handles keyboard show/iconize logic. If the textbox is enabled, then this
-	 *  is an answer, so we iconize the keyboard. Otherwise we are entering the new question,
-	 *  so we need to show it  */
-	private static final String JS_ENTER =
-			"var textbox, form, submit;" +
-			"textbox = document.getElementById (\"" + WKConfig.ANSWER_BOX + "\"); " +
-		    "form = document.getElementById (\"new_lesson\"); " +
-			"if (textbox != null && textbox.value.length > 0) {" +
-		    "   buttons = document.getElementsByTagName('button'); " +
-		    "   buttons [0].click (); " +
-			"}";
-	
-	/** The default keyboard. This is the sequence of keys from left to right, from top to bottom */
-	private static final String KB_LATIN = "qwertyuiopasdfghjkl'zxcvbnm";
-
-	/** The alt keyboard (loaded when the user presses the '123' button). 
-	 *  This is the sequence of keys from left to right, from top to bottom */
-	private static final String KB_ALT = "1234567890-.";
-	
-	/** A table that maps key position (left to right, top to bottom) to button IDs for the
-	 *  ordinary keys */
-	private static final int key_table [] = new int [] {
-		R.id.kb_0, R.id.kb_1,  R.id.kb_2, R.id.kb_3, R.id.kb_4,
-		R.id.kb_5, R.id.kb_6,  R.id.kb_7, R.id.kb_8, R.id.kb_9,
-		R.id.kb_10, R.id.kb_11,  R.id.kb_12, R.id.kb_13, R.id.kb_14,
-		R.id.kb_15, R.id.kb_16,  R.id.kb_17, R.id.kb_18, R.id.kb_19,
-		R.id.kb_20, R.id.kb_21,  R.id.kb_22, R.id.kb_23, R.id.kb_24,
-		R.id.kb_25, R.id.kb_26
-	};
-	
-	/** A table that maps key positions (left to right, top to bottom) to button IDs for the
-	 *  meta keys */
-	private static final int meta_table [] = new int [] {
-		R.id.kb_backspace, R.id.kb_meta, R.id.kb_space, R.id.kb_enter, R.id.kb_hide		
-	};
-	
-	/** A table that maps key positions (left to right, top to bottom) to keycodes for the meta
-	 *  keys */
-	private static final int meta_codes [] = new int [] {
-		KeyEvent.KEYCODE_DEL, KeyEvent.KEYCODE_NUM,
-		KeyEvent.KEYCODE_SPACE, KeyEvent.KEYCODE_ENTER,
-		KeyEvent.KEYCODE_DPAD_DOWN
-	};
-
 	/** The threads reaper */
 	TimerThreadsReaper reaper;
 	
 	/** Thread reaper task */
 	TimerThreadsReaper.ReaperTask rtask;
 	
-	/** The current keyboard. It may be set to either {@link #KB_LATIN} or {@link #KB_ALT} */
-	private String keyboard;
-	
 	/** The current keyboard status */
 	protected KeyboardStatus kbstatus;
 	
-	/** The "show enter key" setting */
-	protected boolean showEnterKey; 
-	
-	/** The mute button to be shown when the embedded keyboard is disabled */
-	private ImageButton muteH;
-	
-	/** The mute button to be shown when the embedded keyboard is enabled */
-	private ImageButton mute;
-	
-	/** Height of a tall keyboard key */
-	private int tallKey;
-	
-	/** Height of a short keyboard key */
-	private int shortKey;
-
 	/** The mute drawable */
 	private Drawable muteDrawable;
 	
@@ -707,7 +569,7 @@ public class WebReviewActivity extends Activity {
 	private MenuHandler mh;
 	
 	/** Set if visible */
-	private boolean visible;
+	boolean visible;
 	
 	/** Set if we have reviewed or had some lessons, so caches should be flushed */
 	private boolean flushCaches;
@@ -715,10 +577,18 @@ public class WebReviewActivity extends Activity {
 	/** Is mute enabled */
 	private boolean isMuted;
 	
-	/** Vibrator service */
-	Vibrator vibrator;
+	/** The current keyboard */
+	private Keyboard keyboard;
 	
+	/** The embedded keyboard */
+	private Keyboard embeddedKeyboard;
 	
+	/** The native keyboard */
+	private Keyboard nativeKeyboard;
+	
+	/** The local IME keyboard */
+	private Keyboard localIMEKeyboard;
+		
 	/**
 	 * Called when the action is initially displayed. It initializes the objects
 	 * and starts loading the review page.
@@ -733,7 +603,6 @@ public class WebReviewActivity extends Activity {
 		Resources res;
 		
 		CookieSyncManager.createInstance (this);
-		vibrator = (Vibrator) getSystemService (Context.VIBRATOR_SERVICE) ;
 		setVolumeControlStream (AudioManager.STREAM_MUSIC);
 		 
 		mh = new MenuHandler (this, new MenuListener ());
@@ -741,13 +610,12 @@ public class WebReviewActivity extends Activity {
 		setContentView (R.layout.web_review);
 
 		prefs = SettingsActivity.prefs (this);
-		showEnterKey = SettingsActivity.getEnter (this);
 
 		res = getResources ();
 		muteDrawable = res.getDrawable(R.drawable.ic_mute);
 		notMutedDrawable = res.getDrawable(R.drawable.ic_not_muted);
 
-		initKeyboard (prefs);
+		kbstatus = KeyboardStatus.INVISIBLE;
 		
 		bar = (ProgressBar) findViewById (R.id.pb_reviews);
 				
@@ -768,8 +636,16 @@ public class WebReviewActivity extends Activity {
 		wv.setScrollBarStyle (ScrollView.SCROLLBARS_OUTSIDE_OVERLAY);
 		wv.setWebViewClient (new WebViewClientImpl ());
 		wv.setWebChromeClient (new WebChromeClientImpl ());		
-
-		wv.loadUrl (getIntent ().getData ().toString ());		
+		
+		wv.loadUrl (getIntent ().getData ().toString ());
+		
+		embeddedKeyboard = new EmbeddedKeyboard (this, wv);
+		nativeKeyboard = new NativeKeyboard (this, wv);
+		localIMEKeyboard = new LocalIMEKeyboard (this, wv);
+		
+		embeddedKeyboard.getMuteButton ().setOnClickListener (new MuteListener ());
+		nativeKeyboard.getMuteButton ().setOnClickListener (new MuteListener ());
+		localIMEKeyboard.getMuteButton ().setOnClickListener (new MuteListener ());
 
 		if (SettingsActivity.getTimerReaper (this)) {
 			reaper = new TimerThreadsReaper ();
@@ -801,11 +677,13 @@ public class WebReviewActivity extends Activity {
 		
 		visible = true;
 		
+		selectKeyboard ();
+		
 		applyMuteSettings ();
 		
 		wv.acquire ();
 		
-		updateLayout (SettingsActivity.prefs (WebReviewActivity.this));		
+		kbstatus.apply (this);
 		
 		if (rtask != null)
 			rtask.resume ();
@@ -842,6 +720,7 @@ public class WebReviewActivity extends Activity {
 	protected void onPause ()
 	{
 		Intent intent;
+		
 		visible = false;
 
 		super.onPause ();
@@ -860,6 +739,8 @@ public class WebReviewActivity extends Activity {
 		
 		if (rtask != null)
 			rtask.pause ();
+		
+		keyboard.hide ();
 	}
 	
 	/**
@@ -875,7 +756,8 @@ public class WebReviewActivity extends Activity {
 		
 		return kbstatus.backIsSafe () &&
 				/* Need this because the reviews summary page is dangerous */
-				!(url.contains (rpage) || rpage.contains (url));
+				!(url.contains (rpage) || rpage.contains (url)) &&
+				!url.contains ("http://www.wanikani.com/quickview");
 	}
 	
 	@Override
@@ -905,7 +787,26 @@ public class WebReviewActivity extends Activity {
 		getMenuInflater().inflate (R.menu.review, menu);
 		return true;
 	}
+
+	/**
+	 * Need to hide/show the ignore button
+	 */
+	@Override
+	public boolean onPrepareOptionsMenu (Menu menu) 
+	{
+		MenuItem mi;
+		int i;
 		
+		for (i = 0; i < menu.size (); i++) {
+			mi = menu.getItem (i);
+			if (mi.getItemId () == R.id.em_ignore) {
+				mi.setVisible (keyboard.canIgnore ());
+				break;
+			}
+		}
+		
+		return true;
+	}
 	
 	/**
 	 * Menu handler. Relays the call to the common {@link MenuHandler}.
@@ -916,93 +817,37 @@ public class WebReviewActivity extends Activity {
 	{
 		return mh.onOptionsItemSelected (item) || super.onOptionsItemSelected (item);
 	}
-	
-	
-	/**
-	 * Sets up listener and bindings of the initial keyboard.
-	 */
-	protected void initKeyboard (SharedPreferences prefs)
+
+	protected void selectKeyboard ()
 	{
-		View.OnClickListener klist, mlist, mutel;
-		LayoutParams lp;
-		View key;
-		int i;
-
-		muteH = (ImageButton) findViewById (R.id.kb_mute_h);
-		mute = (ImageButton) findViewById (R.id.kb_mute);
+		Keyboard oldk;
 		
-		kbstatus = KeyboardStatus.INVISIBLE;
-		mutel = new MuteListener ();
-		muteH.setOnClickListener (mutel);
-		mute.setOnClickListener (mutel);
-		applyMuteSettings ();
-				
-		loadKeyboard (KB_LATIN);		
-
-		klist = new KeyListener ();
-		mlist = new MetaListener ();
-
-		key = findViewById (key_table [0]);
-		lp = key.getLayoutParams ();
-		shortKey = lp.height;
-		tallKey = shortKey + shortKey / 2;
-
-		for (i = 0; i < key_table.length; i++) {
-			key = findViewById (key_table [i]);
-			key.setOnClickListener (klist);
-		}					
-
-		for (i = 0; i < meta_table.length; i++) {
-			key = findViewById (meta_table [i]);
-			key.setOnClickListener (mlist);
+		oldk = keyboard;
+		
+		switch (kbstatus.getKeyboard (this)) {
+		case LOCAL_IME:
+			keyboard = localIMEKeyboard;
+			break;
+			
+		case EMBEDDED:
+			keyboard = embeddedKeyboard;
+			break;
+			
+		case NATIVE:
+			keyboard = nativeKeyboard;
+			break;
 		}
-		
-		updateLayout (prefs);
-	}
-	
-	/**
-	 * Updates the layout, according to the current preferences
-	 * @param prefs the preferences
-	 */
-	private void updateLayout (SharedPreferences prefs)
-	{
-		LayoutParams lp;
-		int height;
-		View key;
-		int i;
-
-		height = SettingsActivity.getLargeKeyboard (this) ? tallKey : shortKey;
-		for (i = 0; i < key_table.length; i++) {
-			key = findViewById (key_table [i]);
-			lp = key.getLayoutParams ();
-			lp.height = height;
-			key.setLayoutParams(lp);
-		}					
-
-		for (i = 0; i < meta_table.length; i++) {
-			key = findViewById (meta_table [i]);
-			lp = key.getLayoutParams ();
-			lp.height = height;
-			key.setLayoutParams(lp);
-		}					
-		
-		lp = mute.getLayoutParams ();
-		lp.height = height;
-		mute.setLayoutParams(lp);
 				
-		showEnterKey = SettingsActivity.getEnter (this);
-		kbstatus.apply (this);
+		if (keyboard != oldk && oldk != null)
+			oldk.hide ();
 	}
 	
 	private void applyMuteSettings ()
 	{
-		boolean show, embedded;
+		boolean show;
 		
 		show = kbstatus.canMute () && SettingsActivity.getShowMute (this);
-		embedded = kbstatus.isEmbedded (this) && kbstatus.isMuteEmbedded ();
-		
-		(embedded ? mute : muteH).setVisibility (show ? View.VISIBLE : View.GONE);
-		(embedded ? muteH : mute).setVisibility (View.GONE);
+		keyboard.getMuteButton ().setVisibility (show ? View.VISIBLE : View.GONE);
 		
 		setMute (show && SettingsActivity.getMute (this));
 	}
@@ -1013,8 +858,7 @@ public class WebReviewActivity extends Activity {
 		Drawable d;
 		
 		d = m ? muteDrawable : notMutedDrawable;
-	    muteH.setImageDrawable (d);
-		mute.setImageDrawable (d);
+		keyboard.getMuteButton ().setImageDrawable (d);
 
 		if (isMuted != m) {
 			isMuted = m;
@@ -1023,131 +867,8 @@ public class WebReviewActivity extends Activity {
 	    
 			am.setStreamMute (AudioManager.STREAM_MUSIC, m);
 		}
-	}
-	
-	/**
-	 * Changes the bindings of the ordinary (non meta) keys. Meta keys never change.
-	 * 	@param kbd the sequence of keys, from left to right, from top to bottom  
-	 */
-	protected void loadKeyboard (String kbd)
-	{
-		Button key;
-		int i;
+	}	
 		
-		keyboard = kbd;
-		for (i = 0; i < kbd.length(); i++) {
-			key = (Button) findViewById (key_table [i]);
-			key.setText ("" + kbd.charAt (i));
-		}
-		while (i < key_table.length) {
-			key = (Button) findViewById (key_table [i]);
-			key.setText ("");
-			i++;
-		}
-	}
-	
-	/**
-	 * Delivers a keycode to the answer text box. There are two notable exceptions:
-	 * <ul>
-	 * 	<li>The {@link KeyEvent.KEYCODE_NUM} key just switches the keys, so it does not
-	 * 	interact with the web page
-	 *  <li>The {@link KeyEvent.KEYCODE_ENTER} key simulates a click on the submit button
-	 *  rather than delivering the key evento to the action box. In fact, this has no effect
-	 *  on text boxes.
-	 *  </ul> 
-	 */
-	public void insert (int keycode)
-	{
-		KeyEvent kdown, kup;
-	
-		if (vibrator != null && SettingsActivity.getVibrate (this))
-			vibrator.vibrate (50);
-		
-		if (keycode == KeyEvent.KEYCODE_NUM) {
-			/* Num == meta -> if iconized, it means "Show"*/
-			if (kbstatus.isIconized ())
-				kbstatus.maximize (this);
-			else
-				loadKeyboard (keyboard == KB_ALT ? KB_LATIN : KB_ALT);
-		} else if (keycode == KeyEvent.KEYCODE_ENTER) {
-			js (JS_ENTER);
-		} else if (keycode == KeyEvent.KEYCODE_DPAD_DOWN)
-			kbstatus.iconize (this);
-		else {			
-			if (kbstatus == KeyboardStatus.LESSONS_MAXIMIZED)
-				js (JS_FOCUS);
-			
-			kdown = new KeyEvent (KeyEvent.ACTION_DOWN, keycode);
-			wv.dispatchKeyEvent (kdown);				
-			kup = new KeyEvent (KeyEvent.ACTION_UP, keycode);
-			wv.dispatchKeyEvent (kup);
-		}
-	}
-	
-	/**
-	 * Makes sure the lessons text box is focused out. This is necessary
-	 * to avoid a very strange behaviour: if the user taps on the lessons answer
-	 * box, then kana are not formed in the correct way. 
-	 */
-	private void focusOut ()
-	{
-		MotionEvent mev;
-		float x, y;
-		long tstamp;
-
-		tstamp = SystemClock.uptimeMillis ();
-		x = wv.getWidth () - 1;
-		y = 1;
-		mev = MotionEvent.obtain (tstamp, tstamp + 100, MotionEvent.ACTION_DOWN,
-								  x, y, 0);
-		wv.dispatchTouchEvent (mev);
-		mev.recycle ();
-		mev = MotionEvent.obtain (tstamp, tstamp + 100, MotionEvent.ACTION_UP,
-				  x, y, 0);
-		wv.dispatchTouchEvent (mev);
-		mev.recycle ();
-	}
-	
-	
-	/**
-	 * A simple ASCII to Android Keycode translation function. It is meant to work
-	 * on ordinary (non meta) keys only. 
-	 * 	@param c the ASCII character
-	 *  @return a KeyCode 
-	 */
-	protected int charToKeyCode (char c)
-	{
-		if (Character.isLetter (c))
-			return KeyEvent.KEYCODE_A + (Character.toLowerCase (c) - 'a');
-		else if (Character.isDigit (c))
-			return KeyEvent.KEYCODE_0 + (c - '0');
-		
-		switch (c) {
-		case ' ':
-			return KeyEvent.KEYCODE_SPACE;
-			
-		case '\'':
-			return KeyEvent.KEYCODE_APOSTROPHE;
-			
-		case '-':
-			return KeyEvent.KEYCODE_MINUS;
-			
-		case '.':
-			return KeyEvent.KEYCODE_PERIOD;			
-		}
-		
-		return KeyEvent.KEYCODE_SPACE;
-	}
-	
-	/**
-	 * Executes a javascript on the web page.
-	 * @param js the javascript statements. This method wraps it into a function
-	 */
-	protected void js (String s)
-	{
-       wv.loadUrl ("javascript:(function() { " + s + "})()");
-	}
-	
 	/**
 	 * Displays the splash screen, also providing a text message
 	 * @param msg the text message to display
@@ -1165,155 +886,56 @@ public class WebReviewActivity extends Activity {
 	 */
 	protected void hide (KeyboardStatus kbstatus)
 	{
-		View view;
-		
 		this.kbstatus = kbstatus;
 		
 		applyMuteSettings ();
-		view = findViewById (R.id.keyboard);
-		view.setVisibility (View.GONE);
-		if (wv != null)
-			wv.enableFocus ();
+		
+		keyboard.hide ();
 	}
 	 
-	/**
-	 * Shows the keyboard. This method does what's expected either when
-	 * called after the keyboard has been hidden, and when it is simply
-	 * iconized. To do this, in addition to changing its visibility,
-	 * we show the keys. 
-	 * @param kbstatus the new keyboard status
-	 */
 	protected void show (KeyboardStatus kbstatus)
 	{
-		showCommon (kbstatus, showEnterKey);
+		this.kbstatus = kbstatus;
+
+		selectKeyboard ();
+		
+		applyMuteSettings ();
+
+		keyboard.show (kbstatus.hasEnter (this));
 	}
 
-	/**
-	 * Shows the keyboard, hiding the enter key, which is problematic
-	 * on lessons. 
-	 * @param kbstatus the new keyboard status
-	 */
-	protected void showLessons (KeyboardStatus kbstatus)
+	protected void iconize (KeyboardStatus kbs)
 	{
-		showCommon (kbstatus, false);
-	}
-	
-	protected void showCommon (KeyboardStatus kbstatus, boolean showEnter)
-	{
-		SharedPreferences prefs;
-		boolean embedded;
+		kbstatus = kbs;
 		
-		this.kbstatus = kbstatus;
-		prefs = SettingsActivity.prefs (this);
-		embedded = kbstatus.isEmbedded (this);
-		if (embedded && kbstatus == KeyboardStatus.REVIEWS_MAXIMIZED)
-			showEmbeddedKeyboardMessage (prefs);
-				
-		if (embedded)
-			showEmbedded (showEnter);
-		else
-			showNative ();
+		selectKeyboard ();
+		
+		applyMuteSettings ();
+		
+		keyboard.iconize (kbstatus.hasEnter (this));
 	}
 	
-	protected void showEmbeddedKeyboardMessage (SharedPreferences prefs)
+	public boolean canIgnore ()
+	{
+		return false;
+	}
+	
+	protected void showIgnoreButtonMessage ()
 	{
 		AlertDialog.Builder builder;
 		Dialog dialog;
 					
-		if (!visible || SettingsActivity.getTipAck (this))
+		if (!visible || SettingsActivity.getIgnoreButtonMessage (this))
 			return;
 		
 		builder = new AlertDialog.Builder (this);
-		builder.setTitle (R.string.kbd_message_title);
-		builder.setMessage (R.string.kbd_message_text);
-		builder.setPositiveButton (R.string.kbd_message_ok, new OkListener ());
+		builder.setTitle (R.string.ignore_button_message_title);
+		builder.setMessage (R.string.ignore_button_message_text);
+		builder.setPositiveButton (R.string.ignore_button_message_ok, new OkListener ());
 		
 		dialog = builder.create ();
 		
 		dialog.show ();		
 	}
-	
-	private void showNative ()
-	{
-		InputMethodManager imm;
-		View view;
-		
-		wv.enableFocus ();
-		
-		view = findViewById (R.id.keyboard);
-		view.setVisibility (View.GONE);
 
-		applyMuteSettings ();
-		imm = (InputMethodManager) getSystemService (Context.INPUT_METHOD_SERVICE);
-		imm.showSoftInput (wv, InputMethodManager.SHOW_IMPLICIT);		
-	}
-	
-	/**
-	 * This is the code shared between {@link #show} and {@link #showLessons}.
-	 * @param showEnter if true, the bottom right key is <code>Enter</code>, 
-	 * 		otherwise <code>Hide</code>.
-	 */
-	private void showEmbedded (boolean showEnter)
-	{
-		View view, key;
-		int i;
-		
-		wv.disableFocus ();
-
-		applyMuteSettings ();
-		for (i = 0; i < key_table.length; i++) {
-			key = findViewById (key_table [i]);
-			key.setVisibility (View.VISIBLE);
-		}					
-
-		for (i = 0; i < meta_table.length; i++) {
-			key = findViewById (meta_table [i]);
-			key.setVisibility (View.VISIBLE);
-		}
-		
-		key = findViewById (R.id.kb_meta);
-		((Button) key).setText (R.string.key_meta);
-
-		view = findViewById (R.id.keyboard);
-		view.setVisibility (View.VISIBLE);
-		
-		key = findViewById (R.id.kb_enter);
-		key.setVisibility (showEnter ? View.VISIBLE : View.GONE);
-
-		key = findViewById (R.id.kb_hide);
-		key.setVisibility (showEnter ? View.GONE : View.VISIBLE);
-	}
-
-	/**
-	 * Iconize the keyboard. This method hides all the keys except
-	 * Enter and Meta (which is renamed to "Show").
-	 * @param kbs {@link KeboardStatus#ICONIZED} or {@link KeboardStatus#ICONIZED_LESSONS}
-	 */
-	protected void iconize (KeyboardStatus kbs)
-	{
-		View view, key;
-		int i;
-		
-		kbstatus = kbs;
-		for (i = 0; i < key_table.length; i++) {
-			key = findViewById (key_table [i]);
-			key.setVisibility (View.GONE);
-		}					
-
-		for (i = 0; i < meta_table.length; i++) {
-			key = findViewById (meta_table [i]);
-			key.setVisibility (View.GONE);
-		}
-		
-		key = findViewById (R.id.kb_enter);
-		/* If in ICONIZED_LESSON status, hide enter key (it does not work :) */
-		key.setVisibility (kbs == KeyboardStatus.REVIEWS_ICONIZED ? View.VISIBLE : View.GONE);
-		
-		key = findViewById (R.id.kb_meta);
-		key.setVisibility (View.VISIBLE);
-		((Button) key).setText (R.string.key_show);
-
-		view = findViewById (R.id.keyboard);
-		view.setVisibility (kbs.isEmbedded (this) ? View.VISIBLE : View.GONE);					
-	}
 }

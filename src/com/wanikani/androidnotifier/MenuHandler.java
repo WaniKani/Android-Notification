@@ -85,6 +85,13 @@ public class MenuHandler {
 			DataExporter.INSTANCE.export (ctxt, CSVFormat.newInstance (ctxt));
 		}
 		
+		/**
+		 * Ignore button
+		 */
+		public void ignore ()
+		{
+			/* empty */
+		}
 	}
 	
 	/**
@@ -163,6 +170,11 @@ public class MenuHandler {
 			
 		case R.id.em_export:
 			listener.export ();
+			break;
+			
+		case R.id.em_ignore:
+			listener.ignore ();
+			break;
 			
 		default:
 			return false;

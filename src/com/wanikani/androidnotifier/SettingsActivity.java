@@ -46,6 +46,10 @@ public class SettingsActivity
 		
 	};
 	
+	static enum Keyboard {
+		LOCAL_IME, EMBEDDED, NATIVE
+	};
+	
 	/** Preferences enabled key. Must match preferences.xml */
 	private static final String KEY_PREF_ENABLED = "pref_enabled";
 	/** Notify threshold */
@@ -59,7 +63,7 @@ public class SettingsActivity
 	/** Refresh timeout. Must match preferences.xml */
 	private static final String KEY_PREF_REFRESH_TIMEOUT = "pref_refresh_timeout";
 	/** Enable reviews keyboard. Must match preferences.xml */
-	private static final String KEY_PREF_SHOW_REVIEWS_KEYBOARD = "pref_show_keyboard";
+	private static final String KEY_PREF_REVIEWS_KEYBOARD = "pref_reviews_keyboard";
 	/** Enable lessons keyboard Must match preferences.xml */
 	private static final String KEY_PREF_SHOW_LESSONS_KEYBOARD = "pref_show_lessons_keyboard";
 	/** Enable tall keyboard. Must match preferences.xml */
@@ -70,6 +74,8 @@ public class SettingsActivity
 	private static final String KEY_PREF_ENTER = "pref_enter";
 	/** Show mute button. Must match preferences.xml */
 	private static final String KEY_PREF_SHOW_MUTE = "pref_show_mute";
+	/** Ignore button */
+	private static final String KEY_PREF_IGNORE_BUTTON = "pref_ignore_button";
 	/** Enable 42+ mode. Must match preferences.xml */
 	private static final String KEY_PREF_42PLUS = "pref_42plus";
 	/** Wanikani review URL */
@@ -93,7 +99,8 @@ public class SettingsActivity
 	
 	/** Embedded keyboard message has been read and acknowledged */
 	private static final String KEY_TIP_ACK = "key_tip_ack";
-	
+	/** Ignore button message has been read and acknowledged */
+	private static final String KEY_IGNORE_BUTTON_MESSAGE_ACK = "key_ignore_button_message_ack";
 	/** Lessons message has been read and acknowledged */
 	private static final String KEY_TIP_LESSON = "key_tip_lesson";
 
@@ -167,7 +174,7 @@ public class SettingsActivity
 		onSharedPreferenceChanged (prefs, KEY_PREF_REFRESH_TIMEOUT);
 		onSharedPreferenceChanged (prefs, KEY_PREF_NOT_THRESHOLD);
 		onSharedPreferenceChanged (prefs, KEY_PREF_USE_INTEGRATED_BROWSER);
-		onSharedPreferenceChanged (prefs, KEY_PREF_SHOW_REVIEWS_KEYBOARD);
+		onSharedPreferenceChanged (prefs, KEY_PREF_REVIEWS_KEYBOARD);
 		onSharedPreferenceChanged (prefs, KEY_PREF_SHOW_LESSONS_KEYBOARD);
 		onSharedPreferenceChanged (prefs, KEY_PREF_ENTER);
 		onSharedPreferenceChanged (prefs, KEY_PREF_EXPORT_DEST);
@@ -201,7 +208,7 @@ public class SettingsActivity
 							 R.string.pref_use_external_browser_desc);
 			runIntegratedBrowserHook (prefs);
 		} else if (key.equals (KEY_PREF_SHOW_LESSONS_KEYBOARD) ||
-			  key.equals (KEY_PREF_SHOW_REVIEWS_KEYBOARD)) {
+			  key.equals (KEY_PREF_REVIEWS_KEYBOARD)) {
 			runShowKeyboardHooks (prefs);
 		} else if (key.equals (KEY_PREF_USERKEY)) {
 			s = prefs.getString (KEY_PREF_USERKEY, "").trim ();
@@ -284,13 +291,16 @@ public class SettingsActivity
 	{
 		Preference pref;
 		
-		pref = findPreference (KEY_PREF_SHOW_REVIEWS_KEYBOARD);
+		pref = findPreference (KEY_PREF_REVIEWS_KEYBOARD);
 		pref.setEnabled (getUseIntegratedBrowser (prefs));
 
 		pref = findPreference (KEY_PREF_SHOW_MUTE);
 		pref.setEnabled (getUseIntegratedBrowser (prefs));
 		
 		pref = findPreference (KEY_PREF_SHOW_LESSONS_KEYBOARD);
+		pref.setEnabled (getUseIntegratedBrowser (prefs));
+		
+		pref = findPreference (KEY_PREF_IGNORE_BUTTON);
 		pref.setEnabled (getUseIntegratedBrowser (prefs));
 
 		runShowKeyboardHooks (prefs);
@@ -302,12 +312,12 @@ public class SettingsActivity
 		Preference pref;
 		
 		pref = findPreference (KEY_PREF_ENTER);
-		pref.setEnabled ((getShowLessonsKeyboard (prefs) ||
-				          getShowReviewsKeyboard (prefs)) && getUseIntegratedBrowser (prefs));	
+		pref.setEnabled ((getLessonsKeyboard (prefs) == Keyboard.EMBEDDED ||
+				          getReviewsKeyboard (prefs) == Keyboard.EMBEDDED) && getUseIntegratedBrowser (prefs));	
 
 		pref = findPreference (KEY_PREF_LARGE_KEYBOARD);
-		pref.setEnabled ((getShowLessonsKeyboard (prefs) ||
-		                  getShowReviewsKeyboard (prefs)) && getUseIntegratedBrowser (prefs));	
+		pref.setEnabled ((getLessonsKeyboard (prefs) == Keyboard.EMBEDDED ||
+		                  getReviewsKeyboard (prefs) == Keyboard.EMBEDDED) && getUseIntegratedBrowser (prefs));	
 	}
 
 	@SuppressWarnings ("deprecation")
@@ -413,27 +423,52 @@ public class SettingsActivity
 		return getInt (prefs, KEY_PREF_NOT_THRESHOLD, 1);
 	}
 
-	public static boolean getShowReviewsKeyboard (Context ctxt)
+	public static Keyboard getReviewsKeyboard (Context ctxt)
 	{
-		return getShowReviewsKeyboard (prefs (ctxt));
-	}
-	
-	private static boolean getShowReviewsKeyboard (SharedPreferences prefs)
-	{
-		return prefs.getBoolean (KEY_PREF_SHOW_REVIEWS_KEYBOARD, true);
-	}
-	
-	public static boolean getShowLessonsKeyboard (Context ctxt)
-	{
-		return getShowLessonsKeyboard (prefs (ctxt));
-	}
-	
-	private static boolean getShowLessonsKeyboard (SharedPreferences prefs)
-	{
-		return prefs.getBoolean (KEY_PREF_SHOW_LESSONS_KEYBOARD, 
-								 getShowReviewsKeyboard (prefs));
+		return getReviewsKeyboard (prefs (ctxt));
 	}
 
+	private static Keyboard getReviewsKeyboard (SharedPreferences prefs)
+	{
+		int i;
+		
+		try { 
+			i = Integer.parseInt (prefs.getString (KEY_PREF_REVIEWS_KEYBOARD, "0"));
+		} catch (NumberFormatException e) {
+			i = 0;
+		}
+			
+		switch (i) {
+		case 0:
+			return Keyboard.LOCAL_IME;
+			
+		case 1:
+			return Keyboard.EMBEDDED;
+			
+		case 2:
+			return Keyboard.NATIVE;
+		}
+		
+		return Keyboard.LOCAL_IME;
+	}
+	
+	public static Keyboard getLessonsKeyboard (Context ctxt)
+	{
+		return getLessonsKeyboard (prefs (ctxt));
+	}
+	
+	private static Keyboard getLessonsKeyboard (SharedPreferences prefs)
+	{
+		return prefs.getBoolean (KEY_PREF_SHOW_LESSONS_KEYBOARD, 
+								 getReviewsKeyboard (prefs) != Keyboard.NATIVE) ?
+										 Keyboard.EMBEDDED : Keyboard.NATIVE;
+	}
+
+	public static boolean getIgnoreButton (Context ctxt)
+	{
+		return prefs (ctxt).getBoolean (KEY_PREF_IGNORE_BUTTON, true);
+	}
+	
 	public static boolean getShowMute (Context ctxt)
 	{
 		return prefs (ctxt).getBoolean (KEY_PREF_SHOW_MUTE, true);
@@ -442,6 +477,11 @@ public class SettingsActivity
 	public static boolean getLargeKeyboard (Context ctxt)
 	{
 		return prefs (ctxt).getBoolean (KEY_PREF_LARGE_KEYBOARD, false);
+	}
+	
+	public static boolean getNativeIME (Context ctxt)
+	{
+		return true;
 	}
 	
 	public static boolean getVibrate (Context ctxt)
@@ -474,6 +514,16 @@ public class SettingsActivity
 		return prefs (ctxt).edit ().putBoolean (KEY_TIP_ACK, value).commit ();
 	}
 	
+	public static boolean getIgnoreButtonMessage (Context ctxt)
+	{
+		return prefs (ctxt).getBoolean (KEY_IGNORE_BUTTON_MESSAGE_ACK, false);
+	}
+	
+	public static boolean setIgnoreButtonMessage (Context ctxt, boolean value)
+	{
+		return prefs (ctxt).edit ().putBoolean (KEY_IGNORE_BUTTON_MESSAGE_ACK, value).commit ();
+	}
+
 	public static boolean getTipLessons (Context ctxt)
 	{
 		return prefs (ctxt).getBoolean (KEY_TIP_LESSON, false);
