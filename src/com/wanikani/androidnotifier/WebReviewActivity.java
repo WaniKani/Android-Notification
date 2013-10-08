@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
@@ -596,7 +597,7 @@ public class WebReviewActivity extends Activity {
 	 */
 	@Override
 	public void onCreate (Bundle bundle) 
-	{
+	{		
 		super.onCreate (bundle);
 
 		SharedPreferences prefs;
@@ -606,6 +607,11 @@ public class WebReviewActivity extends Activity {
 		setVolumeControlStream (AudioManager.STREAM_MUSIC);
 		 
 		mh = new MenuHandler (this, new MenuListener ());
+		
+		if (SettingsActivity.getFullscreen (this)) {
+			getWindow ().addFlags (WindowManager.LayoutParams.FLAG_FULLSCREEN);
+			requestWindowFeature (Window.FEATURE_NO_TITLE);
+		}
 		
 		setContentView (R.layout.web_review);
 

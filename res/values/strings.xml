@@ -45,6 +45,8 @@
     <string name="pref_show_mute_desc">Show mute button when reviewing</string>
     <string name="pref_lock_screen">Lock screen</string>
     <string name="pref_lock_screen_descr">Keep screen awake during lessons and reviews</string>
+    <string name="pref_fullscreen">Full screen</string>
+    <string name="pref_fullscreen_descr">Display lessons and reviews in fullscreen</string>
     <string name="pref_leak_kludge">Leak workaround</string>
     <string name="pref_leak_kludge_descr">
         	Enables CPU/memory leak workaround (see WK post)</string>
