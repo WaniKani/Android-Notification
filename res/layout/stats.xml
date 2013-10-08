@@ -24,14 +24,25 @@
             android:layout_alignParentLeft="true"
             android:layout_alignParentTop="true"
             android:orientation="vertical" >
-            
-            <TextView
-                android:id="@+id/ct_eta"
-                style="@style/ChartTitle"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:text="@string/ct_eta"
-                android:visibility="gone" />
+                                    
+            <RelativeLayout
+                	android:layout_width="match_parent"
+                	android:layout_height="wrap_content">"
+            	<TextView
+	                android:id="@+id/ct_eta"
+                	style="@style/ChartTitle"
+                	android:layout_width="match_parent"
+                	android:layout_height="match_parent"
+                	android:layout_alignParentBottom="true"
+                	android:text="@string/ct_eta"
+                	android:visibility="gone" />
+            	<Button
+	                android:id="@+id/btn_other_stats"
+                	android:layout_width="wrap_content"
+                	android:layout_height="wrap_content"
+                	android:layout_alignParentRight="true"
+                	android:text="@string/tag_other_stats"/>
+            </RelativeLayout>
     
     		<LinearLayout
     		    android:id="@+id/ctab_eta"

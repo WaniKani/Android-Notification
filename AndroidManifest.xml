@@ -30,6 +30,8 @@
             </intent-filter>
         </activity>
         <activity android:name="SettingsActivity" />
+        <activity android:name="OtherStatsActivity" 
+            	  android:configChanges="orientation|keyboardHidden|screenSize"/>
 
         <activity android:name="WebReviewActivity"
             	  android:windowSoftInputMode="adjustPan"

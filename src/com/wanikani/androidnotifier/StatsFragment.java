@@ -12,6 +12,7 @@ import java.util.Vector;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Resources;
 import android.database.SQLException;
 import android.os.AsyncTask;
@@ -57,6 +58,23 @@ import com.wanikani.wklib.UserInformation;
  * (we need to create and maintain a database, though).
  */
 public class StatsFragment extends Fragment implements Tab {
+
+	/**
+	 * Listener of the "other stats" button. We start the other stats activity.
+	 */
+	private class OtherStatsListener implements View.OnClickListener {
+		
+		@Override
+		public void onClick (View view)
+		{
+			Intent intent;
+			
+			intent = new Intent (main, OtherStatsActivity.class);
+			intent.putExtra (OtherStatsActivity.EXTRA_CACHE, main.getConnection ().cache);			
+			startActivity (intent);
+		}
+		
+	}
 	
 	/**
 	 * This task gets called at application start time to acquire some overall
@@ -894,6 +912,8 @@ public class StatsFragment extends Fragment implements Tab {
     {
 		super.onCreateView (inflater, container, savedInstanceState);
 		
+		View view;
+		
 		parent = inflater.inflate(R.layout.stats, container, false);
 		charts = new Vector<TYChart> ();
 
@@ -915,6 +935,9 @@ public class StatsFragment extends Fragment implements Tab {
 			task = new GetCoreStatsTask (main);
 			task.execute ();
 		}
+		
+		view = parent.findViewById (R.id.btn_other_stats);
+		view.setOnClickListener (new OtherStatsListener ());
 		
 		return parent;
     }
