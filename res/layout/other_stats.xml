@@ -17,7 +17,7 @@
             android:layout_alignParentTop="true"
             android:visibility="gone" />
 
-        <LinearLayout
+       <LinearLayout
             android:id="@+id/os_panel"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -28,104 +28,22 @@
                 style="@style/ChartTitle"
                 android:text="@string/ct_jlpt_progress" />
 
-            <TableLayout
-                style="@style/Table"
+            <com.wanikani.androidnotifier.graph.ProgressChart
+                style="@style/ProgressPlot"                        
+                android:id="@+id/os_jlpt"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical" >
+                android:layout_height="wrap_content" />
+            
+            <TextView
+                style="@style/ChartTitle"
+                android:text="@string/ct_joyo_progress" />
 
-                <TableRow
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" >
-
-                    <TextView
-                        style="@style/ProgressTitle"
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:text="@string/jlpt1" />
-
-                    <com.wanikani.androidnotifier.graph.ProgressPlot
-                        style="@style/ProgressPlot"                        
-                        android:id="@+id/os_jlpt_1"
-                        android:layout_width="0dip"
-                        android:layout_height="@dimen/m_progress_size"
-                        android:layout_weight="1" />
-                </TableRow>
-
-                <TableRow
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" >
-
-                    <TextView
-                        style="@style/ProgressTitle"
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:text="@string/jlpt2" />
-
-                    <com.wanikani.androidnotifier.graph.ProgressPlot
-                        android:id="@+id/os_jlpt_2"
-                        style="@style/ProgressPlot"
-                        android:layout_width="0dip"
-                        android:layout_height="@dimen/m_progress_size"
-                        android:layout_weight="1" />
-                </TableRow>
-                
-                <TableRow
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" >
-
-                    <TextView
-                        style="@style/ProgressTitle"
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:text="@string/jlpt3" />
-
-                    <com.wanikani.androidnotifier.graph.ProgressPlot
-                        android:id="@+id/os_jlpt_3"
-                        style="@style/ProgressPlot"
-                        android:layout_width="0dip"
-                        android:layout_height="@dimen/m_progress_size"
-                        android:layout_weight="1" />
-                </TableRow>
-                
-                <TableRow
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" >
-
-                    <TextView
-                        style="@style/ProgressTitle"
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:text="@string/jlpt4" />
-
-                    <com.wanikani.androidnotifier.graph.ProgressPlot
-                        android:id="@+id/os_jlpt_4"
-                        style="@style/ProgressPlot"
-                        android:layout_width="0dip"
-                        android:layout_height="@dimen/m_progress_size"
-                        android:layout_weight="1" />
-                </TableRow>
-                
-                <TableRow
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" >
-
-                    <TextView
-                        style="@style/ProgressTitle"
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:text="@string/jlpt5" />
-
-                    <com.wanikani.androidnotifier.graph.ProgressPlot
-                        android:id="@+id/os_jlpt_5"
-                        style="@style/ProgressPlot"
-                        android:layout_width="0dip"
-                        android:layout_height="@dimen/m_progress_size"
-                        android:layout_weight="1" />
-                </TableRow>
-                
-            </TableLayout>
-        </LinearLayout>
+            <com.wanikani.androidnotifier.graph.ProgressChart
+                style="@style/ProgressPlot"                        
+                android:id="@+id/os_joyo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+            </LinearLayout>
     </RelativeLayout>
 
 </ScrollView>

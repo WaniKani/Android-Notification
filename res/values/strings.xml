@@ -188,6 +188,15 @@
     <string name="jlpt4">N4</string>
     <string name="jlpt5">N5</string>
         
+    <string name="ct_joyo_progress">Joyo Progress</string>
+    <string name="joyo1">G1</string>
+    <string name="joyo2">G2</string>
+    <string name="joyo3">G3</string>
+    <string name="joyo4">G4</string>
+    <string name="joyo5">G5</string>
+    <string name="joyo6">G6</string>
+    <string name="joyoS">S</string>
+    
     <string name="alert_can_fill">Reconstruct missing data</string>
     
     <string name="txt_reconstruct_title">Reconstruct Data</string>

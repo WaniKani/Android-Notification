@@ -90,8 +90,14 @@ public class ProgressPlot extends View {
 	/// Default width/height ratio of the ellipse
 	private static final float DEFAULT_RATIO = 2F;
 	
+	/// Default height. Set to the android rythm
+	private static final int DEFAULT_HEIGHT = 48;
+	
 	/// Width/height ratio of the ellipse
 	private float ratio;
+	
+	/// Is the view ready to display
+	private boolean readyToDraw; 
 	
 	/**
 	 * Constructor.
@@ -107,6 +113,17 @@ public class ProgressPlot extends View {
 		loadAttributes (ctxt, attrs);
 	}
 	
+	/**
+	 * Constructor.
+	 * @param ctxt context
+	 */
+	public ProgressPlot (Context ctxt)
+	{		
+		super (ctxt);
+		
+		dsets = new Vector<DataSet> (0);
+	}
+
 	/**
 	 * Performs the actual job of reading the attributes and updating 
 	 * the look. Meant for cascading.
@@ -138,8 +155,17 @@ public class ProgressPlot extends View {
 		if (wMode == MeasureSpec.UNSPECIFIED)
 			width = 100;
 		
-		if (hMode == MeasureSpec.UNSPECIFIED)
-			height = 100;
+		switch (hMode) {
+		case MeasureSpec.AT_MOST:
+			height = Math.min (width, DEFAULT_HEIGHT);
+			break;
+			
+		case MeasureSpec.EXACTLY:
+			break;
+			
+		case MeasureSpec.UNSPECIFIED:
+			height = DEFAULT_HEIGHT;
+		}
 		
 		setMeasuredDimension (width, height);	
 	}
@@ -149,6 +175,9 @@ public class ProgressPlot extends View {
 	{
 		DataSet nzds;
 		
+		if (!readyToDraw)
+			return;
+		
 		nzds = null;
 		for (DataSet ds : dsets) {
 			canvas.drawPath (ds.fpath, ds.fpaint);
@@ -156,7 +185,7 @@ public class ProgressPlot extends View {
 				nzds = ds;
 		}
 		if (nzds != null) {
-			nzds = dsets.get (dsets.size () - 1);
+			canvas.drawPath (nzds.fpath, nzds.fpaint);
 			canvas.drawPath (nzds.spath, nzds.spaint);
 		}		
 	}
@@ -210,7 +239,7 @@ public class ProgressPlot extends View {
 		
 		ds.spath = path;
 	}
-
+	
 	/**
 	 * Recreates all the private fields of a dataset, to make the redraw operation
 	 * as quick as possible.
@@ -219,6 +248,8 @@ public class ProgressPlot extends View {
 	{
 		RectF rect, orect;
 		float total, unit;
+		
+		readyToDraw = false;
 		
 		if (dsets.isEmpty () || this.rect == null)
 			return;
@@ -255,12 +286,15 @@ public class ProgressPlot extends View {
 			ds.fpaint.setAntiAlias (true);
 			
 			ds.spaint = new Paint ();
-			ds.spaint.setStyle (Style.FILL);
+			ds.spaint.setStyle (Style.FILL_AND_STROKE);
 			ds.spaint.setColor (shadow (ds.color));
-			ds.spaint.setAntiAlias (true);
+			ds.spaint.setAntiAlias (true);			
+			
 			
 			rect.left = rect.right;
 		}
+
+		readyToDraw = true;
 	}
 	
 	/**

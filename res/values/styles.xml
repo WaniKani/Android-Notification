@@ -288,7 +288,7 @@
         <item name="android:paddingRight">@dimen/m_gap</item>
         <item name="android:gravity">center_vertical</item>
     </style>
-    <style name="ProgressPlot" parent="AppTheme">
+    <style name="ProgressPlot" parent="Table">
         <item name="android:paddingTop">@dimen/m_half_gap</item>
         <item name="android:paddingBottom">@dimen/m_half_gap</item>
         </style>

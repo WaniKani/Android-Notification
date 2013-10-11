@@ -14,8 +14,8 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.ProgressBar;
 
+import com.wanikani.androidnotifier.graph.ProgressChart;
 import com.wanikani.androidnotifier.graph.ProgressPlot;
-import com.wanikani.androidnotifier.graph.ProgressPlot.DataSet;
 import com.wanikani.wklib.Connection;
 import com.wanikani.wklib.ItemLibrary;
 import com.wanikani.wklib.ItemsCache;
@@ -55,22 +55,21 @@ public class OtherStatsActivity extends Activity {
 		
 	}
 	
-	private class KanjiProgressPlot extends ItemListener {
+	private class KanjiProgressChart extends ItemListener {
 		
-		ProgressPlot plot;
+		ProgressChart.SubPlot plot;
 		
 		String library;
-		
-		List<ProgressPlot.DataSet> dsets;
 		
 		EnumMap<SRSLevel, ProgressPlot.DataSet> slds;
 		
 		ProgressPlot.DataSet rds;
 		
-		public KanjiProgressPlot (ProgressPlot plot, String library)
+		public KanjiProgressChart (ProgressChart chart, String title, String library)
 		{
-			this.plot = plot;
 			this.library = library;
+			
+			plot = chart.addData (title); 
 		}
 		
 		public void reset ()
@@ -79,10 +78,11 @@ public class OtherStatsActivity extends Activity {
 			
 			res = getResources ();
 
-			slds = new EnumMap<SRSLevel, ProgressPlot.DataSet> (SRSLevel.class); 
+			slds = new EnumMap<SRSLevel, ProgressPlot.DataSet> (SRSLevel.class);
+			
 			slds.put (SRSLevel.APPRENTICE, 
 					  new ProgressPlot.DataSet (getString (R.string.tag_apprentice), 
-							  					res.getColor (R.color.apprentice), 10));
+							  					res.getColor (R.color.apprentice), 0));
 			slds.put (SRSLevel.GURU, 
 					  new ProgressPlot.DataSet (getString (R.string.tag_guru), 
 							  					res.getColor (R.color.guru), 0));
@@ -96,7 +96,7 @@ public class OtherStatsActivity extends Activity {
 					  new ProgressPlot.DataSet (getString (R.string.tag_burned), 
 							  					res.getColor (R.color.burned), 0));
 			
-			rds = new ProgressPlot.DataSet (getString (R.string.tag_loading),
+			rds = new ProgressPlot.DataSet (getString (R.string.tag_locked),
 											res.getColor (R.color.locked), library.length ());
 		}
 		
@@ -189,6 +189,10 @@ public class OtherStatsActivity extends Activity {
 	
 	private ProgressBar spinner;
 	
+	private ProgressChart jlptChart;
+
+	private ProgressChart joyoChart;
+	
 	private View panel;
 	
 	private static final String KLIB_JLPT_1 =
@@ -225,30 +229,30 @@ public class OtherStatsActivity extends Activity {
 	private static final String KLIB_JLPT_5 =
 		"日一国人年大十二本中長出三時行見月後前生五間上東四今金九入学高円子外八六下来気小七山話女北午百書先名川千水半男西電校語土木聞食車何南万毎白天母火右読友左休父雨";
 	
-	private static final String JOYO_1 =
+	private static final String KLIB_JOYO_1 =
 		"一右雨円王音下火花貝学気九休玉金空月犬見五口校左三山子四糸字耳七車手十出女小上森人水正生青夕石赤千川先早草足村大男竹中虫町天田土二日入年白八百文木本名目立力林六";
 
-	private static final String JOYO_2 =
+	private static final String KLIB_JOYO_2 =
 		"引羽雲園遠何科夏家歌画回会海絵外角楽活間丸岩顔汽記帰弓牛魚京強教近兄形計元言原戸古午後語工公広交光考行高黄合谷国黒今才細作算止市矢姉思紙寺自時室社弱首秋週春書少場色食心新親図数西声星晴切雪船線前組走多" +
 		"太体台地池知茶昼長鳥朝直通弟店点電刀冬当東答頭同道読内南肉馬売買麦半番父風分聞米歩母方北毎妹万明鳴毛門夜野友用曜来里理話";
 	
-	private static final String JOYO_3 =
+	private static final String KLIB_JOYO_3 =
 		"悪安暗医委意育員院飲運泳駅央横屋温化荷界開階寒感漢館岸起期客究急級宮球去橋業曲局銀区苦具君係軽血決研県庫湖向幸港号根祭皿仕死使始指歯詩次事持式実写者主守取酒受州拾終習集住重宿所暑助昭消商章勝乗植申身神" +
 		"真深進世整昔全相送想息速族他打対待代第題炭短談着注柱丁帳調追定庭笛鉄転都度投豆島湯登等動童農波配倍箱畑発反坂板皮悲美鼻筆氷表秒病品負部服福物平返勉放味命面問役薬由油有遊予羊洋葉陽様落流旅両緑礼列練路和";
 	
-	private static final String JOYO_4 =
+	private static final String KLIB_JOYO_4 =
 		"愛案以衣位囲胃印英栄塩億加果貨課芽改械害街各覚完官管関観願希季紀喜旗器機議求泣救給挙漁共協鏡競極訓軍郡径型景芸欠結建健験固功好候航康告差菜最材昨札刷殺察参産散残士氏史司試児治辞失借種周祝順初松笑唱焼象" +
 		"照賞臣信成省清静席積折節説浅戦選然争倉巣束側続卒孫帯隊達単置仲貯兆腸低底停的典伝徒努灯堂働特得毒熱念敗梅博飯飛費必票標不夫付府副粉兵別辺変便包法望牧末満未脈民無約勇要養浴利陸良料量輪類令冷例歴連老労録";
 	
-	private static final String JOYO_5 =
+	private static final String KLIB_JOYO_5 =
 		"圧移因永営衛易益液演応往桜恩可仮価河過賀快解格確額刊幹慣眼基寄規技義逆久旧居許境均禁句群経潔件券険検限現減故個護効厚耕鉱構興講混査再災妻採際在財罪雑酸賛支志枝師資飼示似識質舎謝授修述術準序招承証条状常" +
 		"情織職制性政勢精製税責績接設舌絶銭祖素総造像増則測属率損退貸態団断築張提程適敵統銅導徳独任燃能破犯判版比肥非備俵評貧布婦富武復複仏編弁保墓報豊防貿暴務夢迷綿輸余預容略留領";
 	
-	private static final String JOYO_6 =
+	private static final String KLIB_JOYO_6 =
 		"異遺域宇映延沿我灰拡革閣割株干巻看簡危机揮貴疑吸供胸郷勤筋系敬警劇激穴絹権憲源厳己呼誤后孝皇紅降鋼刻穀骨困砂座済裁策冊蚕至私姿視詞誌磁射捨尺若樹収宗就衆従縦縮熟純処署諸除将傷障城蒸針仁垂推寸盛聖誠宣専" +
 		"泉洗染善奏窓創装層操蔵臓存尊宅担探誕段暖値宙忠著庁頂潮賃痛展討党糖届難乳認納脳派拝背肺俳班晩否批秘腹奮並陛閉片補暮宝訪亡忘棒枚幕密盟模訳郵優幼欲翌乱卵覧裏律臨朗論";
 	
-	private static final String JOYO_S =
+	private static final String KLIB_JOYO_S =
 		"亜哀挨曖握扱宛嵐依威為畏尉萎偉椅彙違維慰緯壱逸茨芋咽姻淫陰隠韻唄鬱畝浦詠影鋭疫悦越謁閲炎怨宴媛援煙猿鉛縁艶汚凹押旺欧殴翁奥岡憶臆虞乙俺卸穏佳苛架華菓渦嫁暇禍靴寡箇稼蚊牙瓦雅餓介戒怪拐悔皆塊楷潰壊懐諧劾" +
 		"崖涯慨蓋該概骸垣柿核殻郭較隔獲嚇穫岳顎掛潟括喝渇葛滑褐轄且釜鎌刈甘汗缶肝冠陥乾勘患貫喚堪換敢棺款閑勧寛歓監緩憾還環韓艦鑑含玩頑企伎岐忌奇祈軌既飢鬼亀幾棋棄毀畿輝騎宜偽欺儀戯擬犠菊吉喫詰却脚虐及丘朽臼糾" +
 		"嗅窮巨拒拠虚距御凶叫狂享況峡挟狭恐恭脅矯響驚仰暁凝巾斤菌琴僅緊錦謹襟吟駆惧愚偶遇隅串屈掘窟熊繰勲薫刑茎契恵啓掲渓蛍傾携継詣慶憬稽憩鶏迎鯨隙撃桁傑肩倹兼剣拳軒圏堅嫌献遣賢謙鍵繭顕懸幻玄弦舷股虎孤弧枯雇誇" +
@@ -271,6 +275,8 @@ public class OtherStatsActivity extends Activity {
 		
 		spinner = (ProgressBar) findViewById (R.id.pb_status);
 		panel = findViewById (R.id.os_panel);
+		jlptChart = (ProgressChart) findViewById (R.id.os_jlpt);
+		joyoChart = (ProgressChart) findViewById (R.id.os_joyo);
 
 		conn = new Connection (SettingsActivity.getLogin (this));
 		if (cache == null)
@@ -278,12 +284,20 @@ public class OtherStatsActivity extends Activity {
 		
 		listeners = new Vector<ItemListener> ();		
 		
-		addKanjiListener (R.id.os_jlpt_1, KLIB_JLPT_1);		
-		addKanjiListener (R.id.os_jlpt_2, KLIB_JLPT_2);		
-		addKanjiListener (R.id.os_jlpt_3, KLIB_JLPT_3);		
-		addKanjiListener (R.id.os_jlpt_4, KLIB_JLPT_4);		
-		addKanjiListener (R.id.os_jlpt_5, KLIB_JLPT_5);
+		addKanjiListener (jlptChart, R.string.jlpt5, KLIB_JLPT_5);		
+		addKanjiListener (jlptChart, R.string.jlpt4, KLIB_JLPT_4);		
+		addKanjiListener (jlptChart, R.string.jlpt3, KLIB_JLPT_3);		
+		addKanjiListener (jlptChart, R.string.jlpt2, KLIB_JLPT_2);		
+		addKanjiListener (jlptChart, R.string.jlpt1, KLIB_JLPT_1);
 		
+		addKanjiListener (joyoChart, R.string.joyo1, KLIB_JOYO_1);
+		addKanjiListener (joyoChart, R.string.joyo2, KLIB_JOYO_2);
+		addKanjiListener (joyoChart, R.string.joyo3, KLIB_JOYO_3);
+		addKanjiListener (joyoChart, R.string.joyo4, KLIB_JOYO_4);
+		addKanjiListener (joyoChart, R.string.joyo5, KLIB_JOYO_5);
+		addKanjiListener (joyoChart, R.string.joyo6, KLIB_JOYO_6);
+		addKanjiListener (joyoChart, R.string.joyoS, KLIB_JOYO_S);
+
 		refresh ();
 	}
 		
@@ -296,12 +310,9 @@ public class OtherStatsActivity extends Activity {
 			cache = (ItemsCache) intent.getSerializableExtra (EXTRA_CACHE);		
 	}
 	
-	protected void addKanjiListener (int id, String library)
+	protected void addKanjiListener (ProgressChart chart, int id, String library)
 	{
-		ProgressPlot plot;
-		
-		plot = (ProgressPlot) findViewById (id);
-		listeners.add (new KanjiProgressPlot (plot, library));
+		listeners.add (new KanjiProgressChart (chart, getString (id), library));
 	}
 	
 	protected void refresh ()
