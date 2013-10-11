@@ -22,10 +22,43 @@ import android.widget.TextView.OnEditorActionListener;
 
 import com.wanikani.wklib.JapaneseIME;
 
+/* 
+ *  Copyright (c) 2013 Alberto Cuda
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/**
+ * Implementation of the "Custom IME" keyboard. This is now the preferred choice,
+ * since it is the only one that features tilde substitution, ignore button, and
+ * is much more appealing on small devices. Basically we put a textbox on top
+ * of the real answer form, and use a regular keyboard to input text. If it is
+ * a "reading" question, we perform kana translation directly inside the app,
+ * instead of using the WK JS-based IME.
+ */
 public class LocalIMEKeyboard extends NativeKeyboard {
 
+	/**
+	 * A listener of meaningful webview events. We need this to synchronized the position
+	 * of our text box with that of the HTML form.
+	 */
 	private class WebViewListener implements FocusWebView.Listener {
-		
+
+		/**
+		 * Called when the webview scrolls vertically. We relay the event
+		 * to {@link LocalIMEKeyboard#scroll(int, int)}.
+		 */
 		@Override
 		public void onScroll (int dx, int dy)
 		{
@@ -33,10 +66,22 @@ public class LocalIMEKeyboard extends NativeKeyboard {
 		}
 	}
 	
+	/**
+	 * Listener of all the events related to the IME. This class is the glue between the app 
+	 * and {@link JapaneseIME}: it handles text changes, delivers them to the IME and updates
+	 * the contents accordingly.
+	 */
 	private class IMEListener implements TextWatcher, OnEditorActionListener, View.OnClickListener {
 		
+		/// Set if we need to perform kana translation
 	    boolean translate;
 	    
+	    /**
+	     * Called after the text is changed to perform kana translation (if enabled).
+	     * In that case, the new text is sent the IME and, if some changes need to be performed,
+	     * they are applied to the text view. After that, android will call this method again,
+	     * but that's safe because the IME won't ask for a replacement any more.
+	     */
 	    @Override
 	    public void afterTextChanged (Editable s)
 	    {
@@ -66,11 +111,19 @@ public class LocalIMEKeyboard extends NativeKeyboard {
 	    	/* empty */
 	    }
 	    
+	    /**
+	     * Enable or disable kana translation.
+	     * @param enable set if should be enabled
+	     */
 	    public void translate (boolean enable)
 	    {
 	    	translate = enable;
 	    }
 	    
+	    /**
+	     * Handler of editor actions. It intercepts the "enter" key and moves to the
+	     * next question, by calling {@link #next()}.
+	     */
 	    @Override
 	    public boolean onEditorAction (TextView tv, int actionId, KeyEvent event)
 	    {
@@ -83,12 +136,19 @@ public class LocalIMEKeyboard extends NativeKeyboard {
 	        return false;
 	    }
 	    
+	    /**
+	     * Handler of the next button. Calls {@link #next()}.
+	     */
 	    @Override
 	    public void onClick (View view)
 	    {
 	    	next ();
 	    }
 	    
+	    /**
+	     * Called when the user presses the "next" button. It completes kana translation
+	     * (to fix trailing 'n's), and injects the answer.
+	     */
 	    private void next ()
 	    {
 	    	String s;
@@ -100,10 +160,18 @@ public class LocalIMEKeyboard extends NativeKeyboard {
 	    }
 	}
 	
+	/**
+	 * Chain runnable that handles "setText" events on the UI thread. 
+	 */
 	private class JSSetText implements Runnable {
 		
+		/// The text to set
 		public String text;
 		
+		/**
+		 * Constructor
+		 * @param text the text to set
+		 */
 		public JSSetText (String text)
 		{
 			this.text = text;
@@ -111,6 +179,9 @@ public class LocalIMEKeyboard extends NativeKeyboard {
 			wav.runOnUiThread (this);
 		}
 		
+		/**
+		 * Sets the text on the EditView.
+		 */
 		public void run ()
 		{
 			ew.setText (text);
@@ -118,12 +189,21 @@ public class LocalIMEKeyboard extends NativeKeyboard {
 		
 	}
 
+	/**
+	 * Chain runnable that handles "setClass" events on the UI thread. 
+	 */
 	private class JSListenerSetClass implements Runnable {
 		
+		/// Set if the classes should be added. If unset, all CSS classes should be removed
 		public boolean enable;
 		
+		/// The CSS class to emulate
 		public String clazz;
 		
+		/**
+		 * Constructor. Used when the edittext changes class.
+		 * @param clazz the CSS class
+		 */
 		public JSListenerSetClass (String clazz)
 		{
 			this.clazz = clazz;
@@ -133,6 +213,9 @@ public class LocalIMEKeyboard extends NativeKeyboard {
 			wav.runOnUiThread (this);
 		}
 		
+		/**
+		 * Constructor. Used when the edittext goes back to the default class
+		 */
 		public JSListenerSetClass ()
 		{
 			enable = false;
@@ -140,6 +223,10 @@ public class LocalIMEKeyboard extends NativeKeyboard {
 			wav.runOnUiThread (this);
 		}
 
+		/**
+		 * Delivers the event to {@link LocalIMEKeyboard#setClass(String)}
+		 * or {@link LocalIMEKeyboard#unsetClass()}, depending on the type of event.
+		 */
 		public void run ()
 		{
 			if (enable)
@@ -168,8 +255,22 @@ public class LocalIMEKeyboard extends NativeKeyboard {
 		}
 	}
 	
+	/**
+	 * A JS bridge that handles the answer text-box events. 
+	 */
 	private class JSListener {
 		
+		/**
+		 * Called by {@link LocalIMEKeyboard#JS_INIT_TRIGGERS} when the form changes its position.
+		 * @param fleft form top-left X coordinate 
+		 * @param ftop form top-left Y coordinate
+		 * @param fright form bottom-right X coordinate 
+		 * @param fbottom form bottom-right Y coordinate
+		 * @param tleft textbox top-left X coordinate
+		 * @param ttop textbox top-left Y coordinate
+		 * @param tright textbox bottom-right X coordinate
+		 * @param tbottom textbox bottom-right Y coordinate
+		 */
 		@JavascriptInterface
 		public void replace (int fleft, int ftop, int fright, int fbottom,
 							 int tleft, int ttop, int tright, int tbottom)
@@ -188,6 +289,10 @@ public class LocalIMEKeyboard extends NativeKeyboard {
 								new Rect (tleft, ttop, tright, tbottom));
 		}
 
+		/**
+		 * Called when the question changes.
+		 * @param qtype the type of question (reading vs meaning)
+		 */
 		@JavascriptInterface
 		public void newQuestion (String qtype)
 		{
@@ -195,12 +300,22 @@ public class LocalIMEKeyboard extends NativeKeyboard {
 			new JSListenerSetClass ();
 		}
 		
+		/**
+		 * Called when the text box changes its class
+		 * @param clazz the new CSS class
+		 */
 		@JavascriptInterface
 		public void setClass (String clazz)
 		{
 			new JSListenerSetClass (clazz);
 		}
 		
+		/**
+		 * Called when a full CSS class and contents synchronization needs to be done.
+		 * @param correct
+		 * @param incorrect
+		 * @param text
+		 */
 		@JavascriptInterface
 		public void sync (boolean correct, boolean incorrect, String text)
 		{
@@ -212,6 +327,9 @@ public class LocalIMEKeyboard extends NativeKeyboard {
 		}
 	}
 
+	/**
+	 * The javascript triggers. They are installed when the keyboard is shown.
+	 */
 	private static final String JS_INIT_TRIGGERS =
 			"window.wknReplace = function () {" +
 			"   var form, frect, txt, trect, button, brect;" +
@@ -248,36 +366,53 @@ public class LocalIMEKeyboard extends NativeKeyboard {
 			"form = $(\"#answer-form fieldset\");" +
 			"tbox = $(\"#user-response\");" +
 			"wknJSListener.sync (form.hasClass (\"correct\"), form.hasClass (\"incorrect\"), tbox.val ());";
-	
-	private final String JS_REPLACE = 
-			"window.wknReplace ();";
-	
+
+	/** 
+	 * Uninstalls the triggers, when the keyboard is hidden
+	 */
 	private static final String JS_STOP_TRIGGERS =
 			"$.jStorage.stopListening (\"currentItem\", window.wknNewQuestion);";
+	
+	/**
+	 * Injects an answer into the HTML text box and clickes the "next" button.
+	 */
 	private static final String JS_INJECT_ANSWER = 
 			"$(\"#user-response\").val (\"%s\");" +
 			"$(\"#answer-form button\").click ();";
 	
+	/// The IME
     JapaneseIME ime;
     
+    /// The view that is placed on top of the answer form 
     View divw;
     
+    /// The edit text
     EditText ew;
     
+    /// The handler of all the ime events
     IMEListener imel;
     
+    /// Bridge between JS and the main class
     JSListener jsl;
-    
+   
+    /// Display metrics, needed to translate HTML coordinates into pixels
     DisplayMetrics dm;
     
+    /// The next button
     Button next;
     
     int correctFG, incorrectFG, ignoredFG;
     
     int correctBG, incorrectBG, ignoredBG;
     
+    /// Set if the ignore button must be shown, because the answer is incorrect
     boolean canIgnore;
     
+    /**
+     * Constructor
+     * @param wav parent activity
+     * @param wv the integrated browser
+     */
 	public LocalIMEKeyboard (WebReviewActivity wav, FocusWebView wv)
 	{
 		super (wav, wv);
@@ -316,6 +451,12 @@ public class LocalIMEKeyboard extends NativeKeyboard {
 		ignoredBG = res.getColor (R.color.ignoredbg);
 	}	
 	
+	/**
+	 * Shows the keyboard. Actually we only inject the triggers: if the javascript code detects that
+	 * the form must be shown, it call the appropriate event listeners.
+	 * @param hasEnter
+	 */
+	@Override
 	public void show (boolean hasEnter)
 	{
 		super.show (hasEnter);
@@ -323,6 +464,10 @@ public class LocalIMEKeyboard extends NativeKeyboard {
 		wv.js (JS_INIT_TRIGGERS);
 	}
 
+	/**
+	 * Hides the keyboard and uninstalls the triggers.
+	 */
+	@Override
 	public void hide ()
 	{
 		super.hide ();
@@ -332,6 +477,11 @@ public class LocalIMEKeyboard extends NativeKeyboard {
 		divw.setVisibility (View.GONE);
 	}
 
+	/**
+	 * Called when the HTML textbox is moved. It moves the edittext as well
+	 * @param frect the form rect 
+	 * @param trect text textbox rect
+	 */
 	/* The commented-out sections are there until I find a way to resize the font as well */
 	protected void replace (Rect frect, Rect trect)
 	{
@@ -366,6 +516,11 @@ public class LocalIMEKeyboard extends NativeKeyboard {
 		ew.requestFocus ();
 	}
 	
+	/**
+	 * Called when the webview is scrolled. It moves the edittext as well
+	 * @param dx the horizontal displacement
+	 * @param dy the vertical displacement
+	 */
 	protected void scroll (int dx, int dy)
 	{
 		RelativeLayout.LayoutParams rparams;
@@ -375,6 +530,10 @@ public class LocalIMEKeyboard extends NativeKeyboard {
 		divw.setLayoutParams (rparams);
 	}
 	
+	/**
+	 * Called when the HTML textbox changes class. It changes the edit text accordingly.
+	 * @param clazz the CSS class
+	 */
 	public void setClass (String clazz)
 	{
 		if (clazz.equals ("correct")) {
@@ -390,17 +549,29 @@ public class LocalIMEKeyboard extends NativeKeyboard {
 			
 	}
 	
+	/**
+	 * Called when the HTML textbox goes back to the default CSS class.
+	 */
 	public void unsetClass ()
 	{
 		enableIgnoreButton (false);
 		enable ();
 	}
 	
+	/**
+	 * Called to set/unset ignore button visbility 
+	 * @param enable if it should be visible
+	 */
 	public void enableIgnoreButton (boolean enable)
 	{
 		canIgnore = enable;
 	}
 	
+	/**
+	 * Disables editing on the edit text
+	 * @param fg foreground color
+	 * @param bg background color
+	 */
 	private void disable (int fg, int bg)
 	{
 		ew.setTextColor (fg);
@@ -408,6 +579,9 @@ public class LocalIMEKeyboard extends NativeKeyboard {
 		ew.setEnabled (false);
 	}
 
+	/**
+	 * Enable editing on the edit text. It also clears the contents.
+	 */
 	private void enable ()
 	{
     	ew.setText ("");
@@ -418,12 +592,21 @@ public class LocalIMEKeyboard extends NativeKeyboard {
 		imm.showSoftInput (ew, 0);
 		ew.requestFocus ();
 	}
-	
+
+	/**
+	 * Runs the ignore button script.
+	 */
+	@Override
 	public void ignore ()
 	{
 		wv.js (IgnoreButton.JS_CODE);
 	}
 	
+	/**
+	 * Tells if the ignore button can be shown
+	 * @return <tt>true</tt> if the current answer is wrong
+	 */
+	@Override
 	public boolean canIgnore ()
 	{
 		return canIgnore;

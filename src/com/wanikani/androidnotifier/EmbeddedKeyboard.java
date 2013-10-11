@@ -18,23 +18,62 @@ import android.widget.ImageButton;
 import com.wanikani.androidnotifier.WebReviewActivity.KeyboardStatus;
 import com.wanikani.androidnotifier.WebReviewActivity.WKConfig;
 
+/* 
+ *  Copyright (c) 2013 Alberto Cuda
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/**
+ * Implementation of the {@link Keyboard} interface that shows the traditional embedded keyboard.
+ * Basically, we show a view that contains a set of buttons arranged as a qwerty keyboard:
+ * each time the user presses one of those keys, we inject (through JS) the corresponding character. 
+ */
 public class EmbeddedKeyboard implements Keyboard { 
-	
+
+	/**
+	 * Chain runnable the delivers the {@link Focus#focusOut()} event using the UI thread. 
+	 */
 	private class FocusOut implements Runnable {
 		
+		/**
+		 * Constructor. It also schedules the event on the UI thread. 
+		 */
 		FocusOut ()
 		{
 			wav.runOnUiThread (this);
 		}
 		
+		/**
+		 * Delivers the event.
+		 */
 		public void run ()
 		{
 			focusOut ();
 		}
 	}
 	
+	/**
+	 * JS bridge that receives the focusout event. This is called by the javascript before entering
+	 * the first character into a lesson answer box. This event is eventually delivered to
+	 * {@link EmbeddedKeyboard#focusOut()} to focus the box out. 
+	 */
 	private class Focus {
 
+		/**
+		 * Performs the focus out operation. Called by {@link EmbeddedKeyboard#JS_ENTER}.
+		 */
 		@JavascriptInterface
 		public void focusOut ()
 		{
@@ -121,6 +160,10 @@ public class EmbeddedKeyboard implements Keyboard {
 	}
 	
 
+	/**
+	 * This javascript is called before entering any key into a lesson answer box and takes care
+	 * of fixing additional strange behaviours of that specific page.
+	 */
 	private static final String JS_FOCUS = 
 			"var ltextbox;" +
 			"ltextbox = document.getElementById (\"" + WKConfig.LESSON_ANSWER_BOX_JP + "\"); " +
@@ -179,10 +222,19 @@ public class EmbeddedKeyboard implements Keyboard {
 		KeyEvent.KEYCODE_DPAD_DOWN
 	};
 
+	/**
+	 * The parent activity
+	 */
 	WebReviewActivity wav;
 	
+	/**
+	 * The integrated browser
+	 */
 	FocusWebView wv;
 	
+	/**
+	 * The keyboard view
+	 */
 	View kview;
 	
 	/** The current keyboard. It may be set to either {@link #KB_LATIN} or {@link #KB_ALT} */
@@ -200,6 +252,11 @@ public class EmbeddedKeyboard implements Keyboard {
 	/** The mute button to be shown when the embedded keyboard is enabled */
 	private ImageButton mute;
 	
+	/**
+	 * Constructor.
+	 * @param wav the parent activity
+	 * @param wv the integrated browser
+	 */
 	public EmbeddedKeyboard (WebReviewActivity wav, FocusWebView wv)
 	{
 		this.wav = wav;		
@@ -215,6 +272,9 @@ public class EmbeddedKeyboard implements Keyboard {
 		init ();
 	}
 	
+	/**
+	 * Keyboard specific initialization.
+	 */
 	protected void init ()
 	{
 		View.OnClickListener klist, mlist;
@@ -386,6 +446,11 @@ public class EmbeddedKeyboard implements Keyboard {
 		return KeyEvent.KEYCODE_SPACE;
 	}
 	
+	/**
+	 * Called by the parent activity when the keyboard needs to be shown.
+	 * @param hasEnter if the keyboard contains the enter key. If unset, the hide button is shown instead
+	 */
+	@Override
 	public void show (boolean hasEnter)
 	{
 		View view, key;
@@ -419,6 +484,11 @@ public class EmbeddedKeyboard implements Keyboard {
 		key.setVisibility (hasEnter ? View.GONE : View.VISIBLE);		
 	}
 	
+	/**
+	 * Iconizes the keyboard, making it appear as a single line of buttons.
+	 * @param hasEnter if the keyboard contains the enter key. If unset, the hide button is shown instead
+	 */
+	@Override
 	public void iconize (boolean hasEnter)
 	{
 		View view, key;
@@ -445,17 +515,30 @@ public class EmbeddedKeyboard implements Keyboard {
 		view.setVisibility (View.VISIBLE);					
 	}
 	
+	/**
+	 * Hides the keyboard. Used also when the user chooses a different keyboard.
+	 */
+	@Override
 	public void hide ()
 	{
 		kview.setVisibility (View.GONE);
 		wv.enableFocus ();
 	}
 	
+	/**
+	 * Returns a reference to the mute button view.
+	 * @return the mute button
+	 */
+	@Override
 	public ImageButton getMuteButton ()
 	{
 		return mute;
 	}
 	
+	/**
+	 * Shows a small notice that tells the user what should be avoided to use the keyboard in
+	 * the correct way. Once the user acknowledges the message, this method does nothing 
+	 */
 	protected void showEmbeddedKeyboardMessage ()
 	{
 		AlertDialog.Builder builder;
@@ -474,11 +557,19 @@ public class EmbeddedKeyboard implements Keyboard {
 		dialog.show ();		
 	}
 
+	/**
+	 * Ignore button pressed. Does nothing because it is not supported.
+	 */
+	@Override
 	public void ignore ()
 	{
 		/* Not supported */
 	}	
 
+	/**
+	 * Tells if the ignore menu item may be shown.
+	 * @return always false, since we do not implement it in this class
+	 */
 	public boolean canIgnore ()
 	{
 		return false;

@@ -677,6 +677,9 @@ public class StatsFragment extends Fragment implements Tab {
 				if (lastlup != null) {
 					cal = Calendar.getInstance ();
 					cal.setTime (dd.creation);
+					cal.set (Calendar.HOUR_OF_DAY, 0);
+					cal.set (Calendar.MINUTE, 0);
+					cal.set (Calendar.SECOND, 0);
 					cal.add (Calendar.DATE, lastlup);
 					delay -= ((float) System.currentTimeMillis () - cal.getTimeInMillis ()) / (24 * 3600 * 1000);
 					if (delay > 0)
@@ -740,7 +743,7 @@ public class StatsFragment extends Fragment implements Tab {
 			
 			lday = 0;
 			ans = new Hashtable<Integer, Integer> ();
-			for (i = 1; i < dd.level; i++) {
+			for (i = 1; i <= dd.level; i++) {
 				cday = cs.levelups.get (i);
 				if (cday != null && lday != null && lday < cday)
 					ans.put (i - 1, cday - lday);
