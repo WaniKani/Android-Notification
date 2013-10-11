@@ -49,8 +49,6 @@ public class NativeKeyboard implements Keyboard {
 		wv.enableFocus ();
 		
 		imm.showSoftInput (wv, InputMethodManager.SHOW_IMPLICIT);
-		
-		muteH.setVisibility (SettingsActivity.getShowMute (wav) ? View.VISIBLE : View.GONE);
 	}
 		
 	/**
