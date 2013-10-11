@@ -725,7 +725,7 @@ public class StatsFragment extends Fragment implements Tab {
 			
 			lday = 0;
 			ans = new Hashtable<Integer, Integer> ();
-			for (i = 1; i < dd.level; i++) {
+			for (i = 1; i <= dd.level; i++) {
 				cday = cs.levelups.get (i);
 				if (cday != null && lday != null && lday < cday)
 					ans.put (i - 1, cday - lday);
