@@ -479,6 +479,8 @@ public class LocalIMEKeyboard extends NativeKeyboard {
 		super.show (hasEnter);
 		
 		wv.js (JS_INIT_TRIGGERS);
+		
+		showCustomIMEMessage ();
 	}
 
 	/**
