@@ -243,16 +243,32 @@
     
     <string name="ignore_button_message_title">Ignore button</string>
     <string name="ignore_button_message_text">        
-		Anyone using this feature is responsible for using it correctly. 
+		Anyone using this feature is responsible for using it correctly.\n 
 		This should be used only if you make an honest mistake but actually 
 		knew the correct answer. Using it in any other way will harm your 
 		Kanji learning process, cheating will only make learning Japanese harder 
-		and you\'ll end up harming only yourselves!		
-		See also \@ruipgpinheiro\'s post (author of the script) for more information: 
+		and you\'ll end up harming only yourselves!\n
+		See also \@ruipgpinheiro\'s post (author of the script) for more information:/n 
 			http://www.wanikani.com/chat/api-and-third-party-apps/2940/
     </string>
     <string name="ignore_button_message_ok">OK, got it</string>
     
+    <string name="custom_ime_title">Custom IME</string>
+    <string name="custom_ime_message_text">        
+		Defaulting to the Custom IME. Hope you will like it.\n
+		This new input mode supports \@ruipgpinheiro\'s ignore button: check
+		the menu after entering a wrong answer.\n
+		If you encounter any problems, you can switch to traditional input
+		mode (Settings/Reviews Kbd). But please report!
+    </string>
+    <string name="custom_ime_message_ok">OK, got it</string>
+    
+    <string name="other_stats_error_message_title">Network error</string>
+    <string name="other_stats_error_message_text">
+        Failed to download the data needed to build the plots        
+    </string>
+    <string name="other_stats_message_retry">Retry</string>
+    <string name="other_stats_message_cancel">Cancel</string>
     
     <string name="exp_no_bluetooth">No bluetooth adapter found</string>
     <string name="exp_to_file">Db exported to %s</string>

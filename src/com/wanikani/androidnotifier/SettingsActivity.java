@@ -105,6 +105,8 @@ public class SettingsActivity
 	private static final String KEY_IGNORE_BUTTON_MESSAGE_ACK = "key_ignore_button_message_ack";
 	/** Lessons message has been read and acknowledged */
 	private static final String KEY_TIP_LESSON = "key_tip_lesson";
+	/** Custom IME message has been read and acknowledged */
+	private static final String KEY_CUSTOM_IME = "key_custom_ime";
 
 	/** Mute review */
 	private static final String KEY_MUTE = "mute";
@@ -534,6 +536,16 @@ public class SettingsActivity
 	public static boolean setTipLessons (Context ctxt, boolean value)
 	{
 		return prefs (ctxt).edit ().putBoolean (KEY_TIP_LESSON, value).commit ();
+	}
+
+	public static boolean getCustomIMEMessage (Context ctxt)
+	{
+		return prefs (ctxt).getBoolean (KEY_CUSTOM_IME, false);
+	}
+	
+	public static boolean setCustomIMEMessage (Context ctxt, boolean value)
+	{
+		return prefs (ctxt).edit ().putBoolean (KEY_CUSTOM_IME, value).commit ();
 	}
 
 	public static boolean getLockScreen (Context ctxt)
