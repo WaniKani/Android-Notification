@@ -263,6 +263,13 @@
     </string>
     <string name="custom_ime_message_ok">OK, got it</string>
     
+    <string name="other_stats_error_message_title">Network error</string>
+    <string name="other_stats_error_message_text">
+        Failed to download the data needed to build the plots        
+    </string>
+    <string name="other_stats_message_retry">Retry</string>
+    <string name="other_stats_message_cancel">Cancel</string>
+    
     <string name="exp_no_bluetooth">No bluetooth adapter found</string>
     <string name="exp_to_file">Db exported to %s</string>
     </resources>

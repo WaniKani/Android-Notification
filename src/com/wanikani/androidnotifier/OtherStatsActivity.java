@@ -6,7 +6,10 @@ import java.util.List;
 import java.util.Vector;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.os.AsyncTask;
@@ -26,6 +29,24 @@ import com.wanikani.wklib.Vocabulary;
 
 public class OtherStatsActivity extends Activity {
 	
+	private class RetryListener implements DialogInterface.OnClickListener {
+		
+		@Override
+		public void onClick (DialogInterface ifc, int which)
+		{
+			refresh ();
+		}		
+	}
+
+	private class CancelListener implements DialogInterface.OnClickListener {
+		
+		@Override
+		public void onClick (DialogInterface ifc, int which)
+		{
+			finish ();
+		}		
+	}
+
 	private class ItemListener {
 		
 		public void reset ()
@@ -195,6 +216,8 @@ public class OtherStatsActivity extends Activity {
 	
 	private View panel;
 	
+	private boolean visible;
+	
 	private static final String KLIB_JLPT_1 =
 		"氏統保第結派案策基価提挙応企検藤沢裁証援施井護展態鮮視条幹独宮率衛張監環審義訴株姿閣衆評影松撃佐核整融製票渉響推請器士討攻崎督授催及憲離激摘系批郎健盟従修隊織拡故振弁就異献厳維浜遺塁邦素遣抗模雄益緊標" +
 		"宣昭廃伊江僚吉盛皇臨踏壊債興源儀創障継筋闘葬避司康善逮迫惑崩紀聴脱級博締救執房撤削密措志載陣我為抑幕染奈傷択秀徴弾償功拠秘拒刑塚致繰尾描鈴盤項喪伴養懸街契掲躍棄邸縮還属慮枠恵露沖緩節需射購揮充貢鹿却端" +
@@ -310,6 +333,22 @@ public class OtherStatsActivity extends Activity {
 			cache = (ItemsCache) intent.getSerializableExtra (EXTRA_CACHE);		
 	}
 	
+	@Override
+	public void onResume ()
+	{
+		super.onResume ();
+		
+		visible = true;
+	}
+	
+	@Override
+	public void onPause ()
+	{
+		super.onPause ();
+		
+		visible = false;
+	}
+
 	protected void addKanjiListener (ProgressChart chart, int id, String library)
 	{
 		listeners.add (new KanjiProgressChart (chart, getString (id), library));
@@ -326,10 +365,33 @@ public class OtherStatsActivity extends Activity {
 	
 	protected void completed (boolean ok)
 	{
-		spinner.setVisibility (View.GONE);	
-		panel.setVisibility (View.VISIBLE);
-		for (ItemListener l : listeners)
-			l.update ();
+		spinner.setVisibility (View.GONE);
+		
+		if (ok) {
+			panel.setVisibility (View.VISIBLE);
+			for (ItemListener l : listeners)
+				l.update ();
+		} else
+			showErrorMessage ();
+	}
+
+	protected void showErrorMessage ()
+	{
+		AlertDialog.Builder builder;
+		Dialog dialog;
+		
+		if (!visible)
+			return;
+		
+		builder = new AlertDialog.Builder (this);
+		builder.setTitle (R.string.other_stats_error_message_title);
+		builder.setMessage (R.string.other_stats_error_message_text);
+		builder.setPositiveButton (R.string.other_stats_message_retry, new RetryListener ());
+		builder.setNegativeButton (R.string.other_stats_message_cancel, new CancelListener ());
+		
+		dialog = builder.create ();
+		
+		dialog.show ();		
 	}
 
 }
