@@ -1,5 +1,8 @@
 package com.wanikani.androidnotifier;
 
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.content.DialogInterface;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Rect;
@@ -48,6 +51,20 @@ import com.wanikani.wklib.JapaneseIME;
  * instead of using the WK JS-based IME.
  */
 public class LocalIMEKeyboard extends NativeKeyboard {
+
+	/**
+	 * The listener attached to the welcome message.
+	 * When the user taps the ok button, we write on the property
+	 * that it has been acknowleged, so it won't show up any more. 
+	 */
+	private class OkListener implements DialogInterface.OnClickListener {
+		
+		@Override
+		public void onClick (DialogInterface ifc, int which)
+		{
+			SettingsActivity.setCustomIMEMessage (wav, true);
+		}		
+	}
 
 	/**
 	 * A listener of meaningful webview events. We need this to synchronized the position
@@ -611,4 +628,24 @@ public class LocalIMEKeyboard extends NativeKeyboard {
 	{
 		return canIgnore;
 	}
+	
+	protected void showCustomIMEMessage ()
+	{
+		AlertDialog.Builder builder;
+		Dialog dialog;
+					
+		if (!wav.visible || SettingsActivity.getCustomIMEMessage (wav))
+			return;
+		
+		builder = new AlertDialog.Builder (wav);
+		builder.setTitle (R.string.custom_ime_title);
+		builder.setMessage (R.string.custom_ime_message_text);
+		builder.setPositiveButton (R.string.custom_ime_message_ok, new OkListener ());
+		
+		dialog = builder.create ();
+		
+		dialog.show ();		
+	}
+
+
 }
