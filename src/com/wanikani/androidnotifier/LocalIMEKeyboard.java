@@ -171,6 +171,11 @@ public class LocalIMEKeyboard extends NativeKeyboard {
 	    	String s;
 	    	
         	s = ew.getText ().toString ();
+
+        	/* This prevents some race conditions */
+        	if (s.length () == 0)
+        		return;
+        	
         	if (translate)
         		s = ime.fixup (s);
         	wv.js (String.format (JS_INJECT_ANSWER, s));
@@ -479,6 +484,8 @@ public class LocalIMEKeyboard extends NativeKeyboard {
 		super.show (hasEnter);
 		
 		wv.js (JS_INIT_TRIGGERS);
+		
+		showCustomIMEMessage ();
 	}
 
 	/**
