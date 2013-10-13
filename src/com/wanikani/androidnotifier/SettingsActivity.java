@@ -349,9 +349,12 @@ public class SettingsActivity
 			sb = new StringBuffer (res.getString (R.string.status_msg_unauthorized));
 			key = prefs.getString (KEY_PREF_USERKEY, "");
 			delta = key.length () - EXPECTED_KEYLEN;
-			if (key.length () == 0 || delta == 0)
+			if (delta == 0)
 				/* Say nothing more */;
-			else if (delta > 0) {
+			else if (key.length () == 0) {
+				fmt = res.getString (R.string.status_msg_unauthorized_empty);
+				sb.append ('\n').append (String.format (fmt, delta));
+			} else if (delta > 0) {
 				fmt = res.getString (R.string.status_msg_unauthorized_too_long);
 				sb.append ('\n').append (String.format (fmt, delta));
 			} else {
