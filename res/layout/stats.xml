@@ -79,6 +79,13 @@
                 android:layout_height="wrap_content"
                 custom:title="@string/ct_srs_distribution" />
             
+            <com.wanikani.androidnotifier.graph.HistogramChart
+                android:id="@+id/hi_levels"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                custom:ticks="1"
+                custom:title="@string/ct_levels"/>
+            
             <com.wanikani.androidnotifier.graph.PieChart
                 android:id="@+id/pc_kanji"
                 android:layout_width="match_parent"

@@ -1,25 +1,20 @@
 package com.wanikani.androidnotifier.graph;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.Hashtable;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
+import java.util.Vector;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.BitmapShader;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.DashPathEffect;
 import android.graphics.Paint;
 import android.graphics.Paint.FontMetrics;
-import android.graphics.Path;
 import android.graphics.RectF;
 import android.graphics.Shader;
 import android.support.v4.view.ViewCompat;
@@ -32,8 +27,6 @@ import android.view.View;
 import android.widget.Scroller;
 
 import com.wanikani.androidnotifier.R;
-import com.wanikani.androidnotifier.graph.Pager.DataSet;
-import com.wanikani.wklib.UserInformation;
 
 /* 
  *  Copyright (c) 2013 Alberto Cuda
@@ -54,25 +47,43 @@ import com.wanikani.wklib.UserInformation;
 
 public class HistogramPlot extends View {
 
-	public class Series {
+	public static class Series {
+		
+		public String name;
 		
 		public int color;
 		
+		public Series (String name, int color)
+		{
+			this.name = name;
+			this.color = color;
+		}
+		
+		public Series (int color)
+		{
+			this.color = color;
+		}
+		
 	}
 	
-	public class Sample {
+	public static class Sample {
 		
 		public Series series;
 		
 		public long value;
-				
 	}
 	
-	public class Samples {
+	public static class Samples {
 		
 		public String tag;
 		
 		public List<Sample> samples;
+		
+		public Samples (String tag)
+		{
+			this.tag = tag;
+			samples = new Vector<Sample> ();
+		}
 		
 	}
 		
@@ -161,7 +172,7 @@ public class HistogramPlot extends View {
 		/// Actual space between axis and label
 		public int headroom = 10;
 
-		/// Actual height of a day tick
+		/// Actual font siz
 		public float dateLabelFontSize;
 		
 		/// Actual number of items represented by a vertical mark
@@ -175,7 +186,10 @@ public class HistogramPlot extends View {
 		public Measures (Context ctxt, AttributeSet attrs)
 		{
 			DisplayMetrics dm;
+			TypedArray a;
 			
+			a = ctxt.obtainStyledAttributes (attrs, R.styleable.HistogramPlot);
+				 								
 			dm = ctxt.getResources ().getDisplayMetrics ();
 			
 			margin = DEFAULT_MARGIN;
@@ -184,10 +198,13 @@ public class HistogramPlot extends View {
 			axisWidth = DEFAULT_AXIS_WIDTH;
 			headroom = DEFAULT_HEADROOM;
 			dateLabelFontSize = DEFAULT_DATE_LABEL_FONT_SIZE;
-			yaxisGrid = DEFAULT_YAXIS_GRID;
+			yaxisGrid = a.getInteger (R.styleable.HistogramPlot_ticks, DEFAULT_YAXIS_GRID);
 			
 			dateLabelFontSize = TypedValue.applyDimension (TypedValue.COMPLEX_UNIT_SP, 
 					 									   dateLabelFontSize, dm);
+			
+			a.recycle ();		
+
 			updateSize (new RectF ());
 		}
 
@@ -245,8 +262,6 @@ public class HistogramPlot extends View {
 		public PaintAssets (Resources res, AttributeSet attrs, Measures meas)
 		{
 			FontMetrics fm;
-			Bitmap bmp;
-			Shader shader;
 			float points [];
 			
 			axisPaint = new Paint ();
@@ -266,8 +281,6 @@ public class HistogramPlot extends View {
 			
 			fm = labelPaint.getFontMetrics ();
 			meas.ensureFontMargin ((int) (fm.bottom - fm.ascent));
-			
-			bmp = BitmapFactory.decodeResource (res, R.drawable.partial);
 			
 			series = new Hashtable<Series, Paint> ();
 		}		
@@ -455,7 +468,7 @@ public class HistogramPlot extends View {
 		}
 
 		/**
-		 * Returns the rightmost bar represented in this viewport.
+		 * Returns the rightmost complete bar represented in this viewport.
 		 * This differs from {@link #t1} because it is an integer
 		 * @return the bar
 		 */
@@ -465,7 +478,7 @@ public class HistogramPlot extends View {
 		}
 		
 		/**
-		 * Returns the leftmost bar represented in this viewport.
+		 * Returns the leftmost complete bar represented in this viewport.
 		 * This differs from {@link #t0} because it is an integer
 		 * @return the bar
 		 */
@@ -530,7 +543,7 @@ public class HistogramPlot extends View {
 	 * @param attrs the attributes
 	 */
 	void loadAttributes (Context ctxt, AttributeSet attrs)
-	{
+	{				
 		meas = new Measures (ctxt, attrs);
 		pas = new PaintAssets (getResources (), attrs, meas);		
 	}
@@ -540,7 +553,7 @@ public class HistogramPlot extends View {
 	 * @param series a list of series that will be referenced by <tt>data</tt> 
 	 * @param bars a list of samples, each representing a bar
 	 */
-	public void setDataSource (List<Series> series, List<Samples> bars)
+	public void setData (List<Series> series, List<Samples> bars)
 	{
 		pas.setSeries (series);
 		vp = new Viewport (meas, bars.size (), getMaxY (bars));
@@ -609,25 +622,27 @@ public class HistogramPlot extends View {
 	@Override
 	protected void onDraw (Canvas canvas)
 	{			
-		drawPlot (canvas);
-	}
-	
-	protected void drawPlot (Canvas canvas)
-	{
 		float left, right, tagLabelBaseline;
 		int d, lo, hi, ascent;
 		Samples bar;
 		
 		canvas.drawLine (meas.plotArea.left, meas.plotArea.bottom,
 				         meas.plotArea.right, meas.plotArea.bottom, pas.axisPaint);
-		lo = vp.leftmostBar ();
-		hi = vp.rightmostBar ();
+		lo = vp.leftmostBar () - 1;	/* We want broken bars too :) */
+		hi = vp.rightmostBar () + 1;
 				
 		ascent = (int) pas.labelPaint.getFontMetrics ().ascent;
 		
 		tagLabelBaseline = meas.plotArea.bottom - ascent + meas.headroom / 2;
 		
 		for (d = lo; d <= hi; d++) {
+			
+			if (d < 0)
+				continue;
+			
+			if (d >= bars.size ())
+				break;
+			
 			left = vp.getRelPosition (d);
 			right = left + vp.meas.dipPerBar;
 			bar = bars.get (d);
@@ -644,15 +659,17 @@ public class HistogramPlot extends View {
 	
 	protected void drawBar (Canvas canvas, Samples bar, float left, float right)
 	{
-		float base, height;
+		long base, height;
+		RectF rect;
 		
 		base = 0;
 		for (Sample sample : bar.samples) {
 			if (sample.value > 0) {
-				height = vp.getY (sample.value);
-				canvas.drawRect(left, base, right, base - height, 
-								pas.series.get (sample.series));
-				base -= height;
+				height = sample.value;
+				rect = new RectF (left, vp.getY (base + height), right, vp.getY (base));
+				rect.intersect (meas.plotArea);
+				canvas.drawRect (rect, pas.series.get (sample.series));
+				base += height;
 			}
 		}
 	}

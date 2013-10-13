@@ -181,6 +181,7 @@
     <string name="ct_srs_distribution">SRS Distribution</string>
     <string name="ct_kanji_progress">Kanji Progress</string>
     <string name="ct_vocab_progress">Vocab Progress</string>
+    <string name="ct_levels">Levelup time</string>
     
     <string name="ct_jlpt_progress">JLPT Progress</string>
     <string name="jlpt1">N1</string>

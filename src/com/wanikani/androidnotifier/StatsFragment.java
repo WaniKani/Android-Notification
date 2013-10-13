@@ -1,9 +1,9 @@
 package com.wanikani.androidnotifier;
 
+import java.lang.reflect.GenericSignatureFormatError;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Locale;
@@ -26,13 +26,14 @@ import android.widget.TextView;
 import com.wanikani.androidnotifier.db.HistoryDatabase;
 import com.wanikani.androidnotifier.db.HistoryDatabaseCache;
 import com.wanikani.androidnotifier.db.HistoryDatabaseCache.PageSegment;
+import com.wanikani.androidnotifier.graph.HistogramChart;
+import com.wanikani.androidnotifier.graph.HistogramPlot;
 import com.wanikani.androidnotifier.graph.Pager;
 import com.wanikani.androidnotifier.graph.Pager.Series;
 import com.wanikani.androidnotifier.graph.PieChart;
 import com.wanikani.androidnotifier.graph.PiePlot.DataSet;
 import com.wanikani.androidnotifier.graph.TYChart;
 import com.wanikani.wklib.SRSDistribution;
-import com.wanikani.wklib.UserInformation;
 
 /* 
  *  Copyright (c) 2013 Alberto Cuda
@@ -577,12 +578,64 @@ public class StatsFragment extends Fragment implements Tab {
 		
 	}
 	
+	private abstract class GenericChart {
+		
+		HistoryDatabase.CoreStats cs;
+		
+		DashboardData dd;		
+		
+		public void setCoreStats (HistoryDatabase.CoreStats cs)
+		{
+			this.cs = cs;
+			
+			updateIfComplete ();
+		}
+		
+		public void setDashboardData (DashboardData dd)
+		{
+			this.dd = dd;
+			
+			updateIfComplete ();
+		}
+		
+		public boolean scrolling ()
+		{
+			return false;
+		}
+		
+		protected void updateIfComplete ()
+		{
+			if (dd != null && cs != null)
+				update ();
+		}
+		
+		protected abstract void update ();
+		
+		protected Map<Integer, Integer> getDays ()
+		{
+			Map<Integer, Integer> ans;
+			Integer lday, cday;
+			int i;
+
+			lday = 0;
+			ans = new Hashtable<Integer, Integer> ();
+			for (i = 1; i <= dd.level; i++) {
+				cday = cs.levelups.get (i);
+				if (cday != null && lday != null && lday < cday)
+					ans.put (i - 1, cday - lday);
+				lday = cday;
+			}
+
+			return ans;
+		}
+	}
+	
 	/**
 	 * This class, given the core stats, calculates the expected completion time
 	 * of the fifty WK levels and of next level. This is done through an exponentially
 	 * weighted average. The exponent is different in the two cases.
 	 */
-	private class LevelEstimates {
+	private class LevelEstimates extends GenericChart {
 		
 		/// The exponent for l50 completion
 		private static final float WEXP_L50 = 0.707f;
@@ -590,39 +643,20 @@ public class StatsFragment extends Fragment implements Tab {
 		/// The exponent for next level completion
 		private static final float WEXP_NEXT = 0.42f;
 		
-		/// The corestats
-		HistoryDatabase.CoreStats cs;
-		
-		/// The dashboard data
-		DashboardData dd;
-		
 		/// The Date formatter
-		private DateFormat df;		
+		private DateFormat df;
 		
-		public void setCoreStats (HistoryDatabase.CoreStats cs)
+		public LevelEstimates ()
 		{
-			this.cs = cs;
-			
-			df = new SimpleDateFormat ("dd MMM yyyy", Locale.US);
-			update ();
+			df =  new SimpleDateFormat ("dd MMM yyyy", Locale.US);
 		}
 		
-		public void setDashboardData (DashboardData dd)
-		{
-			this.dd = dd;
-			
-			update ();
-		}
-		
-		private void update ()
+		protected void update ()
 		{
 			Map<Integer, Integer> days;
 			boolean show;
 			int vity;
 			
-			if (cs == null || dd == null)
-				return;
-
 			days = getDays ();
 			show = false;
 			
@@ -735,44 +769,6 @@ public class StatsFragment extends Fragment implements Tab {
 				
 		}
 		
-		private Map<Integer, Integer> getDays ()
-		{
-			Map<Integer, Integer> ans;
-			Integer lday, cday, days;
-			int i, minl, maxl, minv, maxv;
-			
-			lday = 0;
-			ans = new Hashtable<Integer, Integer> ();
-			for (i = 1; i <= dd.level; i++) {
-				cday = cs.levelups.get (i);
-				if (cday != null && lday != null && lday < cday)
-					ans.put (i - 1, cday - lday);
-				lday = cday;
-			}
-			
-			minl = maxl = minv = maxv = -1;			
-			for (i = 1; i < dd.level; i++) {
-				days = ans.get (i);
-				if (days != null) {
-					if (minv == -1 || days < minv) {
-						minl = i;
-						minv = days;						
-					}
-					if (maxv == -1 || days > maxv) {
-						maxl = i;
-						maxv = days;
-					}						
-				}
-			}
-			
-			if (minl > 0)
-				ans.remove (minl);
-			if (maxl > 0)
-				ans.remove (maxl);
-				
-			return ans;
-		}
-		
 		private Float weight (Map<Integer, Integer> days, float wexp)
 		{
 			float cw, num, den;
@@ -792,7 +788,93 @@ public class StatsFragment extends Fragment implements Tab {
 			
 			return den != 0 ? num / den : null;
 		}
+		
+		@Override
+		protected Map<Integer, Integer> getDays ()
+		{
+			Map<Integer, Integer> ans;
+			int i, minl, maxl, minv, maxv;
+			Integer days;
+
+			ans = super.getDays ();
+			
+			minl = maxl = minv = maxv = -1;			
+			for (i = 1; i < dd.level; i++) {
+				days = ans.get (i);
+				if (days != null) {
+					if (minv == -1 || days < minv) {
+						minl = i;
+						minv = days;						
+					}
+					if (maxv == -1 || days > maxv) {
+						maxl = i;
+						maxv = days;
+					}						
+				}
+			}
+
+			if (minl > 0)
+				ans.remove (minl);
+			if (maxl > 0)
+				ans.remove (maxl);
+			
+			return ans;
+		}
+
 				
+	}
+	
+	private class LevelupSource extends GenericChart {
+
+		List<HistogramPlot.Series> series;
+		
+		public LevelupSource ()
+		{
+			Resources res;
+			
+			res = getResources ();
+			
+			series = new Vector<HistogramPlot.Series> ();
+			series.add (new HistogramPlot.Series (res.getColor (R.color.apprentice)));
+			series.add (new HistogramPlot.Series (res.getColor (R.color.guru)));
+			series.add (new HistogramPlot.Series (res.getColor (R.color.master)));
+			series.add (new HistogramPlot.Series (res.getColor (R.color.enlightened)));
+		}
+		
+		protected void update ()
+		{
+			List<HistogramPlot.Samples> bars;
+			Map<Integer, Integer> days;
+			HistogramPlot.Samples bar;
+			HistogramPlot.Sample sample;
+			HistogramChart chart;
+			Integer day;
+			int i;
+			
+			bars = new Vector<HistogramPlot.Samples> ();
+			days = getDays ();
+			for (i = 1; i < dd.level; i++) {
+				bar = new HistogramPlot.Samples (Integer.toString (i));				
+				sample = new HistogramPlot.Sample ();				
+				bar.samples.add (sample);
+				
+				sample.series = series.get (i % series.size ());
+				day = days.get (i);
+				sample.value = day != null ? day : 0;
+				
+				bars.add (bar);
+			}
+			
+			chart = (HistogramChart) parent.findViewById (R.id.hi_levels);
+			chart.setData (series, bars);
+			
+			chart.setVisibility (bars.isEmpty () ? View.GONE : View.VISIBLE);
+		}
+		
+		public boolean scrolling ()
+		{
+			return ((HistogramChart) parent.findViewById (R.id.hi_levels)).scrolling ();
+		}		
 	}
 
 	/// The main activity
@@ -801,8 +883,11 @@ public class StatsFragment extends Fragment implements Tab {
 	/// The root view of the fragment
 	View parent;
 	
-	/// All the charts. This is needed to lock and unlock scrolling
+	/// All the TY charts. This is needed to lock and unlock scrolling
 	List<TYChart> charts;
+	
+	/// All the generic (non TY) charts.
+	List<GenericChart> gcharts;	
 	
 	/// The core stats, used to trim graph scales
 	HistoryDatabase.CoreStats cs;
@@ -819,9 +904,6 @@ public class StatsFragment extends Fragment implements Tab {
 	/// The Vocab progress plot datasource
 	VocabDataSource vocabds;
 	
-	/// The level estimator
-	LevelEstimates les;
-
 	/// Overall number of kanji
 	private static final int ALL_THE_KANJI = 1700;
 	
@@ -842,9 +924,9 @@ public class StatsFragment extends Fragment implements Tab {
 	 */
 	public StatsFragment ()
 	{
-		this.charts = new Vector<TYChart> ();
+		charts = new Vector<TYChart> ();
+		gcharts = new Vector<GenericChart> ();
 		hdbc = new HistoryDatabaseCache ();
-		les = new LevelEstimates ();
 	}
 	
 	@Override
@@ -885,9 +967,11 @@ public class StatsFragment extends Fragment implements Tab {
 		srsds.setCoreStats (cs);
 		kanjids.setCoreStats (cs);
 		vocabds.setCoreStats (cs);
-		les.setCoreStats (cs);
 		for (TYChart tyc : charts)
 			tyc.refresh ();
+		
+		for (GenericChart gc : gcharts)
+			gc.setCoreStats (cs);
 	}
 
 	/**
@@ -919,6 +1003,7 @@ public class StatsFragment extends Fragment implements Tab {
 		
 		parent = inflater.inflate(R.layout.stats, container, false);
 		charts = new Vector<TYChart> ();
+		gcharts = new Vector<GenericChart> ();
 
 		srsds = new SRSDataSource (hdbc);
 		kanjids = new KanjiDataSource (hdbc);
@@ -931,6 +1016,9 @@ public class StatsFragment extends Fragment implements Tab {
 		attach (R.id.ty_srs, srsds);
 		attach (R.id.ty_kanji, kanjids);
 		attach (R.id.ty_vocab, vocabds);
+	
+		gcharts.add (new LevelEstimates ());
+		gcharts.add (new LevelupSource ());
 		
 		if (cs != null)
 			setCoreStats (cs);
@@ -984,7 +1072,9 @@ public class StatsFragment extends Fragment implements Tab {
 		if (dd == null || !isResumed ())
 			return;
 		
-		les.setDashboardData (dd);
+		for (GenericChart gc : gcharts)
+			gc.setDashboardData (dd);
+		
 		switch (dd.od.srsStatus) {
 		case RETRIEVING:
 			break;
@@ -1228,6 +1318,10 @@ public class StatsFragment extends Fragment implements Tab {
 			if (chart.scrolling ())
 				return true;
 		
+		for (GenericChart chart : gcharts)
+			if (chart.scrolling ())
+				return true;
+
 		return false; 
 	}
 	
@@ -1277,5 +1371,46 @@ public class StatsFragment extends Fragment implements Tab {
     public boolean contains (Contents c)
 	{
 		return c == Contents.STATS;
-	}	
+	}
+	
+	private static Map<Integer, Integer> getDays (HistoryDatabase.CoreStats cs,
+												  DashboardData dd, boolean remove)
+	{
+		Map<Integer, Integer> ans;
+		Integer lday, cday, days;
+		int i, minl, maxl, minv, maxv;
+		
+		lday = 0;
+		ans = new Hashtable<Integer, Integer> ();
+		for (i = 1; i <= dd.level; i++) {
+			cday = cs.levelups.get (i);
+			if (cday != null && lday != null && lday < cday)
+				ans.put (i - 1, cday - lday);
+			lday = cday;
+		}
+		
+		minl = maxl = minv = maxv = -1;			
+		for (i = 1; i < dd.level; i++) {
+			days = ans.get (i);
+			if (days != null) {
+				if (minv == -1 || days < minv) {
+					minl = i;
+					minv = days;						
+				}
+				if (maxv == -1 || days > maxv) {
+					maxl = i;
+					maxv = days;
+				}						
+			}
+		}
+		
+		if (remove) {
+			if (minl > 0)
+				ans.remove (minl);
+			if (maxl > 0)
+				ans.remove (maxl);
+		}
+			
+		return ans;
+	}
 }
