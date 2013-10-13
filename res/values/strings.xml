@@ -94,6 +94,7 @@
     <string name="status_msg_error">Error connecting to WaniKani</string>
     <string name="status_msg_partial">Network error. Partial results</string>
     <string name="status_msg_unauthorized">Authentication failed: check User API Key</string>
+    <string name="status_msg_unauthorized_empty">(did you subscribe to http://www.wanikani.com?)</string>
     <string name="status_msg_unauthorized_too_short">(hint: it is %d chars too short)</string>
     <string name="status_msg_unauthorized_too_long">(hint: it is %d chars too long)</string>
     
