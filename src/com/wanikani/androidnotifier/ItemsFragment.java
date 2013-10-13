@@ -113,7 +113,7 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 		
 		/**
 		 * Display time before next review. If the item has not
-		 * been unlocked yet (or if available date is not available), 
+		 * been unlocked yet, it is burned or if available date is not available, 
 		 * it returns an empty string.
 		 */
 		AVAILABLE {
@@ -124,6 +124,9 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 				
 				date = i.getAvailableDate ();
 				if (date == null)
+					return "";
+				
+				if (i.stats != null && i.stats.srs == SRSLevel.BURNED)
 					return "";
 				
 				now = System.currentTimeMillis ();
