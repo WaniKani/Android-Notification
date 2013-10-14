@@ -71,6 +71,22 @@ public class HistogramPlot extends View {
 		public Series series;
 		
 		public long value;
+		
+		public Sample (Series series, long value)
+		{
+			this.series = series;
+			this.value = value;
+		}
+
+		public Sample (Series series)
+		{
+			this.series = series;
+		}
+		
+		public Sample ()
+		{
+			/* empty */
+		}		
 	}
 	
 	public static class Samples {

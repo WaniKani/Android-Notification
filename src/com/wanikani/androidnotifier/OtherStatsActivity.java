@@ -15,11 +15,15 @@ import android.content.res.Resources;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ProgressBar;
 
+import com.wanikani.androidnotifier.graph.HistogramChart;
+import com.wanikani.androidnotifier.graph.HistogramPlot;
 import com.wanikani.androidnotifier.graph.ProgressChart;
 import com.wanikani.androidnotifier.graph.ProgressPlot;
 import com.wanikani.wklib.Connection;
+import com.wanikani.wklib.Item;
 import com.wanikani.wklib.ItemLibrary;
 import com.wanikani.wklib.ItemsCache;
 import com.wanikani.wklib.Kanji;
@@ -45,6 +49,17 @@ public class OtherStatsActivity extends Activity {
 		{
 			finish ();
 		}		
+	}
+	
+	private class MoreListener implements View.OnClickListener {
+		
+		@Override
+		public void onClick (View view)
+		{
+			view.setVisibility (View.GONE);
+			showMore ();
+		}
+		
 	}
 
 	private class ItemListener {
@@ -198,6 +213,147 @@ public class OtherStatsActivity extends Activity {
 		}
 	}
 
+	private class LevelsTask extends AsyncTask<Void, List<HistogramPlot.Samples>, Boolean> {
+
+		/// WK connection
+		private Connection conn;
+		
+		/// Context
+		private Context ctxt;
+		
+		/// The chart to be updated
+		private HistogramChart chart;
+		
+		/// The series
+		private List<HistogramPlot.Series> series;
+
+		/// The SRS to series mapping
+		private EnumMap<SRSLevel, HistogramPlot.Series> map;
+		
+		/// The SRS to idx mapping
+		private EnumMap<SRSLevel, Integer> imap;
+
+		/// The actual data
+		private List<HistogramPlot.Samples> bars; 
+		
+		/**
+		 * Constructor
+		 * @param conn WK connection
+		 * @param ctxt the context
+		 */
+		public LevelsTask (Connection conn, HistogramChart chart, Context ctxt)
+			throws IOException
+		{
+			Resources res;
+			
+			this.conn = conn;
+			this.chart = chart;
+			this.ctxt = ctxt;
+			
+			res = ctxt.getResources ();
+			
+			series = new Vector<HistogramPlot.Series> ();
+			map = new EnumMap<SRSLevel, HistogramPlot.Series> (SRSLevel.class);
+			imap = new EnumMap<SRSLevel, Integer> (SRSLevel.class);
+			bars = new Vector<HistogramPlot.Samples> ();
+			
+			add (res, SRSLevel.APPRENTICE, R.string.tag_apprentice, R.color.apprentice);
+			add (res, SRSLevel.GURU, R.string.tag_guru, R.color.guru);
+			add (res, SRSLevel.MASTER, R.string.tag_master, R.color.master);
+			add (res, SRSLevel.ENLIGHTEN, R.string.tag_enlightened, R.color.enlightened);
+			add (res, SRSLevel.BURNED, R.string.tag_burned, R.color.burned);
+			
+			imap.put (SRSLevel.APPRENTICE, 0);
+			imap.put (SRSLevel.GURU, 1);
+			imap.put (SRSLevel.MASTER, 2);
+			imap.put (SRSLevel.ENLIGHTEN, 3);
+			imap.put (SRSLevel.BURNED, 4);
+			
+			initBars ();
+		}
+		
+		private void add (Resources res, SRSLevel level, int string, int color)		
+		{			
+			HistogramPlot.Series s;
+			
+			s = new HistogramPlot.Series (res.getString (string), res.getColor (color));
+			series.add (s);
+			map.put (level, s);
+		}
+		
+		private void initBars ()
+			throws IOException
+		{
+			HistogramPlot.Samples bar;
+			int i, levels;
+			
+			levels = conn.getUserInformation ().level;
+			for (i = 1; i <= levels; i++) {
+				bar = new HistogramPlot.Samples (Integer.toString (i));
+				bar.samples.add (new HistogramPlot.Sample (map.get (SRSLevel.APPRENTICE)));
+				bar.samples.add (new HistogramPlot.Sample (map.get (SRSLevel.GURU)));
+				bar.samples.add (new HistogramPlot.Sample (map.get (SRSLevel.MASTER)));
+				bar.samples.add (new HistogramPlot.Sample (map.get (SRSLevel.ENLIGHTEN)));
+				bar.samples.add (new HistogramPlot.Sample (map.get (SRSLevel.BURNED)));
+				bars.add (bar);
+			}
+		}
+				
+		/**
+		 * The reconstruction process itself. It opens a DB reconstruction object,
+		 * loads all the items, and retrieves the new core stats 
+		 * @return true if everything is ok
+		 */
+		@Override
+		protected Boolean doInBackground (Void... vd)
+		{
+			ItemLibrary<Radical> rlib;
+			ItemLibrary<Kanji> klib;
+			ItemLibrary<Vocabulary> vlib;
+			
+			try {
+				rlib = conn.getRadicals ();
+				for (Radical r : rlib.list)
+					put (r);
+			} catch (IOException e) {
+				return false;
+			} 
+
+			try {
+				klib = conn.getKanji ();
+				for (Kanji k : klib.list)
+					put (k);
+			} catch (IOException e) {
+				return false;
+			} 
+			
+			try {
+				vlib = conn.getVocabulary ();
+				for (Vocabulary v : vlib.list)
+					put (v);
+			} catch (IOException e) {
+				return false;
+			} 
+			
+			return true;
+		}	
+		
+		private void put (Item i)
+		{
+			bars.get (i.level - 1).samples.get (imap.get (i.stats.srs)).value++;
+		}
+						
+		/**
+		 * Ends the reconstruction process by telling everybody how it went.
+		 * @param ok if everything was ok
+		 */
+		@Override
+		protected void onPostExecute (Boolean ok)
+		{
+			chart.setData (series, bars);
+		}
+	}
+
 	private Connection conn;
 	
 	private ItemsCache cache;
@@ -213,6 +369,8 @@ public class OtherStatsActivity extends Activity {
 	private ProgressChart jlptChart;
 
 	private ProgressChart joyoChart;
+	
+	private HistogramChart levelsChart;
 	
 	private View panel;
 	
@@ -300,6 +458,8 @@ public class OtherStatsActivity extends Activity {
 		panel = findViewById (R.id.os_panel);
 		jlptChart = (ProgressChart) findViewById (R.id.os_jlpt);
 		joyoChart = (ProgressChart) findViewById (R.id.os_joyo);
+		levelsChart = (HistogramChart) findViewById (R.id.os_levels);
+		levelsChart.setVisibility (View.GONE);
 
 		conn = new Connection (SettingsActivity.getLogin (this));
 		if (cache == null)
@@ -365,12 +525,18 @@ public class OtherStatsActivity extends Activity {
 	
 	protected void completed (boolean ok)
 	{
+		Button more;
+		
 		spinner.setVisibility (View.GONE);
 		
 		if (ok) {
 			panel.setVisibility (View.VISIBLE);
 			for (ItemListener l : listeners)
 				l.update ();
+			
+			more = (Button) findViewById (R.id.os_more);
+			more.setVisibility (View.VISIBLE);
+			more.setOnClickListener (new MoreListener ());
 		} else
 			showErrorMessage ();
 	}
@@ -392,6 +558,17 @@ public class OtherStatsActivity extends Activity {
 		dialog = builder.create ();
 		
 		dialog.show ();		
+	}
+	
+	protected void showMore ()
+	{
+		levelsChart.setVisibility (View.VISIBLE);
+
+		try {
+			new LevelsTask (conn, levelsChart, this).execute ();
+		} catch (IOException e) {
+			/* empty */
+		}
 	}
 
 }
