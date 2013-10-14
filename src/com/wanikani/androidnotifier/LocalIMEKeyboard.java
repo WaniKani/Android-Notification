@@ -178,7 +178,10 @@ public class LocalIMEKeyboard extends NativeKeyboard {
         	
         	if (translate)
         		s = ime.fixup (s);
-        	wv.js (String.format (JS_INJECT_ANSWER, s) + WaniKaniImprove.JS_CODE);
+        	if (isWKIEnabled)
+        		wv.js (String.format (JS_INJECT_ANSWER, s) + WaniKaniImprove.JS_CODE);
+        	else
+        		wv.js (String.format (JS_INJECT_ANSWER, s));
 	    }
 	}
 	
@@ -429,6 +432,8 @@ public class LocalIMEKeyboard extends NativeKeyboard {
     
     WaniKaniImprove wki;
     
+    boolean isWKIEnabled;
+    
     /// Set if the ignore button must be shown, because the answer is incorrect
     boolean canIgnore;
     
@@ -446,6 +451,7 @@ public class LocalIMEKeyboard extends NativeKeyboard {
 		dm = wav.getResources ().getDisplayMetrics ();
 		
 		ime = new JapaneseIME ();
+		
 		wki = new WaniKaniImprove ();
 		
 		ew = (EditText) wav.findViewById (R.id.ime);
@@ -486,8 +492,10 @@ public class LocalIMEKeyboard extends NativeKeyboard {
 	{
 		super.show (hasEnter);
 		
-		wv.js (JS_INIT_TRIGGERS);		
-		wki.initPage ();
+		wv.js (JS_INIT_TRIGGERS);
+		isWKIEnabled = SettingsActivity.getWaniKaniImprove (wav); 
+		if (isWKIEnabled)
+			wki.initPage ();
 		
 		showCustomIMEMessage ();
 	}

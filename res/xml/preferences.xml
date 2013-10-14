@@ -74,6 +74,11 @@
         	android:summary="@string/pref_ignore_button_descr"
         	android:defaultValue="true" />
     <CheckBoxPreference
+        	android:key="pref_wanikani_improve"
+        	android:title="@string/pref_wanikani_improve"
+        	android:summary="@string/pref_wanikani_improve_descr"
+        	android:defaultValue="false" />    
+    <CheckBoxPreference
         	android:key="pref_show_mute"
         	android:title="@string/pref_show_mute"
         	android:summary="@string/pref_show_mute_desc"

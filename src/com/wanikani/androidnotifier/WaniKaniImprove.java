@@ -1,8 +1,14 @@
 package com.wanikani.androidnotifier;
 
-import android.app.Activity;
+import android.app.Dialog;
+import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.view.View;
 import android.webkit.JavascriptInterface;
-import android.widget.Toast;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 
 public class WaniKaniImprove {
 
@@ -12,13 +18,13 @@ public class WaniKaniImprove {
 		
 		private String type;
 		
-		private String questionType;
+		private String jstoreEn [];
 
-		public State (String item, String type, String questionType)
+		public State (String item, String type, String jstoreEn [])
 		{
 			this.item = item;
 			this.type = type;
-			this.questionType = questionType;
+			this.jstoreEn = jstoreEn;
 		}
 		
 		public void publish ()
@@ -26,11 +32,73 @@ public class WaniKaniImprove {
 			activity.runOnUiThread (this);
 		}
 		
+		public String getURL ()
+		{
+			StringBuffer sb;
+			
+			sb = new StringBuffer ("http://www.wanikani.com/quickview/");
+			
+			if (type.equals ("kanji"))
+				sb.append ("kanji/").append (item).append ('/');
+			else if (type.equals ("vocabulary"))
+				sb.append ("vocabulary/").append (item).append ('/');
+			else
+				sb.append ("radicals/").
+					append (jstoreEn [0].toLowerCase ().replace (' ', '-')).
+					append ('/');
+			
+			return sb.toString ();
+		}
+		
 		public void run ()
 		{
-			Toast.makeText (activity, "item: " + item, Toast.LENGTH_LONG).show();
+			showDialog (this);
 		}
 	}
+	
+	private class WebViewClientImpl extends WebViewClient {
+		
+		Dialog dialog;
+		
+		ProgressBar pb;
+		
+		TextView tv;
+		
+		String title;
+		
+		WebViewClientImpl (Dialog dialog, String title)
+		{
+			this.dialog = dialog;
+			this.title = title;
+
+			pb = (ProgressBar) dialog.findViewById (R.id.pb_lastitem);
+			tv = (TextView) dialog.findViewById (R.id.tv_lastitem_message);
+		}
+		
+		@Override  
+	    public void onPageStarted (WebView view, String url, Bitmap favicon)  
+	    {  
+	        pb.setVisibility (View.VISIBLE);
+		}
+	
+		@Override
+	    public void onReceivedError (WebView view, int errorCode, String description, String failingUrl)
+	    {
+			dialog.setTitle (title);
+	    	pb.setVisibility (View.GONE);
+	    	tv.setText (activity.getResources ().getString (R.string.status_msg_error));
+	    	tv.setVisibility (View.VISIBLE);
+	    	view.setVisibility (View.GONE);
+	    }
+
+		@Override  
+	    public void onPageFinished (WebView view, String url)  
+	    {  
+			dialog.setTitle (title);
+			pb.setVisibility (View.GONE);
+	    }
+	}
+
 	
 	private static final String JS_INIT_PAGE =
 "\r\n" + 
@@ -103,16 +171,16 @@ public class WaniKaniImprove {
 "    currentItem = $.trim($('#character span').html());" + 
 "    currentType = $('#character').attr('class');" + 
 "    currentQuestionType = $.trim($('#question-type').text());" + 
-"    wknWanikaniImprove.save (currentItem, currentType, currentQuestionType);" +
+"    wknWanikaniImprove.save (currentItem, currentType, currentQuestionType, jstored_currentItem.en);" +
 "    checkAnswer();";
 	
 	private State currentState;
 	
-	private Activity activity;
+	private WebReviewActivity activity;
 	
 	private FocusWebView wv;
 	
-	public void init (Activity activity, FocusWebView wv)
+	public void init (WebReviewActivity activity, FocusWebView wv)
 	{
 		this.activity = activity;
 		this.wv = wv;
@@ -127,9 +195,9 @@ public class WaniKaniImprove {
 	}
 	
 	@JavascriptInterface
-	public void save (String currentItem, String currentType, String currentQuestionType)
+	public void save (String currentItem, String currentType, String currentQuestionType, String jstoreEn [])
 	{
-		currentState = new State (currentItem, currentType, currentQuestionType);
+		currentState = new State (currentItem, currentType, jstoreEn);
 	}
 	
 	@JavascriptInterface
@@ -139,6 +207,29 @@ public class WaniKaniImprove {
 			currentState.publish ();
 	}
 	
+	private void showDialog (State state)
+	{
+		Resources res;
+		WebView webview;
+		Dialog dialog;
+		String title;
+		
+		if (!activity.visible)
+			return;
+		
+		res = activity.getResources ();
+		
+		dialog = new Dialog (activity);
+		dialog.setTitle (res.getString (R.string.fmt_last_item_wait));
+		dialog.setContentView (R.layout.lastitem);
+		webview = (WebView) dialog.findViewById (R.id.wv_lastitem);
+		webview.getSettings ().setJavaScriptEnabled (true);
+		title = res.getString (R.string.fmt_last_item, state.type);
+		webview.setWebViewClient (new WebViewClientImpl (dialog, title));
+		webview.loadUrl (state.getURL ());
+		
+		dialog.show ();
+	}
 	
 }
 			

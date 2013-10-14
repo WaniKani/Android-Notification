@@ -76,6 +76,8 @@ public class SettingsActivity
 	private static final String KEY_PREF_SHOW_MUTE = "pref_show_mute";
 	/** Ignore button */
 	private static final String KEY_PREF_IGNORE_BUTTON = "pref_ignore_button";
+	/** WaniKani improve */
+	private static final String KEY_PREF_WANIKANI_IMPROVE = "pref_wanikani_improve";
 	/** Enable 42+ mode. Must match preferences.xml */
 	private static final String KEY_PREF_42PLUS = "pref_42plus";
 	/** Wanikani review URL */
@@ -307,6 +309,9 @@ public class SettingsActivity
 		pref = findPreference (KEY_PREF_IGNORE_BUTTON);
 		pref.setEnabled (getUseIntegratedBrowser (prefs));
 
+		pref = findPreference (KEY_PREF_WANIKANI_IMPROVE);
+		pref.setEnabled (getUseIntegratedBrowser (prefs));
+
 		runShowKeyboardHooks (prefs);
 	}
 
@@ -474,6 +479,11 @@ public class SettingsActivity
 	public static boolean getIgnoreButton (Context ctxt)
 	{
 		return prefs (ctxt).getBoolean (KEY_PREF_IGNORE_BUTTON, true);
+	}
+	
+	public static boolean getWaniKaniImprove (Context ctxt)
+	{
+		return prefs (ctxt).getBoolean (KEY_PREF_WANIKANI_IMPROVE, false);
 	}
 	
 	public static boolean getShowMute (Context ctxt)

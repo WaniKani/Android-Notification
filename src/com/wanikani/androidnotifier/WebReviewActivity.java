@@ -600,7 +600,6 @@ public class WebReviewActivity extends Activity {
 	{		
 		super.onCreate (bundle);
 
-		SharedPreferences prefs;
 		Resources res;
 		
 		CookieSyncManager.createInstance (this);
@@ -614,8 +613,6 @@ public class WebReviewActivity extends Activity {
 		}
 		
 		setContentView (R.layout.web_review);
-
-		prefs = SettingsActivity.prefs (this);
 
 		res = getResources ();
 		muteDrawable = res.getDrawable(R.drawable.ic_mute);
