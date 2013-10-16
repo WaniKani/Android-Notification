@@ -170,15 +170,37 @@
     <string name="fmt_ii_percent">%d%%</string>
     <string name="fmt_ii_percent_full">%1$d%% (%2$d%%M, %3$d%%R)</string>
     
+    <string name="tag_other_stats">Other&#8230;</string>
+    <string name="tag_more_stats">More&#8230;</string>
+    
+    <string name="os_levels">SRS by level</string>
+    
     <string name="ct_eta">Estimates</string>
     <string name="fmt_eta_l50">Level 50: %s</string>
     <string name="fmt_eta_avg">Average levelup time: %s</string>
     <string name="fmt_eta_next_future">which is in %s</string>
-    <string name="fmt_eta_next_past">which is %s ago</string>
+    <string name="fmt_eta_next_past">which is %s ago</string>    
     
     <string name="ct_srs_distribution">SRS Distribution</string>
     <string name="ct_kanji_progress">Kanji Progress</string>
     <string name="ct_vocab_progress">Vocab Progress</string>
+    <string name="ct_levels">Levelup time</string>
+    
+    <string name="ct_jlpt_progress">JLPT Progress</string>
+    <string name="jlpt1">N1</string>
+    <string name="jlpt2">N2</string>
+    <string name="jlpt3">N3</string>
+    <string name="jlpt4">N4</string>
+    <string name="jlpt5">N5</string>
+        
+    <string name="ct_joyo_progress">Joyo Progress</string>
+    <string name="joyo1">G1</string>
+    <string name="joyo2">G2</string>
+    <string name="joyo3">G3</string>
+    <string name="joyo4">G4</string>
+    <string name="joyo5">G5</string>
+    <string name="joyo6">G6</string>
+    <string name="joyoS">S</string>
     
     <string name="alert_can_fill">Reconstruct missing data</string>
     
@@ -245,6 +267,13 @@
 		mode (Settings/Reviews Kbd). But please report!
     </string>
     <string name="custom_ime_message_ok">OK, got it</string>
+    
+    <string name="other_stats_error_message_title">Network error</string>
+    <string name="other_stats_error_message_text">
+        Failed to download the data needed to build the plots        
+    </string>
+    <string name="other_stats_message_retry">Retry</string>
+    <string name="other_stats_message_cancel">Cancel</string>
     
     <string name="exp_no_bluetooth">No bluetooth adapter found</string>
     <string name="exp_to_file">Db exported to %s</string>

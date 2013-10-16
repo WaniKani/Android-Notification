@@ -283,6 +283,15 @@
     <style name="ChartLegend" parent ="AppTheme">
         <item name="android:gravity">top</item>        
     </style>
+    <style name="ProgressTitle" parent="AppTheme">
+        <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
+        <item name="android:paddingRight">@dimen/m_gap</item>
+        <item name="android:gravity">center_vertical</item>
+    </style>
+    <style name="ProgressPlot" parent="Table">
+        <item name="android:paddingTop">@dimen/m_half_gap</item>
+        <item name="android:paddingBottom">@dimen/m_half_gap</item>
+        </style>
     
     <style name="LegendItem" parent="AppTheme">
         <item name="android:layout_width">@dimen/m_li_width</item>
