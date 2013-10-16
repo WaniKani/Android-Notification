@@ -15,6 +15,7 @@ import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.webkit.JavascriptInterface;
 import android.widget.Button;
 import android.widget.EditText;
@@ -259,6 +260,30 @@ public class LocalIMEKeyboard extends NativeKeyboard {
 		
 	}
 	
+	private class JSHideShow implements Runnable {
+		
+		boolean show;
+		
+		public JSHideShow (boolean show)
+		{
+			this.show = show;
+			
+			wav.runOnUiThread (this);
+		}
+		
+		public void run ()
+		{
+			if (show) {
+				divw.setVisibility (View.VISIBLE);
+				imm.showSoftInput (wv, InputMethodManager.SHOW_IMPLICIT);
+			} else {
+				divw.setVisibility (View.GONE);
+				imm.hideSoftInputFromWindow (ew.getWindowToken (), 0);
+			}
+		}
+		
+	}
+	
 	private class JSListenerShow implements Runnable {
 		
 		Rect frect, trect;
@@ -347,6 +372,24 @@ public class LocalIMEKeyboard extends NativeKeyboard {
 				new JSListenerSetClass ("incorrect");			
 			new JSSetText (text);
 		}
+		
+		/**
+		 * Called when the text box should be shown
+		 */
+		@JavascriptInterface
+		public void showKeyboard ()
+		{
+			new JSHideShow (true);
+		}
+
+		/**
+		 * Called when the text box should be hidden
+		 */
+		@JavascriptInterface
+		public void hideKeyboard ()
+		{
+			new JSHideShow (false);
+		}		
 	}
 
 	/**
@@ -383,7 +426,42 @@ public class LocalIMEKeyboard extends NativeKeyboard {
 			"         wknJSListener.setClass (arguments [0]); " +
 			"    return res;" +
 			"};" +
-			"window.wknNewQuestion ();" +
+			"window.wknNewQuiz = function (entry, type) {" +
+			"   var qtype, e;" +
+			"   qtype = $.jStorage.get (\"l/questionType\");" +
+			"   window.wknReplace ();" +
+			"   if ($(\"#main-info\").hasClass (\"vocabulary\")) {" +
+			"        e = $(\"#character\");" +
+			"        e.text (e.text ().replace (/〜/g, \"~\")); " +
+			"   }" +
+			"   wknJSListener.newQuestion (qtype);" +			
+			"};" +
+			"$.jStorage.listenKeyChange (\"l/currentQuizItem\", window.wknNewQuiz);" +
+			"var oldShow = jQuery.fn.show;" +
+			"var oldHide = jQuery.fn.hide;" +
+			"jQuery.fn.show = function () {" +
+			"    var res;" +
+			"    res = oldShow.apply (this, arguments);" +
+			"    if (this == $(\"#quiz\"))" +
+			"         wknJSListener.showKeyboard (); " +
+			"    return res;" +
+			"};" +
+			"jQuery.fn.hide = function () {" +
+			"    var res;" +
+			"    res = oldHide.apply (this, arguments);" +
+			"    if (this == $(\"#quiz\"))" +
+			"         wknJSListener.hideKeyboard (); " +
+			"    return res;" +
+			"};" +
+			"if (document.getElementById (\"quiz\") == null) {" +
+			"  wknJSListener.showKeyboard ();" +
+			"  window.wknNewQuestion ();" +
+			"} else if ($(\"#quiz\").is (\":visible\")) {" +
+			"  window.wknNewQuestion ();" +
+			"  wknJSListener.showKeyboard ();" +
+			"} else {" +
+			"	wknJSListener.hideKeyboard ();" +
+			"}" +
 			"var form, tbox;" +
 			"form = $(\"#answer-form fieldset\");" +
 			"tbox = $(\"#user-response\");" +
@@ -393,7 +471,8 @@ public class LocalIMEKeyboard extends NativeKeyboard {
 	 * Uninstalls the triggers, when the keyboard is hidden
 	 */
 	private static final String JS_STOP_TRIGGERS =
-			"$.jStorage.stopListening (\"currentItem\", window.wknNewQuestion);";
+			"$.jStorage.stopListening (\"currentItem\", window.wknNewQuestion);" +
+			"$.jStorage.stopListening (\"l/currentQuizItem\", window.wknNewQuiz);";
 	
 	/**
 	 * Injects an answer into the HTML text box and clickes the "next" button.
@@ -481,11 +560,10 @@ public class LocalIMEKeyboard extends NativeKeyboard {
 	@Override
 	public void show (boolean hasEnter)
 	{
-		super.show (hasEnter);
+		wv.enableFocus ();
 		
 		wv.js (JS_INIT_TRIGGERS);
 		
-		showCustomIMEMessage ();
 	}
 
 	/**
@@ -496,7 +574,6 @@ public class LocalIMEKeyboard extends NativeKeyboard {
 	{
 		super.hide ();
 
-		imm.hideSoftInputFromWindow (ew.getWindowToken (), 0);
 		wv.js (JS_STOP_TRIGGERS);
 		divw.setVisibility (View.GONE);
 	}
