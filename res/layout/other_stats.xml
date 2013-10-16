@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:custom="http://schemas.android.com/apk/res/com.wanikani.androidnotifier"
     style="@style/Background"
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
@@ -43,7 +44,22 @@
                 android:id="@+id/os_joyo"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
+            
+       		<Button
+       		    android:id="@+id/os_more"
+       		    android:text="@string/tag_more_stats"
+       		    android:layout_width="wrap_content"
+       		    android:layout_height="wrap_content"
+       		    android:layout_gravity="center_horizontal"
+       		    android:visibility="gone"/>
+       		
+       		<com.wanikani.androidnotifier.graph.HistogramChart 
+       		    android:id="@+id/os_levels"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                custom:ticks="10"
+                custom:title="@string/os_levels"/>
             </LinearLayout>
-    </RelativeLayout>
+       </RelativeLayout>
 
 </ScrollView>

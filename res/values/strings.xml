@@ -171,6 +171,9 @@
     <string name="fmt_ii_percent_full">%1$d%% (%2$d%%M, %3$d%%R)</string>
     
     <string name="tag_other_stats">Other&#8230;</string>
+    <string name="tag_more_stats">More&#8230;</string>
+    
+    <string name="os_levels">SRS by level</string>
     
     <string name="ct_eta">Estimates</string>
     <string name="fmt_eta_l50">Level 50: %s</string>
