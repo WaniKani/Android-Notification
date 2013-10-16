@@ -354,14 +354,14 @@ public class OtherStatsActivity extends Activity {
 			
 			try {
 				if (types.contains (Item.Type.VOCABULARY)) {
-					bunch = new int [BUNCH_SIZE];
 					i = 1;
 					while (i <= levels) {
+						bunch = new int [Math.min (BUNCH_SIZE, levels - i + 1)];
 						for (j = 0; j < BUNCH_SIZE && i <= levels; j++)
-							bunch [j++] = i++;
-							vlib = conn.getVocabulary (bunch);
-							for (ItemListener l : listeners)
-								l.newVocab (vlib);
+							bunch [j] = i++;
+						vlib = conn.getVocabulary (bunch);
+						for (ItemListener l : listeners)
+							l.newVocab (vlib);
 						publishProgress ((100 * (i - 1)) / levels);
 					}
 				}
