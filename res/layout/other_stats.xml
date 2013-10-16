@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/os_scroll"
     xmlns:custom="http://schemas.android.com/apk/res/com.wanikani.androidnotifier"
     style="@style/Background"
     android:layout_width="match_parent"
@@ -45,6 +46,13 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
             
+       		<com.wanikani.androidnotifier.graph.HistogramChart 
+       		    android:id="@+id/os_kanji_levels"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                custom:ticks="10"
+                custom:title="@string/os_kanji_levels"/>
+            
        		<Button
        		    android:id="@+id/os_more"
        		    android:text="@string/tag_more_stats"
@@ -53,6 +61,13 @@
        		    android:layout_gravity="center_horizontal"
        		    android:visibility="gone"/>
        		
+       		<ProgressBar
+    	    	android:id="@+id/os_pb_other"
+            	style="?android:attr/progressBarStyleHorizontal"
+            	android:layout_width="match_parent"
+            	android:layout_height="wrap_content" 
+            	android:visibility="gone" />
+       		       		
        		<com.wanikani.androidnotifier.graph.HistogramChart 
        		    android:id="@+id/os_levels"
                 android:layout_width="match_parent"

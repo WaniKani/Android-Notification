@@ -2,6 +2,7 @@ package com.wanikani.androidnotifier;
 
 import java.io.IOException;
 import java.util.EnumMap;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Vector;
 
@@ -17,6 +18,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
+import android.widget.ScrollView;
 
 import com.wanikani.androidnotifier.graph.HistogramChart;
 import com.wanikani.androidnotifier.graph.HistogramPlot;
@@ -32,6 +34,12 @@ import com.wanikani.wklib.SRSLevel;
 import com.wanikani.wklib.Vocabulary;
 
 public class OtherStatsActivity extends Activity {
+	
+	private enum Job {
+		
+		BASE, OTHER
+		
+	};
 	
 	private class RetryListener implements DialogInterface.OnClickListener {
 		
@@ -64,7 +72,7 @@ public class OtherStatsActivity extends Activity {
 
 	private class ItemListener {
 		
-		public void reset ()
+		public void reset (int levels)
 		{
 			/* empty */
 		}
@@ -108,7 +116,7 @@ public class OtherStatsActivity extends Activity {
 			plot = chart.addData (title); 
 		}
 		
-		public void reset ()
+		public void reset (int levels)
 		{
 			Resources res;
 			
@@ -158,74 +166,13 @@ public class OtherStatsActivity extends Activity {
 		
 	}
 	
-	/**
-	 * The asynch task that loads all the info from WK, feeds the database and
-	 * publishes the progress.
-	 */
-	private class Task extends AsyncTask<ItemListener, Void, Boolean> {
+	private class ItemDistribution extends ItemListener {
 
-		/// WK connection
-		private Connection conn;
-		
-		/// Context
-		private Context ctxt;
-				
-		/**
-		 * Constructor
-		 * @param conn WK connection
-		 * @param ctxt the context
-		 */
-		public Task (Connection conn, Context ctxt)
-		{
-			this.conn = conn;
-			this.ctxt = ctxt;
-		}
-				
-		/**
-		 * The reconstruction process itself. It opens a DB reconstruction object,
-		 * loads all the items, and retrieves the new core stats 
-		 * @return true if everything is ok
-		 */
-		@Override
-		protected Boolean doInBackground (ItemListener... listeners)
-		{
-			ItemLibrary<Kanji> klib;
-			
-			try {
-				klib = conn.getKanji ();
-				for (ItemListener l : listeners)
-					l.newKanji (klib);
-			} catch (IOException e) {
-				return false;
-			} 
-			
-			return true;
-		}	
-						
-		/**
-		 * Ends the reconstruction process by telling everybody how it went.
-		 * @param ok if everything was ok
-		 */
-		@Override
-		protected void onPostExecute (Boolean ok)
-		{
-			completed (ok);
-		}
-	}
-
-	private class LevelsTask extends AsyncTask<Void, List<HistogramPlot.Samples>, Boolean> {
-
-		/// WK connection
-		private Connection conn;
-		
-		/// Context
-		private Context ctxt;
-		
-		/// The chart to be updated
-		private HistogramChart chart;
-		
 		/// The series
 		private List<HistogramPlot.Series> series;
+
+		/// The chart to be updated
+		private HistogramChart chart;
 
 		/// The SRS to series mapping
 		private EnumMap<SRSLevel, HistogramPlot.Series> map;
@@ -236,22 +183,14 @@ public class OtherStatsActivity extends Activity {
 		/// The actual data
 		private List<HistogramPlot.Samples> bars; 
 		
-		/**
-		 * Constructor
-		 * @param conn WK connection
-		 * @param ctxt the context
-		 */
-		public LevelsTask (Connection conn, HistogramChart chart, Context ctxt)
-			throws IOException
+		public ItemDistribution (Context ctxt, HistogramChart chart)
 		{
 			Resources res;
-			
-			this.conn = conn;
+
 			this.chart = chart;
-			this.ctxt = ctxt;
 			
 			res = ctxt.getResources ();
-			
+								
 			series = new Vector<HistogramPlot.Series> ();
 			map = new EnumMap<SRSLevel, HistogramPlot.Series> (SRSLevel.class);
 			imap = new EnumMap<SRSLevel, Integer> (SRSLevel.class);
@@ -268,10 +207,18 @@ public class OtherStatsActivity extends Activity {
 			imap.put (SRSLevel.MASTER, 2);
 			imap.put (SRSLevel.ENLIGHTEN, 3);
 			imap.put (SRSLevel.BURNED, 4);
-			
-			initBars ();
 		}
 		
+		public void reset (int levels)
+		{
+			initBars (levels);
+		}
+		
+		public void update ()
+		{
+			chart.setData (series, bars);
+		}
+
 		private void add (Resources res, SRSLevel level, int string, int color)		
 		{			
 			HistogramPlot.Series s;
@@ -281,13 +228,11 @@ public class OtherStatsActivity extends Activity {
 			map.put (level, s);
 		}
 		
-		private void initBars ()
-			throws IOException
+		private void initBars (int levels)
 		{
 			HistogramPlot.Samples bar;
-			int i, levels;
+			int i;
 			
-			levels = conn.getUserInformation ().level;
 			for (i = 1; i <= levels; i++) {
 				bar = new HistogramPlot.Samples (Integer.toString (i));
 				bar.samples.add (new HistogramPlot.Sample (map.get (SRSLevel.APPRENTICE)));
@@ -299,50 +244,141 @@ public class OtherStatsActivity extends Activity {
 			}
 		}
 				
+		public void newRadical (ItemLibrary<Radical> radicals)
+		{
+			for (Item i : radicals.list)
+				put (i);
+		}
+		
+		public void newKanji (ItemLibrary<Kanji> kanji)
+		{
+			for (Item i : kanji.list)
+				put (i);
+		}
+
+		public void newVocab (ItemLibrary<Vocabulary> vocabs)
+		{
+			for (Item i : vocabs.list)
+				put (i);			
+		}
+
+		private void put (Item i)
+		{
+			if (i.stats != null)	// stats is null for loced items
+				bars.get (i.level - 1).samples.get (imap.get (i.stats.srs)).value++;
+		}
+						
+	}
+
+	/**
+	 * The asynch task that loads all the info from WK, feeds the database and
+	 * publishes the progress.
+	 */
+	private class Task extends AsyncTask<ItemListener, Integer, Boolean> {
+
+		/// WK connection
+		private Connection conn;
+		
+		/// Must reset
+		private boolean reset;
+		
+		/// List of item types to load
+		private EnumSet<Item.Type>types;
+		
+		/// Progress bar
+		private ProgressBar pb;
+		
+		/// Number of levels to load at once
+		private static final int BUNCH_SIZE = 5;
+		
+		/// The job type
+		private Job job;
+		
+		public Task (Job job, Connection conn, Context ctxt, ProgressBar pb, boolean reset, Item.Type...types)
+		{
+			int i;
+			
+			this.job = job;
+			this.conn = conn;
+			this.pb = pb;
+			this.reset = reset;
+			
+			this.types = EnumSet.noneOf (Item.Type.class);
+			
+			for (i = 0; i < types.length; i++)
+				this.types.add (types [i]);
+		}
+				
 		/**
 		 * The reconstruction process itself. It opens a DB reconstruction object,
 		 * loads all the items, and retrieves the new core stats 
 		 * @return true if everything is ok
 		 */
 		@Override
-		protected Boolean doInBackground (Void... vd)
+		protected Boolean doInBackground (ItemListener... listeners)
 		{
 			ItemLibrary<Radical> rlib;
 			ItemLibrary<Kanji> klib;
 			ItemLibrary<Vocabulary> vlib;
+			int i, j, levels, bunch [];
+
+			try {
+				levels = conn.getUserInformation ().level;
+			} catch (IOException e) {
+				return false;
+			}
+
+			if (reset)
+				for (ItemListener l : listeners)
+					l.reset (levels);				
 			
 			try {
-				rlib = conn.getRadicals ();
-				for (Radical r : rlib.list)
-					put (r);
+				if (types.contains (Item.Type.RADICAL)) {
+					rlib = conn.getRadicals ();
+					for (ItemListener l : listeners)
+						l.newRadical (rlib);
+				}
 			} catch (IOException e) {
 				return false;
 			} 
 
 			try {
-				klib = conn.getKanji ();
-				for (Kanji k : klib.list)
-					put (k);
+				if (types.contains (Item.Type.KANJI)) {
+					klib = conn.getKanji ();
+					for (ItemListener l : listeners)
+						l.newKanji (klib);
+				}
 			} catch (IOException e) {
 				return false;
 			} 
 			
 			try {
-				vlib = conn.getVocabulary ();
-				for (Vocabulary v : vlib.list)
-					put (v);
+				if (types.contains (Item.Type.VOCABULARY)) {
+					bunch = new int [BUNCH_SIZE];
+					i = 1;
+					while (i <= levels) {
+						for (j = 0; j < BUNCH_SIZE && i <= levels; j++)
+							bunch [j++] = i++;
+							vlib = conn.getVocabulary (bunch);
+							for (ItemListener l : listeners)
+								l.newVocab (vlib);
+						publishProgress ((100 * (i - 1)) / levels);
+					}
+				}
 			} catch (IOException e) {
 				return false;
 			} 
-			
+
 			return true;
 		}	
-		
-		private void put (Item i)
+				
+		@Override
+		protected void onProgressUpdate (Integer... i)
 		{
-			bars.get (i.level - 1).samples.get (imap.get (i.stats.srs)).value++;
+			if (pb != null)
+				pb.setProgress (i [i.length - 1]);
 		}
-						
+		
 		/**
 		 * Ends the reconstruction process by telling everybody how it went.
 		 * @param ok if everything was ok
@@ -350,7 +386,7 @@ public class OtherStatsActivity extends Activity {
 		@Override
 		protected void onPostExecute (Boolean ok)
 		{
-			chart.setData (series, bars);
+			completed (job, ok);
 		}
 	}
 
@@ -364,7 +400,11 @@ public class OtherStatsActivity extends Activity {
 	
 	private List<ItemListener> listeners;
 	
+	private List<ItemListener> olisteners;
+
 	private ProgressBar spinner;
+	
+	private ProgressBar opb;
 	
 	private ProgressChart jlptChart;
 
@@ -372,9 +412,15 @@ public class OtherStatsActivity extends Activity {
 	
 	private HistogramChart levelsChart;
 	
+	private HistogramChart kanjiLevelsChart;
+	
+	private ItemDistribution itemd;
+	
+	private ItemDistribution kanjid;
+
 	private View panel;
 	
-	private boolean visible;
+	private boolean visible;	
 	
 	private static final String KLIB_JLPT_1 =
 		"氏統保第結派案策基価提挙応企検藤沢裁証援施井護展態鮮視条幹独宮率衛張監環審義訴株姿閣衆評影松撃佐核整融製票渉響推請器士討攻崎督授催及憲離激摘系批郎健盟従修隊織拡故振弁就異献厳維浜遺塁邦素遣抗模雄益緊標" +
@@ -455,9 +501,11 @@ public class OtherStatsActivity extends Activity {
 		setContentView (R.layout.other_stats);
 		
 		spinner = (ProgressBar) findViewById (R.id.pb_status);
+		opb = (ProgressBar) findViewById (R.id.os_pb_other);
 		panel = findViewById (R.id.os_panel);
 		jlptChart = (ProgressChart) findViewById (R.id.os_jlpt);
 		joyoChart = (ProgressChart) findViewById (R.id.os_joyo);
+		kanjiLevelsChart = (HistogramChart) findViewById (R.id.os_kanji_levels);
 		levelsChart = (HistogramChart) findViewById (R.id.os_levels);
 		levelsChart.setVisibility (View.GONE);
 
@@ -466,6 +514,7 @@ public class OtherStatsActivity extends Activity {
 			cache = new ItemsCache ();
 		
 		listeners = new Vector<ItemListener> ();		
+		olisteners = new Vector<ItemListener> ();		
 		
 		addKanjiListener (jlptChart, R.string.jlpt5, KLIB_JLPT_5);		
 		addKanjiListener (jlptChart, R.string.jlpt4, KLIB_JLPT_4);		
@@ -480,6 +529,13 @@ public class OtherStatsActivity extends Activity {
 		addKanjiListener (joyoChart, R.string.joyo5, KLIB_JOYO_5);
 		addKanjiListener (joyoChart, R.string.joyo6, KLIB_JOYO_6);
 		addKanjiListener (joyoChart, R.string.joyoS, KLIB_JOYO_S);
+
+		kanjid = new ItemDistribution (this, kanjiLevelsChart);
+		itemd = new ItemDistribution (this, levelsChart);
+		
+		listeners.add (kanjid);
+		listeners.add (itemd);
+		olisteners.add (itemd);
 
 		refresh ();
 	}
@@ -517,26 +573,27 @@ public class OtherStatsActivity extends Activity {
 	protected void refresh ()
 	{
 		spinner.setVisibility (View.VISIBLE);
-		for (ItemListener l : listeners)
-			l.reset ();
-		
-		new Task (conn, this).execute (listeners.toArray (new ItemListener [0]));
+		new Task (Job.BASE, conn, this, null, 
+				  true, Item.Type.KANJI).execute (listeners.toArray (new ItemListener [0]));
 	}
 	
-	protected void completed (boolean ok)
+	protected void completed (Job job, boolean ok)
 	{
 		Button more;
 		
 		spinner.setVisibility (View.GONE);
+		opb.setVisibility (View.GONE);
 		
 		if (ok) {
 			panel.setVisibility (View.VISIBLE);
 			for (ItemListener l : listeners)
 				l.update ();
 			
-			more = (Button) findViewById (R.id.os_more);
-			more.setVisibility (View.VISIBLE);
-			more.setOnClickListener (new MoreListener ());
+			if (job == Job.BASE) {
+				more = (Button) findViewById (R.id.os_more);
+				more.setVisibility (View.VISIBLE);
+				more.setOnClickListener (new MoreListener ());
+			}
 		} else
 			showErrorMessage ();
 	}
@@ -562,13 +619,15 @@ public class OtherStatsActivity extends Activity {
 	
 	protected void showMore ()
 	{
+		ScrollView sv;
+		
+		sv = (ScrollView) findViewById (R.id.os_scroll);
+		opb.setVisibility (View.VISIBLE);
+		new Task (Job.OTHER, conn, this, opb, false, 
+				  Item.Type.RADICAL, Item.Type.VOCABULARY).execute (olisteners.toArray (new ItemListener [0]));
+		levelsChart.spin (true);
 		levelsChart.setVisibility (View.VISIBLE);
-
-		try {
-			new LevelsTask (conn, levelsChart, this).execute ();
-		} catch (IOException e) {
-			/* empty */
-		}
+		sv.fullScroll (ScrollView.FOCUS_DOWN);
 	}
 
 }
