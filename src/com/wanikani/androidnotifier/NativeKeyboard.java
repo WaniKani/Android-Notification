@@ -22,7 +22,7 @@ public class NativeKeyboard implements Keyboard {
 	InputMethodManager imm;
 	
 	/// The mute button
-	private ImageButton muteH;	
+	ImageButton muteH;	
 	
 	/**
 	 * Constructor

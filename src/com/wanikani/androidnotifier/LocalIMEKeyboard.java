@@ -2,6 +2,7 @@ package com.wanikani.androidnotifier;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.Resources;
 import android.graphics.Color;
@@ -19,6 +20,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.webkit.JavascriptInterface;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -51,7 +53,7 @@ import com.wanikani.wklib.JapaneseIME;
  * a "reading" question, we perform kana translation directly inside the app,
  * instead of using the WK JS-based IME.
  */
-public class LocalIMEKeyboard extends NativeKeyboard {
+public class LocalIMEKeyboard implements Keyboard {
 
 	/**
 	 * The listener attached to the welcome message.
@@ -481,6 +483,18 @@ public class LocalIMEKeyboard extends NativeKeyboard {
 			"$(\"#user-response\").val (\"%s\");" +
 			"$(\"#answer-form button\").click ();";
 	
+	/// Parent activity
+	WebReviewActivity wav;
+	
+	/// Internal browser
+	FocusWebView wv;
+	
+	/// The manager, used to popup the keyboard when needed
+	InputMethodManager imm;
+	
+	/// The mute button
+	ImageButton muteH;	
+
 	/// The IME
     JapaneseIME ime;
     
@@ -516,14 +530,18 @@ public class LocalIMEKeyboard extends NativeKeyboard {
      */
 	public LocalIMEKeyboard (WebReviewActivity wav, FocusWebView wv)
 	{
-		super (wav, wv);
-		
 		Resources res;
+		
+		this.wav = wav;
+		this.wv = wv;
+		
+		imm = (InputMethodManager) wav.getSystemService (Context.INPUT_METHOD_SERVICE);
 		
 		dm = wav.getResources ().getDisplayMetrics ();
 		
 		ime = new JapaneseIME ();
 		
+		muteH = (ImageButton) wav.findViewById (R.id.kb_mute_h);
 		ew = (EditText) wav.findViewById (R.id.ime);
 		divw = wav.findViewById (R.id.ime_div);
 		imel = new IMEListener ();		
@@ -562,9 +580,20 @@ public class LocalIMEKeyboard extends NativeKeyboard {
 	{
 		wv.enableFocus ();
 		
-		wv.js (JS_INIT_TRIGGERS);
-		
+		wv.js (JS_INIT_TRIGGERS);		
 	}
+
+	/**
+	 * Called when the keyboard should be iconized. This does never happen when using the
+	 * native keyboard, so this method does nothing
+	 * @param hasEnter if the keyboard contains the enter key. If unset, the hide button is shown instead
+	 */
+	@Override
+	public void iconize (boolean hasEnter)
+	{
+		/* empty */
+	}
+
 
 	/**
 	 * Hides the keyboard and uninstalls the triggers.
@@ -572,12 +601,21 @@ public class LocalIMEKeyboard extends NativeKeyboard {
 	@Override
 	public void hide ()
 	{
-		super.hide ();
-
+		imm.hideSoftInputFromWindow (ew.getWindowToken (), 0);
 		wv.js (JS_STOP_TRIGGERS);
 		divw.setVisibility (View.GONE);
 	}
 
+	/**
+	 * Returns a reference to the mute button view.
+	 * @return the mute button
+	 */
+	@Override
+	public ImageButton getMuteButton ()
+	{
+		return muteH;
+	}	
+	
 	/**
 	 * Called when the HTML textbox is moved. It moves the edittext as well
 	 * @param frect the form rect 
