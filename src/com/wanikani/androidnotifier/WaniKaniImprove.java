@@ -1,6 +1,7 @@
 package com.wanikani.androidnotifier;
 
 import android.app.Dialog;
+
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.view.View;
@@ -10,16 +11,47 @@ import android.webkit.WebViewClient;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+/**
+ * This is an integration of Seiji's "WaniKani Improve": 
+ * 			http://www.wanikani.com/chat/api-and-third-party-apps/2952
+ * This script provides two features:
+ * <ul>
+ * 	<li>Fast forward: skip to next item, if previous has been entered correctly
+ *  <li>Add HTML button opens a window showing information about previous item
+ * </ul>
+ * I integrated the first feature directly from the original script.
+ * The second one is implemented using a native Android dialog, and the code is something
+ * like a translation of JS to Java.
+ */
+/*
+ * Implementation details: Seiji's script stores state information as a set of separate
+ * variables. Here, instead, we push all this information through the JS bridge into this 
+ * class, where it is stored as an instance of the State structure.
+ * I had also to break the original script into an initialization code, which builds
+ * the HTML button, and a trigger part, that is run each time the "next" button is pressed. 
+ */
 public class WaniKaniImprove {
 
+	/**
+	 * The current state.
+	 */
 	private class State implements Runnable {
-		
+
+		/// Last item
 		private String item;
 		
+		/// Last item type
 		private String type;
 		
+		/// In case this is a radical, this is its name
 		private String jstoreEn [];
 
+		/**
+		 * Constrcutor
+		 * @param item last item
+		 * @param type last item type 
+		 * @param jstoreEn in case this is a radical, its name
+		 */
 		public State (String item, String type, String jstoreEn [])
 		{
 			this.item = item;
@@ -27,11 +59,19 @@ public class WaniKaniImprove {
 			this.jstoreEn = jstoreEn;
 		}
 		
+		/**
+		 * Called when we should display the last item info dialog.
+		 * This method can be safely called from any thread.
+		 */
 		public void publish ()
 		{
 			activity.runOnUiThread (this);
 		}
 		
+		/**
+		 * Returns the quickview URL for the current item
+		 * @return the URL
+		 */
 		public String getURL ()
 		{
 			StringBuffer sb;
@@ -50,22 +90,37 @@ public class WaniKaniImprove {
 			return sb.toString ();
 		}
 		
+		/**
+		 * Shows the dialog. To be called inside the UI thread.
+		 */
 		public void run ()
 		{
 			showDialog (this);
 		}
 	}
 	
+	/**
+	 * WebViewClient implementation for the intergrated browser inside the item info dialog.
+	 */
 	private class WebViewClientImpl extends WebViewClient {
-		
+
+		/// The dialog owning the webview
 		Dialog dialog;
 		
+		/// Progress bar, to show how the download is going
 		ProgressBar pb;
 		
+		/// A text view that can display error messages, if something goes wrong
 		TextView tv;
 		
+		/// The dialog title
 		String title;
 		
+		/**
+		 * Constructor
+		 * @param dialog the enclosing dialog
+		 * @param title its title
+		 */
 		WebViewClientImpl (Dialog dialog, String title)
 		{
 			this.dialog = dialog;
@@ -74,7 +129,7 @@ public class WaniKaniImprove {
 			pb = (ProgressBar) dialog.findViewById (R.id.pb_lastitem);
 			tv = (TextView) dialog.findViewById (R.id.tv_lastitem_message);
 		}
-		
+				
 		@Override  
 	    public void onPageStarted (WebView view, String url, Bitmap favicon)  
 	    {  
@@ -99,20 +154,24 @@ public class WaniKaniImprove {
 	    }
 	}
 
-	
+	/// This code must be run when the page is initially shown, to show the info button
 	private static final String JS_INIT_PAGE =
+								
+// Original script
 "\r\n" + 
 "$('<li id=\"option-show-previous\"><span title=\"Check previous item\" lang=\"ja\"><i class=\"icon-question-sign\"></i></span></li>').insertAfter('#option-home').addClass('disabled');\r\n" + 
 "$('<style type=\"text/css\"> .qtip{ max-width: 380px !important; } #additional-content ul li { width: 16% !important; } #additional-content {text-align: center;} #option-show-previous img { max-width: 12px; background-color: #00A2F3; padding: 2px 3px; }</style>').appendTo('head');\r\n" + 
 "\r\n" +
-// Bind the show previous button
+
+// Glue code, to bind the button to the JS bridge 
 "$('#option-show-previous').on('click', function (event)" + 
 "{" +
 "	wknWanikaniImprove.show ();" + 
 "});";	
 
-	
-	public static final String JS_CODE =
+	/// This code must be run when the "next" button is pressed.
+	private static final String JS_CODE =
+// Original script
 "function checkAnswer()\r\n" + 
 "{\r\n" + 
 "    answerException = $.trim($('#answer-exception').text());\r\n" + 
@@ -165,7 +224,8 @@ public class WaniKaniImprove {
 "    console.log('Moving to next question');\r\n" + 
 "    $('#answer-form button').click();\r\n" + 
 "}" + 
-	// The trigger //
+
+// Glue code, pushing status info and triggering checkAnswer()
 "	 jstored_currentItem = $.jStorage.get('currentItem');" + 
 "    $('#option-show-previous').removeClass('disabled');" +
 "    currentItem = $.trim($('#character span').html());" + 
@@ -174,13 +234,21 @@ public class WaniKaniImprove {
 "    wknWanikaniImprove.save (currentItem, currentType, currentQuestionType, jstored_currentItem.en);" +
 "    checkAnswer();";
 	
+	/// The current state
 	private State currentState;
 	
+	/// The main activity
 	private WebReviewActivity activity;
 	
+	/// The main WebView 
 	private FocusWebView wv;
 	
-	public void init (WebReviewActivity activity, FocusWebView wv)
+	/**
+	 * Constructor.
+	 * @param activity the main actibity
+	 * @param wv the webview
+	 */
+	public WaniKaniImprove (WebReviewActivity activity, FocusWebView wv)
 	{
 		this.activity = activity;
 		this.wv = wv;
@@ -188,18 +256,31 @@ public class WaniKaniImprove {
 		wv.addJavascriptInterface (this, "wknWanikaniImprove");
 	}
 	
+	/**
+	 * Initializes the page. Must be called when the reviews page is entered
+	 */
 	public void initPage ()
 	{
 		currentState = null;
-		wv.js (JS_INIT_PAGE);
+		wv.js (LocalIMEKeyboard.ifReviews (JS_INIT_PAGE));
 	}
 	
+	/**
+	 * Save state.
+	 * @param currentItem current item name
+	 * @param currentType current item type
+	 * @param currentQuestionType current question tyoe
+	 * @param jstoreEn radical name
+	 */
 	@JavascriptInterface
 	public void save (String currentItem, String currentType, String currentQuestionType, String jstoreEn [])
 	{
 		currentState = new State (currentItem, currentType, jstoreEn);
 	}
 	
+	/**
+	 * Shows the dialog. Must be bound to the "last item info" button.
+	 */
 	@JavascriptInterface
 	public void show ()
 	{
@@ -207,6 +288,10 @@ public class WaniKaniImprove {
 			currentState.publish ();
 	}
 	
+	/**
+	 * Shows the dialog. Must be run on the main UI thread
+	 * @param state the state to be published
+	 */
 	private void showDialog (State state)
 	{
 		Resources res;
@@ -229,6 +314,11 @@ public class WaniKaniImprove {
 		webview.loadUrl (state.getURL ());
 		
 		dialog.show ();
+	}
+	
+	public static String getCode ()
+	{
+		return LocalIMEKeyboard.ifReviews (JS_CODE);
 	}
 	
 }

@@ -182,7 +182,7 @@ public class LocalIMEKeyboard implements Keyboard {
         	if (translate)
         		s = ime.fixup (s);
         	if (isWKIEnabled)
-        		wv.js (String.format (JS_INJECT_ANSWER, s) + WaniKaniImprove.JS_CODE);
+        		wv.js (String.format (JS_INJECT_ANSWER, s) +  WaniKaniImprove.getCode ());
         	else
         		wv.js (String.format (JS_INJECT_ANSWER, s));
 	    }
@@ -396,7 +396,7 @@ public class LocalIMEKeyboard implements Keyboard {
 			new JSHideShow (false);
 		}		
 	}
-
+	
 	/**
 	 * The javascript triggers. They are installed when the keyboard is shown.
 	 */
@@ -548,8 +548,6 @@ public class LocalIMEKeyboard implements Keyboard {
 		
 		ime = new JapaneseIME ();
 		
-		wki = new WaniKaniImprove ();
-		
 		muteH = (ImageButton) wav.findViewById (R.id.kb_mute_h);
 		ew = (EditText) wav.findViewById (R.id.ime);
 		divw = wav.findViewById (R.id.ime_div);
@@ -566,7 +564,8 @@ public class LocalIMEKeyboard implements Keyboard {
 		
 		jsl = new JSListener ();
 		wv.addJavascriptInterface (jsl, "wknJSListener");
-		wki.init (wav, wv);
+		
+		wki = new WaniKaniImprove (wav, wv);
 		wv.registerListener (new WebViewListener ());
 		
 		res = wav.getResources ();
@@ -783,5 +782,9 @@ public class LocalIMEKeyboard implements Keyboard {
 		dialog.show ();		
 	}
 
-
+	public static String ifReviews (String js)
+	{
+		return "if (document.getElementById (\"quiz\") == null) {" + js + "}";
+	}
+	
 }
