@@ -95,6 +95,9 @@ public class WebReviewActivity extends Activity {
 		/** HTML id of the lessons review form */
 		static final String LESSONS_REVIEW_FORM = "new_lesson";
 		
+		/** HTML id of the lessons quiz */
+		static final String QUIZ = "quiz";
+		
 		/** Any object on the lesson pages */
 		static final String LESSONS_OBJ = "nav-lesson";
 		
@@ -244,7 +247,7 @@ public class WebReviewActivity extends Activity {
 		 * bit.
 		 */
 		public void run ()
-		{			
+		{	
 			kbstatus.apply (WebReviewActivity.this);
 			if (kbstatus.isRelevantPage ())
 				reviewsSession ();			
@@ -281,6 +284,16 @@ public class WebReviewActivity extends Activity {
 		public void showLessons ()
 		{
 			new ShowHideKeyboard (KeyboardStatus.LESSONS_MAXIMIZED);
+		}
+
+		/**
+		 * Called by javascript when the keyboard should be shown, using
+		 * new lessons layout.
+		 */
+		@JavascriptInterface
+		public void showLessonsNew ()
+		{
+			new ShowHideKeyboard (KeyboardStatus.LESSONS_MAXIMIZED_NEW);
 		}
 
 		/**
@@ -391,6 +404,24 @@ public class WebReviewActivity extends Activity {
 			}
 		},
 
+		/** Keyboard visible, all keys but ENTER visible */
+		LESSONS_MAXIMIZED_NEW {
+			public void apply (WebReviewActivity wav) { wav.show (this); } 
+			
+			public void iconize (WebReviewActivity wav) { LESSONS_ICONIZED_NEW.apply (wav); }
+
+			public SettingsActivity.Keyboard getKeyboard (WebReviewActivity wav)
+			{
+				return SettingsActivity.getReviewsKeyboard (wav);				
+			}
+
+			public boolean canMute ()
+			{
+				return true;
+			}
+			
+		},
+
 		/** Keyboard visible, just "Show" and "Enter" keys are visible */ 
 		REVIEWS_ICONIZED {
 			public void apply (WebReviewActivity wav) { wav.iconize (this); }
@@ -434,6 +465,25 @@ public class WebReviewActivity extends Activity {
 			}			
 		},
 		
+		/** Keyboard visible, just "Show" and "Enter" keys are visible, in lessons mode */ 
+		LESSONS_ICONIZED_NEW {
+			public void apply (WebReviewActivity wav) { wav.iconize (this); }
+			
+			public void maximize (WebReviewActivity wav) { LESSONS_MAXIMIZED_NEW.apply (wav); }
+			
+			public boolean isIconized () { return true; }
+
+			public SettingsActivity.Keyboard getKeyboard (WebReviewActivity wav)
+			{
+				return SettingsActivity.getReviewsKeyboard (wav);				
+			}
+			
+			public boolean canMute ()
+			{
+				return true;
+			}
+		},
+
 		/** Keyboard invisible */
 		INVISIBLE {
 			public void apply (WebReviewActivity wav) { wav.hide (this); }
@@ -535,10 +585,13 @@ public class WebReviewActivity extends Activity {
 			"lessobj = document.getElementById (\"" + WKConfig.LESSONS_OBJ + "\"); " +
 			"ltextbox = document.getElementById (\"" + WKConfig.LESSON_ANSWER_BOX_JP + "\"); " +
 			"reviews = document.getElementById (\"" + WKConfig.REVIEWS_DIV + "\");" +
+			"quiz = document.getElementById (\"" + WKConfig.QUIZ + "\");" +
 			"if (ltextbox == null) {" +
 			"   ltextbox = document.getElementById (\"" + WKConfig.LESSON_ANSWER_BOX_EN + "\"); " +
 			"}" +
-			"if (textbox != null && !textbox.disabled) {" +
+			"if (quiz != null) {" +
+			"   wknKeyboard.showLessonsNew ();" +
+			"} else if (textbox != null && !textbox.disabled) {" +
 			"   wknKeyboard.show (); " +
 			"} else if (ltextbox != null) {" +
 			"   wknKeyboard.showLessons ();" +

@@ -2,6 +2,7 @@ package com.wanikani.androidnotifier;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.Resources;
 import android.graphics.Color;
@@ -15,9 +16,11 @@ import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.webkit.JavascriptInterface;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -50,7 +53,7 @@ import com.wanikani.wklib.JapaneseIME;
  * a "reading" question, we perform kana translation directly inside the app,
  * instead of using the WK JS-based IME.
  */
-public class LocalIMEKeyboard extends NativeKeyboard {
+public class LocalIMEKeyboard implements Keyboard {
 
 	/**
 	 * The listener attached to the welcome message.
@@ -262,6 +265,30 @@ public class LocalIMEKeyboard extends NativeKeyboard {
 		
 	}
 	
+	private class JSHideShow implements Runnable {
+		
+		boolean show;
+		
+		public JSHideShow (boolean show)
+		{
+			this.show = show;
+			
+			wav.runOnUiThread (this);
+		}
+		
+		public void run ()
+		{
+			if (show) {
+				divw.setVisibility (View.VISIBLE);
+				imm.showSoftInput (wv, InputMethodManager.SHOW_IMPLICIT);
+			} else {
+				divw.setVisibility (View.GONE);
+				imm.hideSoftInputFromWindow (ew.getWindowToken (), 0);
+			}
+		}
+		
+	}
+	
 	private class JSListenerShow implements Runnable {
 		
 		Rect frect, trect;
@@ -350,6 +377,24 @@ public class LocalIMEKeyboard extends NativeKeyboard {
 				new JSListenerSetClass ("incorrect");			
 			new JSSetText (text);
 		}
+		
+		/**
+		 * Called when the text box should be shown
+		 */
+		@JavascriptInterface
+		public void showKeyboard ()
+		{
+			new JSHideShow (true);
+		}
+
+		/**
+		 * Called when the text box should be hidden
+		 */
+		@JavascriptInterface
+		public void hideKeyboard ()
+		{
+			new JSHideShow (false);
+		}		
 	}
 
 	/**
@@ -386,7 +431,42 @@ public class LocalIMEKeyboard extends NativeKeyboard {
 			"         wknJSListener.setClass (arguments [0]); " +
 			"    return res;" +
 			"};" +
-			"window.wknNewQuestion ();" +
+			"window.wknNewQuiz = function (entry, type) {" +
+			"   var qtype, e;" +
+			"   qtype = $.jStorage.get (\"l/questionType\");" +
+			"   window.wknReplace ();" +
+			"   if ($(\"#main-info\").hasClass (\"vocabulary\")) {" +
+			"        e = $(\"#character\");" +
+			"        e.text (e.text ().replace (/〜/g, \"~\")); " +
+			"   }" +
+			"   wknJSListener.newQuestion (qtype);" +			
+			"};" +
+			"$.jStorage.listenKeyChange (\"l/currentQuizItem\", window.wknNewQuiz);" +
+			"var oldShow = jQuery.fn.show;" +
+			"var oldHide = jQuery.fn.hide;" +
+			"jQuery.fn.show = function () {" +
+			"    var res;" +
+			"    res = oldShow.apply (this, arguments);" +
+			"    if (this == $(\"#quiz\"))" +
+			"         wknJSListener.showKeyboard (); " +
+			"    return res;" +
+			"};" +
+			"jQuery.fn.hide = function () {" +
+			"    var res;" +
+			"    res = oldHide.apply (this, arguments);" +
+			"    if (this == $(\"#quiz\"))" +
+			"         wknJSListener.hideKeyboard (); " +
+			"    return res;" +
+			"};" +
+			"if (document.getElementById (\"quiz\") == null) {" +
+			"  wknJSListener.showKeyboard ();" +
+			"  window.wknNewQuestion ();" +
+			"} else if ($(\"#quiz\").is (\":visible\")) {" +
+			"  window.wknNewQuestion ();" +
+			"  wknJSListener.showKeyboard ();" +
+			"} else {" +
+			"	wknJSListener.hideKeyboard ();" +
+			"}" +
 			"var form, tbox;" +
 			"form = $(\"#answer-form fieldset\");" +
 			"tbox = $(\"#user-response\");" +
@@ -396,7 +476,8 @@ public class LocalIMEKeyboard extends NativeKeyboard {
 	 * Uninstalls the triggers, when the keyboard is hidden
 	 */
 	private static final String JS_STOP_TRIGGERS =
-			"$.jStorage.stopListening (\"currentItem\", window.wknNewQuestion);";
+			"$.jStorage.stopListening (\"currentItem\", window.wknNewQuestion);" +
+			"$.jStorage.stopListening (\"l/currentQuizItem\", window.wknNewQuiz);";
 	
 	/**
 	 * Injects an answer into the HTML text box and clickes the "next" button.
@@ -405,6 +486,18 @@ public class LocalIMEKeyboard extends NativeKeyboard {
 			"$(\"#user-response\").val (\"%s\");" +
 			"$(\"#answer-form button\").click ();";
 	
+	/// Parent activity
+	WebReviewActivity wav;
+	
+	/// Internal browser
+	FocusWebView wv;
+	
+	/// The manager, used to popup the keyboard when needed
+	InputMethodManager imm;
+	
+	/// The mute button
+	ImageButton muteH;	
+
 	/// The IME
     JapaneseIME ime;
     
@@ -444,9 +537,12 @@ public class LocalIMEKeyboard extends NativeKeyboard {
      */
 	public LocalIMEKeyboard (WebReviewActivity wav, FocusWebView wv)
 	{
-		super (wav, wv);
-		
 		Resources res;
+		
+		this.wav = wav;
+		this.wv = wv;
+		
+		imm = (InputMethodManager) wav.getSystemService (Context.INPUT_METHOD_SERVICE);
 		
 		dm = wav.getResources ().getDisplayMetrics ();
 		
@@ -454,6 +550,7 @@ public class LocalIMEKeyboard extends NativeKeyboard {
 		
 		wki = new WaniKaniImprove ();
 		
+		muteH = (ImageButton) wav.findViewById (R.id.kb_mute_h);
 		ew = (EditText) wav.findViewById (R.id.ime);
 		divw = wav.findViewById (R.id.ime_div);
 		imel = new IMEListener ();		
@@ -490,15 +587,27 @@ public class LocalIMEKeyboard extends NativeKeyboard {
 	@Override
 	public void show (boolean hasEnter)
 	{
-		super.show (hasEnter);
-		
 		wv.js (JS_INIT_TRIGGERS);
 		isWKIEnabled = SettingsActivity.getWaniKaniImprove (wav); 
 		if (isWKIEnabled)
 			wki.initPage ();
 		
 		showCustomIMEMessage ();
+		
+		wv.enableFocus ();
 	}
+
+	/**
+	 * Called when the keyboard should be iconized. This does never happen when using the
+	 * native keyboard, so this method does nothing
+	 * @param hasEnter if the keyboard contains the enter key. If unset, the hide button is shown instead
+	 */
+	@Override
+	public void iconize (boolean hasEnter)
+	{
+		/* empty */
+	}
+
 
 	/**
 	 * Hides the keyboard and uninstalls the triggers.
@@ -506,13 +615,21 @@ public class LocalIMEKeyboard extends NativeKeyboard {
 	@Override
 	public void hide ()
 	{
-		super.hide ();
-
 		imm.hideSoftInputFromWindow (ew.getWindowToken (), 0);
 		wv.js (JS_STOP_TRIGGERS);
 		divw.setVisibility (View.GONE);
 	}
 
+	/**
+	 * Returns a reference to the mute button view.
+	 * @return the mute button
+	 */
+	@Override
+	public ImageButton getMuteButton ()
+	{
+		return muteH;
+	}	
+	
 	/**
 	 * Called when the HTML textbox is moved. It moves the edittext as well
 	 * @param frect the form rect 

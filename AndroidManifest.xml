@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.wanikani.androidnotifier"
-    android:versionCode="43"
-    android:versionName="1.6.0rc0">
+    android:versionCode="46"
+    android:versionName="1.7.0pre0">
 
     <uses-sdk
         android:minSdkVersion="7"
@@ -30,6 +30,8 @@
             </intent-filter>
         </activity>
         <activity android:name="SettingsActivity" />
+        <activity android:name="OtherStatsActivity" 
+            	  android:configChanges="orientation|keyboardHidden|screenSize"/>
 
         <activity android:name="WebReviewActivity"
             	  android:windowSoftInputMode="adjustPan"

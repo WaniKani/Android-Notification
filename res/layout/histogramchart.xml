@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+    <TextView
+        android:id="@+id/hc_title"
+        style="@style/ChartTitle"/>
+    
+    <LinearLayout
+        style="@style/Table"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+    <ProgressBar
+        android:id="@+id/hc_spinner"
+        style="@style/Spinner"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="right" />
+
+	<LinearLayout
+	    android:id="@+id/hc_lay_alert"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	    android:gravity="center_vertical"
+	    android:orientation="horizontal" >
+
+	    <ImageView
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:src="@drawable/info"/>
+	    <TextView
+	        android:id="@+id/hc_alert"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"/>
+	</LinearLayout>
+    
+    <com.wanikani.androidnotifier.graph.HistogramPlot
+        android:id="@+id/hc_plot"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/m_hcplot_size"/>    
+	<LinearLayout 
+	    android:id="@+id/hc_legend"
+    	style="@style/ChartLegend"
+    	android:layout_width="match_parent"
+    	android:layout_height="match_parent"
+    	android:orientation="vertical" />
+	</LinearLayout>
+
+</LinearLayout>

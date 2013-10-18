@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/os_scroll"
+    xmlns:custom="http://schemas.android.com/apk/res/com.wanikani.androidnotifier"
+    style="@style/Background"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+
+        <ProgressBar
+            android:id="@id/pb_status"
+            style="@style/Spinner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            android:visibility="gone" />
+
+       <LinearLayout
+            android:id="@+id/os_panel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone" >
+
+            <TextView
+                style="@style/ChartTitle"
+                android:text="@string/ct_jlpt_progress" />
+
+            <com.wanikani.androidnotifier.graph.ProgressChart
+                style="@style/ProgressPlot"                        
+                android:id="@+id/os_jlpt"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+            
+            <TextView
+                style="@style/ChartTitle"
+                android:text="@string/ct_joyo_progress" />
+
+            <com.wanikani.androidnotifier.graph.ProgressChart
+                style="@style/ProgressPlot"                        
+                android:id="@+id/os_joyo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+            
+       		<com.wanikani.androidnotifier.graph.HistogramChart 
+       		    android:id="@+id/os_kanji_levels"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                custom:ticks="10"
+                custom:title="@string/os_kanji_levels"/>
+            
+       		<Button
+       		    android:id="@+id/os_more"
+       		    android:text="@string/tag_more_stats"
+       		    android:layout_width="wrap_content"
+       		    android:layout_height="wrap_content"
+       		    android:layout_gravity="center_horizontal"
+       		    android:visibility="gone"/>
+       		
+       		<ProgressBar
+    	    	android:id="@+id/os_pb_other"
+            	style="?android:attr/progressBarStyleHorizontal"
+            	android:layout_width="match_parent"
+            	android:layout_height="wrap_content" 
+            	android:visibility="gone" />
+       		       		
+       		<com.wanikani.androidnotifier.graph.HistogramChart 
+       		    android:id="@+id/os_levels"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                custom:ticks="10"
+                custom:title="@string/os_levels"/>
+            </LinearLayout>
+       </RelativeLayout>
+
+</ScrollView>

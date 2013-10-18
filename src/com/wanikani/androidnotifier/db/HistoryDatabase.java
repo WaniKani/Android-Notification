@@ -970,6 +970,11 @@ public class HistoryDatabase {
 		private static final String SQL_INSERT_OR_IGNORE =
 				"INSERT OR IGNORE INTO " + TABLE + " VALUES (?, ?)";
 		
+		/** Tries to insert a new row into the table. If a row at the
+		 *  same level already exists, it is updated. */
+		private static final String SQL_INSERT_OR_UPDATE =
+				"INSERT OR REPLACE INTO " + TABLE + " VALUES (?, ?)";
+
 		/** Inserts a new row into the table. If a row at the same level
 		 *  already exists, it is replaced */
 		private static final String SQL_REPLACE =
@@ -1016,6 +1021,27 @@ public class HistoryDatabase {
 			db.execSQL (SQL_INSERT_OR_IGNORE, values);		
 		}
 		
+		/**
+		 * Inserts a row into the database. If the row already exists, it
+		 * is updated.  
+		 * @param db the database
+		 * @param level the level number
+		 * @param day the day number
+		 * @throws SQLException if something goes wrong. May indicate the db is broken
+		 */
+		public static void insertOrUpdate (SQLiteDatabase db, int level, int day)
+			throws SQLException
+		{
+			String values [];
+			
+			values = new String [] {
+				Integer.toString (level), 
+				Integer.toString (day)
+			};
+
+			db.execSQL (SQL_INSERT_OR_UPDATE, values);		
+		}
+
 		/**
 		 * Returns the entire contents of the table.
 		 * @param db the database
@@ -1293,5 +1319,16 @@ public class HistoryDatabase {
 	public Map<Integer, Integer> getLevelups ()
 	{
 		return Levels.getLevelups (db);		
+	}
+	
+	/**
+	 * Updates the leveup table. To be done only when a serious inconsistency
+	 * has been detected
+	 * @param level the level
+	 * @param daty the day
+	 */
+	public void updateLevelup (int level, int day)
+	{
+		Levels.insertOrUpdate (db, level, day);
 	}
 }

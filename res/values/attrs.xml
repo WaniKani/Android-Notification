@@ -9,4 +9,9 @@
 	<declare-styleable name="PieChart">
 	    <attr name="title" format="string" />
 	</declare-styleable>    
+
+	<declare-styleable name="HistogramPlot">
+	    <attr name="ticks" format="integer" />
+	</declare-styleable>    
+
 </resources>
