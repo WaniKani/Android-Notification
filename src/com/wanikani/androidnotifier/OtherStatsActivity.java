@@ -328,6 +328,8 @@ public class OtherStatsActivity extends Activity {
 				return false;
 			}
 
+			publishProgress ((100 * 1) / (levels + 2));
+
 			if (reset)
 				for (ItemListener l : listeners)
 					l.reset (levels);				
@@ -351,6 +353,8 @@ public class OtherStatsActivity extends Activity {
 			} catch (IOException e) {
 				return false;
 			} 
+
+			publishProgress ((100 * 2) / (levels + 2));
 			
 			try {
 				if (types.contains (Item.Type.VOCABULARY)) {
@@ -362,7 +366,7 @@ public class OtherStatsActivity extends Activity {
 						vlib = conn.getVocabulary (bunch);
 						for (ItemListener l : listeners)
 							l.newVocab (vlib);
-						publishProgress ((100 * (i - 1)) / levels);
+						publishProgress ((100 * (i - 1)) / (levels + 2));
 					}
 				}
 			} catch (IOException e) {
