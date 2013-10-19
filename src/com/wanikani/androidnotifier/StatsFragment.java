@@ -716,6 +716,7 @@ public class StatsFragment extends Fragment implements Tab {
 					cal.set (Calendar.SECOND, 0);
 					cal.add (Calendar.DATE, lastlup);
 					delay -= ((float) System.currentTimeMillis () - cal.getTimeInMillis ()) / (24 * 3600 * 1000);
+					delay -= 0.5F;	/* This compensates the fact that granularity is one day */
 					if (delay > 0)
 						s += ", " + main.getString (R.string.fmt_eta_next_future, beautify (delay));
 					else
