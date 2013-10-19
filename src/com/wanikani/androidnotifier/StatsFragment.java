@@ -1,6 +1,6 @@
 package com.wanikani.androidnotifier;
 
-import java.lang.reflect.GenericSignatureFormatError;
+import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -33,6 +33,7 @@ import com.wanikani.androidnotifier.graph.Pager.Series;
 import com.wanikani.androidnotifier.graph.PieChart;
 import com.wanikani.androidnotifier.graph.PiePlot.DataSet;
 import com.wanikani.androidnotifier.graph.TYChart;
+import com.wanikani.wklib.Connection;
 import com.wanikani.wklib.SRSDistribution;
 
 /* 
@@ -86,13 +87,18 @@ public class StatsFragment extends Fragment implements Tab {
 		/// The context
 		private Context ctxt;
 		
+		/// The connection
+		private Connection conn;
+		
 		/**
 		 * Constructor
 		 * @param ctxt the context
+		 * @param conn the connection
 		 */
-		public GetCoreStatsTask (Context ctxt)
+		public GetCoreStatsTask (Context ctxt, Connection conn)
 		{
 			this.ctxt = ctxt;
+			this.conn = conn;
 		}
 		
 		/**
@@ -103,9 +109,9 @@ public class StatsFragment extends Fragment implements Tab {
 		protected HistoryDatabase.CoreStats doInBackground (Void... v)
 		{
 			try {
-				return HistoryDatabase.getCoreStats (ctxt);
-			} catch (SQLException e) {
-				return new HistoryDatabase.CoreStats (0, 0, 0, 0, 0, 0, null);
+				return HistoryDatabase.getCoreStats (ctxt, conn.getUserInformation ());
+			} catch (IOException e) {
+				return HistoryDatabase.getCoreStats (ctxt, null);				
 			}
 		}	
 		
@@ -697,11 +703,11 @@ public class StatsFragment extends Fragment implements Tab {
 		{
 			TextView tw;
 			Integer lastlup;
-			Float delay;
+			Float delay, avgl;
 			Calendar cal;
 			String s;
 			
-			delay = weight (days, WEXP_NEXT);
+			avgl = delay = weight (days, WEXP_NEXT);
 			tw = (TextView) parent.findViewById (R.id.tv_eta_avg);
 			if (delay != null) {
 				s = main.getString (R.string.fmt_eta_avg, beautify (delay));
@@ -717,7 +723,9 @@ public class StatsFragment extends Fragment implements Tab {
 					cal.add (Calendar.DATE, lastlup);
 					delay -= ((float) System.currentTimeMillis () - cal.getTimeInMillis ()) / (24 * 3600 * 1000);
 					delay -= 0.5F;	/* This compensates the fact that granularity is one day */
-					if (delay > 0)
+					if (delay > avgl)
+						;
+					else if (delay > 0)
 						s += ", " + main.getString (R.string.fmt_eta_next_future, beautify (delay));
 					else
 						s += ", " + main.getString (R.string.fmt_eta_next_past, beautify (-delay));
@@ -1024,7 +1032,7 @@ public class StatsFragment extends Fragment implements Tab {
 		if (cs != null)
 			setCoreStats (cs);
 		else if (task == null) {
-			task = new GetCoreStatsTask (main);
+			task = new GetCoreStatsTask (main, main.getConnection ());
 			task.execute ();
 		}
 		

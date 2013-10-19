@@ -338,7 +338,7 @@ public class ReconstructDialog {
 
 				hdb.endReconstructing (rt);
 				
-				return hdb.getCoreStats ();
+				return hdb.getCoreStats (ui);
 				
 			} catch (SQLException e) {
 				return null;

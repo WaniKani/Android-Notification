@@ -473,10 +473,11 @@ public class HistoryDatabase {
 		 * Returns a {@link CoreStats} object, containing some overall info regarding
 		 * this database.
 		 * @param db the database
+		 * @param ui user information
 		 * @return the overall info
 		 * @throws SQLException
 		 */
-		public static CoreStats getCoreStats (SQLiteDatabase db)
+		public static CoreStats getCoreStats (SQLiteDatabase db, UserInformation ui)
 				throws SQLException
 		{
 			CoreStats cs;
@@ -502,7 +503,7 @@ public class HistoryDatabase {
 									getIntOrZero (c, 3),
 									getIntOrZero (c, 4),
 									getIntOrZero (c, 5),
-									Levels.getLevelups (db));
+									Levels.getLevelups (db, ui));
 			} catch (SQLException e) {
 				cs = new CoreStats (0, 0, 0, 0, 0, 0, null);
 			} finally {
@@ -1072,6 +1073,28 @@ public class HistoryDatabase {
 		}
 		
 		/**
+		 * Returns the entire contents of the table, making sure also the last levelup
+		 * is part of the returned map. The last one may have not been recorded yet,
+		 * if we have levelled up today
+		 * @param db the database
+		 * @param ui the user information
+		 * @return the level to day mapping
+		 * @throws SQLException if something goes wrong. May indicate the db is broken
+		 */
+		public static final Map<Integer, Integer> getLevelups (SQLiteDatabase db, UserInformation ui)
+		{
+			Map<Integer, Integer> ans;
+			
+			ans = getLevelups (db);
+			/* The last test is an heuristic way to tell whether no reconstruction process
+			 * has been done yet */
+			if (ui != null && ui.level > 1 && ans.get (ui.level) == null && ans.get (ui.level - 1) != null)
+				ans.put (ui.level, ui.getDay () + 1);
+
+			return ans;
+		}
+		
+		/**
 		 * Replaces the contents of the table. If a level is not present 
 		 * in the map, the corresponding table row (if present) is left
 		 * untouched. The operation is not atomic (I can't see a reason why
@@ -1285,40 +1308,51 @@ public class HistoryDatabase {
 	 * Retrieve some overall statistical data from the facts table.
 	 * When this method is called, the DB must have already been opened
 	 * in R/O (or R/W) mode.
+	 * @param ui the user information
 	 * @return the info
 	 */	
-	public CoreStats getCoreStats ()
+	public CoreStats getCoreStats (UserInformation ui)
 		throws SQLException
 	{
-		return Facts.getCoreStats (db);
+		return Facts.getCoreStats (db, ui);
 	}
 	
 	/**
 	 * Retrieve some overall statistical data from the facts table.
 	 * @param ctxt the context
+	 * @param ui the user information
 	 * @return the info
 	 */	
-	public static CoreStats getCoreStats (Context ctxt)
-		throws SQLException
+	public static CoreStats getCoreStats (Context ctxt, UserInformation ui)
 	{
 		HistoryDatabase hdb;
 		
 		hdb = new HistoryDatabase (ctxt);
 		hdb.openW ();
 		try {
-			return hdb.getCoreStats ();
+			return hdb.getCoreStats (ui);
 		} finally {
 			hdb.close ();
 		}		
 	}
 	
 	/**
-	 * Retruns the levelups hashtable
+	 * Returns the levelups hashtable
 	 * @return the levels-day mapping
 	 */
 	public Map<Integer, Integer> getLevelups ()
 	{
-		return Levels.getLevelups (db);		
+		return getLevelups (null);
+	}
+
+	/**
+	 * Returns the levelups hashtable
+	 * @param ui the user information
+	 * @return the levels-day mapping
+	 */
+	public Map<Integer, Integer> getLevelups (UserInformation ui)
+	{
+		return Levels.getLevelups (db, ui);		
 	}
 	
 	/**

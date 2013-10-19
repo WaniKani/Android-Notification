@@ -556,7 +556,10 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	    receiver = new Receiver ();
 	    alarm = new Alarm ();
 	    mh = new MenuHandler (this, new MenuListener ());
-	    
+
+	    /* Must be placed first, because fragments need this early */
+	    conn = new Connection (SettingsActivity.getLogin (this));
+
 	    if (dsf == null)
 	    	dsf = new DashboardStatsFragment ();
 	    if (dashboardf == null)
@@ -577,8 +580,6 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	    
 	    if (!SettingsActivity.credentialsAreValid (this))
 	    	mh.settings ();
-
-	    conn = new Connection (SettingsActivity.getLogin (this));
 
 	    if (bundle != null && bundle.containsKey (BUNDLE_VALID)) {
 	    	dd = new DashboardData (bundle);
