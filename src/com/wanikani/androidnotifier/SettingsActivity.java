@@ -78,6 +78,8 @@ public class SettingsActivity
 	private static final String KEY_PREF_IGNORE_BUTTON = "pref_ignore_button";
 	/** WaniKani improve */
 	private static final String KEY_PREF_WANIKANI_IMPROVE = "pref_wanikani_improve";
+	/** Review Order */
+	private static final String KEY_PREF_REVIEW_ORDER = "pref_review_order";
 	/** Enable 42+ mode. Must match preferences.xml */
 	private static final String KEY_PREF_42PLUS = "pref_42plus";
 	/** Wanikani review URL */
@@ -312,6 +314,9 @@ public class SettingsActivity
 		pref = findPreference (KEY_PREF_WANIKANI_IMPROVE);
 		pref.setEnabled (getUseIntegratedBrowser (prefs));
 
+		pref = findPreference (KEY_PREF_REVIEW_ORDER);
+		pref.setEnabled (getUseIntegratedBrowser (prefs));
+
 		runShowKeyboardHooks (prefs);
 	}
 
@@ -486,6 +491,11 @@ public class SettingsActivity
 		return prefs (ctxt).getBoolean (KEY_PREF_WANIKANI_IMPROVE, false);
 	}
 	
+	public static boolean getReviewOrder (Context ctxt)
+	{
+		return prefs (ctxt).getBoolean (KEY_PREF_REVIEW_ORDER, false);
+	}
+
 	public static boolean getShowMute (Context ctxt)
 	{
 		return prefs (ctxt).getBoolean (KEY_PREF_SHOW_MUTE, true);

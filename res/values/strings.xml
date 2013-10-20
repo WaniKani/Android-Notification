@@ -9,7 +9,7 @@
     <string name="new_lesson">You can unlock one item</string>
     <string name="tpref_notifications">Notifications</string>
     <string name="tpref_dashboard">Dashboard</string>
-    <string name="tpref_reviews">Reviews</string>
+    <string name="tpref_reviews">Rev"res/values/strings.xml"iews</string>
     <string name="tpref_export">Export</string>
     <string name="pref_enabled">Enable notifications</string>
     <string name="pref_not_threshold">Threshold</string>
@@ -38,6 +38,9 @@
     <string name="pref_wanikani_improve">WaniKani improve</string>
     <string name="pref_wanikani_improve_descr">Skip to next question, if correct. Port of
         		\@Seiji and \@Jatacid scripts</string>
+    <string name="pref_review_order">Review Order</string>
+    <string name="pref_review_order_descr">Put radicals and kanji first. Port of
+        		\@Alucardeck script</string>
     <string name="pref_url">Review URL</string>
     <string name="pref_url_desc">Wanikani review URL</string>
     <string name="pref_lesson_url">Lessons URL</string>

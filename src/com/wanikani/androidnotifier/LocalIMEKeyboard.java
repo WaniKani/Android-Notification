@@ -587,6 +587,9 @@ public class LocalIMEKeyboard implements Keyboard {
 	public void show (boolean hasEnter)
 	{
 		wv.js (JS_INIT_TRIGGERS);
+		if (SettingsActivity.getReviewOrder (wav))
+			wv.js (ReviewOrder.JS_CODE);
+		
 		isWKIEnabled = SettingsActivity.getWaniKaniImprove (wav); 
 		if (isWKIEnabled)
 			wki.initPage ();
