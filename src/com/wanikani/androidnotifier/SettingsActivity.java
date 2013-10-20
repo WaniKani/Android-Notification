@@ -318,8 +318,10 @@ public class SettingsActivity
 		pref = findPreference (KEY_PREF_WANIKANI_IMPROVE);
 		pref.setEnabled (getUseIntegratedBrowser (prefs));
 
+		/*
 		pref = findPreference (KEY_PREF_REVIEW_ORDER);
 		pref.setEnabled (getUseIntegratedBrowser (prefs));
+		*/
 
 		runShowKeyboardHooks (prefs);
 	}

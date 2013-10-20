@@ -78,11 +78,11 @@
         	android:title="@string/pref_wanikani_improve"
         	android:summary="@string/pref_wanikani_improve_descr"
         	android:defaultValue="false" />    
-    <CheckBoxPreference
+    <!--   CheckBoxPreference
         	android:key="pref_review_order"
         	android:title="@string/pref_review_order"
         	android:summary="@string/pref_review_order_descr"
-        	android:defaultValue="false" />    
+        	android:defaultValue="false" -->    
     <CheckBoxPreference
         	android:key="pref_show_mute"
         	android:title="@string/pref_show_mute"
