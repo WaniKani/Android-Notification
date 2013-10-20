@@ -88,7 +88,7 @@ public class ProgressPlot extends View {
 	private RectF rect;
 	
 	/// Default width/height ratio of the ellipse
-	private static final float DEFAULT_RATIO = 2F;
+	private static final float DEFAULT_RATIO = .5F;
 	
 	/// Default height. Set to the android rythm
 	private static final int DEFAULT_HEIGHT = 48;
@@ -184,7 +184,7 @@ public class ProgressPlot extends View {
 			if (ds.value > 0)
 				nzds = ds;
 		}
-		if (nzds != null) {
+		if (nzds != null && ratio > 0) {
 			canvas.drawPath (nzds.fpath, nzds.fpaint);
 			canvas.drawPath (nzds.spath, nzds.spaint);
 		}		
@@ -257,7 +257,7 @@ public class ProgressPlot extends View {
 		rect = new RectF (this.rect);
 		orect = new RectF (this.rect);
 		
-		orect.right = orect.left + orect.height () / ratio;
+		orect.right = orect.left + orect.height () * ratio;
 		if (rect.width () <= orect.width ())
 			return;
 		
