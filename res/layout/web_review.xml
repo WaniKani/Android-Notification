@@ -56,6 +56,12 @@
               android:layout_alignParentTop="true"
               android:layout_alignParentLeft="true"
               android:src="@drawable/ic_mute" />
+        <TextView
+            android:id="@+id/txt_question_override"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical|center_horizontal"
+            android:visibility="gone"/>        
         <LinearLayout
             android:id="@+id/ime_div"
             android:background="#eeeeee"

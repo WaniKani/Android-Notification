@@ -358,6 +358,15 @@ public class WebReviewActivity extends Activity {
 			showIgnoreButtonMessage ();
 			keyboard.ignore ();
 		}
+		
+		/**
+		 * Toggle override fonts
+		 */
+		@Override
+		public void fonts ()
+		{
+			keyboard.overrideFonts ();
+		}
 	}
 	
 	/**
@@ -857,8 +866,8 @@ public class WebReviewActivity extends Activity {
 			mi = menu.getItem (i);
 			if (mi.getItemId () == R.id.em_ignore) {
 				mi.setVisible (keyboard.canIgnore ());
-				break;
-			}
+			} else if (mi.getItemId () == R.id.em_fonts)
+				mi.setVisible (keyboard.canOverrideFonts ());
 		}
 		
 		return true;

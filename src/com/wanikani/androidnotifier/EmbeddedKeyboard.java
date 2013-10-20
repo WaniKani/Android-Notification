@@ -574,5 +574,17 @@ public class EmbeddedKeyboard implements Keyboard {
 	{
 		return false;
 	}
-
+	
+	@Override
+	public boolean canOverrideFonts ()
+	{
+		return false;
+	}
+	
+	@Override
+	public void overrideFonts ()
+	{
+		/* empty */
+	}
+	
 }

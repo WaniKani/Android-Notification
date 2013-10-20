@@ -6,6 +6,9 @@
     <color name="master">#5571e2</color>
     <color name="important">#ff0</color>
     <color name="normal">#fff</color>
+    <color name="radical">#00a0f1</color>
+    <color name="kanji">#dd0093</color>
+    <color name="vocabulary">#9300dd</color>
     <color name="selected">#f87217</color>
     <color name="unselected">#000</color>
     <color name="locked">#efefef</color>

@@ -1148,21 +1148,13 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 	/// Need to restart refresh
 	private boolean resumeRefresh;
 	
-	/// The japanese typeface path
-	private final String JAPANESE_TYPEFACE_FONT = "/system/fonts/MTLmr3m.ttf";
-	
 	public ItemsFragment ()
 	{
 		rimg = new RadicalImages ();
 		alarm = new Alarm ();
 		refreshTask = new RefreshTask ();
-		
-		try {
-			jtf = Typeface.createFromFile (JAPANESE_TYPEFACE_FONT);
-		} catch (Exception e) {
-			jtf = null;
-		}
-		
+		jtf = SettingsActivity.getJapaneseFont ();
+			
 		currentLevel = -1;		
 	}
 	
