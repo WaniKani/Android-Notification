@@ -216,7 +216,7 @@ public class OtherStatsActivity extends Activity {
 		
 		public void update ()
 		{
-			chart.setData (series, bars);
+			chart.setData (series, bars, -1);
 		}
 
 		private void add (Resources res, SRSLevel level, int string, int color)		

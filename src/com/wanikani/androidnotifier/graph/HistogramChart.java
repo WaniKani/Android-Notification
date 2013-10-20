@@ -104,12 +104,13 @@ public class HistogramChart extends LinearLayout {
 	 * Updates the plot with fresh data. Stops the spinner, if shown.
 	 * @param series the series
 	 * @param bars the values
+	 * @param cap the cap
 	 */
-	public void setData (List<HistogramPlot.Series> series, List<HistogramPlot.Samples> bars)
+	public void setData (List<HistogramPlot.Series> series, List<HistogramPlot.Samples> bars, long cap)
 	{
 		LinearLayout item;		
 		
-		plot.setData (series, bars);
+		plot.setData (series, bars, cap);
 		
 		legend.removeAllViews ();
 		for (HistogramPlot.Series s : series) {

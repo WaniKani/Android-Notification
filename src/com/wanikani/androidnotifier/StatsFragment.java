@@ -848,6 +848,8 @@ public class StatsFragment extends Fragment implements Tab {
 
 		List<HistogramPlot.Series> series;
 		
+		private static final long LEVELUP_CAP = 30;
+		
 		public LevelupSource ()
 		{
 			Resources res;
@@ -886,7 +888,7 @@ public class StatsFragment extends Fragment implements Tab {
 			}
 			
 			chart = (HistogramChart) parent.findViewById (R.id.hi_levels);
-			chart.setData (series, bars);
+			chart.setData (series, bars, LEVELUP_CAP);
 			
 			chart.setVisibility (bars.isEmpty () ? View.GONE : View.VISIBLE);
 		}
