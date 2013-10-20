@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.preference.EditTextPreference;
 import android.preference.Preference;
@@ -155,6 +156,9 @@ public class SettingsActivity
 	/** Extra key in the intent {@link #ACT_CREDENTIALS} and {@link #ACT_NOTIFY} action, 
 	 * containing the notifications enabled state  */
 	public static final String E_ENABLED = "enabled";
+	
+	/// The japanese typeface path
+	private static final String JAPANESE_TYPEFACE_FONT = "/system/fonts/MTLmr3m.ttf";
 	
 	/** 
 	 * Called when the activity is first created. We setup the menu, basing on the  
@@ -752,4 +756,15 @@ public class SettingsActivity
 			sendBroadcast (i);
 		}
 	}
+	
+	public static Typeface getJapaneseFont ()
+	{
+		try {
+			return Typeface.createFromFile (JAPANESE_TYPEFACE_FONT);
+		} catch (Exception e) {
+			return null;
+		}
+	}
 }
+
+

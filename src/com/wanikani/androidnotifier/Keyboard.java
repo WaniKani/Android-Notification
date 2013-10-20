@@ -63,4 +63,15 @@ public interface Keyboard {
 	 * @return true if it can be shown
 	 */
 	public boolean canIgnore ();
+	
+	/**
+	 * Tells if fonts can be overridden
+	 * @return true if they can
+	 */
+	public boolean canOverrideFonts ();
+	
+	/**
+	 * Toggle font overriding
+	 */
+	public void overrideFonts ();
 }

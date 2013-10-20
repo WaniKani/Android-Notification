@@ -96,6 +96,7 @@
     <string name="em_dashboard">Dashboard</string>
     <string name="em_export">Export</string>
     <string name="em_ignore">Ignore</string>
+    <string name="em_fonts">JP fonts</string>
     <string name="pref_enabled_descr">Show event icon when you have reviews</string>
     <string name="status_msg_error">Error connecting to WaniKani</string>
     <string name="status_msg_partial">Network error. Partial results</string>
