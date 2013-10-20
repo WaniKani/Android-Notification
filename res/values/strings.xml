@@ -173,6 +173,12 @@
     <string name="fmt_bh_one">one hour</string>
     <string name="fmt_bnow">~now</string>
     
+    <string name="fmts_bd">%dd</string>
+    <string name="fmts_bd_one">1d</string>
+    <string name="fmts_bh">%dh</string>
+    <string name="fmts_bh_one">1h</string>
+    <string name="fmts_bnow">~now</string>
+    
     <string name="fmt_ii_percent">%d%%</string>
     <string name="fmt_ii_percent_full">%1$d%% (%2$d%%M, %3$d%%R)</string>
     
@@ -183,10 +189,13 @@
     <string name="os_kanji_levels">Kanji SRS by level</string>
     
     <string name="ct_eta">Estimates</string>
-    <string name="fmt_eta_l50">Level 50: %s</string>
-    <string name="fmt_eta_avg">Average levelup time: %s</string>
-    <string name="fmt_eta_next_future">which is in %s</string>
-    <string name="fmt_eta_next_past">which is %s ago</string>    
+    <string name="tag_eta_avg">Average level time:</string>
+    <string name="tag_eta_next_future">Next level in:</string>
+    <string name="tag_eta_next_past">Next level:</string>
+    <string name="tag_eta_l50">Level 50 on:</string>
+
+    <string name="fmt_eta_next_future">%s</string>
+    <string name="fmt_eta_next_past">%s ago</string>    
     
     <string name="ct_srs_distribution">SRS Distribution</string>
     <string name="ct_kanji_progress">Kanji Progress</string>

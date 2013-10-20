@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:custom="http://schemas.android.com/apk/res/com.wanikani.androidnotifier"    
     style="@style/Table"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -21,6 +22,7 @@
             style="@style/ProgressPlot"
             android:layout_width="0dip"
             android:layout_height="@dimen/m_progress_size"
+            custom:ratio="0"
             android:layout_weight="1" />
     </TableRow>
 

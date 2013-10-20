@@ -568,30 +568,33 @@ public class HistogramPlot extends View {
 	 * Sets the data samples.
 	 * @param series a list of series that will be referenced by <tt>data</tt> 
 	 * @param bars a list of samples, each representing a bar
+	 * @param cap maximum Y value admitted (may be smaller if bars are smaller than that)
 	 */
-	public void setData (List<Series> series, List<Samples> bars)
+	public void setData (List<Series> series, List<Samples> bars, long cap)
 	{
 		pas.setSeries (series);
-		vp = new Viewport (meas, bars.size (), getMaxY (bars));
+		vp = new Viewport (meas, bars.size (), getMaxY (bars, cap));
 		
 		this.bars = bars;
 		
 		invalidate ();
 	}
 	
-	static private long getMaxY (List<Samples> bars)
+	static private long getMaxY (List<Samples> bars, long cap)
 	{
-		long ans, current;
+		long ans, current, rmax;
 		
-		ans = 0;
+		ans = rmax = 0;
 		for (Samples bar : bars) {
 			current = 0;
 			for (Sample s : bar.samples)
 				current += s.value;
-			ans = Math.max (ans, current);
+			if (cap <= 0 || current < cap)
+				ans = Math.max (ans, current);
+			rmax = Math.max (rmax, current);
 		}
 		
-		return ans;
+		return ans != 0 ? ans : rmax;
 	}
 
 	@Override

@@ -52,17 +52,60 @@
         		android:orientation="vertical"
         		android:visibility="gone">
 
-        		<TextView
-        		    android:id="@+id/tv_eta_l50"
-        		    style="@style/LegendValue"
-        		    android:layout_width="fill_parent"
-        		    android:layout_height="match_parent" />
-
-        		<TextView
-        		    android:id="@+id/tv_eta_avg"
-        		    style="@style/LegendValue"
-        		    android:layout_width="fill_parent"
-        		    android:layout_height="match_parent" />
+    		    <LinearLayout
+    		        android:id="@+id/div_eta_avg"
+    		        android:layout_width="match_parent"
+    		        android:layout_height="wrap_content"
+    		        android:orientation="horizontal">
+        			<TextView
+	        		    android:id="@+id/tag_eta_avg"
+        		    	style="@style/LegendValue"
+        		    	android:layout_weight="1"
+        		    	android:layout_width="0dip"
+        		    	android:layout_height="wrap_content"
+        		    	android:text="@string/tag_eta_avg"/>"
+        			<TextView
+	        		    android:id="@+id/tv_eta_avg"
+        		    	style="@style/LegendValue"
+        		    	android:layout_width="wrap_content"
+        		    	android:layout_height="wrap_content" />    		        		      
+        		</LinearLayout>
+    		    <LinearLayout
+    		        android:id="@+id/div_eta_next"
+    		        android:layout_width="match_parent"
+    		        android:layout_height="wrap_content"
+    		        android:orientation="horizontal">
+        			<TextView
+	        		    android:id="@+id/tag_eta_next"
+        		    	style="@style/LegendValue"
+        		    	android:layout_weight="1"
+        		    	android:layout_width="0dip"
+        		    	android:layout_height="wrap_content"
+        		    	android:text="@string/tag_eta_next_future" />    		        		      
+        			<TextView
+	        		    android:id="@+id/tv_eta_next"
+        		    	style="@style/LegendValue"
+        		    	android:layout_width="wrap_content"
+        		    	android:layout_height="wrap_content" />    		        		      
+        		</LinearLayout>
+    		    <LinearLayout
+    		        android:id="@+id/div_eta_l50"
+    		        android:layout_width="match_parent"
+    		        android:layout_height="wrap_content"
+    		        android:orientation="horizontal">
+        			<TextView
+	        		    android:id="@+id/tag_eta_l50"
+        		    	style="@style/LegendValue"
+        		    	android:layout_weight="1"
+        		    	android:layout_width="0dip"
+        		    	android:layout_height="wrap_content"
+        		    	android:text="@string/tag_eta_l50" />    		        		      
+        			<TextView
+	        		    android:id="@+id/tv_eta_l50"
+        		    	style="@style/LegendValue"
+        		    	android:layout_width="wrap_content"
+        		    	android:layout_height="wrap_content" />    		        		      
+        		</LinearLayout>
 
         	</LinearLayout>
             
