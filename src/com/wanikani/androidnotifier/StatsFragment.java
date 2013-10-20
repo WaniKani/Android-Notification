@@ -679,7 +679,6 @@ public class StatsFragment extends Fragment implements Tab {
 			TextView tw;
 			Float delay;
 			Calendar cal;
-			String s;
 
 			delay = weight (days, WEXP_L50);
 			tw = (TextView) parent.findViewById (R.id.tv_eta_l50);
@@ -687,8 +686,7 @@ public class StatsFragment extends Fragment implements Tab {
 				cal = Calendar.getInstance ();
 				cal.setTime (dd.creation);				
 				cal.add (Calendar.DATE, (int) (delay * ALL_THE_LEVELS));
-				s = main.getString (R.string.fmt_eta_l50, df.format (cal.getTime ()));
-				tw.setText (s);
+				tw.setText (df.format (cal.getTime ()));
 				tw.setVisibility (View.VISIBLE);
 				
 				return true;
@@ -701,18 +699,23 @@ public class StatsFragment extends Fragment implements Tab {
 		
 		private boolean updateNextLevel (Map<Integer, Integer> days)
 		{
-			TextView tw;
+			View nlw, avgw;
+			TextView tw, nltag;
 			Integer lastlup;
 			Float delay, avgl;
 			Calendar cal;
 			String s;
 			
 			avgl = delay = weight (days, WEXP_NEXT);
-			tw = (TextView) parent.findViewById (R.id.tv_eta_avg);
+			nlw = parent.findViewById (R.id.div_eta_next);
+			avgw = parent.findViewById (R.id.div_eta_avg);
 			if (delay != null) {
-				s = main.getString (R.string.fmt_eta_avg, beautify (delay));
-				tw.setVisibility (View.VISIBLE);
+				avgw.setVisibility (View.VISIBLE);
+
+				tw = (TextView) parent.findViewById (R.id.tv_eta_avg);
+				tw.setText (beautify (delay));
 				
+				tw = (TextView) parent.findViewById (R.id.tv_eta_next);
 				lastlup = cs.levelups.get (dd.level);
 				if (lastlup != null) {
 					cal = Calendar.getInstance ();
@@ -722,21 +725,29 @@ public class StatsFragment extends Fragment implements Tab {
 					cal.set (Calendar.SECOND, 0);
 					cal.add (Calendar.DATE, lastlup);
 					delay -= ((float) System.currentTimeMillis () - cal.getTimeInMillis ()) / (24 * 3600 * 1000);
-					delay -= 0.5F;	/* This compensates the fact that granularity is one day */
-					if (delay > avgl)
-						;
-					else if (delay > 0)
-						s += ", " + main.getString (R.string.fmt_eta_next_future, beautify (delay));
-					else
-						s += ", " + main.getString (R.string.fmt_eta_next_past, beautify (-delay));
-				} 
-				
-				tw.setText (s);
+					delay -= 0.5F;	/* This compensates the fact that granularity is one day */										
 
+					if (delay <= avgl) {
+						nltag = (TextView) main.findViewById (R.id.tag_eta_next);
+						nlw.setVisibility (View.VISIBLE);
+						if (delay > 0) {
+							nltag.setText (R.string.tag_eta_next_future);
+							s = main.getString (R.string.fmt_eta_next_future, beautify (delay));
+						} else {
+							nltag.setText (R.string.tag_eta_next_past);
+							s = main.getString (R.string.fmt_eta_next_past, beautify (-delay));
+						}
+						tw.setText (s);
+					} else
+						nlw.setVisibility (View.GONE);
+				} else
+					nlw.setVisibility (View.GONE);
+				
 				return true;
 				
 			} else {
-				tw.setVisibility (View.GONE);
+				avgw.setVisibility (View.GONE);
+				nlw.setVisibility (View.GONE);
 
 				return false;
 			}
@@ -752,16 +763,16 @@ public class StatsFragment extends Fragment implements Tab {
 			dfield = (long) days;
 			hfield = (long) ((days - dfield) * 24);
 			if (dfield > 1)
-				ds = res.getString (R.string.fmt_bd, dfield);
+				ds = res.getString (R.string.fmts_bd, dfield);
 			else if (dfield == 1)
-				ds = res.getString (R.string.fmt_bd_one);
+				ds = res.getString (R.string.fmts_bd_one);
 			else
 				ds = null;
 			
 			if (hfield > 1)
-				hs = res.getString (R.string.fmt_bh, hfield);
+				hs = res.getString (R.string.fmts_bh, hfield);
 			else if (hfield == 1)
-				hs = res.getString (R.string.fmt_bh_one);
+				hs = res.getString (R.string.fmts_bh_one);
 			else
 				hs = null;
 
@@ -774,7 +785,7 @@ public class StatsFragment extends Fragment implements Tab {
 				if (hs != null)
 					return hs;
 				else
-					return res.getString (R.string.fmt_bnow);
+					return res.getString (R.string.fmts_bnow);
 				
 		}
 		
