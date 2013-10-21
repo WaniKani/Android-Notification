@@ -182,8 +182,10 @@ public class LocalIMEKeyboard implements Keyboard {
         	s = ew.getText ().toString ();
 
         	/* This prevents some race conditions */
-        	if (s.length () == 0)
+        	if (s.length () == 0 || frozen)
         		return;
+        	
+        	frozen = true;
         	
         	if (translate)
         		s = ime.fixup (s);
@@ -191,6 +193,7 @@ public class LocalIMEKeyboard implements Keyboard {
         		wv.js (String.format (JS_INJECT_ANSWER, s) +  WaniKaniImprove.getCode ());
         	else
         		wv.js (String.format (JS_INJECT_ANSWER, s));
+        	
 	    }
 	}
 	
@@ -267,6 +270,7 @@ public class LocalIMEKeyboard implements Keyboard {
 				setClass (clazz);
 			else
 				unsetClass ();
+			frozen = false;
 		}
 		
 	}
@@ -629,6 +633,9 @@ public class LocalIMEKeyboard implements Keyboard {
     
     /// The japanese typeface font, if available
     Typeface jtf;
+
+    /// Is the text box frozen because it is waiting for a class change
+    boolean frozen;
     
     /**
      * Constructor
