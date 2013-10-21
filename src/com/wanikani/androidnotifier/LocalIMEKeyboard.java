@@ -96,6 +96,13 @@ public class LocalIMEKeyboard implements Keyboard {
 		/// Set if we need to perform kana translation
 	    boolean translate;
 	    
+	    String log;
+	    
+	    public IMEListener ()
+	    {
+	    	log = "";
+	    }
+	    
 	    /**
 	     * Called after the text is changed to perform kana translation (if enabled).
 	     * In that case, the new text is sent the IME and, if some changes need to be performed,
@@ -114,9 +121,13 @@ public class LocalIMEKeyboard implements Keyboard {
 	    	
 	    	pos = ew.getSelectionStart ();
 	    	et = ew.getText ();
+	    	log += pos + ":" + et + ":";
 	    	repl = ime.replace (et.toString (), pos);
-	    	if (repl != null)
+	    	if (repl != null) {
+	    		log += "<"+ repl.start + ":" + repl.end + ":" + repl.text + ">";
 	    		et.replace (repl.start, repl.end, repl.text);
+	    	}
+	    	log += "/";
 	    }
 	    
 	    @Override
@@ -179,12 +190,21 @@ public class LocalIMEKeyboard implements Keyboard {
         	if (s.length () == 0)
         		return;
         	
-        	if (translate)
+        	if (translate) {
         		s = ime.fixup (s);
+        		log += s + "|";
+        		if (wav.log) {
+        			message (log);
+        			log = "";
+        			return;
+        		}
+        	} 
+        	
         	if (isWKIEnabled)
         		wv.js (String.format (JS_INJECT_ANSWER, s) +  WaniKaniImprove.getCode ());
         	else
         		wv.js (String.format (JS_INJECT_ANSWER, s));
+        	log = "";
 	    }
 	}
 	
@@ -785,6 +805,20 @@ public class LocalIMEKeyboard implements Keyboard {
 	public static String ifReviews (String js)
 	{
 		return "if (document.getElementById (\"quiz\") == null) {" + js + "}";
+	}
+	
+	public void message (String msg)
+	{
+		AlertDialog.Builder builder;
+		Dialog dialog;
+					
+		builder = new AlertDialog.Builder (wav);
+		builder.setTitle ("Log");
+		builder.setMessage (msg);
+		
+		dialog = builder.create ();
+		
+		dialog.show ();				
 	}
 	
 }

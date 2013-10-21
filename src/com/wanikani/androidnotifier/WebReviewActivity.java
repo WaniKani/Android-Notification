@@ -358,6 +358,13 @@ public class WebReviewActivity extends Activity {
 			showIgnoreButtonMessage ();
 			keyboard.ignore ();
 		}
+		
+		
+		@Override
+		public void log ()
+		{
+			log = !log;
+		}
 	}
 	
 	/**
@@ -642,6 +649,8 @@ public class WebReviewActivity extends Activity {
 	
 	/** The local IME keyboard */
 	private Keyboard localIMEKeyboard;
+	
+	public boolean log;
 		
 	/**
 	 * Called when the action is initially displayed. It initializes the objects

@@ -92,6 +92,11 @@ public class MenuHandler {
 		{
 			/* empty */
 		}
+		
+		public void log ()
+		{
+			/* empty */
+		}
 	}
 	
 	/**
@@ -174,6 +179,10 @@ public class MenuHandler {
 			
 		case R.id.em_ignore:
 			listener.ignore ();
+			break;
+			
+		case R.id.em_log:
+			listener.log ();
 			break;
 			
 		default:
