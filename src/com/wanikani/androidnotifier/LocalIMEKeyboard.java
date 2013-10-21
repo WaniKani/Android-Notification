@@ -737,6 +737,7 @@ public class LocalIMEKeyboard implements Keyboard {
 		imm.hideSoftInputFromWindow (ew.getWindowToken (), 0);
 		wv.js (JS_STOP_TRIGGERS);
 		divw.setVisibility (View.GONE);
+		qvw.setVisibility (View.GONE);
 	}
 
 	/**
