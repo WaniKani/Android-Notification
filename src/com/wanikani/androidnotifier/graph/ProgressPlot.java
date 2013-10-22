@@ -11,6 +11,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.Path.Direction;
 import android.graphics.RectF;
 import android.graphics.Paint.Style;
 import android.util.AttributeSet;
@@ -214,12 +215,15 @@ public class ProgressPlot extends View {
 		Path path;
 		
 		path = new Path ();
-		path.moveTo (rect.left, rect.bottom);
-		path.arcTo (orect, 90, 180);
-		path.lineTo (rect.right, rect.top);
-		orect.offset (rect.width (), 0);
-		path.arcTo (orect, 270, -180);
-		path.close ();
+		if (orect.width () > 0) {
+			path.moveTo (rect.left, rect.bottom);
+			path.arcTo (orect, 90, 180);
+			path.lineTo (rect.right, rect.top);
+			orect.offset (rect.width (), 0);
+			path.arcTo (orect, 270, -180);
+			path.close ();
+		} else
+			path.addRect (rect, Direction.CW);
 		
 		ds.fpath = path;
 	}
