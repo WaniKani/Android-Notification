@@ -85,6 +85,15 @@ public class ReviewOrder {
 "    kanSpan.innerHTML = kanC;\r\n" + 
 "    vocSpan.innerHTML = vocC;\r\n" + 
 "}\r\n" + 
-"setTimeout(init,8000);\r\n" + 
-"console.log('load');";			
+
+// Glue code //
+"if ($(\"#wkroStatus\").length > 0) {" +
+"    $(\"#wkroStatus\").show (); " +
+"} else {" +
+"    setTimeout(init,8000);\r\n" + 
+"    console.log('load');" +
+"}";			
+
+	public static final String JS_UNINIT_CODE =
+"$(\"#wkroStatus\").hide ();";
 }

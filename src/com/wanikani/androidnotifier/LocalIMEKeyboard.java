@@ -740,6 +740,8 @@ public class LocalIMEKeyboard implements Keyboard {
 		qvw.setVisibility (View.GONE);
 		if (isWKIEnabled)
 			wki.uninitPage ();
+		if (SettingsActivity.getReviewOrder (wav))
+			wv.js (ReviewOrder.JS_UNINIT_CODE);
 	}
 
 	/**
