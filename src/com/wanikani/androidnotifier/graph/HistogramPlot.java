@@ -221,6 +221,11 @@ public class HistogramPlot extends View {
 
 			updateSize (new RectF ());
 		}
+		
+		public void updateLabelPaint (Paint paint)
+		{
+			dipPerBar = paint.measureText (" 999 ");
+		}
 
 		/**
 		 * Called when the plot changes it size. Updates the inner plot rect
@@ -292,6 +297,7 @@ public class HistogramPlot extends View {
 			labelPaint.setTextAlign (Paint.Align.CENTER);
 			labelPaint.setTextSize ((int) meas.dateLabelFontSize);
 			labelPaint.setAntiAlias (true);
+			meas.updateLabelPaint (labelPaint);
 			
 			fm = labelPaint.getFontMetrics ();
 			meas.ensureFontMargin ((int) (fm.bottom - fm.ascent));
