@@ -8,15 +8,13 @@ import java.util.Vector;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.DashPathEffect;
 import android.graphics.Paint;
 import android.graphics.Paint.FontMetrics;
+import android.graphics.Path;
 import android.graphics.RectF;
-import android.graphics.Shader;
 import android.support.v4.view.ViewCompat;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
@@ -679,16 +677,34 @@ public class HistogramPlot extends View {
 	protected void drawBar (Canvas canvas, Samples bar, float left, float right)
 	{
 		long base, height;
+		float top;
+		Path path;
 		RectF rect;
 		
+		top = vp.getY (vp.yMax);
 		base = 0;
 		for (Sample sample : bar.samples) {
 			if (sample.value > 0) {
 				height = sample.value;
-				rect = new RectF (left, vp.getY (base + height), right, vp.getY (base));
-				rect.intersect (meas.plotArea);
-				canvas.drawRect (rect, pas.series.get (sample.series));
-				base += height;
+				
+				if (base > vp.yMax)
+					break;
+				else if (base + height > vp.yMax) {
+					path = new Path ();
+					path.moveTo (left, vp.getY (base));
+					path.lineTo (left, top);
+					path.lineTo (left + (right - left) / 3, top - 10);
+					path.lineTo (left + (right - left) * 2 / 3, top + 5);
+					path.lineTo (right, top);
+					path.lineTo (right, vp.getY (base));
+					path.close ();
+					canvas.drawPath (path, pas.series.get (sample.series));
+				} else {				
+					rect = new RectF (left, vp.getY (base + height), right, vp.getY (base));
+					rect.intersect (meas.plotArea);
+					canvas.drawRect (rect, pas.series.get (sample.series));
+					base += height;
+				}
 			}
 		}
 	}

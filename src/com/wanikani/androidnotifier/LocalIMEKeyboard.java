@@ -738,6 +738,8 @@ public class LocalIMEKeyboard implements Keyboard {
 		wv.js (JS_STOP_TRIGGERS);
 		divw.setVisibility (View.GONE);
 		qvw.setVisibility (View.GONE);
+		if (isWKIEnabled)
+			wki.uninitPage ();
 	}
 
 	/**
