@@ -168,6 +168,9 @@ public class WaniKaniImprove {
 "{" +
 "	wknWanikaniImprove.show ();" + 
 "});";	
+	
+	private static final String JS_UNINIT_PAGE = 
+"$('#option-show-previous').remove ()";			
 
 	/// This code must be run when the "next" button is pressed.
 	private static final String JS_CODE =
@@ -263,6 +266,14 @@ public class WaniKaniImprove {
 	{
 		currentState = null;
 		wv.js (LocalIMEKeyboard.ifReviews (JS_INIT_PAGE));
+	}
+	
+	/**
+	 * Deinitializes the page.
+	 */
+	public void uninitPage ()
+	{
+		wv.js (JS_UNINIT_PAGE);
 	}
 	
 	/**
