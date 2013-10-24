@@ -299,10 +299,14 @@
         <item name="android:layout_margin">@dimen/m_gap</item>
     </style>
 
-    <style name="LegendDescription" parent="AppTheme">
+    <style name="LegendDescription" parent="LegendItem">
 		<item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
     </style>
 
+    <style name="Estimates" parent="AppTheme">
+		<item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
+    </style>
+    
     <style name="LegendValue" parent="LegendDescription">		
     </style>
 
