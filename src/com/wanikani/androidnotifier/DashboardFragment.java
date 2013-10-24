@@ -557,16 +557,16 @@ public class DashboardFragment extends Fragment implements Tab {
 			return res.getString (R.string.fmt_one_day);
 
 		x = (int) Math.floor (hours);
-		if (minutes % 60 < 2) {
+		if (((long) minutes) % 60 < 2) {
 			if (x > 1)
 				return res.getString (R.string.fmt_X_hours, x);
 			else if (x == 1 && hours >= 1)
 				return res.getString (R.string.fmt_one_hour);
 		} else {
 			if (x > 1)
-				return res.getString (R.string.fmt_X_hours_mins, x, minutes % 60);
+				return res.getString (R.string.fmt_X_hours_mins, x, ((long) minutes) % 60);
 			else if (x == 1 && hours >= 1)
-				return res.getString (R.string.fmt_one_hour_mins, minutes % 60);			
+				return res.getString (R.string.fmt_one_hour_mins, ((long) minutes) % 60);			
 		}
 
 		x = Math.round (minutes);
