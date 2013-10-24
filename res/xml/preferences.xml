@@ -39,7 +39,35 @@
         	android:title="@string/pref_42plus"
         	android:summary="@string/pref_42plus_descr"
         	android:defaultValue="false" />    	
-    	</PreferenceCategory>   
+   	</PreferenceCategory>   
+	<PreferenceCategory
+	    	android:title="@string/tpref_review_enhancements">
+    	<CheckBoxPreference
+        	android:key="pref_ignore_button"
+        	android:title="@string/pref_ignore_button"
+        	android:summary="@string/pref_ignore_button_descr"
+        	android:defaultValue="true" />
+    	<CheckBoxPreference
+        	android:key="pref_wanikani_improve"
+        	android:title="@string/pref_wanikani_improve"
+        	android:summary="@string/pref_wanikani_improve_descr"
+        	android:defaultValue="false" />    
+    	<CheckBoxPreference
+        	android:key="pref_review_order"
+        	android:title="@string/pref_review_order"
+        	android:summary="@string/pref_review_order_descr"
+        	android:defaultValue="false" />    
+    	<CheckBoxPreference
+        	android:key="pref_error_popup"
+        	android:title="@string/pref_error_popup"
+        	android:summary="@string/pref_error_popup_descr"
+        	android:defaultValue="false" />    
+    	<CheckBoxPreference
+        	android:key="pref_show_mute"
+        	android:title="@string/pref_show_mute"
+        	android:summary="@string/pref_show_mute_desc"
+        	android:defaultValue="true" />    	
+	</PreferenceCategory>	
 	<PreferenceCategory
 	    	android:title="@string/tpref_reviews">
 	<CheckBoxPreference
@@ -68,26 +96,6 @@
         	android:title="@string/pref_vibrate"
         	android:summary="@string/pref_vibrate_desc"
         	android:defaultValue="false"/>
-    <CheckBoxPreference
-        	android:key="pref_ignore_button"
-        	android:title="@string/pref_ignore_button"
-        	android:summary="@string/pref_ignore_button_descr"
-        	android:defaultValue="true" />
-    <CheckBoxPreference
-        	android:key="pref_wanikani_improve"
-        	android:title="@string/pref_wanikani_improve"
-        	android:summary="@string/pref_wanikani_improve_descr"
-        	android:defaultValue="false" />    
-    <CheckBoxPreference
-        	android:key="pref_review_order"
-        	android:title="@string/pref_review_order"
-        	android:summary="@string/pref_review_order_descr"
-        	android:defaultValue="false" />    
-    <CheckBoxPreference
-        	android:key="pref_show_mute"
-        	android:title="@string/pref_show_mute"
-        	android:summary="@string/pref_show_mute_desc"
-        	android:defaultValue="true" />
     <CheckBoxPreference
         	android:key="pref_enter"
         	android:title="@string/pref_enter"

@@ -576,6 +576,9 @@ public class LocalIMEKeyboard implements Keyboard {
 	private static final String JS_OVERRIDE =
 			"window.wknOverrideQuestion ();";
 	
+	private static final String JS_INFO_POPUP =
+			"$('#option-item-info span').click()";
+	
 	/// Parent activity
 	WebReviewActivity wav;
 	
@@ -845,6 +848,8 @@ public class LocalIMEKeyboard implements Keyboard {
 			enableIgnoreButton (false);
 			disable (correctFG, correctBG);
 		} else if (clazz.equals ("incorrect")) {
+			if (SettingsActivity.getErrorPopup (wav))
+				errorPopup ();
 			enableIgnoreButton (true);
 			disable (incorrectFG, incorrectBG);
 		} else if (clazz.equals ("WKO_ignored")) {
@@ -852,6 +857,15 @@ public class LocalIMEKeyboard implements Keyboard {
 			disable (ignoredFG, ignoredBG);
 		}
 			
+	}
+	
+	/**
+	 * Show the info popup
+	 */
+	protected void errorPopup ()
+	{
+		imm.hideSoftInputFromWindow (ew.getWindowToken (), 0);		
+		wv.js (JS_INFO_POPUP);
 	}
 	
 	/**

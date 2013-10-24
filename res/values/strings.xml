@@ -11,6 +11,7 @@
     <string name="tpref_dashboard">Dashboard</string>
     <string name="tpref_reviews">Rev"res/values/strings.xml"iews</string>
     <string name="tpref_export">Export</string>
+    <string name="tpref_review_enhancements">Userscripts and enhancements</string>
     <string name="pref_enabled">Enable notifications</string>
     <string name="pref_not_threshold">Threshold</string>
     <string name="pref_not_threshold_desc">Will notify when at least %d reviews are pending</string>
@@ -23,7 +24,9 @@
     <string name="pref_refresh_timeout">Refresh interval</string>
     <string name="pref_refresh_descr">Data will be refreshed every %d minutes</string>
 	<string name="pref_refresh_one_min_descr">Data will be refreshed every minute</string>
-    <string name="pref_userkey_descr">Copy here the "Public API Key" from your Account Settings page</string>
+	<string name="pref_error_popup">Auto popup</string>
+	<string name="pref_error_popup_descr">Open info popup automatically after entering a wrong answer</string>
+	<string name="pref_userkey_descr">Copy here the "Public API Key" from your Account Settings page</string>
     <string name="pref_userkey">User API Key</string>    
     <string name="pref_keyboard">Reviews kbd</string>
     <string name="pref_keyboard_desc">Select keyboard type used while reviewing</string>
