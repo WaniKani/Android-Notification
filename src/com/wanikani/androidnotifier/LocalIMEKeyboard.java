@@ -103,17 +103,15 @@ public class LocalIMEKeyboard implements Keyboard {
 	     * but that's safe because the IME won't ask for a replacement any more.
 	     */
 	    @Override
-	    public void afterTextChanged (Editable s)
+	    public void afterTextChanged (Editable et)
 	    {
 	    	JapaneseIME.Replacement repl;
-	    	Editable et;
 	    	int pos;
 	    	
 	    	if (!translate)
 	    		return;
 	    	
 	    	pos = ew.getSelectionStart ();
-	    	et = ew.getText ();
 	    	repl = ime.replace (et.toString (), pos);
 	    	if (repl != null)
 	    		et.replace (repl.start, repl.end, repl.text);
