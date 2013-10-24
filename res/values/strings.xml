@@ -109,6 +109,8 @@
     <string name="fmt_one_day">~1 day</string>
     <string name="fmt_X_hours">%d hours</string>
     <string name="fmt_one_hour">~1 hour</string>
+    <string name="fmt_X_hours_mins">%1$d hours, %2$d minutes</string>
+    <string name="fmt_one_hour_mins">1 hour, %d minutes</string>
     
     <string name="fmt_X_minutes">%d minutes</string>
     <string name="fmt_one_minute">~1 minute</string>
@@ -163,10 +165,20 @@
     <string name="fmt_ni_minutes">%d minutes</string>
     <string name="fmt_ni_one_hour">one hour</string>
     <string name="fmt_ni_hours">%d hours</string>
+    <string name="fmt_ni_one_hour_mins">one hour, %d minutes</string>
+    <string name="fmt_ni_hours_mins">%1$d hours, %2$d minutes</string>
     <string name="fmt_ni_one_day">one day</string>
     <string name="fmt_ni_days">%d days</string>
+    <string name="fmt_ni_one_day_one_hour">one day, one hour</string>
+    <string name="fmt_ni_days_one_hour">%d days one hour</string>
+    <string name="fmt_ni_one_day_hours">one day, %d hours</string>
+    <string name="fmt_ni_days_hours">%1$d days, %2$d hours</string>
     <string name="fmt_ni_one_month">one month</string>
     <string name="fmt_ni_months">%d months</string>
+    <string name="fmt_ni_one_month_one_day">one month, one day</string>
+    <string name="fmt_ni_months_one_day">%d months, one day</string>
+    <string name="fmt_ni_one_month_days">one month, %d days</string>
+    <string name="fmt_ni_months_days">%1$d months, %2$d days</string>
     
     <string name="fmt_bd">%d days</string>
     <string name="fmt_bd_one">one day</string>

@@ -120,7 +120,7 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 			public String getInfo (Resources res, Item i)
 			{
 				Date date;
-				long now, fw;
+				long now, fw, sub;
 				
 				date = i.getAvailableDate ();
 				if (date == null)
@@ -148,24 +148,58 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 					return res.getString (R.string.fmt_ni_minutes, fw);
 				
 				/* Express fw in hours */
-				fw = Math.round (((float) fw) / 60);
-				if (fw == 1) 
-					return res.getString (R.string.fmt_ni_one_hour);
-				if (fw < 24) 
-					return res.getString (R.string.fmt_ni_hours, fw);
+				sub = fw % 60;
+				fw /= 60;
+				if (sub < 2) {
+					if (fw == 1) 
+						return res.getString (R.string.fmt_ni_one_hour);
+					if (fw < 24) 
+						return res.getString (R.string.fmt_ni_hours, fw);
+				} else {
+					if (fw == 1) 
+						return res.getString (R.string.fmt_ni_one_hour_mins, sub);
+					if (fw < 24) 
+						return res.getString (R.string.fmt_ni_hours_mins, fw, sub);					
+				}
 				
-				/* Express age in days */
-				fw = Math.round (((float) fw) / 24);
-				if (fw == 1) 
-					return res.getString (R.string.fmt_ni_one_day);
-				if (fw < 30)
-					return res.getString (R.string.fmt_ni_days, fw);
+				/* Express fw in days */
+				sub = fw % 24;
+				fw /= 24;
+				if (sub == 0) {
+					if (fw == 1) 
+						return res.getString (R.string.fmt_ni_one_day);
+					if (fw < 30)
+						return res.getString (R.string.fmt_ni_days, fw);
+				} else if (sub == 1) {
+					if (fw == 1) 
+						return res.getString (R.string.fmt_ni_one_day_one_hour);
+					if (fw < 30)
+						return res.getString (R.string.fmt_ni_days_one_hour, fw);					
+				} else {
+					if (fw == 1) 
+						return res.getString (R.string.fmt_ni_one_day_hours, sub);
+					if (fw < 30)
+						return res.getString (R.string.fmt_ni_days_hours, fw, sub);										
+				}
 
+				sub = fw % 30;
 				fw /= 30;
-				if (fw == 1) 
-					return res.getString (R.string.fmt_ni_one_month);
-				
-				return res.getString (R.string.fmt_ni_months, fw);
+				if (sub == 0) {
+					if (fw == 1) 
+						return res.getString (R.string.fmt_ni_one_month);
+					else
+						return res.getString (R.string.fmt_ni_months, fw);
+				} else if (sub == 1) {
+					if (fw == 1) 
+						return res.getString (R.string.fmt_ni_one_month_one_day);
+					else
+						return res.getString (R.string.fmt_ni_months_one_day, fw);									
+				} else {
+					if (fw == 1) 
+						return res.getString (R.string.fmt_ni_one_month_days, sub);
+					else
+						return res.getString (R.string.fmt_ni_months_days, fw, sub);					
+				}
 			}
 		},
 
