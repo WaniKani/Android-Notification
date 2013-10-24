@@ -126,7 +126,7 @@
                 android:id="@+id/hi_levels"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                custom:ticks="1"
+                custom:ticks="0"
                 custom:title="@string/ct_levels"/>
             
             <com.wanikani.androidnotifier.graph.PieChart
