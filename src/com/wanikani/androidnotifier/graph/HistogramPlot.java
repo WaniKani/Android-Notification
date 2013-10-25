@@ -716,7 +716,7 @@ public class HistogramPlot extends View {
 				height = sample.value;
 				
 				if (base > vp.yMax)
-					break;
+					;
 				else if (base + height > vp.yMax) {
 					path = new Path ();
 					path.moveTo (left, vp.getY (base));
@@ -732,8 +732,7 @@ public class HistogramPlot extends View {
 					rect.intersect (meas.plotArea);
 					canvas.drawRect (rect, pas.series.get (sample.series));
 				}
-				base += height;
-				
+				base += height;				
 			}
 		}
 		
