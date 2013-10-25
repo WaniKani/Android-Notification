@@ -142,7 +142,7 @@ public class LocalIMEKeyboard implements Keyboard {
 	     */
 	    public void translate (boolean enable)
 	    {
-	    	translate = enable;
+	    	translate = enable;	    	
 	    }
 	    
 	    /**
@@ -269,6 +269,12 @@ public class LocalIMEKeyboard implements Keyboard {
 				setClass (clazz);
 			else
 				unsetClass ();
+			
+			if (imel.translate)
+				ew.setInputType (InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
+			else
+				ew.setInputType (ewit);
+			
 			frozen = false;
 		}
 		
@@ -639,6 +645,9 @@ public class LocalIMEKeyboard implements Keyboard {
     /// Is the text box frozen because it is waiting for a class change
     boolean frozen;
     
+    /// The default input type
+    int ewit;
+    
     /**
      * Constructor
      * @param wav parent activity
@@ -667,6 +676,8 @@ public class LocalIMEKeyboard implements Keyboard {
 		ew.setGravity (Gravity.CENTER);
 		ew.setImeActionLabel (">>", EditorInfo.IME_ACTION_DONE);
 		ew.setImeOptions (EditorInfo.IME_ACTION_DONE);
+		
+		ewit = ew.getInputType ();
 		
 		qvw = (TextView) wav.findViewById (R.id.txt_question_override);
 		jtf = SettingsActivity.getJapaneseFont ();
