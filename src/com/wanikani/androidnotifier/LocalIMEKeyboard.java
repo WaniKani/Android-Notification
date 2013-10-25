@@ -20,6 +20,7 @@ import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.ViewGroup.LayoutParams;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.webkit.JavascriptInterface;
@@ -770,9 +771,7 @@ public class LocalIMEKeyboard implements Keyboard {
 		rparams.topMargin = frect.top;
 		rparams.leftMargin = frect.left;
 //		rparams.height = frect.height ();
-		rparams.width = frect.width ();
-		rparams.addRule (RelativeLayout.ALIGN_PARENT_RIGHT);
-		rparams.addRule (RelativeLayout.ALIGN_PARENT_LEFT);
+		rparams.width = LayoutParams.MATCH_PARENT;
 		divw.setLayoutParams (rparams);
 	
 		params = (LinearLayout.LayoutParams) ew.getLayoutParams ();
