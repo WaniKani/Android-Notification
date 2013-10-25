@@ -1431,45 +1431,4 @@ public class StatsFragment extends Fragment implements Tab {
 	{
 		return c == Contents.STATS;
 	}
-	
-	private static Map<Integer, Integer> getDays (HistoryDatabase.CoreStats cs,
-												  DashboardData dd, boolean remove)
-	{
-		Map<Integer, Integer> ans;
-		Integer lday, cday, days;
-		int i, minl, maxl, minv, maxv;
-		
-		lday = 0;
-		ans = new Hashtable<Integer, Integer> ();
-		for (i = 1; i <= dd.level; i++) {
-			cday = cs.levelups.get (i);
-			if (cday != null && lday != null && lday < cday)
-				ans.put (i - 1, cday - lday);
-			lday = cday;
-		}
-		
-		minl = maxl = minv = maxv = -1;			
-		for (i = 1; i < dd.level; i++) {
-			days = ans.get (i);
-			if (days != null) {
-				if (minv == -1 || days < minv) {
-					minl = i;
-					minv = days;						
-				}
-				if (maxv == -1 || days > maxv) {
-					maxl = i;
-					maxv = days;
-				}						
-			}
-		}
-		
-		if (remove) {
-			if (minl > 0)
-				ans.remove (minl);
-			if (maxl > 0)
-				ans.remove (maxl);
-		}
-			
-		return ans;
-	}
 }
