@@ -822,6 +822,7 @@ public class LocalIMEKeyboard implements Keyboard {
 		next.setLayoutParams (params);		
 
 		divw.setVisibility (View.VISIBLE);
+		divw.setBackgroundColor (Color.rgb (0xee, 0xee, 0xee));
 		
 		ew.requestFocus ();
 	}
