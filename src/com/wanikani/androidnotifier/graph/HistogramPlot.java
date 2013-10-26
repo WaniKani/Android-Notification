@@ -737,7 +737,6 @@ public class HistogramPlot extends View {
 					canvas.drawRect (rect, paint);
 					paint.setStyle (Style.STROKE);
 					canvas.drawRect (rect, paint);
-					base += height;
 				}
 				base += height;				
 			}
