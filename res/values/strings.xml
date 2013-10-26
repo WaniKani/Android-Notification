@@ -255,6 +255,7 @@
     <string name="rec_vocab_r">Loading vocab %1$d .. %2$d</string>
     <string name="rec_vocab_w">Storing vocab history</string>
     <string name="rec_end">Merging with master facts table</string>
+    <string name="rec_fixup_db">Fixing suspect levels</string>
     <string name="rec_error">Something went wrong. Check connectivity and retry</string>
     
     <string name="kbd_message_title">Did you know?</string>

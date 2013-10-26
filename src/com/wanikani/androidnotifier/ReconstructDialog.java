@@ -288,7 +288,7 @@ public class ReconstructDialog {
 				ui = conn.getUserInformation ();
 				steps = (2 * itemStepsFor (ui.level, RADICALS_CHUNK)) +   
 						(2 * itemStepsFor (ui.level, KANJI_CHUNK)) +
-						(2 * itemStepsFor (ui.level, VOCAB_CHUNK));
+						(2 * itemStepsFor (ui.level, VOCAB_CHUNK)) + 1;
 				step = 0;
 				
 				u = new Update (step++, steps, ctxt.getString (R.string.rec_start));
@@ -337,6 +337,10 @@ public class ReconstructDialog {
 				}
 
 				hdb.endReconstructing (rt);
+				
+				u = new Update (step++, steps, ctxt.getString (R.string.rec_fixup_db));
+				publishProgress (u);
+				DatabaseFixup.run (ctxt, conn);
 				
 				return hdb.getCoreStats (ui);
 				
