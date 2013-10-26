@@ -889,7 +889,9 @@ public class StatsFragment extends Fragment implements Tab {
 			chart = (HistogramChart) parent.findViewById (R.id.hi_levels);
 			chart.setData (series, bars, LEVELUP_CAP);
 			
-			chart.setVisibility (bars.isEmpty () ? View.GONE : View.VISIBLE);
+			/// chart.setVisibility (bars.isEmpty () ? View.GONE : View.VISIBLE);
+			// Need a more robust db fixup algorithm to display this (available on next branch)
+			chart.setVisibility (View.GONE);
 		}
 		
 		public boolean scrolling ()
