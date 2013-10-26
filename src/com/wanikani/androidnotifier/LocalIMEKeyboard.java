@@ -181,7 +181,9 @@ public class LocalIMEKeyboard implements Keyboard {
         	
         	if (translate)
         		s = ime.fixup (s);
-        	if (isWKIEnabled)
+        	if (!editable)
+        		wv.js (JS_ENTER);
+        	else if (isWKIEnabled)
         		wv.js (String.format (JS_INJECT_ANSWER, s) +  WaniKaniImprove.getCode ());
         	else
         		wv.js (String.format (JS_INJECT_ANSWER, s));
@@ -262,7 +264,6 @@ public class LocalIMEKeyboard implements Keyboard {
 				setClass (clazz);
 			else
 				unsetClass ();
-			frozen = false;
 		}
 		
 	}
@@ -396,7 +397,16 @@ public class LocalIMEKeyboard implements Keyboard {
 		public void hideKeyboard ()
 		{
 			new JSHideShow (false);
-		}		
+		}
+		
+		/**
+		 * Re-enables the edit box, because the event has been delivered.
+		 */
+		@JavascriptInterface ()
+		public void unfreeze ()
+		{
+			frozen = false;
+		}
 	}
 	
 	/**
@@ -482,11 +492,19 @@ public class LocalIMEKeyboard implements Keyboard {
 			"$.jStorage.stopListening (\"l/currentQuizItem\", window.wknNewQuiz);";
 	
 	/**
+	 * Clicks the "next" button. Similar to {@link #JS_INJECT_ANSWER}, but it does
+	 * not touch the user-response field 
+	 */
+	private static final String JS_ENTER =
+			"$(\"#answer-form button\").click ();" +
+			"wknJSListener.unfreeze ();";
+	
+	/**
 	 * Injects an answer into the HTML text box and clickes the "next" button.
 	 */
 	private static final String JS_INJECT_ANSWER = 
 			"$(\"#user-response\").val (\"%s\");" +
-			"$(\"#answer-form button\").click ();";
+			JS_ENTER;
 	
 	/// Parent activity
 	WebReviewActivity wav;
@@ -535,6 +553,9 @@ public class LocalIMEKeyboard implements Keyboard {
     /// Is the text box frozen because it is waiting for a class change
     boolean frozen;
     
+    /// Is the text box disabled
+    boolean editable;
+    
     /**
      * Constructor
      * @param wav parent activity
@@ -546,6 +567,8 @@ public class LocalIMEKeyboard implements Keyboard {
 		
 		this.wav = wav;
 		this.wv = wv;
+		
+		editable = true;
 		
 		imm = (InputMethodManager) wav.getSystemService (Context.INPUT_METHOD_SERVICE);
 		
@@ -733,6 +756,7 @@ public class LocalIMEKeyboard implements Keyboard {
 	 */
 	private void disable (int fg, int bg)
 	{
+		editable = false;
 		ew.setTextColor (fg);
 		ew.setBackgroundColor (bg);
 		ew.setEnabled (false);
@@ -743,6 +767,7 @@ public class LocalIMEKeyboard implements Keyboard {
 	 */
 	private void enable ()
 	{
+		editable = true;
     	ew.setText ("");
 		ew.setTextColor (Color.BLACK);
 		ew.setBackgroundColor (Color.WHITE);
