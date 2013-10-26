@@ -71,8 +71,7 @@ public class StatsFragment extends Fragment implements Tab {
 		{
 			Intent intent;
 			
-			intent = new Intent (main, OtherStatsActivity.class);
-			intent.putExtra (OtherStatsActivity.EXTRA_CACHE, main.getConnection ().cache);			
+			intent = new Intent (main, OtherStatsActivity.class);			
 			startActivity (intent);
 		}
 		
