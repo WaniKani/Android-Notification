@@ -247,7 +247,7 @@ public class HistogramPlot extends View {
 		 */
 		public void ensureFontMargin (long mm)
 		{
-			margin = Math.max (DEFAULT_MARGIN, mm + headroom);
+			margin = mm + headroom;
 			updateSize (viewArea);
 		}
 		
