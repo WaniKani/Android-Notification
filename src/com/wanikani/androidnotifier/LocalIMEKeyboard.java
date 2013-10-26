@@ -905,7 +905,7 @@ public class LocalIMEKeyboard implements Keyboard {
 	{
 		ew.setTextColor (fg);
 		ew.setBackgroundColor (bg);
-		ew.setEnabled (false);
+		ew.setCursorVisible (false);
 	}
 
 	/**
@@ -916,7 +916,7 @@ public class LocalIMEKeyboard implements Keyboard {
     	ew.setText ("");
 		ew.setTextColor (Color.BLACK);
 		ew.setBackgroundColor (Color.WHITE);
-		ew.setEnabled (true);
+		ew.setCursorVisible (true);
 
 		imm.showSoftInput (ew, 0);
 		ew.requestFocus ();
