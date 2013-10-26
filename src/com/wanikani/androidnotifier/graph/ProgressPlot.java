@@ -285,7 +285,7 @@ public class ProgressPlot extends View {
 			fillSectionPath (ds, orect);
 			
 			ds.fpaint = new Paint ();
-			ds.fpaint.setStyle (Style.FILL);
+			ds.fpaint.setStyle (Style.FILL_AND_STROKE);
 			ds.fpaint.setColor (ds.color);
 			ds.fpaint.setAntiAlias (true);
 			
@@ -293,8 +293,7 @@ public class ProgressPlot extends View {
 			ds.spaint.setStyle (Style.FILL_AND_STROKE);
 			ds.spaint.setColor (shadow (ds.color));
 			ds.spaint.setAntiAlias (true);			
-			
-			
+						
 			rect.left = rect.right;
 		}
 
