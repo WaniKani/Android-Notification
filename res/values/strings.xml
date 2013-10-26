@@ -9,7 +9,7 @@
     <string name="new_lesson">You can unlock one item</string>
     <string name="tpref_notifications">Notifications</string>
     <string name="tpref_dashboard">Dashboard</string>
-    <string name="tpref_reviews">Rev"res/values/strings.xml"iews</string>
+    <string name="tpref_reviews">Reviews</string>
     <string name="tpref_export">Export</string>
     <string name="tpref_review_enhancements">Userscripts and enhancements</string>
     <string name="pref_enabled">Enable notifications</string>
