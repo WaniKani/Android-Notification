@@ -13,6 +13,7 @@ import android.graphics.Color;
 import android.graphics.DashPathEffect;
 import android.graphics.Paint;
 import android.graphics.Paint.FontMetrics;
+import android.graphics.Paint.Style;
 import android.graphics.Path;
 import android.graphics.RectF;
 import android.support.v4.view.ViewCompat;
@@ -706,6 +707,7 @@ public class HistogramPlot extends View {
 		long base, height;
 		float top, tbl;
 		Paint lpaint;
+		Paint paint;
 		Path path;
 		RectF rect;
 		
@@ -730,7 +732,12 @@ public class HistogramPlot extends View {
 				} else {				
 					rect = new RectF (left, vp.getY (base + height), right, vp.getY (base));
 					rect.intersect (meas.plotArea);
-					canvas.drawRect (rect, pas.series.get (sample.series));
+					paint = pas.series.get (sample.series);
+					paint.setStyle (Style.FILL);
+					canvas.drawRect (rect, paint);
+					paint.setStyle (Style.STROKE);
+					canvas.drawRect (rect, paint);
+					base += height;
 				}
 				base += height;				
 			}
