@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.text.Html;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -164,13 +165,30 @@ public class HistogramChart extends LinearLayout {
 	
 	/**
 	 * Shows an alert message
+	 * @param msg the message
+	 * @param ocl the listener which receives an event when clicked
+	 */
+	public void alert (String msg, View.OnClickListener ocl)
+	{
+		alertPanel.setVisibility (View.VISIBLE);
+		alertMessage.setText (Html.fromHtml ("<font color=\"blue\"><ul>" + msg + "</u></font>"));
+		alertMessage.setClickable (true);
+		alertMessage.setOnClickListener (ocl);
+	}
+	
+	/**
+	 * Shows an alert message
+	 * @param msg the message
 	 */
 	public void alert (String msg)
 	{
-		spinner.setVisibility (View.GONE);
-		plot.setVisibility (View.GONE);
-		legend.setVisibility (View.GONE);
 		alertPanel.setVisibility (View.VISIBLE);
 		alertMessage.setText (msg);
+		alertMessage.setClickable (false);
+	}
+
+	public void hideAlert ()
+	{
+		alertPanel.setVisibility (View.GONE);
 	}
 }

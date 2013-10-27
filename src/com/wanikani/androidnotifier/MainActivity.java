@@ -72,7 +72,6 @@ import com.wanikani.wklib.UserLogin;
  * retrieval, since all the core tasks are implemented at fragment level.
  */
 public class MainActivity extends FragmentActivity implements Runnable {
-		
 	
 	/**
 	 * The pager model. It also broadcasts requests to all the
@@ -432,7 +431,29 @@ public class MainActivity extends FragmentActivity implements Runnable {
 				refreshComplete (dd, false);
 		}		
 	}
+	
+	private class DBFixupListener implements DatabaseFixup.Listener {
+		
+		@Override
+		public void done (boolean ok)
+		{
+			setDBFixup (ok ? FixupState.DONE : FixupState.FAILED);
+		}
+		
+	}
 
+	enum FixupState {
+		
+		NOT_RUNNING,
+		
+		RUNNING,
+		
+		DONE,
+		
+		FAILED
+		
+	}
+	
 	/**
 	 * The listener attached to the lessons tip message.
 	 * When the user taps the ok button, we write on the property
@@ -473,6 +494,12 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	 * The key stored into the bundle to keep track of refresh operations
 	 */
 	private static final String REFRESHING = PREFIX + "refreshing";
+	
+	/**
+	 * The key stored into the bundle to keep track of db fixup operations
+	 */
+	private static final String FIXUP_STATE = PREFIX + "fixup_state";
+	
 
 	/** The broadcast receiver that handles all the actions */
 	private Receiver receiver;
@@ -523,6 +550,9 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	/** Was the last instance of this activity refreshing before being destroyed? */
 	boolean resumeRefresh;
 	
+	/** Are we fixing the db up? */
+	FixupState dbfixup;
+	
 	/** An action that should be invoked to force refresh. This is used typically
 	 *  when reviews complete
 	 */
@@ -556,6 +586,7 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	    receiver = new Receiver ();
 	    alarm = new Alarm ();
 	    mh = new MenuHandler (this, new MenuListener ());
+	    dbfixup = FixupState.NOT_RUNNING;
 
 	    /* Must be placed first, because fragments need this early */
 	    conn = new Connection (SettingsActivity.getLogin (this));
@@ -590,7 +621,9 @@ public class MainActivity extends FragmentActivity implements Runnable {
 				/* In case serialization fails (e.g. version mismatch during upgrade) */
 			}
 			
-			resumeRefresh = bundle.getBoolean (REFRESHING);				
+			resumeRefresh = bundle.getBoolean (REFRESHING);
+			
+			dbfixup = (FixupState) bundle.getSerializable (FIXUP_STATE);
 	    } else
 	    	pager.setCurrentItem (pad.getTabIndex (Tab.Contents.DASHBOARD), false);
 	}
@@ -712,6 +745,7 @@ public class MainActivity extends FragmentActivity implements Runnable {
 				bundle.putSerializable (ITEMS_CACHE, conn.cache);
 			bundle.putInt (CURRENT_TAB, pager.getCurrentItem ());
 			bundle.putBoolean (REFRESHING, rtask != null);
+			bundle.putSerializable (FIXUP_STATE, dbfixup);
 		}
 	}
 	
@@ -1305,5 +1339,20 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	{
 		if (!pad.backButton())
 			super.onBackPressed ();
+	}
+	
+	public void dbFixup ()
+	{
+		setDBFixup (FixupState.RUNNING);
+		
+		new DatabaseFixup (this, conn).asyncRun(new DBFixupListener ());
+	}
+	
+	private void setDBFixup (FixupState dbfixup)
+	{
+		this.dbfixup = dbfixup;
+		
+		if (statsf != null && statsf.isResumed ())
+			statsf.setFixup (dbfixup);
 	}
 }

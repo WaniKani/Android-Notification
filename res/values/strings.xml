@@ -236,6 +236,10 @@
     <string name="joyoS">S</string>
     
     <string name="alert_can_fill">Reconstruct missing data</string>
+    <string name="alert_suspect_levels">You have %d suspect levels. Fix them?</string>
+    
+    <string name="db_fixup_text">Trying to fixup levels&#8230;</string>
+    <string name="db_fixup_fail">A network error occurred. Please retry</string>
     
     <string name="txt_reconstruct_title">Reconstruct Data</string>
     <string name="txt_reconstruct_intro">

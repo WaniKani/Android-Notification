@@ -60,7 +60,7 @@ import com.wanikani.wklib.SRSDistribution;
  * (we need to create and maintain a database, though).
  */
 public class StatsFragment extends Fragment implements Tab {
-
+	
 	/**
 	 * Listener of the "other stats" button. We start the other stats activity.
 	 */
@@ -843,7 +843,7 @@ public class StatsFragment extends Fragment implements Tab {
 				
 	}
 	
-	private class LevelupSource extends GenericChart {
+	private class LevelupSource extends GenericChart implements View.OnClickListener {
 
 		List<HistogramPlot.Series> series;
 		
@@ -870,7 +870,7 @@ public class StatsFragment extends Fragment implements Tab {
 			HistogramPlot.Sample sample;
 			HistogramChart chart;
 			Integer day;
-			int i;
+			int i, slups;
 			
 			bars = new Vector<HistogramPlot.Samples> ();
 			days = getDays ();
@@ -889,7 +889,20 @@ public class StatsFragment extends Fragment implements Tab {
 			chart = (HistogramChart) parent.findViewById (R.id.hi_levels);
 			chart.setData (series, bars, LEVELUP_CAP);
 			
-			chart.setVisibility (bars.isEmpty () ? View.GONE : View.VISIBLE);
+			if (!bars.isEmpty ()) {
+				chart.setVisibility (View.VISIBLE);			
+				slups = DatabaseFixup.getSuspectLevels (main, dd.level, cs);
+				if (slups > 0)
+					chart.alert (getResources ().getString (R.string.alert_suspect_levels, slups), this);
+			} else
+				chart.setVisibility (View.GONE);
+		}
+		
+		@Override
+		public void onClick (View view)
+		{
+			if (isVisible())
+				main.dbFixup ();
 		}
 		
 		public boolean scrolling ()
@@ -939,6 +952,9 @@ public class StatsFragment extends Fragment implements Tab {
 	
 	/// The object that listens for reconstruction events
 	ReconstructListener rlist;
+		
+	/// Level source
+	LevelupSource levels;
 	
 	/**
 	 * Constructor
@@ -1039,7 +1055,7 @@ public class StatsFragment extends Fragment implements Tab {
 		attach (R.id.ty_vocab, vocabds);
 	
 		gcharts.add (new LevelEstimates ());
-		gcharts.add (new LevelupSource ());
+		gcharts.add (levels = new LevelupSource ());
 		
 		if (cs != null)
 			setCoreStats (cs);
@@ -1077,6 +1093,33 @@ public class StatsFragment extends Fragment implements Tab {
 		super.onResume ();
 		
 		refreshComplete (main.getDashboardData ());
+		setFixup (main.dbfixup);
+	}
+	
+	public void setFixup (MainActivity.FixupState state)
+	{
+		HistogramChart hc;
+		Resources res;
+		
+		res = getResources ();
+		hc = (HistogramChart) parent.findViewById (R.id.hi_levels);
+		switch (state) {
+		case NOT_RUNNING:
+			break;
+			
+		case RUNNING:
+			hc.alert (res.getString (R.string.db_fixup_text));
+			break;
+		
+		case FAILED:
+			if (levels != null)
+				hc.alert (res.getString (R.string.db_fixup_fail), levels);
+			break;
+			
+		case DONE:
+			hc.hideAlert ();
+			new GetCoreStatsTask (main, main.getConnection ()).execute ();
+		}
 	}
 	
 	@Override

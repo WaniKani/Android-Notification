@@ -306,14 +306,6 @@ public class NotificationService
 			return false;
 		}
 		
-		try {
-			DatabaseFixup.run (this, conn);
-		} catch (IOException e) {
-			/* Ignore, will fix it another time */
-		} catch (SQLException e) {
-			/* Ignore, will fix it another time */
-		}
-		
 		return true;
 	}
 	
