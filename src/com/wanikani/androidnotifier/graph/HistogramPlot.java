@@ -247,7 +247,7 @@ public class HistogramPlot extends View {
 		 */
 		public void ensureFontMargin (long mm)
 		{
-			margin = Math.max (DEFAULT_MARGIN, mm + headroom);
+			margin = mm + headroom;
 			updateSize (viewArea);
 		}
 		
@@ -269,6 +269,12 @@ public class HistogramPlot extends View {
 		/// Paint used to draw labels
 		Paint labelPaint;
 		
+		/// Paint used to draw total amount
+		Paint levelupPaint;
+		
+		/// Paint used to draw total amount, when drawn inside the bar
+		Paint levelupPaintInside;
+
 		/// Series to paint map
 		Map<Series, Paint> series;
 		
@@ -293,6 +299,18 @@ public class HistogramPlot extends View {
 			gridPaint.setColor (Color.BLACK);
 			gridPaint.setPathEffect (new DashPathEffect (points, 0));
 			
+			levelupPaint = new Paint ();
+			levelupPaint.setColor (res.getColor (R.color.levelup));
+			levelupPaint.setTextAlign (Paint.Align.CENTER);
+			levelupPaint.setTextSize ((int) meas.dateLabelFontSize);
+			levelupPaint.setAntiAlias (true);
+			
+			levelupPaintInside = new Paint ();
+			levelupPaintInside.setColor (Color.WHITE);
+			levelupPaintInside.setTextAlign (Paint.Align.CENTER);
+			levelupPaintInside.setTextSize ((int) meas.dateLabelFontSize);
+			levelupPaintInside.setAntiAlias (true);
+
 			labelPaint = new Paint ();
 			labelPaint.setColor (Color.BLACK);
 			labelPaint.setTextAlign (Paint.Align.CENTER);
@@ -301,7 +319,7 @@ public class HistogramPlot extends View {
 			meas.updateLabelPaint (labelPaint);
 			
 			fm = labelPaint.getFontMetrics ();
-			meas.ensureFontMargin ((int) (fm.bottom - fm.ascent));
+			meas.ensureFontMargin ((int) (fm.bottom - fm.ascent));			
 			
 			series = new Hashtable<Series, Paint> ();
 		}		
@@ -673,18 +691,22 @@ public class HistogramPlot extends View {
 
 			drawBar (canvas, bar, left, right);
 			
-			canvas.drawText (bar.tag, (left + right) / 2, tagLabelBaseline, pas.labelPaint);							
+			canvas.drawText (bar.tag, (left + right) / 2, tagLabelBaseline, pas.labelPaint);
 		}
 		
-		for (d = meas.yaxisGrid; vp.getY (d) >= meas.plotArea.top; d += meas.yaxisGrid)
-			canvas.drawLine (meas.plotArea.left, vp.getY (d), 
-							 meas.plotArea.right, vp.getY (d), pas.gridPaint);
+		if (meas.yaxisGrid > 0) {
+			for (d = meas.yaxisGrid; vp.getY (d) >= meas.plotArea.top; d += meas.yaxisGrid) {
+				canvas.drawLine (meas.plotArea.left, vp.getY (d), 
+							 	meas.plotArea.right, vp.getY (d), pas.gridPaint);
+			}
+		}
 	}
 	
 	protected void drawBar (Canvas canvas, Samples bar, float left, float right)
 	{
 		long base, height;
-		float top;
+		float top, tbl;
+		Paint lpaint;
 		Paint paint;
 		Path path;
 		RectF rect;
@@ -696,7 +718,7 @@ public class HistogramPlot extends View {
 				height = sample.value;
 				
 				if (base > vp.yMax)
-					break;
+					;
 				else if (base + height > vp.yMax) {
 					path = new Path ();
 					path.moveTo (left, vp.getY (base));
@@ -715,10 +737,20 @@ public class HistogramPlot extends View {
 					canvas.drawRect (rect, paint);
 					paint.setStyle (Style.STROKE);
 					canvas.drawRect (rect, paint);
-					base += height;
 				}
+				base += height;				
 			}
 		}
+		
+		if (base <= vp.yMax) {
+			lpaint = pas.levelupPaint;
+			tbl = vp.getY (base) - meas.headroom / 2;
+		} else {
+			lpaint = pas.levelupPaintInside; 
+			tbl = vp.getY (vp.yMax) + meas.margin;
+		}
+			
+		canvas.drawText (Long.toString (base), (left + right) / 2, tbl, lpaint);
 	}
 	
 	/**

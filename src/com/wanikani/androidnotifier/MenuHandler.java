@@ -92,6 +92,14 @@ public class MenuHandler {
 		{
 			/* empty */
 		}
+		
+		/**
+		 * Toggle override fonts
+		 */
+		public void fonts ()
+		{
+			/* empty */
+		}
 	}
 	
 	/**
@@ -174,6 +182,10 @@ public class MenuHandler {
 			
 		case R.id.em_ignore:
 			listener.ignore ();
+			break;
+			
+		case R.id.em_fonts:
+			listener.fonts ();
 			break;
 			
 		default:

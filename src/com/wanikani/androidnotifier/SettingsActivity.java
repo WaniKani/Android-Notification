@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.preference.EditTextPreference;
 import android.preference.Preference;
@@ -78,6 +79,10 @@ public class SettingsActivity
 	private static final String KEY_PREF_IGNORE_BUTTON = "pref_ignore_button";
 	/** WaniKani improve */
 	private static final String KEY_PREF_WANIKANI_IMPROVE = "pref_wanikani_improve";
+	/** Review Order */
+	private static final String KEY_PREF_REVIEW_ORDER = "pref_review_order";
+	/** Info popup */
+	private static final String KEY_PREF_ERROR_POPUP = "pref_error_popup";
 	/** Enable 42+ mode. Must match preferences.xml */
 	private static final String KEY_PREF_42PLUS = "pref_42plus";
 	/** Wanikani review URL */
@@ -153,6 +158,9 @@ public class SettingsActivity
 	/** Extra key in the intent {@link #ACT_CREDENTIALS} and {@link #ACT_NOTIFY} action, 
 	 * containing the notifications enabled state  */
 	public static final String E_ENABLED = "enabled";
+	
+	/// The japanese typeface path
+	private static final String JAPANESE_TYPEFACE_FONT = "/system/fonts/MTLmr3m.ttf";
 	
 	/** 
 	 * Called when the activity is first created. We setup the menu, basing on the  
@@ -310,6 +318,12 @@ public class SettingsActivity
 		pref.setEnabled (getUseIntegratedBrowser (prefs));
 
 		pref = findPreference (KEY_PREF_WANIKANI_IMPROVE);
+		pref.setEnabled (getUseIntegratedBrowser (prefs));
+
+		pref = findPreference (KEY_PREF_REVIEW_ORDER);
+		pref.setEnabled (getUseIntegratedBrowser (prefs));
+
+		pref = findPreference (KEY_PREF_ERROR_POPUP);
 		pref.setEnabled (getUseIntegratedBrowser (prefs));
 
 		runShowKeyboardHooks (prefs);
@@ -486,6 +500,16 @@ public class SettingsActivity
 		return prefs (ctxt).getBoolean (KEY_PREF_WANIKANI_IMPROVE, false);
 	}
 	
+	public static boolean getReviewOrder (Context ctxt)
+	{
+		return prefs (ctxt).getBoolean (KEY_PREF_REVIEW_ORDER, false);
+	}
+
+	public static boolean getErrorPopup (Context ctxt)
+	{
+		return prefs (ctxt).getBoolean (KEY_PREF_ERROR_POPUP, false);
+	}
+
 	public static boolean getShowMute (Context ctxt)
 	{
 		return prefs (ctxt).getBoolean (KEY_PREF_SHOW_MUTE, true);
@@ -742,4 +766,15 @@ public class SettingsActivity
 			sendBroadcast (i);
 		}
 	}
+	
+	public static Typeface getJapaneseFont ()
+	{
+		try {
+			return Typeface.createFromFile (JAPANESE_TYPEFACE_FONT);
+		} catch (Exception e) {
+			return null;
+		}
+	}
 }
+
+

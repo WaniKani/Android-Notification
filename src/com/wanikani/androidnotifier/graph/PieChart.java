@@ -39,6 +39,23 @@ import com.wanikani.androidnotifier.graph.PiePlot.DataSet;
  */
 public class PieChart extends LinearLayout {
 
+	/**
+	 * A dataset that is not displayed. 
+	 */
+	public static class InfoSet extends DataSet {
+		
+		/**
+		 * Constructor.
+		 * @param description the legend description
+		 * @param value the value
+		 */
+		public InfoSet (String description, float value)
+		{
+			super (description, -1, value);
+		}
+		
+	}
+
 	/// The inflater
 	LayoutInflater inflater;
 	
@@ -108,8 +125,9 @@ public class PieChart extends LinearLayout {
 	/**
 	 * Updates the plot with fresh data. Stops the spinner, if shown.
 	 * @param dsets the data
+	 * @param infosets additional info not to be drawn
 	 */
-	public void setData (List<DataSet> dsets)
+	public void setData (List<DataSet> dsets, List<InfoSet> infosets)
 	{
 		LinearLayout item;		
 		
@@ -119,9 +137,19 @@ public class PieChart extends LinearLayout {
 		for (DataSet ds : dsets) {
 			if (ds.value > 0) {
 				item = (LinearLayout) inflater.inflate (R.layout.legend, null); 
-				customizeItem (item, ds);
+				customizeItem (item, ds, true);
 				legend.addView (item);
 			}
+		}
+		
+		if (infosets != null && !infosets.isEmpty ()) {
+			for (DataSet ds : infosets) {
+				if (ds.value > 0) {
+					item = (LinearLayout) inflater.inflate (R.layout.legend, null); 
+					customizeItem (item, ds, false);
+					legend.addView (item);
+				}
+			}			
 		}
 		
 		spin (false);
@@ -131,14 +159,18 @@ public class PieChart extends LinearLayout {
 	 * Fills a new legend item.
 	 * @param item the item to fill
 	 * @param ds the dataset the item shall describe
+	 * @param color if set, add a palette
 	 */
 	@SuppressWarnings ("deprecation")
-	protected void customizeItem (LinearLayout item, DataSet ds)
+	protected void customizeItem (LinearLayout item, DataSet ds, boolean color)
 	{
 		Drawable tag;
 		
-		tag = new ColorDrawable (ds.color);
-		item.findViewById (R.id.leg_color).setBackgroundDrawable (tag);
+		if (color) {
+			tag = new ColorDrawable (ds.color);
+			item.findViewById (R.id.leg_color).setBackgroundDrawable (tag);
+		} else
+			item.findViewById (R.id.leg_color).setVisibility (View.GONE);
 		((TextView) item.findViewById (R.id.leg_description)).
 			setText (ds.description);
 		((TextView) item.findViewById (R.id.leg_value)).

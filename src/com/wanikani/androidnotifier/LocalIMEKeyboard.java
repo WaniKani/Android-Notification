@@ -1,12 +1,17 @@
 package com.wanikani.androidnotifier;
 
+import java.util.EnumMap;
+
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Rect;
+import android.graphics.Typeface;
+import android.preference.PreferenceManager;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
@@ -15,6 +20,7 @@ import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.ViewGroup.LayoutParams;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.webkit.JavascriptInterface;
@@ -26,6 +32,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 
+import com.wanikani.wklib.Item;
 import com.wanikani.wklib.JapaneseIME;
 
 /* 
@@ -135,7 +142,7 @@ public class LocalIMEKeyboard implements Keyboard {
 	     */
 	    public void translate (boolean enable)
 	    {
-	    	translate = enable;
+	    	translate = enable;	    	
 	    }
 	    
 	    /**
@@ -264,6 +271,11 @@ public class LocalIMEKeyboard implements Keyboard {
 				setClass (clazz);
 			else
 				unsetClass ();
+			
+			if (imel.translate)
+				ew.setInputType (InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
+			else
+				ew.setInputType (ewit);
 		}
 		
 	}
@@ -310,6 +322,32 @@ public class LocalIMEKeyboard implements Keyboard {
 		}
 	}
 	
+	private class JSListenerShowQuestion implements Runnable {
+		
+		Item.Type type;
+		
+		String name;
+		
+		Rect rect;
+		
+		int size;
+		
+		public JSListenerShowQuestion (Item.Type type, String name, Rect rect, int size)
+		{
+			this.type = type;
+			this.name = name;
+			this.rect = rect;
+			this.size = size;
+			
+			wav.runOnUiThread (this);
+		}
+		
+		public void run ()
+		{
+			showQuestion (type, name, rect, size);
+		}
+	}
+
 	/**
 	 * A JS bridge that handles the answer text-box events. 
 	 */
@@ -352,7 +390,46 @@ public class LocalIMEKeyboard implements Keyboard {
 		public void newQuestion (String qtype)
 		{
 			imel.translate (qtype.equals ("reading"));			
-			new JSListenerSetClass ();
+			new JSListenerSetClass ();			
+		}
+
+		@JavascriptInterface
+		public void overrideQuestion (String radical, String kanji, String vocab, 
+								 	  int left, int top, int right, int bottom, String size)
+		{
+			Item.Type type;
+			String name;
+			int xsize;
+			
+			left = (int) TypedValue.applyDimension (TypedValue.COMPLEX_UNIT_DIP, left, dm);
+			right = (int) TypedValue.applyDimension (TypedValue.COMPLEX_UNIT_DIP, right, dm);
+			top = (int) TypedValue.applyDimension (TypedValue.COMPLEX_UNIT_DIP, top, dm);
+			bottom = (int) TypedValue.applyDimension (TypedValue.COMPLEX_UNIT_DIP, bottom, dm);
+			
+			if (radical != null) {
+				type = Item.Type.RADICAL;
+				name = radical;
+			} else if (kanji != null) {
+				type = Item.Type.KANJI;
+				name = kanji;
+			} else if (vocab != null) {
+				type = Item.Type.VOCABULARY;
+				name = vocab;
+			} else {
+				type = null;
+				name = null;
+			}
+			
+			try {
+				if (size.endsWith ("px"))
+					xsize = Integer.parseInt (size.substring (0, size.length () - 2));
+				else
+					xsize = 0;
+			} catch (NumberFormatException e) {
+				xsize = 0;
+			}
+			
+			new JSListenerShowQuestion (type, name, new Rect (left, top, right, bottom), xsize);
 		}
 		
 		/**
@@ -424,15 +501,29 @@ public class LocalIMEKeyboard implements Keyboard {
 			"   wknJSListener.replace (frect.left, frect.top, frect.right, frect.bottom," +
 			"						   trect.left, trect.top, brect.left, trect.bottom);" +
 			"};" +
+			"window.wknOverrideQuestion = function () {" +
+			"   var item, question, rect, style;" +
+			"   item = $.jStorage.get (\"currentItem\");" +
+			"   question = document.getElementById (\"character\");" +
+			"   question = question.getElementsByTagName (\"span\") [0];" +
+			"   rect = question.getBoundingClientRect ();" +
+			"   style = window.getComputedStyle (question, null);" +
+			"   wknJSListener.overrideQuestion (item.rad ? item.rad : null," +
+			"							        item.kan ? item.kan : null," +
+			"							        item.voc ? item.voc : null, " +
+			"							        rect.left, rect.top, rect.right, rect.bottom," +
+			"							        style.getPropertyValue(\"font-size\"));" +			
+			"};" +
 			"window.wknNewQuestion = function (entry, type) {" +
 			"   var qtype, e;" +
 			"   qtype = $.jStorage.get (\"questionType\");" +
 			"   window.wknReplace ();" +
+			"   window.wknOverrideQuestion ();" +
 			"   if ($(\"#character\").hasClass (\"vocabulary\")) {" +
 			"        e = $(\"#character span\");" +
 			"        e.text (e.text ().replace (/〜/g, \"~\")); " +
 			"   }" +
-			"   wknJSListener.newQuestion (qtype);" +			
+			"   wknJSListener.newQuestion (qtype);" +
 			"};" +
 			"$.jStorage.listenKeyChange (\"currentItem\", window.wknNewQuestion);" +
 			"var oldAddClass = jQuery.fn.addClass;" +
@@ -506,6 +597,12 @@ public class LocalIMEKeyboard implements Keyboard {
 			"$(\"#user-response\").val (\"%s\");" +
 			JS_ENTER;
 	
+	private static final String JS_OVERRIDE =
+			"window.wknOverrideQuestion ();";
+	
+	private static final String JS_INFO_POPUP =
+			"$('#option-item-info span').click()";
+	
 	/// Parent activity
 	WebReviewActivity wav;
 	
@@ -527,6 +624,9 @@ public class LocalIMEKeyboard implements Keyboard {
     /// The edit text
     EditText ew;
     
+    /// The question
+    TextView qvw;
+    
     /// The handler of all the ime events
     IMEListener imel;
     
@@ -543,16 +643,28 @@ public class LocalIMEKeyboard implements Keyboard {
     
     int correctBG, incorrectBG, ignoredBG;
     
+    EnumMap<Item.Type, Integer> cmap;
+    
     WaniKaniImprove wki;
     
     boolean isWKIEnabled;
     
+    private static final String PREFIX = LocalIMEKeyboard.class + ".";
+    
+    private static final String PREF_FONT_OVERRIDE = PREFIX + "PREF_FONT_OVERRIDE";
+    
     /// Set if the ignore button must be shown, because the answer is incorrect
     boolean canIgnore;
     
+    /// The japanese typeface font, if available
+    Typeface jtf;
+
     /// Is the text box frozen because it is waiting for a class change
     boolean frozen;
     
+    /// The default input type
+    int ewit;
+
     /// Is the text box disabled
     boolean editable;
     
@@ -563,7 +675,7 @@ public class LocalIMEKeyboard implements Keyboard {
      */
 	public LocalIMEKeyboard (WebReviewActivity wav, FocusWebView wv)
 	{
-		Resources res;
+		Resources res;		
 		
 		this.wav = wav;
 		this.wv = wv;
@@ -587,6 +699,13 @@ public class LocalIMEKeyboard implements Keyboard {
 		ew.setImeActionLabel (">>", EditorInfo.IME_ACTION_DONE);
 		ew.setImeOptions (EditorInfo.IME_ACTION_DONE);
 		
+		ewit = ew.getInputType ();
+		
+		qvw = (TextView) wav.findViewById (R.id.txt_question_override);
+		jtf = SettingsActivity.getJapaneseFont ();
+		if (jtf != null)
+			qvw.setTypeface (jtf);			
+		
 		next = (Button) wav.findViewById (R.id.ime_next);
 		next.setOnClickListener (imel);
 		
@@ -604,6 +723,11 @@ public class LocalIMEKeyboard implements Keyboard {
 		correctBG = res.getColor (R.color.correctbg);
 		incorrectBG = res.getColor (R.color.incorrectbg);
 		ignoredBG = res.getColor (R.color.ignoredbg);
+		
+		cmap = new EnumMap<Item.Type, Integer> (Item.Type.class);
+		cmap.put (Item.Type.RADICAL, res.getColor (R.color.radical));
+		cmap.put (Item.Type.KANJI, res.getColor (R.color.kanji));
+		cmap.put (Item.Type.VOCABULARY, res.getColor (R.color.vocabulary));
 	}	
 	
 	/**
@@ -615,6 +739,9 @@ public class LocalIMEKeyboard implements Keyboard {
 	public void show (boolean hasEnter)
 	{
 		wv.js (JS_INIT_TRIGGERS);
+		if (SettingsActivity.getReviewOrder (wav))
+			wv.js (ReviewOrder.JS_CODE);
+		
 		isWKIEnabled = SettingsActivity.getWaniKaniImprove (wav); 
 		if (isWKIEnabled)
 			wki.initPage ();
@@ -645,8 +772,11 @@ public class LocalIMEKeyboard implements Keyboard {
 		imm.hideSoftInputFromWindow (ew.getWindowToken (), 0);
 		wv.js (JS_STOP_TRIGGERS);
 		divw.setVisibility (View.GONE);
+		qvw.setVisibility (View.GONE);
 		if (isWKIEnabled)
 			wki.uninitPage ();
+		if (SettingsActivity.getReviewOrder (wav))
+			wv.js (ReviewOrder.JS_UNINIT_CODE);
 	}
 
 	/**
@@ -674,9 +804,7 @@ public class LocalIMEKeyboard implements Keyboard {
 		rparams.topMargin = frect.top;
 		rparams.leftMargin = frect.left;
 //		rparams.height = frect.height ();
-		rparams.width = frect.width ();
-		rparams.addRule (RelativeLayout.ALIGN_PARENT_RIGHT);
-		rparams.addRule (RelativeLayout.ALIGN_PARENT_LEFT);
+		rparams.width = LayoutParams.MATCH_PARENT;
 		divw.setLayoutParams (rparams);
 	
 		params = (LinearLayout.LayoutParams) ew.getLayoutParams ();
@@ -694,8 +822,35 @@ public class LocalIMEKeyboard implements Keyboard {
 		next.setLayoutParams (params);		
 
 		divw.setVisibility (View.VISIBLE);
+		divw.setBackgroundColor (Color.rgb (0xee, 0xee, 0xee));
 		
 		ew.requestFocus ();
+	}
+	
+	protected void showQuestion (Item.Type type, String name, Rect rect, int size)
+	{
+		RelativeLayout.LayoutParams params;
+
+		if (!overrideFont ())
+			return;
+		
+		params = (RelativeLayout.LayoutParams) qvw.getLayoutParams ();
+		params.topMargin = rect.top - 5;
+		params.leftMargin = rect.left - 5;
+		params.height = rect.height () + 10;
+		params.width = rect.width () + 10;
+		params.addRule (RelativeLayout.CENTER_HORIZONTAL);
+		qvw.setLayoutParams (params);
+		
+		if (type == Item.Type.KANJI ||
+			type == Item.Type.VOCABULARY) {
+			qvw.setVisibility (View.VISIBLE);
+			qvw.setTextSize (size);
+			qvw.setBackgroundColor (cmap.get (type));
+			qvw.setTextColor (Color.WHITE);
+			qvw.setText (name);
+		} else
+			qvw.setVisibility (View.GONE);					
 	}
 	
 	/**
@@ -710,6 +865,10 @@ public class LocalIMEKeyboard implements Keyboard {
 		rparams = (RelativeLayout.LayoutParams) divw.getLayoutParams ();
 		rparams.topMargin -= dy;
 		divw.setLayoutParams (rparams);
+		
+		rparams = (RelativeLayout.LayoutParams) qvw.getLayoutParams ();
+		rparams.topMargin -= dy;
+		qvw.setLayoutParams (rparams);
 	}
 	
 	/**
@@ -722,6 +881,8 @@ public class LocalIMEKeyboard implements Keyboard {
 			enableIgnoreButton (false);
 			disable (correctFG, correctBG);
 		} else if (clazz.equals ("incorrect")) {
+			if (SettingsActivity.getErrorPopup (wav))
+				errorPopup ();
 			enableIgnoreButton (true);
 			disable (incorrectFG, incorrectBG);
 		} else if (clazz.equals ("WKO_ignored")) {
@@ -729,6 +890,15 @@ public class LocalIMEKeyboard implements Keyboard {
 			disable (ignoredFG, ignoredBG);
 		}
 			
+	}
+	
+	/**
+	 * Show the info popup
+	 */
+	protected void errorPopup ()
+	{
+		imm.hideSoftInputFromWindow (ew.getWindowToken (), 0);		
+		wv.js (JS_INFO_POPUP);
 	}
 	
 	/**
@@ -759,7 +929,7 @@ public class LocalIMEKeyboard implements Keyboard {
 		editable = false;
 		ew.setTextColor (fg);
 		ew.setBackgroundColor (bg);
-		ew.setEnabled (false);
+		ew.setCursorVisible (false);
 	}
 
 	/**
@@ -771,7 +941,7 @@ public class LocalIMEKeyboard implements Keyboard {
     	ew.setText ("");
 		ew.setTextColor (Color.BLACK);
 		ew.setBackgroundColor (Color.WHITE);
-		ew.setEnabled (true);
+		ew.setCursorVisible (true);
 
 		imm.showSoftInput (ew, 0);
 		ew.requestFocus ();
@@ -819,4 +989,40 @@ public class LocalIMEKeyboard implements Keyboard {
 		return "if (document.getElementById (\"quiz\") == null) {" + js + "}";
 	}
 	
+	protected boolean overrideFont ()
+	{
+		SharedPreferences prefs;
+
+		prefs = PreferenceManager.getDefaultSharedPreferences (wav);
+		
+		return prefs.getBoolean (PREF_FONT_OVERRIDE, false);
+	}
+	
+	protected boolean toggleFontOverride ()
+	{
+		SharedPreferences prefs;
+		boolean ans;
+
+		prefs = PreferenceManager.getDefaultSharedPreferences (wav);
+		ans = !prefs.getBoolean (PREF_FONT_OVERRIDE, false);
+		prefs.edit ().putBoolean (PREF_FONT_OVERRIDE, ans).commit ();
+		
+		return ans;
+	}
+
+	@Override
+	public boolean canOverrideFonts ()
+	{
+		return jtf != null;
+	}
+	
+	@Override
+	public void overrideFonts ()
+	{
+		if (toggleFontOverride ())
+			wv.js (JS_OVERRIDE);
+		else
+			qvw.setVisibility (View.GONE);
+	}
+
 }

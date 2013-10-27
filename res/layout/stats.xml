@@ -59,14 +59,14 @@
     		        android:orientation="horizontal">
         			<TextView
 	        		    android:id="@+id/tag_eta_avg"
-        		    	style="@style/LegendValue"
+        		    	style="@style/Estimates"
         		    	android:layout_weight="1"
         		    	android:layout_width="0dip"
         		    	android:layout_height="wrap_content"
         		    	android:text="@string/tag_eta_avg"/>"
         			<TextView
 	        		    android:id="@+id/tv_eta_avg"
-        		    	style="@style/LegendValue"
+        		    	style="@style/Estimates"
         		    	android:layout_width="wrap_content"
         		    	android:layout_height="wrap_content" />    		        		      
         		</LinearLayout>
@@ -77,14 +77,14 @@
     		        android:orientation="horizontal">
         			<TextView
 	        		    android:id="@+id/tag_eta_next"
-        		    	style="@style/LegendValue"
+        		    	style="@style/Estimates"
         		    	android:layout_weight="1"
         		    	android:layout_width="0dip"
         		    	android:layout_height="wrap_content"
         		    	android:text="@string/tag_eta_next_future" />    		        		      
         			<TextView
 	        		    android:id="@+id/tv_eta_next"
-        		    	style="@style/LegendValue"
+        		    	style="@style/Estimates"
         		    	android:layout_width="wrap_content"
         		    	android:layout_height="wrap_content" />    		        		      
         		</LinearLayout>
@@ -95,14 +95,14 @@
     		        android:orientation="horizontal">
         			<TextView
 	        		    android:id="@+id/tag_eta_l50"
-        		    	style="@style/LegendValue"
+        		    	style="@style/Estimates"
         		    	android:layout_weight="1"
         		    	android:layout_width="0dip"
         		    	android:layout_height="wrap_content"
         		    	android:text="@string/tag_eta_l50" />    		        		      
         			<TextView
 	        		    android:id="@+id/tv_eta_l50"
-        		    	style="@style/LegendValue"
+        		    	style="@style/Estimates"
         		    	android:layout_width="wrap_content"
         		    	android:layout_height="wrap_content" />    		        		      
         		</LinearLayout>
@@ -126,8 +126,7 @@
                 android:id="@+id/hi_levels"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                custom:ticks="1"
-                android:visibility="gone"
+                custom:ticks="0"
                 custom:title="@string/ct_levels"/>
             
             <com.wanikani.androidnotifier.graph.PieChart

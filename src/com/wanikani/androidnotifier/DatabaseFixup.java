@@ -27,7 +27,9 @@ public class DatabaseFixup {
 	
 	private static final String PREFIX = DatabaseFixup.class + ".";
 	
-	private static final String LEVEL_DONE = PREFIX + "LEVEL_DONE_";
+	private static final String DONE = PREFIX + "DONE";
+	
+	private static final int VERSION = 1;
 	
 	private DatabaseFixup (Context ctxt, Connection conn)
 	{
@@ -43,46 +45,60 @@ public class DatabaseFixup {
 		Map<Integer, Integer> levelups;
 		List<Integer> slup;
 		HistoryDatabase hdb;
+		boolean change;
+		int i;
 		
 		prefs = PreferenceManager.getDefaultSharedPreferences (ctxt);
+		if (prefs.getInt (DONE, 0) >= VERSION)
+			return;
 		
 		hdb = new HistoryDatabase (ctxt);
 		try {
 			hdb.openW ();
 			ui = conn.getUserInformation ();
 			levelups = hdb.getLevelups ();
-			slup = getSuspectLevelups (levelups, ui.level);
-			for (Integer l : slup)
-				fixLevel (hdb, ui, prefs, l);
+			for (i = 0; i < 2 * ui.level; i++) {
+				change = false;
+				slup = getSuspectLevelups (levelups, ui.level);			
+				for (Integer l : slup)
+					change |= fixLevel (hdb, ui, prefs, l, levelups);
+				if (!change)
+					break;
+			}
+			prefs.edit ().putInt (DONE, VERSION).commit ();
 		} finally {
 			hdb.close ();
 		}
 	}
 	
-	private void fixLevel (HistoryDatabase hdb, UserInformation ui, 
-						   SharedPreferences prefs, int level)
+	private boolean fixLevel (HistoryDatabase hdb, UserInformation ui, 
+							  SharedPreferences prefs, int level, 
+						      Map<Integer, Integer> levelups)
 		throws IOException, SQLException
 	{
 		ItemLibrary<Item> lib;
-		String lpref;
-		int day;
+		Integer plday;
+		int day, minday;
 		
-		lpref = LEVEL_DONE + level;
-		
-		if (prefs.getBoolean (lpref, false))
-			return;
+		plday = levelups.get (level - 1);
+		if (plday == null)
+			return false;
+		minday = plday + MIN_DAYS;
 		
 		lib = new ItemLibrary<Item> ();
 		lib.add (conn.getRadicals (level));
 		lib.add (conn.getKanji (level));
 		Collections.sort (lib.list, Item.SortByTime.INSTANCE_ASCENDING);
 
-		if (lib.list.size () >= 2) {
-			day = ui.getDay (lib.list.get (1).getUnlockedDate ());
-			hdb.updateLevelup (level, day);
+		for (Item i : lib.list) {
+			day = ui.getDay (i.getUnlockedDate ());
+			if (day >= minday) {
+				hdb.updateLevelup (level, day);
+				levelups.put (level, day);
+				return true;
+			}
 		}
-		
-		prefs.edit ().putBoolean (lpref, true).commit ();
+		return false;
 	}
 	
 	private List<Integer> getSuspectLevelups (Map<Integer, Integer> levelups, int levels)
@@ -99,7 +115,7 @@ public class DatabaseFixup {
 				if (lday != null) {
 					delta = cday - lday;
 					if (delta < MIN_DAYS)
-						ans.add (i - 1);
+						ans.add (i);
 				}
 				lday = cday;
 			}
@@ -113,5 +129,4 @@ public class DatabaseFixup {
 	{
 		new DatabaseFixup (ctxt, conn).go ();
 	}
-	
 }

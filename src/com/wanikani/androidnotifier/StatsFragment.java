@@ -14,7 +14,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
-import android.database.SQLException;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -31,6 +30,7 @@ import com.wanikani.androidnotifier.graph.HistogramPlot;
 import com.wanikani.androidnotifier.graph.Pager;
 import com.wanikani.androidnotifier.graph.Pager.Series;
 import com.wanikani.androidnotifier.graph.PieChart;
+import com.wanikani.androidnotifier.graph.PieChart.InfoSet;
 import com.wanikani.androidnotifier.graph.PiePlot.DataSet;
 import com.wanikani.androidnotifier.graph.TYChart;
 import com.wanikani.wklib.Connection;
@@ -889,9 +889,7 @@ public class StatsFragment extends Fragment implements Tab {
 			chart = (HistogramChart) parent.findViewById (R.id.hi_levels);
 			chart.setData (series, bars, LEVELUP_CAP);
 			
-			/// chart.setVisibility (bars.isEmpty () ? View.GONE : View.VISIBLE);
-			// Need a more robust db fixup algorithm to display this (available on next branch)
-			chart.setVisibility (View.GONE);
+			chart.setVisibility (bars.isEmpty () ? View.GONE : View.VISIBLE);
 		}
 		
 		public boolean scrolling ()
@@ -1090,6 +1088,7 @@ public class StatsFragment extends Fragment implements Tab {
 	@Override
 	public void refreshComplete (DashboardData dd)
 	{
+		List<DataSet> ds;
 		PieChart pc;
 
 		if (dd == null || !isResumed ())
@@ -1105,16 +1104,19 @@ public class StatsFragment extends Fragment implements Tab {
 		case RETRIEVED:
 			pc = (PieChart) parent.findViewById (R.id.pc_srs);
 			if (hasSRSData (dd.od.srs)) {
-				pc.setVisibility (View.VISIBLE);			
-				pc.setData (getSRSDataSets (dd.od.srs));
+				pc.setVisibility (View.VISIBLE);
+				ds = getSRSDataSets (dd.od.srs);
+				pc.setData (ds, getInfoSet (ds));
 			} else
 				pc.setVisibility (View.GONE);
 
-			pc = (PieChart) parent.findViewById (R.id.pc_kanji);			
-			pc.setData (getKanjiProgDataSets (dd.od.srs));
+			pc = (PieChart) parent.findViewById (R.id.pc_kanji);
+			ds = getKanjiProgDataSets (dd.od.srs);
+			pc.setData (ds, getInfoSet (ds));
 				
-			pc = (PieChart) parent.findViewById (R.id.pc_vocab);			
-			pc.setData (getVocabProgDataSets (dd.od.srs));
+			pc = (PieChart) parent.findViewById (R.id.pc_vocab);
+			ds = getVocabProgDataSets (dd.od.srs);
+			pc.setData (ds, getInfoSet (ds));
 			
 			for (TYChart chart : charts)
 				chart.setOrigin (dd.creation);
@@ -1296,6 +1298,39 @@ public class StatsFragment extends Fragment implements Tab {
 		return ans;
 	}
 
+	/**
+	 * Creates the infoset needed by the any progression distribution plot
+	 * @param ds the input datasets 
+	 * @return a list of information dataset 
+	 */
+	protected List<InfoSet> getInfoSet (List<DataSet> dses)
+	{
+		List<InfoSet> ans;
+		Resources res;
+		InfoSet ds;
+		float count;
+		
+		res = getResources ();
+		ans = new Vector<InfoSet> ();
+
+		count = dses.get (1).value +	/* guru */
+				dses.get (2).value +	/* master */
+				dses.get (3).value;		/* enlightened */
+		if (dses.size () > 4)
+			count += dses.get (4).value; /* burned */
+		
+		ds = new InfoSet (res.getString (R.string.tag_learned), count);
+		ans.add (ds);
+		
+		count += dses.get (0).value;
+		
+		ds = new InfoSet (res.getString (R.string.tag_unlocked), count);
+
+		ans.add (ds);
+
+		return ans;
+	}
+
 	@Override
 	public void spin (boolean enable)
 	{
@@ -1394,46 +1429,5 @@ public class StatsFragment extends Fragment implements Tab {
     public boolean contains (Contents c)
 	{
 		return c == Contents.STATS;
-	}
-	
-	private static Map<Integer, Integer> getDays (HistoryDatabase.CoreStats cs,
-												  DashboardData dd, boolean remove)
-	{
-		Map<Integer, Integer> ans;
-		Integer lday, cday, days;
-		int i, minl, maxl, minv, maxv;
-		
-		lday = 0;
-		ans = new Hashtable<Integer, Integer> ();
-		for (i = 1; i <= dd.level; i++) {
-			cday = cs.levelups.get (i);
-			if (cday != null && lday != null && lday < cday)
-				ans.put (i - 1, cday - lday);
-			lday = cday;
-		}
-		
-		minl = maxl = minv = maxv = -1;			
-		for (i = 1; i < dd.level; i++) {
-			days = ans.get (i);
-			if (days != null) {
-				if (minv == -1 || days < minv) {
-					minl = i;
-					minv = days;						
-				}
-				if (maxv == -1 || days > maxv) {
-					maxl = i;
-					maxv = days;
-				}						
-			}
-		}
-		
-		if (remove) {
-			if (minl > 0)
-				ans.remove (minl);
-			if (maxl > 0)
-				ans.remove (maxl);
-		}
-			
-		return ans;
 	}
 }

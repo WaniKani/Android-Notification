@@ -127,10 +127,21 @@ public abstract class Item implements Serializable {
 		public int compare (Item a, Item b)
 		{
 			Date ala, alb;
+			boolean ba, bb;
 			int ans;
 
+			ba = a.stats != null && a.stats.burned;
+			bb = b.stats != null && b.stats.burned;
+			
+			/* Burned items go last */
+			if (ba && !bb)
+				return 1;
+			if (!ba && bb)
+				return -1;
+			
 			ala = a.getAvailableDate ();
 			alb = b.getAvailableDate ();
+			
 			/* Non-unlocked items should always appear last */
 			if (ala != null) {
 				if (alb != null)
