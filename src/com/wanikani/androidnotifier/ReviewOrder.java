@@ -120,6 +120,7 @@ public class ReviewOrder {
 "if ($(\"#wkroStatus\").length > 0) {" +
 "    $(\"#wkroStatus\").show (); " +
 "    $(\"#divSt\").show (); " +
+"    $(\"#reorderBtn\").show (); " +
 "} else {" +
 "    init();\r\n" + 
 "    console.log('script load end');" +
@@ -127,5 +128,6 @@ public class ReviewOrder {
 
 	public static final String JS_UNINIT_CODE =
 "$(\"#wkroStatus\").hide ();" +
-"$(\"#divSt\").hide (); ";
+"$(\"#divSt\").hide (); " +
+"$(\"#reorderBtn\").hide ();";
 }
