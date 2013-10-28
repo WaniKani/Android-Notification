@@ -30,6 +30,7 @@
             </intent-filter>
         </activity>
         <activity android:name="SettingsActivity" />
+        <activity android:name="MetersActivity" />
         <activity android:name="OtherStatsActivity" 
             	  android:configChanges="orientation|keyboardHidden|screenSize"/>
 
