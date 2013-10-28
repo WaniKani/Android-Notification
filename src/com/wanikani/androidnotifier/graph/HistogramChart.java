@@ -171,7 +171,7 @@ public class HistogramChart extends LinearLayout {
 	public void alert (String msg, View.OnClickListener ocl)
 	{
 		alertPanel.setVisibility (View.VISIBLE);
-		alertMessage.setText (Html.fromHtml ("<font color=\"blue\"><ul>" + msg + "</u></font>"));
+		alertMessage.setText (Html.fromHtml ("<font color=\"blue\"><u>" + msg + "</u></font>"));
 		alertMessage.setClickable (true);
 		alertMessage.setOnClickListener (ocl);
 	}
