@@ -21,4 +21,5 @@
     <color name="incorrectfg">#fff</color>
     <color name="ignoredfg">#fff</color>
     <color name="ignoredbg">#cccc00</color>
+    <color name="separator">#000</color>
 </resources>

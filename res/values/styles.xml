@@ -316,4 +316,18 @@
         <item name="android:maxWidth">@dimen/m_spinner</item>
         <item name="android:maxHeight">@dimen/m_spinner</item>
     </style>
+    
+    <style name="Separator" parent="AppTheme">
+        <item name="android:layout_marginLeft">@dimen/m_separator_margin</item>
+        <item name="android:layout_marginRight">@dimen/m_separator_margin</item>
+        <item name="android:layout_marginTop">@dimen/m_half_gap</item>
+        <item name="android:layout_marginBottom">@dimen/m_half_gap</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">@dimen/m_separator_height</item>
+        <item name="android:background">@color/separator</item>
+    </style>
+
+    <style name="Meter" parent="Estimates">
+       <item name="android:textStyle">italic</item>                                
+    </style>
 </resources>

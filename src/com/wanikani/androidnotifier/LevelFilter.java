@@ -51,6 +51,9 @@ public class LevelFilter implements Filter {
 		
 		/// The connection
 		Connection conn;
+		
+		/// The meter
+		Connection.Meter meter;
 
 		/// The level to fetch
 		int level;
@@ -63,9 +66,10 @@ public class LevelFilter implements Filter {
 		 * @param conn WKLib connection
 		 * @param level the level to fetch
 		 */
-		public Task (Connection conn, int level)
+		public Task (Connection.Meter meter, Connection conn, int level)
 		{
 			this.conn = conn;
+			this.meter = meter;
 			this.level = level;
 			
 			allItems = new Vector<Item> ();
@@ -89,7 +93,7 @@ public class LevelFilter implements Filter {
 			lib = new ItemLibrary<Item> ();
 			imgrad = new Vector<Radical> ();
 			try {
-				lib.add (conn.getRadicals (level));
+				lib.add (conn.getRadicals (meter, level));
 				i = lib.list.iterator ();
 				while (i.hasNext ()) {
 					rad = (Radical) i.next ();
@@ -115,7 +119,7 @@ public class LevelFilter implements Filter {
 			
 			lib = new ItemLibrary<Item> ();
 			try {
-				lib.add (conn.getKanji (level));
+				lib.add (conn.getKanji (meter, level));
 				lpublishProgress (lib);
 			} catch (IOException e) {
 				ok = false;
@@ -123,7 +127,7 @@ public class LevelFilter implements Filter {
 			
 			lib = new ItemLibrary<Item> ();
 			try {
-				lib.add (conn.getVocabulary (level));
+				lib.add (conn.getVocabulary (meter, level));
 				lpublishProgress (lib);
 			} catch (IOException e) {
 				ok = false;
@@ -214,7 +218,7 @@ public class LevelFilter implements Filter {
 	 * @param conn a WKLib Connection
 	 * @param level the level
 	 */
-	public void select (Connection conn, int level)
+	public void select (Connection.Meter meter, Connection conn, int level)
 	{
 		Task ptask;
 	
@@ -225,7 +229,7 @@ public class LevelFilter implements Filter {
 			itemf.clearData (this);
 			itemf.selectLevel (this, level, true);
 
-			task = new Task (conn, level);
+			task = new Task (meter, conn, level);
 			task.execute ();
 			pending.put (level, task);
 		} else {

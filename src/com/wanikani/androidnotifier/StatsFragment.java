@@ -107,8 +107,12 @@ public class StatsFragment extends Fragment implements Tab {
 		@Override
 		protected HistoryDatabase.CoreStats doInBackground (Void... v)
 		{
+			Connection.Meter meter;
+			
+			meter = MeterSpec.T.DASHBOARD_REFRESH.get (ctxt);
+			
 			try {
-				return HistoryDatabase.getCoreStats (ctxt, conn.getUserInformation ());
+				return HistoryDatabase.getCoreStats (ctxt, conn.getUserInformation (meter));
 			} catch (IOException e) {
 				return HistoryDatabase.getCoreStats (ctxt, null);				
 			}

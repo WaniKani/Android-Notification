@@ -94,16 +94,34 @@ public class NotifierStateMachine {
 	public enum Event {
 		
 		/** The state machine boots */ 
-		E_INITIAL,
+		E_INITIAL {
+			public MeterSpec.T meter () {
+				return MeterSpec.T.NOTIFY_TIMEOUT;
+			}
+		},
 		
 		/** A timeout explicitly set by the state machine */
-		E_SOLICITED,
+		E_SOLICITED {
+			public MeterSpec.T meter () {
+				return MeterSpec.T.NOTIFY_TIMEOUT;
+			}
+		},
 		
 		/** Any event of interest to the state machine (connectivity change) */
-		E_UNSOLICITED,
+		E_UNSOLICITED {
+			public MeterSpec.T meter () {
+				return MeterSpec.T.NOTIFY_CHANGE_CONNECTIVITY;
+			}
+		},
 		
 		/** The user tapping the notification icon */
-		E_TAP	
+		E_TAP {
+			public MeterSpec.T meter () {
+				return MeterSpec.T.NOTIFY_TIMEOUT;
+			}
+		};
+		
+		public abstract MeterSpec.T meter ();
 	};
 
 	static enum State {

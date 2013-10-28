@@ -281,20 +281,21 @@ public class MainActivity extends FragmentActivity implements Runnable {
 		@Override
 		protected DashboardData doInBackground (Connection... conn)
 		{
+			Connection.Meter meter;
 			DashboardData dd;
 			UserInformation ui;
 			StudyQueue sq;
 			int size;
 
 			size = getResources ().getDimensionPixelSize (R.dimen.m_avatar_size);
-			
+			meter = MeterSpec.T.DASHBOARD_REFRESH.get (MainActivity.this);
 			try {
-				sq = conn [0].getStudyQueue ();
+				sq = conn [0].getStudyQueue (meter);
 				/* getUserInformation should be called after at least one
 				 * of the other calls, so we give Connection a chance
 				 * to cache its contents */
-				ui = conn [0].getUserInformation ();
-				conn [0].resolve (ui, size, defAvatar);
+				ui = conn [0].getUserInformation (meter);
+				conn [0].resolve (meter, ui, size, defAvatar);
 
 				dd = new DashboardData (ui, sq);
 				if (dd.gravatar != null)
@@ -364,7 +365,7 @@ public class MainActivity extends FragmentActivity implements Runnable {
 			int cis;
 			
 			try {
-				srs = conn [0].getSRSDistribution();
+				srs = conn [0].getSRSDistribution(MeterSpec.T.DASHBOARD_REFRESH.get (MainActivity.this));
 				srsStatus = DashboardData.OptionalDataStatus.RETRIEVED;
 			} catch (IOException e) {
 				srs = null;
@@ -372,7 +373,7 @@ public class MainActivity extends FragmentActivity implements Runnable {
 			}
 
 			try {
-				lp = conn [0].getLevelProgression ();
+				lp = conn [0].getLevelProgression (MeterSpec.T.DASHBOARD_REFRESH.get (MainActivity.this));
 				lpStatus = DashboardData.OptionalDataStatus.RETRIEVED;
 			} catch (IOException e) {
 				lp = null;
@@ -380,7 +381,7 @@ public class MainActivity extends FragmentActivity implements Runnable {
 			}
 
 			try {
-				critical = conn [0].getCriticalItems ();
+				critical = conn [0].getCriticalItems (MeterSpec.T.DASHBOARD_REFRESH.get (MainActivity.this));
 				ciStatus = DashboardData.OptionalDataStatus.RETRIEVED;
 				cis = critical.list.size ();
 			} catch (IOException e) {

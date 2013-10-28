@@ -101,6 +101,7 @@
     <string name="em_export">Export</string>
     <string name="em_ignore">Ignore</string>
     <string name="em_fonts">JP fonts</string>
+    <string name="em_meters">Meters</string>
     <string name="pref_enabled_descr">Show event icon when you have reviews</string>
     <string name="status_msg_error">Error connecting to WaniKani</string>
     <string name="status_msg_partial">Network error. Partial results</string>
@@ -318,4 +319,30 @@
     
     <string name="fmt_last_item_wait">Loading&#8230;</string>    
     <string name="fmt_last_item">Previous %s</string>
-    </resources>
+    
+    <string name="tag_settings">Settings</string>
+    <string name="fmt_last_reset">Last reset: %s</string>
+    <string name="tag_reset">Reset</string>
+    <string name="tag_counter_format">Show counters as</string>
+    <string name="tag_summary">Summary</string>
+    <string name="tag_total">Total</string>
+    <string name="tag_service">Background process</string>
+    <string name="tag_app">Application</string>
+    
+    <string name="mc_mobile">Mobile network:</string>
+    <string name="mc_wifi">WiFi, WiMAX:</string>
+    <string name="mc_unknown">Unknown network:</string>
+    
+    <string name="tag_notify_timeout">Polling</string>
+    <string name="tag_change_connectivity">Connectivity changes</string>
+    <string name="tag_daily_jobs">Data collection for stat plots</string>
+    
+    <string name="tag_dashboard_refresh">Dashboard refresh</string>
+    <string name="tag_me_items">Item browser</string>
+    <string name="tag_me_other_stats">Stats</string>
+    <string name="tag_reconstruct">Reconstruction process</string>
+    
+    <string name="tag_me_notice">Note: these are approximate values, 
+        	regarding the API only (e.g. browsing sessions are excluded)</string>
+   
+</resources>

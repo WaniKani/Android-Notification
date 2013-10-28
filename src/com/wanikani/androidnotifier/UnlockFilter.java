@@ -49,6 +49,9 @@ public class UnlockFilter implements Filter {
 		
 		/// The connection
 		Connection conn;
+		
+		/// The meter
+		Connection.Meter meter;
 
 		/// List of all the items collected so far
 		List<Item> allItems;
@@ -57,9 +60,10 @@ public class UnlockFilter implements Filter {
 		 * Constructor.
 		 * @param conn the connection
 		 */
-		public Task (Connection conn)
+		public Task (Connection.Meter meter, Connection conn)
 		{
 			this.conn = conn;
+			this.meter = meter;
 
 			allItems = new Vector<Item> ();
 		}
@@ -82,7 +86,7 @@ public class UnlockFilter implements Filter {
 			lib = new ItemLibrary<Item> ();
 			imgrad = new Vector<Radical> ();
 			try {
-				lib = conn.getRecentUnlocks (100);
+				lib = conn.getRecentUnlocks (meter, 100);
 				i = lib.list.iterator ();
 				while (i.hasNext ()) {
 					item = i.next ();
@@ -185,7 +189,7 @@ public class UnlockFilter implements Filter {
 	 * as possible. 
 	 * @param conn a WKLib Connection 
 	 */
-	public void select (Connection conn)
+	public void select (Connection.Meter meter, Connection conn)
 	{
 		itemf.enableSorting (false, true, false);
 		if (citems != null) {
@@ -199,7 +203,7 @@ public class UnlockFilter implements Filter {
 			itemf.clearData (this);
 			itemf.selectOtherFilter (this, true);			
 
-			task = new Task (conn);
+			task = new Task (meter, conn);
 			task.execute ();
 		} 
 	}

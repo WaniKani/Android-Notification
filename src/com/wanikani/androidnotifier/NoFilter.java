@@ -43,6 +43,9 @@ public class NoFilter implements Filter {
 		
 		/// The connection
 		Connection conn;
+		
+		/// The meter
+		Connection.Meter meter;
 
 		/// List of all the items collected so far
 		List<Item> allItems;
@@ -51,9 +54,10 @@ public class NoFilter implements Filter {
 		 * Constructor.
 		 * @param conn WKLib connection
 		 */
-		public Task (Connection conn)
+		public Task (Connection.Meter meter, Connection conn)
 		{
 			this.conn = conn;
+			this.meter = meter;
 			
 			allItems = new Vector<Item> ();
 		}
@@ -76,7 +80,7 @@ public class NoFilter implements Filter {
 			lib = new ItemLibrary<Item> ();
 			imgrad = new Vector<Radical> ();
 			try {
-				lib.add (conn.getRadicals ());
+				lib.add (conn.getRadicals (meter));
 				i = lib.list.iterator ();
 				while (i.hasNext ()) {
 					rad = (Radical) i.next ();
@@ -92,7 +96,7 @@ public class NoFilter implements Filter {
 			
 			lib = new ItemLibrary<Item> ();
 			try {
-				lib.add (conn.getKanji ());
+				lib.add (conn.getKanji (meter));
 				lpublishProgress (lib);
 			} catch (IOException e) {
 				ok = false;
@@ -100,7 +104,7 @@ public class NoFilter implements Filter {
 			
 			lib = new ItemLibrary<Item> ();
 			try {
-				lib.add (conn.getVocabulary ());
+				lib.add (conn.getVocabulary (meter));
 				lpublishProgress (lib);
 			} catch (IOException e) {
 				ok = false;
@@ -192,7 +196,7 @@ public class NoFilter implements Filter {
 	 * as possible.
 	 * @param conn a WKLib Connection 
 	 */
-	public void select (Connection conn)
+	public void select (Connection.Meter meter, Connection conn)
 	{
 		itemf.enableSorting (true, true, true);
 		
@@ -204,7 +208,7 @@ public class NoFilter implements Filter {
 			itemf.clearData (this);
 			itemf.selectOtherFilter (this, true);			
 
-			task = new Task (conn);
+			task = new Task (meter, conn);
 			task.execute ();
 		} 
 	}

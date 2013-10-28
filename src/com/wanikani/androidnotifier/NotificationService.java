@@ -289,14 +289,16 @@ public class NotificationService
 		UserInformation ui;
 		Connection conn;
 		UserLogin login;
+		Connection.Meter meter;
 		
 		try {
+			meter = MeterSpec.T.NOTIFY_DAILY_JOBS.get (this);
 			login = SettingsActivity.getLogin (this);
 		
 			conn = new Connection (login);
 			
-			srs = conn.getSRSDistribution ();
-			ui = conn.getUserInformation ();
+			srs = conn.getSRSDistribution (meter);
+			ui = conn.getUserInformation (meter);
 			
 			HistoryDatabase.insert (this, ui, srs);
 			
@@ -451,17 +453,19 @@ public class NotificationService
 	{
 		UserLogin login;
 		UserInformation ui;
+		Connection.Meter meter;
 		Connection conn;
 		DashboardData dd;
 		StudyQueue sq;
 		
 		login = SettingsActivity.getLogin (this);
+		meter = event.meter ().get (this);
 		
 		conn = new Connection (login);
 		try {
-			sq = conn.getStudyQueue ();
+			sq = conn.getStudyQueue (meter);
 			/* This call does not cause network traffic */
-			ui = conn.getUserInformation ();
+			ui = conn.getUserInformation (meter);
 			dd = new DashboardData (ui, sq);
 			if (SettingsActivity.getLessonsEnabled (this))
 				showLessons (dd.lessonsAvailable);

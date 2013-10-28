@@ -67,6 +67,8 @@ public class DatabaseFixup {
 	
 	Connection conn;
 	
+	Connection.Meter meter;
+
 	private static final int KANJI_MIN_DAYS = 3;
 	
 	private static final int RADICALS_MIN_DAYS = 7;
@@ -81,6 +83,7 @@ public class DatabaseFixup {
 	{
 		this.ctxt = ctxt;
 		this.conn = conn;
+		meter = MeterSpec.T.RECONSTRUCT_DIALOG.get (ctxt);
 	}
 	
 	private void go ()
@@ -101,7 +104,7 @@ public class DatabaseFixup {
 		prefs.edit ().putBoolean (SHOULD_RUN, true).commit ();
 		try {
 			hdb.openW ();
-			ui = conn.getUserInformation ();
+			ui = conn.getUserInformation (meter);
 			levelups = hdb.getLevelups ();
 			for (i = 0; i < 2 * ui.level; i++) {
 				change = false;
@@ -132,7 +135,7 @@ public class DatabaseFixup {
 				return true;
 			}
 		}		
-		
+
 		return false;
 	}
 	
@@ -146,11 +149,11 @@ public class DatabaseFixup {
 		if (plday == null)
 			return false;
 		
-		if (tryFix (hdb, ui, new ItemLibrary<Item> (conn.getRadicals (level)), 
+		if (tryFix (hdb, ui, new ItemLibrary<Item> (conn.getRadicals (meter, level)), 
 					levelups, level, plday + RADICALS_MIN_DAYS))
 			return true;
 				
-		if (tryFix (hdb, ui, new ItemLibrary<Item> (conn.getKanji (level)), 
+		if (tryFix (hdb, ui, new ItemLibrary<Item> (conn.getKanji (meter, level)), 
 				levelups, level, plday + KANJI_MIN_DAYS))
 			return true;
 

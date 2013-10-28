@@ -279,6 +279,9 @@ public class OtherStatsActivity extends Activity {
 		/// WK connection
 		private Connection conn;
 		
+		/// The meter
+		private Connection.Meter meter;
+		
 		/// Must reset
 		private boolean reset;
 		
@@ -294,12 +297,14 @@ public class OtherStatsActivity extends Activity {
 		/// The job type
 		private Job job;
 		
-		public Task (Job job, Connection conn, Context ctxt, ProgressBar pb, boolean reset, Item.Type...types)
+		public Task (Job job, Connection.Meter meter, Connection conn, Context ctxt, 
+					 ProgressBar pb, boolean reset, Item.Type...types)
 		{
 			int i;
 			
 			this.job = job;
 			this.conn = conn;
+			this.meter = meter;
 			this.pb = pb;
 			this.reset = reset;
 			
@@ -323,7 +328,7 @@ public class OtherStatsActivity extends Activity {
 			int i, j, levels, bunch [];
 
 			try {
-				levels = conn.getUserInformation ().level;
+				levels = conn.getUserInformation (meter).level;
 			} catch (IOException e) {
 				return false;
 			}
@@ -336,7 +341,7 @@ public class OtherStatsActivity extends Activity {
 			
 			try {
 				if (types.contains (Item.Type.RADICAL)) {
-					rlib = conn.getRadicals ();
+					rlib = conn.getRadicals (meter);
 					for (ItemListener l : listeners)
 						l.newRadical (rlib);
 				}
@@ -346,7 +351,7 @@ public class OtherStatsActivity extends Activity {
 
 			try {
 				if (types.contains (Item.Type.KANJI)) {
-					klib = conn.getKanji ();
+					klib = conn.getKanji (meter);
 					for (ItemListener l : listeners)
 						l.newKanji (klib);
 				}
@@ -363,7 +368,7 @@ public class OtherStatsActivity extends Activity {
 						bunch = new int [Math.min (BUNCH_SIZE, levels - i + 1)];
 						for (j = 0; j < BUNCH_SIZE && i <= levels; j++)
 							bunch [j] = i++;
-						vlib = conn.getVocabulary (bunch);
+						vlib = conn.getVocabulary (meter, bunch);
 						for (ItemListener l : listeners)
 							l.newVocab (vlib);
 						publishProgress ((100 * (i - 1)) / (levels + 2));
@@ -577,7 +582,7 @@ public class OtherStatsActivity extends Activity {
 	protected void refresh ()
 	{
 		spinner.setVisibility (View.VISIBLE);
-		new Task (Job.BASE, conn, this, null, 
+		new Task (Job.BASE, MeterSpec.T.MORE_STATS.get (this), conn, this, null, 
 				  true, Item.Type.KANJI).execute (listeners.toArray (new ItemListener [0]));
 	}
 	
@@ -627,7 +632,7 @@ public class OtherStatsActivity extends Activity {
 		
 		sv = (ScrollView) findViewById (R.id.os_scroll);
 		opb.setVisibility (View.VISIBLE);
-		new Task (Job.OTHER, conn, this, opb, false, 
+		new Task (Job.OTHER, MeterSpec.T.OTHER_STATS.get (this), conn, this, opb, false, 
 				  Item.Type.RADICAL, Item.Type.VOCABULARY).execute (olisteners.toArray (new ItemListener [0]));
 		levelsChart.spin (true);
 		levelsChart.setVisibility (View.VISIBLE);

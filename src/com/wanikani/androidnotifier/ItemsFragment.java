@@ -30,6 +30,7 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 
+import com.wanikani.wklib.Connection;
 import com.wanikani.wklib.Item;
 import com.wanikani.wklib.Kanji;
 import com.wanikani.wklib.Radical;
@@ -1415,7 +1416,7 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 			btn = (RadioButton) parent.findViewById (R.id.btn_filter_none); 
 			btn.setChecked (true);
 
-			nof.select (main.getConnection ());
+			nof.select (meter (), main.getConnection ());
 			iview.setSelection (0);
 		}
 		
@@ -1436,7 +1437,7 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 			fg = (RadioGroup) parent.findViewById (R.id.rg_filter);
 			fg.check (R.id.btn_filter_by_level); 
 		
-			levelf.select (main.getConnection (), level);
+			levelf.select (meter (), main.getConnection (), level);
 			iview.setSelection (0);
 		}
 		
@@ -1456,7 +1457,7 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 			btn = (RadioButton) parent.findViewById (R.id.btn_filter_critical); 
 			btn.setChecked (true);
 
-			criticalf.select (main.getConnection ());
+			criticalf.select (meter (), main.getConnection ());
 			iview.setSelection (0);
 		}
 		
@@ -1476,7 +1477,7 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 			btn = (RadioButton) parent.findViewById (R.id.btn_filter_unlocks); 
 			btn.setChecked (true);
 
-			unlockf.select (main.getConnection ());
+			unlockf.select (meter (), main.getConnection ());
 			iview.setSelection (0);
 		}
 		
@@ -1789,9 +1790,9 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 			levelf.flush ();
 
 			if (currentFilter == nof)
-				nof.select (main.getConnection ());
+				nof.select (meter (), main.getConnection ());
 			else if (currentFilter == levelf && currentLevel > 0)
-				levelf.select (main.getConnection (), currentLevel);
+				levelf.select (meter (), main.getConnection (), currentLevel);
 
 			/* Fall through */
 
@@ -1800,9 +1801,9 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 			unlockf.flush ();
 			
 			if (currentFilter == criticalf)
-				criticalf.select (main.getConnection ());
+				criticalf.select (meter (), main.getConnection ());
 			else if (currentFilter == unlockf)
-				unlockf.select (main.getConnection ());
+				unlockf.select (meter (), main.getConnection ());
 			
 		}
 	}
@@ -1857,5 +1858,10 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
     public boolean contains (Contents c)
 	{
 		return c == Contents.ITEMS;
+	}
+	
+	protected Connection.Meter meter ()
+	{
+		return MeterSpec.T.ITEMS.get (main);
 	}
 }

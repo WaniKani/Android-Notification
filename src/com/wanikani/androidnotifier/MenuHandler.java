@@ -100,6 +100,18 @@ public class MenuHandler {
 		{
 			/* empty */
 		}
+		
+		/**
+		 * Start meters activity
+		 */
+		public void meters ()
+		{
+			Intent intent;
+			
+			intent = new Intent (ctxt, MetersActivity.class);
+			
+			ctxt.startActivity (intent);			
+		}
 	}
 	
 	/**
@@ -186,6 +198,10 @@ public class MenuHandler {
 			
 		case R.id.em_fonts:
 			listener.fonts ();
+			break;
+			
+		case R.id.em_meters:
+			listener.meters ();
 			break;
 			
 		default:

@@ -6,6 +6,9 @@ import java.io.InputStreamReader;
 import java.net.Authenticator;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLConnection;
+import java.util.List;
+import java.util.Map;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -33,6 +36,14 @@ import android.graphics.BitmapFactory;
  */
 
 public class Connection {
+	
+	public interface Meter {
+		
+		public void count (int data);
+		
+		public void sync ();
+		
+	}
 	
 	class Response {
 		
@@ -91,22 +102,22 @@ public class Connection {
 		cache = new ItemsCache ();
 	}
 	
-	public UserInformation getUserInformation ()
+	public UserInformation getUserInformation (Meter meter)
 		throws IOException
 	{
 		if (ui == null)
-			ui = call ("user-information", false).ui;
+			ui = call (meter, "user-information", false).ui;
 		
 		return ui;
 	}	
 
-	public StudyQueue getStudyQueue ()
+	public StudyQueue getStudyQueue (Meter meter)
 			throws IOException
 	{
 		Response res;
 		
 		try {
-			res = call ("study-queue", false);
+			res = call (meter, "study-queue", false);
 			ui = res.ui;
 
 			return new StudyQueue (res.infoAsObj);
@@ -115,13 +126,13 @@ public class Connection {
 		}
 	}	
 
-	public SRSDistribution getSRSDistribution ()
+	public SRSDistribution getSRSDistribution (Meter meter)
 			throws IOException
 	{
 		Response res;
 		
 		try {
-			res = call ("srs-distribution", false);
+			res = call (meter, "srs-distribution", false);
 			ui = res.ui;
 
 			return new SRSDistribution (res.infoAsObj);
@@ -130,13 +141,13 @@ public class Connection {
 		}
 	}	
 
-	public LevelProgression getLevelProgression ()
+	public LevelProgression getLevelProgression (Meter meter)
 			throws IOException
 	{
 		Response res;
 		
 		try {
-			res = call ("level-progression", false);
+			res = call (meter, "level-progression", false);
 			ui = res.ui;
 
 			return new LevelProgression (res.infoAsObj);
@@ -145,14 +156,14 @@ public class Connection {
 		}
 	}
 	
-	private int [] getAllLevels ()
+	private int [] getAllLevels (Meter meter)
 		throws IOException
 	{
 		UserInformation ui;
 		int ans [];
 		int i;
 		
-		ui = getUserInformation ();
+		ui = getUserInformation (meter);
 		
 		ans = new int [ui.level];
 		for (i = 0; i < ans.length; i++)
@@ -174,7 +185,7 @@ public class Connection {
 		return sb.toString ();
 	}
 	
-	public ItemLibrary<Radical> getRadicals (int level)
+	public ItemLibrary<Radical> getRadicals (Meter meter, int level)
 			throws IOException
 	{
 		ItemLibrary<Radical> ans;
@@ -185,7 +196,7 @@ public class Connection {
 			return ans;
 		
 		try {
-			res = call ("radicals", true, Integer.toString (level));
+			res = call (meter, "radicals", true, Integer.toString (level));
 
 			return cache.radicals.put 
 					(new ItemLibrary<Radical> (Radical.FACTORY, res.infoAsArray));
@@ -195,7 +206,7 @@ public class Connection {
 		}
 	}
 
-	public ItemLibrary<Radical> getRadicals (int levels [])
+	public ItemLibrary<Radical> getRadicals (Meter meter, int levels [])
 		throws IOException
 	{
 		ItemLibrary<Radical> ans;
@@ -207,7 +218,7 @@ public class Connection {
 			return ans;
 
 		try {
-			res = call ("radicals", true, levelList (levels));
+			res = call (meter, "radicals", true, levelList (levels));
 
 			return ans.add (cache.radicals.put 
 						(new ItemLibrary<Radical> (Radical.FACTORY, res.infoAsArray)));
@@ -217,13 +228,13 @@ public class Connection {
 		}
 	}
 	
-	public ItemLibrary<Radical> getRadicals ()
+	public ItemLibrary<Radical> getRadicals (Meter meter)
 			throws IOException
 	{		
-		return getRadicals (getAllLevels ());
+		return getRadicals (meter, getAllLevels (meter));
 	}
 		
-	public ItemLibrary<Kanji> getKanji (int level)
+	public ItemLibrary<Kanji> getKanji (Meter meter, int level)
 		throws IOException
 	{
 		ItemLibrary<Kanji> ans;
@@ -234,7 +245,7 @@ public class Connection {
 			return ans;
 		
 		try {
-			res = call ("kanji", true, Integer.toString (level));
+			res = call (meter, "kanji", true, Integer.toString (level));
 
 			return cache.kanji.put 
 				(new ItemLibrary<Kanji> (Kanji.FACTORY, res.infoAsArray));
@@ -244,7 +255,7 @@ public class Connection {
 		}
 	}
 	
-	public ItemLibrary<Kanji> getKanji (int level [])
+	public ItemLibrary<Kanji> getKanji (Meter meter, int level [])
 		throws IOException
 	{
 		ItemLibrary<Kanji> ans;
@@ -256,7 +267,7 @@ public class Connection {
 			return ans;
 		
 		try {
-			res = call ("kanji", true, levelList (level));
+			res = call (meter, "kanji", true, levelList (level));
 
 			return ans.add (cache.kanji.put
 					(new ItemLibrary<Kanji> (Kanji.FACTORY, res.infoAsArray)));
@@ -266,13 +277,13 @@ public class Connection {
 		}
 	}
 		
-	public ItemLibrary<Kanji> getKanji ()
+	public ItemLibrary<Kanji> getKanji (Meter meter)
 			throws IOException
 	{		
-		return getKanji (getAllLevels ());
+		return getKanji (meter, getAllLevels (meter));
 	}
 	
-	public ItemLibrary<Vocabulary> getVocabulary (int level)
+	public ItemLibrary<Vocabulary> getVocabulary (Meter meter, int level)
 		throws IOException
 	{
 		ItemLibrary<Vocabulary> ans;
@@ -283,7 +294,7 @@ public class Connection {
 			return ans;
 		
 		try {
-			res = call ("vocabulary", true, Integer.toString (level));
+			res = call (meter, "vocabulary", true, Integer.toString (level));
 
 			return cache.vocab.put
 					(new ItemLibrary<Vocabulary> (Vocabulary.FACTORY, res.infoAsArray));
@@ -293,7 +304,7 @@ public class Connection {
 		}
 	}
 	
-	public ItemLibrary<Vocabulary> getVocabulary (int level [])
+	public ItemLibrary<Vocabulary> getVocabulary (Meter meter, int level [])
 			throws IOException
 	{
 		ItemLibrary<Vocabulary> ans;
@@ -305,7 +316,7 @@ public class Connection {
 			return ans;
 		
 		try {
-			res = call ("vocabulary", true, levelList (level));
+			res = call (meter, "vocabulary", true, levelList (level));
 
 			return ans.add (cache.vocab.put
 					(new ItemLibrary<Vocabulary> (Vocabulary.FACTORY, res.infoAsArray)));
@@ -315,19 +326,19 @@ public class Connection {
 		}
 	}
 	
-	public ItemLibrary<Vocabulary> getVocabulary ()
+	public ItemLibrary<Vocabulary> getVocabulary (Meter meter)
 			throws IOException
 	{		
-		return getVocabulary (getAllLevels ());
+		return getVocabulary (meter, getAllLevels (meter));
 	}
 
-	public ItemLibrary<Item> getRecentUnlocks (int count)
+	public ItemLibrary<Item> getRecentUnlocks (Meter meter, int count)
 		throws IOException
 	{
 		Response res;
 		
 		try {
-			res = call ("recent-unlocks", true, Integer.toString (count));
+			res = call (meter, "recent-unlocks", true, Integer.toString (count));
 
 			return new ItemLibrary<Item> (Item.FACTORY, res.infoAsArray);
 			
@@ -336,13 +347,13 @@ public class Connection {
 		}		
 	}
 
-	public ItemLibrary<Item> getCriticalItems ()
+	public ItemLibrary<Item> getCriticalItems (Meter meter)
 			throws IOException
 	{
 		Response res;
 			
 		try {
-			res = call ("critical-items", true);
+			res = call (meter, "critical-items", true);
 				return new ItemLibrary<Item> (Item.FACTORY, res.infoAsArray);
 			
 		} catch (JSONException e) {
@@ -350,22 +361,22 @@ public class Connection {
 		}		
 	}
 
-	public ItemLibrary<Item> getItems (int level)
+	public ItemLibrary<Item> getItems (Meter meter, int level)
 			throws IOException
 	{
 		ItemLibrary<Radical> radicals;
 		ItemLibrary<Kanji> kanji; 
 		ItemLibrary<Vocabulary> vocab;
 		
-		radicals = getRadicals (level);
-		kanji = getKanji (level);
-		vocab = getVocabulary (level);
+		radicals = getRadicals (meter, level);
+		kanji = getKanji (meter, level);
+		vocab = getVocabulary (meter, level);
 		
 		return new ItemLibrary<Item> ().
 					add (radicals).add (kanji).add(vocab);
 	}		
 
-	private static String readStream (InputStream is)
+	private static String readStream (Meter meter, InputStream is)
 		throws IOException
 	{
 		InputStreamReader ir;
@@ -380,18 +391,21 @@ public class Connection {
 			rd = ir.read (buf, 0, buf.length);
 			if (rd < 0)
 				break;
+			meter.count (rd);
 			sb.append (buf, 0, rd);
 		}
+		
+		meter.sync ();
 		return sb.toString ();
 	}
 	
-	protected Response call (String resource, boolean isArray)
+	protected Response call (Meter meter, String resource, boolean isArray)
 			throws IOException
 	{
-			return call (resource, isArray, null);
+			return call (meter, resource, isArray, null);
 	}
 		
-	protected Response call (String resource, boolean isArray, String arg)
+	protected Response call (Meter meter, String resource, boolean isArray, String arg)
 		throws IOException
 	{
 		HttpURLConnection conn;
@@ -406,7 +420,8 @@ public class Connection {
 			conn = (HttpURLConnection) url.openConnection ();
 			setTimeouts (conn);
 			is = conn.getInputStream ();
-			tok = new JSONTokener (readStream (is));
+			measureHeaders (meter, conn, false);
+			tok = new JSONTokener (readStream (meter, is));
 		} finally {
 			if (conn != null)
 				conn.disconnect ();
@@ -419,7 +434,7 @@ public class Connection {
 		}
 	}
 		
-	public void resolve (UserInformation ui, int size, Bitmap defAvatar)
+	public void resolve (Meter meter, UserInformation ui, int size, Bitmap defAvatar)
 	{
 			HttpURLConnection conn;
 			InputStream is;
@@ -438,6 +453,7 @@ public class Connection {
 					ui.gravatarBitmap = BitmapFactory.decodeStream (is);
 				} else if (code == 404)
 					ui.gravatarBitmap = defAvatar;
+				measureHeaders (meter, conn, true);
 			} catch (IOException e) {
 				/* empty */
 			} finally {
@@ -445,7 +461,30 @@ public class Connection {
 					conn.disconnect ();
 			}
 	}
-
+	
+	protected void measureHeaders (Meter meter, URLConnection conn, boolean clen)
+	{
+		Map<String, List<String>> hdrs;
+		
+		hdrs = conn.getHeaderFields ();
+		if (hdrs == null)
+			return;
+		for (Map.Entry<String, List<String>> e : hdrs.entrySet ()) {
+			meter.count (e.getKey ().length () + 1);
+			for (String s : e.getValue ())
+				meter.count (s.length () + 3);
+			if (clen && e.getKey ().equals ("Content-Length") && !e.getValue ().isEmpty ()) {
+				try {
+					meter.count (Integer.parseInt (e.getValue ().get (0)));
+				} catch (NumberFormatException x) {
+					/* empty */
+				}
+			}
+		}
+		
+		meter.sync ();
+	}
+		
 	private String makeURL (String resource, String arg)
 	{
 		String ans;

@@ -3,4 +3,5 @@
     <item android:id="@+id/em_refresh" android:title="@string/em_refresh" android:icon="@drawable/ic_menu_refresh"/>   
     <item android:id="@+id/em_settings" android:title="@string/em_settings" android:icon="@drawable/ic_menu_preferences"/>
     <item android:id="@+id/em_export" android:title="@string/em_export" android:icon="@drawable/ic_menu_save"/>
+    <item android:id="@+id/em_meters" android:title="@string/em_meters" android:icon="@drawable/ic_menu_view"/>
 </menu>

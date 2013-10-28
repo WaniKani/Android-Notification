@@ -277,15 +277,17 @@ public class ReconstructDialog {
 			UserInformation ui;
 			HistoryDatabase hdb;
 			int i, j, step, steps;
+			Connection.Meter meter;
 			Update u;
 
 			hdb = null;
 			rt = null;
+			meter = MeterSpec.T.RECONSTRUCT_DIALOG.get (ctxt);
 			try {
 				hdb = new HistoryDatabase (ctxt);
 				hdb.openW ();
 
-				ui = conn.getUserInformation ();
+				ui = conn.getUserInformation (meter);
 				steps = (2 * itemStepsFor (ui.level, RADICALS_CHUNK)) +   
 						(2 * itemStepsFor (ui.level, KANJI_CHUNK)) +
 						(2 * itemStepsFor (ui.level, VOCAB_CHUNK)) + 1;
@@ -301,7 +303,7 @@ public class ReconstructDialog {
 					u = new Update (step++, steps, 
 									ctxt.getString (R.string.rec_radicals_r, i, j));
 					publishProgress (u);
-					rlib = conn.getRadicals (array (i, j));
+					rlib = conn.getRadicals (meter, array (i, j));
 					u = new Update (step++, steps, ctxt.getString (R.string.rec_radicals_w));
 					publishProgress (u);
 					for (Radical r : rlib.list)
@@ -315,7 +317,7 @@ public class ReconstructDialog {
 					u = new Update (step++, steps, 
 									ctxt.getString (R.string.rec_kanji_r, i, j));
 					publishProgress (u);
-					klib = conn.getKanji (array (i, j));
+					klib = conn.getKanji (meter, array (i, j));
 					u = new Update (step++, steps, ctxt.getString (R.string.rec_kanji_w));
 					publishProgress (u);
 					for (Kanji kanji : klib.list)
@@ -329,7 +331,7 @@ public class ReconstructDialog {
 					u = new Update (step++, steps, 
 									ctxt.getString (R.string.rec_vocab_r, i, j));
 					publishProgress (u);
-					vlib = conn.getVocabulary (array (i, j));
+					vlib = conn.getVocabulary (meter, array (i, j));
 					u = new Update (step++, steps, ctxt.getString (R.string.rec_vocab_w));
 					publishProgress (u);
 					for (Vocabulary vocab : vlib.list)
