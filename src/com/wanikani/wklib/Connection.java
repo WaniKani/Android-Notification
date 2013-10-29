@@ -470,10 +470,12 @@ public class Connection {
 		if (hdrs == null)
 			return;
 		for (Map.Entry<String, List<String>> e : hdrs.entrySet ()) {
-			meter.count (e.getKey ().length () + 1);
+			if (e.getKey () != null) 
+				meter.count (e.getKey ().length () + 1);
 			for (String s : e.getValue ())
 				meter.count (s.length () + 3);
-			if (clen && e.getKey ().equals ("Content-Length") && !e.getValue ().isEmpty ()) {
+			if (clen && e.getKey () != null && 
+			    e.getKey ().equals ("Content-Length") && !e.getValue ().isEmpty ()) {
 				try {
 					meter.count (Integer.parseInt (e.getValue ().get (0)));
 				} catch (NumberFormatException x) {
