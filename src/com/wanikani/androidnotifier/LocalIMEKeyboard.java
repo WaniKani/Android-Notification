@@ -486,6 +486,41 @@ public class LocalIMEKeyboard implements Keyboard {
 		}
 	}
 	
+	private class BoxPosition {
+
+		Rect frect;
+		
+		Rect trect;
+		
+		public boolean update (Rect frect, Rect trect)
+		{
+			boolean changed;
+			
+			changed = false;
+			if (this.frect == null || !this.frect.equals (frect)) {
+				changed = true;
+				this.frect = frect;
+			}
+			
+			if (this.trect == null || !this.trect.equals (trect)) {
+				changed = true;
+				this.trect = trect;
+			}
+			
+			return changed;
+		}
+		
+		public void shift (int yofs)
+		{
+			if (frect != null)
+				frect.offset (0, yofs);
+			
+			if (trect != null)
+				trect.offset (0, yofs);
+		}
+		
+	}
+	
 	/**
 	 * The javascript triggers. They are installed when the keyboard is shown.
 	 */
@@ -639,6 +674,9 @@ public class LocalIMEKeyboard implements Keyboard {
     /// The next button
     Button next;
     
+    /// The current box position
+    BoxPosition bpos;
+    
     int correctFG, incorrectFG, ignoredFG;
     
     int correctBG, incorrectBG, ignoredBG;
@@ -681,6 +719,7 @@ public class LocalIMEKeyboard implements Keyboard {
 		this.wv = wv;
 		
 		editable = true;
+		bpos = new BoxPosition ();
 		
 		imm = (InputMethodManager) wav.getSystemService (Context.INPUT_METHOD_SERVICE);
 		
@@ -800,29 +839,31 @@ public class LocalIMEKeyboard implements Keyboard {
 		RelativeLayout.LayoutParams rparams;
 		LinearLayout.LayoutParams params;
 
-		rparams = (RelativeLayout.LayoutParams) divw.getLayoutParams ();
-		rparams.topMargin = frect.top;
-		rparams.leftMargin = frect.left;
-//		rparams.height = frect.height ();
-		rparams.width = LayoutParams.MATCH_PARENT;
-		divw.setLayoutParams (rparams);
+		if (bpos.update (frect, trect)) {
+					
+			rparams = (RelativeLayout.LayoutParams) divw.getLayoutParams ();
+			rparams.topMargin = frect.top;
+			rparams.leftMargin = frect.left;
+//			rparams.height = frect.height ();
+			rparams.width = LayoutParams.MATCH_PARENT;
+			divw.setLayoutParams (rparams);
 	
-		params = (LinearLayout.LayoutParams) ew.getLayoutParams ();
+			params = (LinearLayout.LayoutParams) ew.getLayoutParams ();
 				
-//		params.topMargin = trect.top - frect.top;
-//		params.bottomMargin = frect.bottom - trect.bottom;
-		params.leftMargin = trect.left - frect.left;
-		params.rightMargin = params.leftMargin;
+//			params.topMargin = trect.top - frect.top;
+//			params.bottomMargin = frect.bottom - trect.bottom;
+			params.leftMargin = trect.left - frect.left;
+			params.rightMargin = params.leftMargin;
 		
-		ew.setLayoutParams (params);
+			ew.setLayoutParams (params);
 				
-		params = (LinearLayout.LayoutParams) next.getLayoutParams ();
-//		params.topMargin = trect.top - frect.top;
-//		params.bottomMargin = frect.bottom - trect.bottom;
-		next.setLayoutParams (params);		
-
+			params = (LinearLayout.LayoutParams) next.getLayoutParams ();
+//			params.topMargin = trect.top - frect.top;
+//			params.bottomMargin = frect.bottom - trect.bottom;
+			next.setLayoutParams (params);		
+		}
+			
 		divw.setVisibility (View.VISIBLE);
-		divw.setBackgroundColor (Color.rgb (0xee, 0xee, 0xee));
 		
 		ew.requestFocus ();
 	}
@@ -869,6 +910,8 @@ public class LocalIMEKeyboard implements Keyboard {
 		rparams = (RelativeLayout.LayoutParams) qvw.getLayoutParams ();
 		rparams.topMargin -= dy;
 		qvw.setLayoutParams (rparams);
+		
+		bpos.shift (-dy);
 	}
 	
 	/**
@@ -917,6 +960,7 @@ public class LocalIMEKeyboard implements Keyboard {
 	public void enableIgnoreButton (boolean enable)
 	{
 		canIgnore = enable;
+		wav.updateCanIgnore ();
 	}
 	
 	/**
