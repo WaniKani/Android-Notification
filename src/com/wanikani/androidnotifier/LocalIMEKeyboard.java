@@ -238,13 +238,18 @@ public class LocalIMEKeyboard implements Keyboard {
 		/// The CSS class to emulate
 		public String clazz;
 		
+		/// Set if we reviewing, unset if we are in the lessons quiz module
+		public boolean reviews;
+		
 		/**
 		 * Constructor. Used when the edittext changes class.
 		 * @param clazz the CSS class
+		 * @param reviews are we in the review module
 		 */
-		public JSListenerSetClass (String clazz)
+		public JSListenerSetClass (String clazz, boolean reviews)
 		{
 			this.clazz = clazz;
+			this.reviews = reviews;
 			
 			enable = true;
 			
@@ -268,7 +273,7 @@ public class LocalIMEKeyboard implements Keyboard {
 		public void run ()
 		{
 			if (enable)
-				setClass (clazz);
+				setClass (clazz, reviews);
 			else
 				unsetClass ();
 			
@@ -435,11 +440,12 @@ public class LocalIMEKeyboard implements Keyboard {
 		/**
 		 * Called when the text box changes its class
 		 * @param clazz the new CSS class
+		 * @param reviews if we are doing reviews
 		 */
 		@JavascriptInterface
-		public void setClass (String clazz)
+		public void setClass (String clazz, boolean reviews)
 		{
-			new JSListenerSetClass (clazz);
+			new JSListenerSetClass (clazz, reviews);
 		}
 		
 		/**
@@ -447,14 +453,15 @@ public class LocalIMEKeyboard implements Keyboard {
 		 * @param correct
 		 * @param incorrect
 		 * @param text
+		 * @param reviews if we are doing reviews
 		 */
 		@JavascriptInterface
-		public void sync (boolean correct, boolean incorrect, String text)
+		public void sync (boolean correct, boolean incorrect, String text, boolean reviews)
 		{
 			if (correct)
-				new JSListenerSetClass ("correct");
+				new JSListenerSetClass ("correct", reviews);
 			if (incorrect)
-				new JSListenerSetClass ("incorrect");			
+				new JSListenerSetClass ("incorrect", reviews);			
 			new JSSetText (text);
 		}
 		
@@ -522,6 +529,12 @@ public class LocalIMEKeyboard implements Keyboard {
 	}
 	
 	/**
+	 * A JS condition that evaluates to true if we are reviewing, false if we are in the lessons module
+	 */
+	private static final String JS_REVIEWS_P =
+			"(document.getElementById (\"quiz\") == null)";
+	
+	/**
 	 * The javascript triggers. They are installed when the keyboard is shown.
 	 */
 	private static final String JS_INIT_TRIGGERS =
@@ -566,7 +579,7 @@ public class LocalIMEKeyboard implements Keyboard {
 			"    var res;" +
 			"    res = oldAddClass.apply (this, arguments);" +
 			"    if (this.selector == \"#answer-form fieldset\")" +
-			"         wknJSListener.setClass (arguments [0]); " +
+			"         wknJSListener.setClass (arguments [0], " + JS_REVIEWS_P + "); " +
 			"    return res;" +
 			"};" +
 			"window.wknNewQuiz = function (entry, type) {" +
@@ -608,7 +621,8 @@ public class LocalIMEKeyboard implements Keyboard {
 			"var form, tbox;" +
 			"form = $(\"#answer-form fieldset\");" +
 			"tbox = $(\"#user-response\");" +
-			"wknJSListener.sync (form.hasClass (\"correct\"), form.hasClass (\"incorrect\"), tbox.val ());";
+			"wknJSListener.sync (form.hasClass (\"correct\"), form.hasClass (\"incorrect\"), " +
+			"                    tbox.val (), " + JS_REVIEWS_P + ");";
 
 	/** 
 	 * Uninstalls the triggers, when the keyboard is hidden
@@ -917,8 +931,9 @@ public class LocalIMEKeyboard implements Keyboard {
 	/**
 	 * Called when the HTML textbox changes class. It changes the edit text accordingly.
 	 * @param clazz the CSS class
+	 * @param reviews if we are reviewing
 	 */
-	public void setClass (String clazz)
+	public void setClass (String clazz, boolean reviews)
 	{
 		if (clazz.equals ("correct")) {
 			enableIgnoreButton (false);
@@ -926,7 +941,7 @@ public class LocalIMEKeyboard implements Keyboard {
 		} else if (clazz.equals ("incorrect")) {
 			if (SettingsActivity.getErrorPopup (wav))
 				errorPopup ();
-			enableIgnoreButton (true);
+			enableIgnoreButton (reviews);
 			disable (incorrectFG, incorrectBG);
 		} else if (clazz.equals ("WKO_ignored")) {
 			enableIgnoreButton (false);
@@ -1030,7 +1045,7 @@ public class LocalIMEKeyboard implements Keyboard {
 
 	public static String ifReviews (String js)
 	{
-		return "if (document.getElementById (\"quiz\") == null) {" + js + "}";
+		return "if (" + JS_REVIEWS_P + ") {" + js + "}";
 	}
 	
 	protected boolean overrideFont ()
