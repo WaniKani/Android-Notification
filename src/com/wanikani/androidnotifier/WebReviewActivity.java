@@ -6,26 +6,23 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v4.app.ActivityCompat;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.view.inputmethod.InputMethodManager;
 import android.webkit.CookieSyncManager;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -905,6 +902,8 @@ public class WebReviewActivity extends Activity {
 				
 		if (keyboard != oldk && oldk != null)
 			oldk.hide ();
+		
+		flushMenu ();
 	}
 	
 	private void applyMuteSettings ()
@@ -980,9 +979,14 @@ public class WebReviewActivity extends Activity {
 		keyboard.iconize (kbstatus.hasEnter (this));
 	}
 	
-	public boolean canIgnore ()
+	protected void flushMenu ()
 	{
-		return false;
+		ActivityCompat.invalidateOptionsMenu (this);		
+	}
+	
+	public void updateCanIgnore ()
+	{
+		flushMenu ();
 	}
 	
 	protected void showIgnoreButtonMessage ()
