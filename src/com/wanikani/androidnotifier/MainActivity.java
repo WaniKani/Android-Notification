@@ -455,20 +455,6 @@ public class MainActivity extends FragmentActivity implements Runnable {
 		
 	}
 	
-	/**
-	 * The listener attached to the lessons tip message.
-	 * When the user taps the ok button, we write on the property
-	 * that it has been acknowleged, so it won't show up any more. 
-	 */
-	private class OkListener implements DialogInterface.OnClickListener {
-		
-		@Override
-		public void onClick (DialogInterface ifc, int which)
-		{
-			SettingsActivity.setTipLessons (MainActivity.this, true);
-		}		
-	}
-
 	/** The prefix */
 	private static final String PREFIX = MainActivity.class + ".";
 	
@@ -766,28 +752,6 @@ public class MainActivity extends FragmentActivity implements Runnable {
 		if (layout != getLayout ())
 			reboot ();
 	}
-
-	/**
-	 * Show a guidance message about forthcoming lessons reviews.
-	 */
-	protected void showLessonsMessage ()
-	{
-		AlertDialog.Builder builder;
-		Dialog dialog;
-					
-		if (SettingsActivity.getTipLessons (this))
-			return;
-		
-		builder = new AlertDialog.Builder (this);
-		builder.setTitle (R.string.lesson_message_title);
-		builder.setMessage (R.string.lesson_message_text);
-		builder.setPositiveButton (R.string.kbd_message_ok, new OkListener ());
-		
-		dialog = builder.create ();
-		
-		dialog.show ();		
-	}
-	
 		
 	/**
 	 * Restarts the activity 
@@ -1038,10 +1002,8 @@ public class MainActivity extends FragmentActivity implements Runnable {
 		if (!intermediate)
 			pad.spin (false);
 
-		if (this.dd == null) {
-			showLessonsMessage ();
+		if (this.dd == null)
 			switchTo (R.id.f_main);
-		}
 		
 		if (this.dd != null)
 			dd.merge (this.dd);
