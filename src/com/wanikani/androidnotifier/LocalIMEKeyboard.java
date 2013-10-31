@@ -615,7 +615,7 @@ public class LocalIMEKeyboard implements Keyboard {
 			"    if (arguments [0] == \"hidden\" && " +
 			"        (this.selector == \"#screen-quiz-ready\" || " +
 			"         this.selector == \"#screen-lesson-ready\" || " +			
-			"         this.selector == \"#screen-lesson-done\" || " +			
+	//		"         this.selector == \"#screen-lesson-done\" || " +   /* We skip this test to avoid glitch */			
 			"         this.selector == \"#screen-time-out\"))" +
 			"			wknJSListener.timeout (false);" +			
 			"    return res;" +
