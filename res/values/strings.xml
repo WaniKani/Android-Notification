@@ -273,18 +273,6 @@
     </string>
     <string name="kbd_message_ok">OK, got it</string>
     
-    <string name="lesson_message_title">Lessons are changing!!!</string>
-    <string name="lesson_message_text">
-		Soon the WK lessons module will change. 
-		This might break me. If one day clicking on the unlock button takes you
-		to a blank page, please find the new lessons URL and put it into the 
-		Settings/Lesson URL preference. If the keyboard does not work anymore,
-		try disabling the "Embedded lessons kbd" checkbox.
-		In any case, have a look to the WK post in the "API" WK Forum 
-		and check for an update on Google Play. 		
-    </string>
-    <string name="lesson_message_ok">OK, got it</string>
-    
     <string name="ignore_button_message_title">Ignore button</string>
     <string name="ignore_button_message_text">        
 		Anyone using this feature is responsible for using it correctly.\n 

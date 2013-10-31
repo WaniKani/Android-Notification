@@ -124,9 +124,9 @@
     <EditTextPreference android:key="pref_review_url" 
         	android:title="@string/pref_url" android:summary="@string/pref_url_desc"
         	android:defaultValue="http://www.wanikani.com/review/session" />
-    <EditTextPreference android:key="pref_lesson_url" 
+    <EditTextPreference android:key="pref_lesson_url2" 
         	android:title="@string/pref_lesson_url" android:summary="@string/pref_lesson_url_desc"
-        	android:defaultValue="http://www.wanikani.com/lesson" />
+        	android:defaultValue="http://www.wanikani.com/lesson/session" />
     </PreferenceCategory>
 	<PreferenceCategory
 	    	android:title="@string/tpref_export">

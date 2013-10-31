@@ -75,7 +75,7 @@ public class WebReviewActivity extends Activity {
 		static final String CURRENT_REVIEW_START = "http://www.wanikani.com/review/session";
 
 		/** Review start page. Of course must be inside of @link {@link #REVIEW_SPACE} */
-		static final String CURRENT_LESSON_START = "http://www.wanikani.com/lesson";
+		static final String CURRENT_LESSON_START = "http://www.wanikani.com/lesson/session";
 
 		/** HTML id of the textbox the user types its answer in (reviews, client-side) */
 		static final String ANSWER_BOX = "user-response";
