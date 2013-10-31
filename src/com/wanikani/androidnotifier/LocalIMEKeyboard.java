@@ -305,6 +305,8 @@ public class LocalIMEKeyboard implements Keyboard {
 				divw.setVisibility (View.GONE);
 				imm.hideSoftInputFromWindow (ew.getWindowToken (), 0);
 			}
+			
+			qvw.setVisibility (bpos.qvisible && show ? View.VISIBLE : View.GONE);
 		}
 		
 	}
@@ -351,6 +353,55 @@ public class LocalIMEKeyboard implements Keyboard {
 		{
 			showQuestion (type, name, rect, size);
 		}
+	}
+
+	private class BoxPosition {
+
+		Rect frect;
+		
+		Rect trect;
+		
+		/// The box is visible, or ought to be unless there is a timeout screen showing
+		boolean visible;
+		
+		/// Is the timeout screen visible
+		boolean timeout; 
+		
+		/// Is the qbox visible
+		boolean qvisible;
+		
+		public boolean update (Rect frect, Rect trect)
+		{
+			boolean changed;
+			
+			changed = false;
+			if (this.frect == null || !this.frect.equals (frect)) {
+				changed = true;
+				this.frect = frect;
+			}
+			
+			if (this.trect == null || !this.trect.equals (trect)) {
+				changed = true;
+				this.trect = trect;
+			}
+			
+			return changed;
+		}
+		
+		public void shift (int yofs)
+		{
+			if (frect != null)
+				frect.offset (0, yofs);
+			
+			if (trect != null)
+				trect.offset (0, yofs);
+		}
+		
+		public boolean shallShow ()
+		{
+			return visible && !timeout;
+		}
+		
 	}
 
 	/**
@@ -471,7 +522,8 @@ public class LocalIMEKeyboard implements Keyboard {
 		@JavascriptInterface
 		public void showKeyboard ()
 		{
-			new JSHideShow (true);
+			bpos.visible = true;
+			new JSHideShow (bpos.shallShow ());
 		}
 
 		/**
@@ -480,8 +532,22 @@ public class LocalIMEKeyboard implements Keyboard {
 		@JavascriptInterface
 		public void hideKeyboard ()
 		{
-			new JSHideShow (false);
+			bpos.visible = false;
+			new JSHideShow (bpos.shallShow ());
 		}
+		
+		/**
+		 * Called when the timeout div is shown or hidden. Need to catch this event to hide
+		 * and show the windows as well.
+		 * @param enabled if the div is shown
+		 */
+		@JavascriptInterface
+		public void timeout (boolean enabled)
+		{
+			bpos.timeout = enabled;
+			new JSHideShow (bpos.shallShow ());
+		}
+
 		
 		/**
 		 * Re-enables the edit box, because the event has been delivered.
@@ -490,43 +556,9 @@ public class LocalIMEKeyboard implements Keyboard {
 		public void unfreeze ()
 		{
 			frozen = false;
-		}
+		}		
 	}
 	
-	private class BoxPosition {
-
-		Rect frect;
-		
-		Rect trect;
-		
-		public boolean update (Rect frect, Rect trect)
-		{
-			boolean changed;
-			
-			changed = false;
-			if (this.frect == null || !this.frect.equals (frect)) {
-				changed = true;
-				this.frect = frect;
-			}
-			
-			if (this.trect == null || !this.trect.equals (trect)) {
-				changed = true;
-				this.trect = trect;
-			}
-			
-			return changed;
-		}
-		
-		public void shift (int yofs)
-		{
-			if (frect != null)
-				frect.offset (0, yofs);
-			
-			if (trect != null)
-				trect.offset (0, yofs);
-		}
-		
-	}
 	
 	/**
 	 * A JS condition that evaluates to true if we are reviewing, false if we are in the lessons module
@@ -600,6 +632,8 @@ public class LocalIMEKeyboard implements Keyboard {
 			"    res = oldShow.apply (this, arguments);" +
 			"    if (this == $(\"#quiz\"))" +
 			"         wknJSListener.showKeyboard (); " +
+			"    if (this.selector == \"#timeout\") " +
+			"         wknJSListener.timeout (true);" +
 			"    return res;" +
 			"};" +
 			"jQuery.fn.hide = function () {" +
@@ -607,16 +641,21 @@ public class LocalIMEKeyboard implements Keyboard {
 			"    res = oldHide.apply (this, arguments);" +
 			"    if (this == $(\"#quiz\"))" +
 			"         wknJSListener.hideKeyboard (); " +
+			"    if (this.selector == \"#timeout\") " +
+			"         wknJSListener.timeout (false);" +
 			"    return res;" +
 			"};" +
-			"if (document.getElementById (\"quiz\") == null) {" +
+			"if (" + JS_REVIEWS_P + ") {" +
 			"  wknJSListener.showKeyboard ();" +
+			"  wknJSListener.timeout ($(\"#timeout\").is (\":visible\"));" +
 			"  window.wknNewQuestion ();" +
 			"} else if ($(\"#quiz\").is (\":visible\")) {" +
 			"  window.wknNewQuestion ();" +
 			"  wknJSListener.showKeyboard ();" +
+			"  wknJSListener.timeout (false);" +
 			"} else {" +
 			"	wknJSListener.hideKeyboard ();" +
+			"   wknJSListener.timeout (false);" +
 			"}" +
 			"var form, tbox;" +
 			"form = $(\"#answer-form fieldset\");" +
@@ -688,7 +727,7 @@ public class LocalIMEKeyboard implements Keyboard {
     /// The next button
     Button next;
     
-    /// The current box position
+    /// The current box position and state
     BoxPosition bpos;
     
     int correctFG, incorrectFG, ignoredFG;
@@ -755,7 +794,7 @@ public class LocalIMEKeyboard implements Keyboard {
 		ewit = ew.getInputType ();
 		
 		qvw = (TextView) wav.findViewById (R.id.txt_question_override);
-		jtf = SettingsActivity.getJapaneseFont ();
+		jtf = SettingsActivity.getJapaneseFont (wav);
 		if (jtf != null)
 			qvw.setTypeface (jtf);			
 		
@@ -904,8 +943,11 @@ public class LocalIMEKeyboard implements Keyboard {
 			qvw.setBackgroundColor (cmap.get (type));
 			qvw.setTextColor (Color.WHITE);
 			qvw.setText (name);
-		} else
-			qvw.setVisibility (View.GONE);					
+			bpos.qvisible = true;
+		} else {
+			qvw.setVisibility (View.GONE);
+			bpos.qvisible = false;
+		}
 	}
 	
 	/**
