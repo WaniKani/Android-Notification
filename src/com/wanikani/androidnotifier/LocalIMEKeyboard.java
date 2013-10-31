@@ -612,6 +612,24 @@ public class LocalIMEKeyboard implements Keyboard {
 			"    res = oldAddClass.apply (this, arguments);" +
 			"    if (this.selector == \"#answer-form fieldset\")" +
 			"         wknJSListener.setClass (arguments [0], " + JS_REVIEWS_P + "); " +
+			"    if (arguments [0] == \"hidden\" && " +
+			"        (this.selector == \"#screen-quiz-ready\" || " +
+			"         this.selector == \"#screen-lesson-ready\" || " +			
+			"         this.selector == \"#screen-lesson-done\" || " +			
+			"         this.selector == \"#screen-time-out\"))" +
+			"			wknJSListener.timeout (false);" +			
+			"    return res;" +
+			"};" +
+			"var oldRemoveClass = jQuery.fn.removeClass;" +
+			"jQuery.fn.removeClass = function () {" +
+			"    var res;" +
+			"    res = oldRemoveClass.apply (this, arguments);" +
+			"    if (arguments [0] == \"hidden\" && " +
+			"        (this.selector == \"#screen-quiz-ready\" || " +
+			"         this.selector == \"#screen-lesson-ready\" || " +			
+			"         this.selector == \"#screen-lesson-done\" || " +			
+			"         this.selector == \"#screen-time-out\"))" +
+			"			wknJSListener.timeout (true);" +			
 			"    return res;" +
 			"};" +
 			"window.wknNewQuiz = function (entry, type) {" +
@@ -630,7 +648,7 @@ public class LocalIMEKeyboard implements Keyboard {
 			"jQuery.fn.show = function () {" +
 			"    var res;" +
 			"    res = oldShow.apply (this, arguments);" +
-			"    if (this == $(\"#quiz\"))" +
+			"    if (this.selector == \"#quiz\")" +
 			"         wknJSListener.showKeyboard (); " +
 			"    if (this.selector == \"#timeout\") " +
 			"         wknJSListener.timeout (true);" +
@@ -639,7 +657,7 @@ public class LocalIMEKeyboard implements Keyboard {
 			"jQuery.fn.hide = function () {" +
 			"    var res;" +
 			"    res = oldHide.apply (this, arguments);" +
-			"    if (this == $(\"#quiz\"))" +
+			"    if (this.selector == \"#quiz\")" +
 			"         wknJSListener.hideKeyboard (); " +
 			"    if (this.selector == \"#timeout\") " +
 			"         wknJSListener.timeout (false);" +
@@ -652,7 +670,12 @@ public class LocalIMEKeyboard implements Keyboard {
 			"} else if ($(\"#quiz\").is (\":visible\")) {" +
 			"  window.wknNewQuestion ();" +
 			"  wknJSListener.showKeyboard ();" +
-			"  wknJSListener.timeout (false);" +
+			"  wknJSListener.timeout (" +
+			"        $(\"#screen-quiz-ready\").is (\":visible\") || " +
+			"        $(\"#screen-lesson-ready\").is (\":visible\") || " +			
+			"        $(\"#screen-lesson-done\").is (\":visible\") || " +			
+			"        $(\"#screen-time-out\").is (\":visible\")" +
+			"			); " +			
 			"} else {" +
 			"	wknJSListener.hideKeyboard ();" +
 			"   wknJSListener.timeout (false);" +
