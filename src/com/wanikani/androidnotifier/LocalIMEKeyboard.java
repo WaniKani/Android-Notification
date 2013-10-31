@@ -897,8 +897,7 @@ public class LocalIMEKeyboard implements Keyboard {
 		params.addRule (RelativeLayout.CENTER_HORIZONTAL);
 		qvw.setLayoutParams (params);
 		
-		if (type == Item.Type.KANJI ||
-			type == Item.Type.VOCABULARY) {
+		if (!name.endsWith (".png")) {
 			qvw.setVisibility (View.VISIBLE);
 			qvw.setTextSize (size);
 			qvw.setBackgroundColor (cmap.get (type));
