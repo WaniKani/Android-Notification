@@ -54,7 +54,7 @@
               style="@style/AlertButton"
               android:visibility="gone"
               android:layout_alignParentTop="true"
-              android:layout_alignParentLeft="true"
+              android:layout_centerHorizontal="true"
               android:src="@drawable/ic_mute" />
         <TextView
             android:id="@+id/txt_question_override"
