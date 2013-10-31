@@ -659,6 +659,7 @@ public class LocalIMEKeyboard implements Keyboard {
 			"}" +
 			"var form, tbox;" +
 			"form = $(\"#answer-form fieldset\");" +
+			"form.css ('visibility','hidden');" +
 			"tbox = $(\"#user-response\");" +
 			"wknJSListener.sync (form.hasClass (\"correct\"), form.hasClass (\"incorrect\"), " +
 			"                    tbox.val (), " + JS_REVIEWS_P + ");";
@@ -667,6 +668,8 @@ public class LocalIMEKeyboard implements Keyboard {
 	 * Uninstalls the triggers, when the keyboard is hidden
 	 */
 	private static final String JS_STOP_TRIGGERS =
+			"form = $(\"#answer-form fieldset\");" +
+			"form.css ('visibility','visible');" +
 			"$.jStorage.stopListening (\"currentItem\", window.wknNewQuestion);" +
 			"$.jStorage.stopListening (\"l/currentQuizItem\", window.wknNewQuiz);";
 	
