@@ -767,13 +767,22 @@ public class SettingsActivity
 		}
 	}
 	
-	public static Typeface getJapaneseFont ()
+	public static Typeface getJapaneseFont (Context ctxt)
 	{
 		try {
 			return Typeface.createFromFile (JAPANESE_TYPEFACE_FONT);
 		} catch (Exception e) {
-			return null;
+			/* empty */
 		}
+		
+		try {
+			if (ctxt != null)
+				return Typeface.createFromAsset (ctxt.getAssets (), "MTLmr3m.ttf");
+		} catch (Exception e) {
+			/* empty */
+		}
+		
+		return null;
 	}
 }
 

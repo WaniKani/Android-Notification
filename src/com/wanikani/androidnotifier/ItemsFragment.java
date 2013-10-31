@@ -1188,7 +1188,7 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 		rimg = new RadicalImages ();
 		alarm = new Alarm ();
 		refreshTask = new RefreshTask ();
-		jtf = SettingsActivity.getJapaneseFont ();
+		jtf = SettingsActivity.getJapaneseFont (null);
 			
 		currentLevel = -1;		
 	}
