@@ -10,6 +10,7 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
@@ -150,9 +151,16 @@ public class WebReviewActivity extends Activity {
 	    @Override
 	    public boolean shouldOverrideUrlLoading (WebView view, String url) 
 	    {
-	        view.loadUrl (url);
+    		Intent intent;
 
-	        return true;
+    		if (!url.contains ("wanikani.com")) {
+    			intent = new Intent (Intent.ACTION_VIEW);	    		
+	    		intent.setData (Uri.parse (url));
+	    		startActivity (intent);		
+	    	} else
+	    		view.loadUrl (url);	    	
+	    	
+	    	return false;
 	    }
 		
 	    /**
