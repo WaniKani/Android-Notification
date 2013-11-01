@@ -159,7 +159,7 @@ public class WaniKaniImprove {
 								
 // Original script
 "\r\n" + 
-"$('<li id=\"option-show-previous\"><span title=\"Check previous item\" lang=\"ja\"><i class=\"icon-question-sign\"></i></span></li>').insertAfter('#option-home').addClass('disabled');\r\n" + 
+"$('<li id=\"option-show-previous\"><span title=\"Check previous item\" lang=\"ja\"><i class=\"icon-question-sign\"></i></span></li>').insertAfter('#option-last-items').addClass('disabled');\r\n" + 
 "$('<style type=\"text/css\"> .qtip{ max-width: 380px !important; } #additional-content ul li { width: 16% !important; } #additional-content {text-align: center;} #option-show-previous img { max-width: 12px; background-color: #00A2F3; padding: 2px 3px; }</style>').appendTo('head');\r\n" + 
 "\r\n" +
 
