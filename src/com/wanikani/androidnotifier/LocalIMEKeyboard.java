@@ -858,7 +858,7 @@ public class LocalIMEKeyboard implements Keyboard {
 	{
 		wv.js (JS_INIT_TRIGGERS);
 		if (SettingsActivity.getReviewOrder (wav))
-			ifReviews (ReviewOrder.JS_CODE);
+			wv.js (ifReviews (ReviewOrder.JS_CODE));
 		
 		isWKIEnabled = SettingsActivity.getWaniKaniImprove (wav); 
 		if (isWKIEnabled)
@@ -894,7 +894,7 @@ public class LocalIMEKeyboard implements Keyboard {
 		if (isWKIEnabled)
 			wki.uninitPage ();
 		if (SettingsActivity.getReviewOrder (wav))
-			ifReviews (ReviewOrder.JS_UNINIT_CODE);
+			wv.js (ifReviews (ReviewOrder.JS_UNINIT_CODE));
 	}
 
 	/**
