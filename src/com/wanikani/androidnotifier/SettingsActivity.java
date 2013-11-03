@@ -105,6 +105,8 @@ public class SettingsActivity
 	private static final String KEY_PREF_EXPORT_DEST = "pref_export_dest";
 	/** The export file */
 	private static final String KEY_PREF_EXPORT_FILE = "pref_export_file";
+	/** Disable keyboard suggestions */
+	private static final String KEY_PREF_DISABLE_SUGGESTIONS = "pref_disable_suggestions";
 	
 	/** Embedded keyboard message has been read and acknowledged */
 	private static final String KEY_TIP_ACK = "key_tip_ack";
@@ -338,7 +340,10 @@ public class SettingsActivity
 
 		pref = findPreference (KEY_PREF_LARGE_KEYBOARD);
 		pref.setEnabled ((getLessonsKeyboard (prefs) == Keyboard.EMBEDDED ||
-		                  getReviewsKeyboard (prefs) == Keyboard.EMBEDDED) && getUseIntegratedBrowser (prefs));	
+		                  getReviewsKeyboard (prefs) == Keyboard.EMBEDDED) && getUseIntegratedBrowser (prefs));
+		
+		pref = findPreference (KEY_PREF_DISABLE_SUGGESTIONS);
+		pref.setEnabled (getReviewsKeyboard (prefs) == Keyboard.LOCAL_IME && getUseIntegratedBrowser (prefs));			
 	}
 
 	@SuppressWarnings ("deprecation")
@@ -501,6 +506,11 @@ public class SettingsActivity
 	public static boolean getReviewOrder (Context ctxt)
 	{
 		return prefs (ctxt).getBoolean (KEY_PREF_REVIEW_ORDER, false);
+	}
+	
+	public static boolean getDisableSuggestions (Context ctxt)
+	{
+		return prefs (ctxt).getBoolean (KEY_PREF_DISABLE_SUGGESTIONS, false);
 	}
 
 	public static boolean getErrorPopup (Context ctxt)

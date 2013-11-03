@@ -276,6 +276,8 @@ public class LocalIMEKeyboard implements Keyboard {
 				setClass (clazz, reviews);
 			else
 				unsetClass ();
+			
+			setInputType ();
 		}
 		
 	}
@@ -777,6 +779,9 @@ public class LocalIMEKeyboard implements Keyboard {
     /// Is the text box disabled
     boolean editable;
     
+    /// Was suggestion disabled last time we checked?
+    boolean disableSuggestions;
+    
     /**
      * Constructor
      * @param wav parent activity
@@ -793,6 +798,8 @@ public class LocalIMEKeyboard implements Keyboard {
 		bpos = new BoxPosition ();
 		
 		imm = (InputMethodManager) wav.getSystemService (Context.INPUT_METHOD_SERVICE);
+		
+		disableSuggestions = SettingsActivity.getDisableSuggestions (wav);
 		
 		dm = wav.getResources ().getDisplayMetrics ();
 		
@@ -855,6 +862,7 @@ public class LocalIMEKeyboard implements Keyboard {
 			wki.initPage ();
 		
 		showCustomIMEMessage ();
+		setInputType ();
 		
 		wv.enableFocus ();
 	}
@@ -1139,6 +1147,20 @@ public class LocalIMEKeyboard implements Keyboard {
 			wv.js (JS_OVERRIDE);
 		else
 			qvw.setVisibility (View.GONE);
+	}
+	
+	protected void setInputType ()
+	{
+		if (SettingsActivity.getDisableSuggestions (wav)) {
+			disableSuggestions = true;
+			if (imel.translate)
+				ew.setInputType (InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
+			else
+				ew.setInputType (InputType.TYPE_CLASS_TEXT);
+		} else if (disableSuggestions) {	// This strange trick is to avoid messing with inputtype when not needed
+			disableSuggestions = false;
+			ew.setInputType (InputType.TYPE_CLASS_TEXT);
+		}
 	}
 
 }

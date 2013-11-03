@@ -30,6 +30,8 @@
     <string name="pref_userkey">User API Key</string>    
     <string name="pref_keyboard">Reviews kbd</string>
     <string name="pref_keyboard_desc">Select keyboard type used while reviewing</string>
+    <string name="pref_disable_suggestions">No suggestions</string>
+    <string name="pref_disable_suggestions_desc">Disable suggestions when entering japanese words</string>
     <string name="pref_show_lessons_keyboard">Embedded lessons kbd</string>
     <string name="pref_show_lessons_keyboard_desc">Show embedded keyboard during lessons</string>
     <string name="pref_large_keyboard">Tall keyboard</string>

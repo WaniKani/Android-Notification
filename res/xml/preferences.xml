@@ -82,6 +82,11 @@
 	        android:entries="@array/keyboards"
 	        android:entryValues="@array/keyboardValues"/>
     <CheckBoxPreference
+        	android:key="pref_disable_suggestions"
+        	android:title="@string/pref_disable_suggestions"
+        	android:summary="@string/pref_disable_suggestions_desc"
+        	android:defaultValue="false" />   
+    <CheckBoxPreference
         	android:key="pref_show_lessons_keyboard"
         	android:title="@string/pref_show_lessons_keyboard"
         	android:summary="@string/pref_show_lessons_keyboard_desc"
