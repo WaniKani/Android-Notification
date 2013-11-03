@@ -276,11 +276,6 @@ public class LocalIMEKeyboard implements Keyboard {
 				setClass (clazz, reviews);
 			else
 				unsetClass ();
-			
-			if (imel.translate)
-				ew.setInputType (InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
-			else
-				ew.setInputType (ewit);
 		}
 		
 	}
@@ -779,9 +774,6 @@ public class LocalIMEKeyboard implements Keyboard {
     /// Is the text box frozen because it is waiting for a class change
     boolean frozen;
     
-    /// The default input type
-    int ewit;
-
     /// Is the text box disabled
     boolean editable;
     
@@ -816,8 +808,6 @@ public class LocalIMEKeyboard implements Keyboard {
 		ew.setGravity (Gravity.CENTER);
 		ew.setImeActionLabel (">>", EditorInfo.IME_ACTION_DONE);
 		ew.setImeOptions (EditorInfo.IME_ACTION_DONE);
-		
-		ewit = ew.getInputType ();
 		
 		qvw = (TextView) wav.findViewById (R.id.txt_question_override);
 		jtf = SettingsActivity.getJapaneseFont (wav);
