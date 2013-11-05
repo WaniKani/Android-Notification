@@ -2,10 +2,10 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
     <item android:id="@+id/em_dashboard" android:title="@string/em_dashboard" 
           android:showAsAction="ifRoom|withText"  android:icon="@drawable/ic_menu_home"/>
-    <item android:id="@+id/em_ignore" android:title="@string/em_ignore" 
-          android:showAsAction="ifRoom|withText"  android:icon="@drawable/ic_menu_close_clear_cancel"/>
     <item android:id="@id/em_settings" android:title="@string/em_settings" 
           android:showAsAction="ifRoom|withText"  android:icon="@drawable/ic_menu_preferences"/>
     <item android:id="@+id/em_fonts" android:title="@string/em_fonts" 
           android:showAsAction="ifRoom|withText" android:icon="@drawable/ic_menu_font"/>
+    <item android:id="@+id/em_ignore" android:title="@string/em_ignore" 
+          android:showAsAction="never|withText"  android:icon="@drawable/ic_menu_close_clear_cancel"/>
 </menu>

@@ -85,7 +85,7 @@
         	android:key="pref_disable_suggestions"
         	android:title="@string/pref_disable_suggestions"
         	android:summary="@string/pref_disable_suggestions_desc"
-        	android:defaultValue="false" />   
+        	android:defaultValue="true" />   
     <CheckBoxPreference
         	android:key="pref_show_lessons_keyboard"
         	android:title="@string/pref_show_lessons_keyboard"

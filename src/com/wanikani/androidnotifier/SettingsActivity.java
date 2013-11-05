@@ -510,7 +510,7 @@ public class SettingsActivity
 	
 	public static boolean getDisableSuggestions (Context ctxt)
 	{
-		return prefs (ctxt).getBoolean (KEY_PREF_DISABLE_SUGGESTIONS, false);
+		return prefs (ctxt).getBoolean (KEY_PREF_DISABLE_SUGGESTIONS, true);
 	}
 
 	public static boolean getErrorPopup (Context ctxt)
