@@ -328,6 +328,8 @@ public class LocalIMEKeyboard implements Keyboard {
 	
 	private class JSListenerShowQuestion implements Runnable {
 		
+		int version;
+		
 		Item.Type type;
 		
 		String name;
@@ -336,8 +338,9 @@ public class LocalIMEKeyboard implements Keyboard {
 		
 		int size;
 		
-		public JSListenerShowQuestion (Item.Type type, String name, Rect rect, int size)
+		public JSListenerShowQuestion (int version, Item.Type type, String name, Rect rect, int size)
 		{
+			this.version = version;
 			this.type = type;
 			this.name = name;
 			this.rect = rect;
@@ -345,10 +348,29 @@ public class LocalIMEKeyboard implements Keyboard {
 			
 			wav.runOnUiThread (this);
 		}
+
+		private void message (int v1, int v2)
+		{
+			AlertDialog.Builder builder;
+			Dialog dialog;
+						
+			builder = new AlertDialog.Builder (wav);
+			builder.setTitle ("Test");
+			builder.setMessage ("Swapped threads (" + v1 + "/" + v2 + ")");
+			builder.setPositiveButton ("ok", new OkListener ());
+			
+			dialog = builder.create ();
+			
+			dialog.show ();		
+		}
 		
 		public void run ()
 		{
-			showQuestion (type, name, rect, size);
+			if (version > lastQuestionVersion) {			
+				showQuestion (type, name, rect, size);
+				lastQuestionVersion = version;
+			} else
+				message (lastQuestionVersion, version);
 		}
 	}
 
@@ -447,7 +469,7 @@ public class LocalIMEKeyboard implements Keyboard {
 		}
 
 		@JavascriptInterface
-		public void overrideQuestion (String radical, String kanji, String vocab, 
+		public void overrideQuestion (int version, String radical, String kanji, String vocab, 
 								 	  int left, int top, int right, int bottom, String size)
 		{
 			Item.Type type;
@@ -482,7 +504,7 @@ public class LocalIMEKeyboard implements Keyboard {
 				xsize = 0;
 			}
 			
-			new JSListenerShowQuestion (type, name, new Rect (left, top, right, bottom), xsize);
+			new JSListenerShowQuestion (version, type, name, new Rect (left, top, right, bottom), xsize);
 		}
 		
 		/**
@@ -567,6 +589,7 @@ public class LocalIMEKeyboard implements Keyboard {
 	 * The javascript triggers. They are installed when the keyboard is shown.
 	 */
 	private static final String JS_INIT_TRIGGERS =
+			"window.wknNewQuestionVersion = 1;" +
 			"window.wknReplace = function () {" +
 			"   var form, frect, txt, trect, button, brect;" +
 			"   form = document.getElementById (\"answer-form\");" +
@@ -585,11 +608,13 @@ public class LocalIMEKeyboard implements Keyboard {
 			"   question = question.getElementsByTagName (\"span\") [0];" +
 			"   rect = question.getBoundingClientRect ();" +
 			"   style = window.getComputedStyle (question, null);" +
-			"   wknJSListener.overrideQuestion (item.rad ? item.rad : null," +
+			"   wknJSListener.overrideQuestion (window.wknNewQuestionVersion," +
+			"                                   item.rad ? item.rad : null," +
 			"							        item.kan ? item.kan : null," +
 			"							        item.voc ? item.voc : null, " +
 			"							        rect.left, rect.top, rect.right, rect.bottom," +
-			"							        style.getPropertyValue(\"font-size\"));" +			
+			"							        style.getPropertyValue(\"font-size\"));" +
+			"   window.wknNewQuestionVersion++;" +			
 			"};" +
 			"window.wknNewQuestion = function (entry, type) {" +
 			"   var qtype, e;" +
@@ -782,6 +807,9 @@ public class LocalIMEKeyboard implements Keyboard {
     /// Was suggestion disabled last time we checked?
     boolean disableSuggestions;
     
+    /// Last Question version
+    int lastQuestionVersion;
+    
     /**
      * Constructor
      * @param wav parent activity
@@ -853,6 +881,7 @@ public class LocalIMEKeyboard implements Keyboard {
 	@Override
 	public void show (boolean hasEnter)
 	{
+		lastQuestionVersion = -1;
 		wv.js (JS_INIT_TRIGGERS);
 		if (SettingsActivity.getReviewOrder (wav))
 			wv.js (ifReviews (ReviewOrder.JS_CODE));
