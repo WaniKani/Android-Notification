@@ -9,6 +9,7 @@ import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.preference.PreferenceManager;
@@ -620,7 +621,7 @@ public class LocalIMEKeyboard implements Keyboard {
 			"   var qtype, e;" +
 			"   qtype = $.jStorage.get (\"questionType\");" +
 			"   window.wknReplace ();" +
-			"   window.wknOverrideQuestion ();" +
+			"   window.wknOverrideQuestion ();" +			
 			"   if ($(\"#character\").hasClass (\"vocabulary\")) {" +
 			"        e = $(\"#character span\");" +
 			"        e.text (e.text ().replace (/〜/g, \"~\")); " +
@@ -637,7 +638,7 @@ public class LocalIMEKeyboard implements Keyboard {
 			"    if (arguments [0] == \"hidden\" && " +
 			"        (this.selector == \"#screen-quiz-ready\" || " +
 			"         this.selector == \"#screen-lesson-ready\" || " +			
-	//		"         this.selector == \"#screen-lesson-done\" || " +   /* We skip this test to avoid glitch */			
+			"         this.selector == \"#screen-lesson-done\" || " +   /* We skip this test to avoid glitch */			
 			"         this.selector == \"#screen-time-out\"))" +
 			"			wknJSListener.timeout (false);" +			
 			"    return res;" +
@@ -974,6 +975,14 @@ public class LocalIMEKeyboard implements Keyboard {
 		ew.requestFocus ();
 	}
 	
+	private void adjustWidth (TextView view, RelativeLayout.LayoutParams params, String text)
+	{
+		Paint tpaint;
+		
+		tpaint = view.getPaint ();
+		params.width = (int) Math.max (params.width, tpaint.measureText (text));
+	}
+	
 	protected void showQuestion (Item.Type type, String name, Rect rect, int size)
 	{
 		RelativeLayout.LayoutParams params;
@@ -987,9 +996,9 @@ public class LocalIMEKeyboard implements Keyboard {
 		params.height = rect.height () + 10;
 		params.width = rect.width () + 10;
 		params.addRule (RelativeLayout.CENTER_HORIZONTAL);
-		qvw.setLayoutParams (params);
 		
 		if (!name.endsWith (".png")) {
+			adjustWidth (qvw, params, name);
 			qvw.setVisibility (View.VISIBLE);
 			qvw.setTextSize (size);
 			qvw.setBackgroundColor (cmap.get (type));
@@ -1000,6 +1009,8 @@ public class LocalIMEKeyboard implements Keyboard {
 			qvw.setVisibility (View.GONE);
 			bpos.qvisible = false;
 		}
+		
+		qvw.setLayoutParams (params);
 	}
 	
 	/**
