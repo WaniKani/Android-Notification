@@ -210,6 +210,7 @@ public class JapaneseIME {
 		put ("xya", "lya", "ゃ");
 		put ("xyu", "lyu", "ゅ");
 		put ("xyo", "lyo", "ょ");
+		put ("xtsu", "ltsu", "xtu", "ltu", "っ");
 				
 		/* Alt spellings */
 		put ("ca", "か");
