@@ -177,7 +177,7 @@ public class LocalIMEKeyboard implements Keyboard {
 	     */
 	    private void next ()
 	    {
-	    	String s;
+	    	String s, orgs;
 	    	
         	s = ew.getText ().toString ();
 
@@ -187,8 +187,11 @@ public class LocalIMEKeyboard implements Keyboard {
         	
         	frozen = true;
         	
-        	if (translate)
-        		s = ime.fixup (s);
+        	if (translate) {
+        		s = ime.fixup (orgs = s);
+        		if (!s.equals (orgs))	// We do this only if needed to avoid glitch on cursor
+        			ew.setText (s);
+        	}
         	if (!editable)
         		wv.js (JS_ENTER);
         	else if (isWKIEnabled)
