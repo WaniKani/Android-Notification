@@ -287,16 +287,6 @@
     </string>
     <string name="ignore_button_message_ok">OK, got it</string>
     
-    <string name="custom_ime_title">Custom IME</string>
-    <string name="custom_ime_message_text">        
-		Defaulting to the Custom IME. Hope you will like it.\n
-		This new input mode supports \@ruipgpinheiro\'s ignore button: check
-		the menu after entering a wrong answer.\n
-		If you encounter any problems, you can switch to traditional input
-		mode (Settings/Reviews Kbd). But please report!
-    </string>
-    <string name="custom_ime_message_ok">OK, got it</string>
-    
     <string name="other_stats_error_message_title">Network error</string>
     <string name="other_stats_error_message_text">
         Failed to download the data needed to build the plots        

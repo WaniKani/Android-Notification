@@ -878,7 +878,6 @@ public class LocalIMEKeyboard implements Keyboard {
 		if (isWKIEnabled)
 			wki.initPage ();
 		
-		showCustomIMEMessage ();
 		setInputType ();
 		
 		wv.enableFocus ();
@@ -1117,24 +1116,6 @@ public class LocalIMEKeyboard implements Keyboard {
 		return canIgnore;
 	}
 	
-	protected void showCustomIMEMessage ()
-	{
-		AlertDialog.Builder builder;
-		Dialog dialog;
-					
-		if (!wav.visible || SettingsActivity.getCustomIMEMessage (wav))
-			return;
-		
-		builder = new AlertDialog.Builder (wav);
-		builder.setTitle (R.string.custom_ime_title);
-		builder.setMessage (R.string.custom_ime_message_text);
-		builder.setPositiveButton (R.string.custom_ime_message_ok, new OkListener ());
-		
-		dialog = builder.create ();
-		
-		dialog.show ();		
-	}
-
 	public static String ifReviews (String js)
 	{
 		return "if (" + JS_REVIEWS_P + ") {" + js + "}";
