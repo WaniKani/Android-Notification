@@ -358,7 +358,8 @@ public class LocalIMEKeyboard implements Keyboard {
 			if (version > lastQuestionVersion) {			
 				showQuestion (type, name, rect, size);
 				lastQuestionVersion = version;
-			}
+			} 
+		}
 	}
 
 	private class BoxPosition {
