@@ -353,29 +353,12 @@ public class LocalIMEKeyboard implements Keyboard {
 			wav.runOnUiThread (this);
 		}
 
-		private void message (int v1, int v2)
-		{
-			AlertDialog.Builder builder;
-			Dialog dialog;
-						
-			builder = new AlertDialog.Builder (wav);
-			builder.setTitle ("Test");
-			builder.setMessage ("Swapped threads (" + v1 + "/" + v2 + ")");
-			builder.setPositiveButton ("ok", new OkListener ());
-			
-			dialog = builder.create ();
-			
-			dialog.show ();		
-		}
-		
 		public void run ()
 		{
 			if (version > lastQuestionVersion) {			
 				showQuestion (type, name, rect, size);
 				lastQuestionVersion = version;
-			} else
-				message (lastQuestionVersion, version);
-		}
+			}
 	}
 
 	private class BoxPosition {
