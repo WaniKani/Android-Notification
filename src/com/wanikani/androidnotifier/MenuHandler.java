@@ -86,14 +86,6 @@ public class MenuHandler {
 		}
 		
 		/**
-		 * Ignore button
-		 */
-		public void ignore ()
-		{
-			/* empty */
-		}
-		
-		/**
 		 * Toggle override fonts
 		 */
 		public void fonts ()
@@ -190,10 +182,6 @@ public class MenuHandler {
 			
 		case R.id.em_export:
 			listener.export ();
-			break;
-			
-		case R.id.em_ignore:
-			listener.ignore ();
 			break;
 			
 		case R.id.em_fonts:

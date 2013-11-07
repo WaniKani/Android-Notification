@@ -72,6 +72,12 @@
             android:orientation="horizontal"
             android:layout_alignParentLeft="true"
             android:layout_alignParentTop="true">
+        	<ImageButton
+            	android:id="@+id/btn_ignore"
+              	style="@style/AlertButton"
+              	android:visibility="gone"
+              	android:layout_gravity="center_vertical"
+              	android:src="@drawable/ic_ignore" />
             <EditText 
                 android:id="@+id/ime"
                 android:layout_weight="1"

@@ -13,7 +13,6 @@ import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.v4.app.ActivityCompat;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -24,6 +23,7 @@ import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -356,15 +356,6 @@ public class WebReviewActivity extends Activity {
 		}
 		
 		/**
-		 * Ignore button
-		 */
-		public void ignore ()
-		{
-			showIgnoreButtonMessage ();
-			keyboard.ignore ();
-		}
-		
-		/**
 		 * Toggle override fonts
 		 */
 		@Override
@@ -564,6 +555,16 @@ public class WebReviewActivity extends Activity {
 			/* Here we could keep some stats. Currently unused */
 		}		
 	}
+	
+	private class IgnoreButtonListener implements View.OnClickListener {
+		
+		@Override
+		public void onClick (View view)
+		{
+			ignore ();
+		}
+		
+	}
 
 	/** The web view, where the web contents are rendered */
 	FocusWebView wv;
@@ -636,6 +637,9 @@ public class WebReviewActivity extends Activity {
 	/** The menu handler */
 	private MenuHandler mh;
 	
+	/** The ignore button */
+	private ImageButton ignbtn;
+	
 	/** Set if visible */
 	boolean visible;
 	
@@ -688,6 +692,9 @@ public class WebReviewActivity extends Activity {
 		kbstatus = KeyboardStatus.INVISIBLE;
 		
 		bar = (ProgressBar) findViewById (R.id.pb_reviews);
+		
+		ignbtn = (ImageButton) findViewById (R.id.btn_ignore);
+		ignbtn.setOnClickListener (new IgnoreButtonListener ());
 				
 		/* First of all get references to views we'll need in the near future */
 		splashView = findViewById (R.id.wv_splash);
@@ -869,9 +876,7 @@ public class WebReviewActivity extends Activity {
 		
 		for (i = 0; i < menu.size (); i++) {
 			mi = menu.getItem (i);
-			if (mi.getItemId () == R.id.em_ignore) {
-				mi.setVisible (keyboard.canIgnore ());
-			} else if (mi.getItemId () == R.id.em_fonts)
+			if (mi.getItemId () == R.id.em_fonts)
 				mi.setVisible (keyboard.canOverrideFonts ());
 		}
 		
@@ -911,7 +916,7 @@ public class WebReviewActivity extends Activity {
 		if (keyboard != oldk && oldk != null)
 			oldk.hide ();
 		
-		flushMenu ();
+		updateCanIgnore ();
 	}
 	
 	private void applyMuteSettings ()
@@ -987,14 +992,18 @@ public class WebReviewActivity extends Activity {
 		keyboard.iconize (kbstatus.hasEnter (this));
 	}
 	
-	protected void flushMenu ()
-	{
-		ActivityCompat.invalidateOptionsMenu (this);		
-	}
-	
 	public void updateCanIgnore ()
 	{
-		flushMenu ();
+		ignbtn.setVisibility (keyboard.canIgnore () ? View.VISIBLE : View.GONE);
+	}
+	
+	/**
+	 * Ignore button
+	 */
+	public void ignore ()
+	{
+		showIgnoreButtonMessage ();
+		keyboard.ignore ();
 	}
 	
 	protected void showIgnoreButtonMessage ()
