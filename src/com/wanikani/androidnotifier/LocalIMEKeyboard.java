@@ -352,10 +352,19 @@ public class LocalIMEKeyboard implements Keyboard {
 			
 			wav.runOnUiThread (this);
 		}
+		
+		public JSListenerShowQuestion ()
+		{
+			name = null;
+			
+			wav.runOnUiThread (this);			
+		}
 
 		public void run ()
 		{
-			if (version > lastQuestionVersion) {			
+			if (name == null)
+				hideQuestion ();
+			else if (version > lastQuestionVersion) {			
 				showQuestion (type, name, rect, size);
 				lastQuestionVersion = version;
 			} 
@@ -493,6 +502,12 @@ public class LocalIMEKeyboard implements Keyboard {
 			}
 			
 			new JSListenerShowQuestion (version, type, name, new Rect (left, top, right, bottom), xsize);
+		}
+		
+		@JavascriptInterface
+		public void doNotOverrideQuestion ()
+		{
+			new JSListenerShowQuestion ();
 		}
 		
 		/**
@@ -695,8 +710,15 @@ public class LocalIMEKeyboard implements Keyboard {
 			"form.css ('visibility','hidden');" +
 			"tbox = $(\"#user-response\");" +
 			"wknJSListener.sync (form.hasClass (\"correct\"), form.hasClass (\"incorrect\"), " +
-			"                    tbox.val (), " + JS_REVIEWS_P + ");";
-
+			"                    tbox.val (), " + JS_REVIEWS_P + ");" +
+			"if (this.Srs != null) {" +
+			"	var oldSrsLoad = this.Srs.load;" +
+			"   this.Srs.load = function () {" +
+			"		res = oldSrsLoad.apply (this, arguments);" +
+			"       wknJSListener.doNotOverrideQuestion ();" +
+			"       return res;" +
+			"   }" +
+			"}";
 	/** 
 	 * Uninstalls the triggers, when the keyboard is hidden
 	 */
@@ -967,6 +989,11 @@ public class LocalIMEKeyboard implements Keyboard {
 		
 		tpaint = view.getPaint ();
 		params.width = (int) Math.max (params.width, tpaint.measureText (text));
+	}
+	
+	protected void hideQuestion ()
+	{
+		qvw.setVisibility (View.INVISIBLE);
 	}
 	
 	protected void showQuestion (Item.Type type, String name, Rect rect, int size)
