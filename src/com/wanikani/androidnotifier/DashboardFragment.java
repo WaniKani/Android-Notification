@@ -159,37 +159,6 @@ public class DashboardFragment extends Fragment implements Tab {
 		}	
 	}
 	
-	/**
-	 * Listener for clicks on the critical/lessons popup button. Istances
-	 * of this class show or hide the view.
-	 */
-	private class AlertsClickListener implements View.OnClickListener {
-		
-		/// The view to show or hide
-		private int id;
-		
-		/**
-		 * Constructor.
-		 * @param id the view to show or hide
-		 */
-		AlertsClickListener (int id)
-		{
-			this.id = id;
-		}
-
-		@Override
-		public void onClick (View v)
-		{
-			View rw;
-			
-			rw = parent.findViewById (id);
-			rw.setVisibility (rw.getVisibility () == View.VISIBLE ?
-							  View.GONE : View.VISIBLE);
-			
-			showAlertsLayout ();
-		}	
-	}
-
 	/// The main activity
 	MainActivity main;
 	
@@ -253,12 +222,6 @@ public class DashboardFragment extends Fragment implements Tab {
 		view = parent.findViewById (R.id.kanji_remaining);
 		view.setClickable (true);
 		view.setOnClickListener (new RemainingClickListener (Item.Type.KANJI));
-		
-		view = parent.findViewById (R.id.btn_critical);
-		view.setOnClickListener (new AlertsClickListener (R.id.lay_critical_items));
-
-		view = parent.findViewById (R.id.btn_lessons);
-		view.setOnClickListener (new AlertsClickListener (R.id.lay_lessons_available));
 		
 		view = parent.findViewById (R.id.btn_result);
 		view.setOnClickListener (new ReviewSummaryClickListener ());
@@ -437,12 +400,8 @@ public class DashboardFragment extends Fragment implements Tab {
 		} else if (dd.lessonsAvailable == 1)
 			setText (R.id.lessons_available, getString (R.string.fmt_one_lesson));
 			
-		setVisibility (R.id.btn_lessons,
-					   dd.lessonsAvailable > 0 ? View.VISIBLE : View.GONE);
-		
 		/* If no more lessons, hide the message */
-		if (dd.lessonsAvailable == 0)
-			setVisibility (R.id.lay_lessons_available, View.GONE);
+		setVisibility (R.id.lay_lessons_available, dd.lessonsAvailable > 0 ? View.VISIBLE : View.GONE);
 		
 		setText (R.id.next_hour_val, Integer.toString (dd.reviewsAvailableNextHour));
 		setText (R.id.next_day_val, Integer.toString (dd.reviewsAvailableNextDay));
@@ -485,12 +444,7 @@ public class DashboardFragment extends Fragment implements Tab {
 			} else if (dd.od.criticalItems == 1)
 				setText (R.id.critical_items, getString (R.string.fmt_one_critical_item));
 			
-			setVisibility (R.id.btn_critical,
-						   dd.od.criticalItems > 0 ? View.VISIBLE : View.GONE);
-
-			/* If no more lessons, hide the message */
-			if (dd.od.criticalItems == 0)
-				setVisibility (R.id.lay_critical_items, View.GONE);
+			setVisibility (R.id.lay_critical_items, dd.od.criticalItems > 0 ? View.VISIBLE : View.GONE);
 			
 			break;
 			
@@ -499,25 +453,21 @@ public class DashboardFragment extends Fragment implements Tab {
 		}
 
 		/* Show the alerts panel only if there are still alerts to be shown */  
-		showAlertsLayout ();
+		showAlertsLayout (dd.lessonsAvailable > 0 ||
+						  (dd.od != null && dd.od.criticalItems > 0));
 	}
 
 	/**
 	 * Shows or hides the alerts layout, depending on the state of the visibility
-	 * of its children  
+	 * of its children
+	 * 	@param show if it shall be shown  
 	 */
-	protected void showAlertsLayout ()
+	protected void showAlertsLayout (boolean show)
 	{
 		ViewGroup lay;
-		int i;
 
 		lay = (ViewGroup) parent.findViewById (R.id.lay_alerts);
-		lay.setVisibility (View.GONE);
-		for (i = 0; i < lay.getChildCount (); i++)
-			if (lay.getChildAt (i).getVisibility () == View.VISIBLE) {
-				lay.setVisibility (View.VISIBLE);
-				break;
-			}
+		lay.setVisibility (show ? View.VISIBLE : View.GONE);
 	}	
 
 	/**

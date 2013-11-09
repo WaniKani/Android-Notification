@@ -97,16 +97,6 @@
                 	android:layout_width="0dip"
                 	android:layout_weight="1"
                		android:layout_height="wrap_content"/>
-		    	<ImageButton
-		    	    style="@style/AlertButton"
-		    	    android:id="@+id/btn_critical" 
-		    	    android:src="@drawable/critical"
-		    	    android:visibility="gone"/>
-		    	<ImageButton
-		    	    style="@style/AlertButton"
-		    	    android:id="@+id/btn_lessons" 
-		    	    android:src="@drawable/lessons"
-		    	    android:visibility="gone"/>
                 <ProgressBar
                     android:id="@+id/pb_status"
                     style="@style/Spinner"
