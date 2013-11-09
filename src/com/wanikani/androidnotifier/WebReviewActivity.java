@@ -283,16 +283,6 @@ public class WebReviewActivity extends Activity {
 
 		/**
 		 * Called by javascript when the keyboard should be shown, using
-		 * lessons layout.
-		 */
-		@JavascriptInterface
-		public void showLessons ()
-		{
-			new ShowHideKeyboard (KeyboardStatus.LESSONS_MAXIMIZED);
-		}
-
-		/**
-		 * Called by javascript when the keyboard should be shown, using
 		 * new lessons layout.
 		 */
 		@JavascriptInterface
@@ -309,24 +299,6 @@ public class WebReviewActivity extends Activity {
 		{
 			new ShowHideKeyboard (KeyboardStatus.INVISIBLE);
 		}
-
-		/**
-		 * Called by javascript when the keyboard should be iconized.
-		 */
-		@JavascriptInterface
-		public void iconize ()
-		{
-			new ShowHideKeyboard (KeyboardStatus.REVIEWS_ICONIZED);
-		}
-
-		/**
-		 * Called by javascript when the keyboard should be iconized (lessons mode).
-		 */
-		@JavascriptInterface
-		public void iconizeLessons ()
-		{
-			new ShowHideKeyboard (KeyboardStatus.LESSONS_ICONIZED);
-		}	
 	}
 	
 	/**
@@ -374,8 +346,6 @@ public class WebReviewActivity extends Activity {
 		REVIEWS_MAXIMIZED {
 			 public void apply (WebReviewActivity wav) { wav.show (this); }
 
-			 public void iconize (WebReviewActivity wav) { REVIEWS_ICONIZED.apply (wav); }
-
  			 public SettingsActivity.Keyboard getKeyboard (WebReviewActivity wav)
 			 {
 				 return SettingsActivity.getReviewsKeyboard (wav);
@@ -385,36 +355,12 @@ public class WebReviewActivity extends Activity {
  			 {
  				 return true;
  			 }
- 			
- 			public boolean isMuteEmbedded ()
- 			{
- 				return true;
- 			}
- 			
- 			public boolean hasEnter (WebReviewActivity wav)
- 			{
- 				return SettingsActivity.getEnter (wav);
- 			}
-		},
+ 		},
 		
-		/** Keyboard visible, all keys but ENTER visible */
-		LESSONS_MAXIMIZED {
-			public void apply (WebReviewActivity wav) { wav.show (this); } 
-			
-			public void iconize (WebReviewActivity wav) { LESSONS_ICONIZED.apply (wav); }
-
-			public SettingsActivity.Keyboard getKeyboard (WebReviewActivity wav)
-			{
-				return SettingsActivity.getLessonsKeyboard (wav);				
-			}
-		},
-
 		/** Keyboard visible, all keys but ENTER visible */
 		LESSONS_MAXIMIZED_NEW {
 			public void apply (WebReviewActivity wav) { wav.show (this); } 
 			
-			public void iconize (WebReviewActivity wav) { LESSONS_ICONIZED_NEW.apply (wav); }
-
 			public SettingsActivity.Keyboard getKeyboard (WebReviewActivity wav)
 			{
 				return SettingsActivity.getReviewsKeyboard (wav);				
@@ -425,68 +371,6 @@ public class WebReviewActivity extends Activity {
 				return true;
 			}
 			
-		},
-
-		/** Keyboard visible, just "Show" and "Enter" keys are visible */ 
-		REVIEWS_ICONIZED {
-			public void apply (WebReviewActivity wav) { wav.iconize (this); }
-			
-			public void maximize (WebReviewActivity wav) { REVIEWS_MAXIMIZED.apply (wav); }
-			
-			 public SettingsActivity.Keyboard getKeyboard (WebReviewActivity wav)
-			 {
-				 return SettingsActivity.getReviewsKeyboard (wav);
-			 }
-
-			 public boolean isIconized () { return true; }
-			 
- 			 public boolean canMute ()
- 			 {
- 				 return true;
- 			 }
- 			
- 			 public boolean isMuteEmbedded ()
- 			 {
- 			 	 return false;
- 			 }			 
- 			 
-  			public boolean hasEnter (WebReviewActivity wav)
-  			{
-  				return SettingsActivity.getEnter (wav);
-  			}
-		},
-
-		/** Keyboard visible, just "Show" and "Enter" keys are visible, in lessons mode */ 
-		LESSONS_ICONIZED {
-			public void apply (WebReviewActivity wav) { wav.iconize (this); }
-			
-			public void maximize (WebReviewActivity wav) { LESSONS_MAXIMIZED.apply (wav); }
-			
-			public boolean isIconized () { return true; }
-
-			public SettingsActivity.Keyboard getKeyboard (WebReviewActivity wav)
-			{
-				return SettingsActivity.getLessonsKeyboard (wav);				
-			}			
-		},
-		
-		/** Keyboard visible, just "Show" and "Enter" keys are visible, in lessons mode */ 
-		LESSONS_ICONIZED_NEW {
-			public void apply (WebReviewActivity wav) { wav.iconize (this); }
-			
-			public void maximize (WebReviewActivity wav) { LESSONS_MAXIMIZED_NEW.apply (wav); }
-			
-			public boolean isIconized () { return true; }
-
-			public SettingsActivity.Keyboard getKeyboard (WebReviewActivity wav)
-			{
-				return SettingsActivity.getReviewsKeyboard (wav);				
-			}
-			
-			public boolean canMute ()
-			{
-				return true;
-			}
 		},
 
 		/** Keyboard invisible */
@@ -510,11 +394,6 @@ public class WebReviewActivity extends Activity {
 			/* empty */
 		}
 		
-		public void iconize (WebReviewActivity wav)
-		{
-			/* empty */
-		}
-
 		public boolean isIconized ()
 		{
 			return false;
@@ -532,11 +411,6 @@ public class WebReviewActivity extends Activity {
 			 return false;
 		}
 			
-		public boolean isMuteEmbedded ()
-		{
-			return false;
-		}
-		
 		public boolean hasEnter (WebReviewActivity wav)
 		{
 			return false;
@@ -597,21 +471,12 @@ public class WebReviewActivity extends Activity {
 	private static final String JS_INIT_KBD = 
 			"var textbox, lessobj, ltextbox, reviews;" +
 			"textbox = document.getElementById (\"" + WKConfig.ANSWER_BOX + "\"); " +
-			"lessobj = document.getElementById (\"" + WKConfig.LESSONS_OBJ + "\"); " +
-			"ltextbox = document.getElementById (\"" + WKConfig.LESSON_ANSWER_BOX_JP + "\"); " +
 			"reviews = document.getElementById (\"" + WKConfig.REVIEWS_DIV + "\");" +
 			"quiz = document.getElementById (\"" + WKConfig.QUIZ + "\");" +
-			"if (ltextbox == null) {" +
-			"   ltextbox = document.getElementById (\"" + WKConfig.LESSON_ANSWER_BOX_EN + "\"); " +
-			"}" +
 			"if (quiz != null) {" +
 			"   wknKeyboard.showLessonsNew ();" +
 			"} else if (textbox != null && !textbox.disabled) {" +
 			"   wknKeyboard.show (); " +
-			"} else if (ltextbox != null) {" +
-			"   wknKeyboard.showLessons ();" +
-			"} else if (lessobj != null) {" +
-			"   wknKeyboard.iconizeLessons ();" +
 			"} else {" +
 			"	wknKeyboard.hide ();" +			
 			"}" +
@@ -652,14 +517,14 @@ public class WebReviewActivity extends Activity {
 	/** The current keyboard */
 	private Keyboard keyboard;
 	
-	/** The embedded keyboard */
-	private Keyboard embeddedKeyboard;
-	
 	/** The native keyboard */
 	private Keyboard nativeKeyboard;
 	
 	/** The local IME keyboard */
 	private Keyboard localIMEKeyboard;
+	
+	/** The mute button */
+	private ImageButton muteH;	
 		
 	/**
 	 * Called when the action is initially displayed. It initializes the objects
@@ -716,13 +581,11 @@ public class WebReviewActivity extends Activity {
 		
 		wv.loadUrl (getIntent ().getData ().toString ());
 		
-		embeddedKeyboard = new EmbeddedKeyboard (this, wv);
 		nativeKeyboard = new NativeKeyboard (this, wv);
 		localIMEKeyboard = new LocalIMEKeyboard (this, wv);
 		
-		embeddedKeyboard.getMuteButton ().setOnClickListener (new MuteListener ());
-		nativeKeyboard.getMuteButton ().setOnClickListener (new MuteListener ());
-		localIMEKeyboard.getMuteButton ().setOnClickListener (new MuteListener ());
+		muteH = (ImageButton) findViewById (R.id.kb_mute_h);
+		muteH.setOnClickListener (new MuteListener ());
 
 		if (SettingsActivity.getTimerReaper (this)) {
 			reaper = new TimerThreadsReaper ();
@@ -904,10 +767,6 @@ public class WebReviewActivity extends Activity {
 			keyboard = localIMEKeyboard;
 			break;
 			
-		case EMBEDDED:
-			keyboard = embeddedKeyboard;
-			break;
-			
 		case NATIVE:
 			keyboard = nativeKeyboard;
 			break;
@@ -924,7 +783,7 @@ public class WebReviewActivity extends Activity {
 		boolean show;
 		
 		show = kbstatus.canMute () && SettingsActivity.getShowMute (this);
-		keyboard.getMuteButton ().setVisibility (show ? View.VISIBLE : View.GONE);
+		muteH.setVisibility (show ? View.VISIBLE : View.GONE);
 		
 		setMute (show && SettingsActivity.getMute (this));
 	}
@@ -935,7 +794,7 @@ public class WebReviewActivity extends Activity {
 		Drawable d;
 		
 		d = m ? muteDrawable : notMutedDrawable;
-		keyboard.getMuteButton ().setImageDrawable (d);
+		muteH.setImageDrawable (d);
 
 		if (isMuted != m) {
 			isMuted = m;

@@ -47,12 +47,6 @@ public interface Keyboard {
 	public void hide ();
 	
 	/**
-	 * Returns a reference to the mute button.
-	 * @return the mute button
-	 */
-	public ImageButton getMuteButton ();	
-	
-	/**
 	 * Called when the user presses the ignore answer button.
 	 */
 	public void ignore ();

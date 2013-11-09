@@ -625,7 +625,7 @@ public class LocalIMEKeyboard implements Keyboard {
 			"    if (arguments [0] == \"hidden\" && " +
 			"        (this.selector == \"#screen-quiz-ready\" || " +
 			"         this.selector == \"#screen-lesson-ready\" || " +			
-			"         this.selector == \"#screen-lesson-done\" || " +   /* We skip this test to avoid glitch */			
+			"         this.selector == \"#screen-lesson-done\" || " +   			
 			"         this.selector == \"#screen-time-out\"))" +
 			"			wknJSListener.timeout (false);" +			
 			"    return res;" +
@@ -735,9 +735,6 @@ public class LocalIMEKeyboard implements Keyboard {
 	/// The manager, used to popup the keyboard when needed
 	InputMethodManager imm;
 	
-	/// The mute button
-	ImageButton muteH;	
-
 	/// The IME
     JapaneseIME ime;
     
@@ -820,7 +817,6 @@ public class LocalIMEKeyboard implements Keyboard {
 		
 		ime = new JapaneseIME ();
 		
-		muteH = (ImageButton) wav.findViewById (R.id.kb_mute_h);
 		ew = (EditText) wav.findViewById (R.id.ime);
 		divw = wav.findViewById (R.id.ime_div);
 		imel = new IMEListener ();		
@@ -910,16 +906,6 @@ public class LocalIMEKeyboard implements Keyboard {
 			wv.js (ifReviews (ReviewOrder.JS_UNINIT_CODE));
 	}
 
-	/**
-	 * Returns a reference to the mute button view.
-	 * @return the mute button
-	 */
-	@Override
-	public ImageButton getMuteButton ()
-	{
-		return muteH;
-	}	
-	
 	/**
 	 * Called when the HTML textbox is moved. It moves the edittext as well
 	 * @param frect the form rect 

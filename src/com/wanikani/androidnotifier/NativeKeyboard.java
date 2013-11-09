@@ -72,16 +72,6 @@ public class NativeKeyboard implements Keyboard {
 	}
 	
 	/**
-	 * Returns a reference to the mute button view.
-	 * @return the mute button
-	 */
-	@Override
-	public ImageButton getMuteButton ()
-	{
-		return muteH;
-	}
-	
-	/**
 	 * Ignore button pressed. Does nothing because it is not supported.
 	 */
 	@Override

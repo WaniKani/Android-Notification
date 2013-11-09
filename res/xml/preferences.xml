@@ -43,6 +43,11 @@
 	<PreferenceCategory
 	    	android:title="@string/tpref_review_enhancements">
     	<CheckBoxPreference
+	        android:key="pref_review_improvements"
+	        android:title="@string/pref_review_improvements"
+	        android:summary="@string/pref_review_improvements_desc"
+	        android:defaultValue="true"/>
+	    <CheckBoxPreference
         	android:key="pref_ignore_button"
         	android:title="@string/pref_ignore_button"
         	android:summary="@string/pref_ignore_button_descr"
@@ -62,6 +67,11 @@
         	android:title="@string/pref_error_popup"
         	android:summary="@string/pref_error_popup_descr"
         	android:defaultValue="false" />    
+	    <CheckBoxPreference
+        	android:key="pref_disable_suggestions"
+        	android:title="@string/pref_disable_suggestions"
+        	android:summary="@string/pref_disable_suggestions_desc"
+        	android:defaultValue="true" />       	
     	<CheckBoxPreference
         	android:key="pref_show_mute"
         	android:title="@string/pref_show_mute"
@@ -73,38 +83,6 @@
 	<CheckBoxPreference
         	android:key="pref_use_integrated_browser"
         	android:title="@string/pref_use_integrated_browser"
-        	android:defaultValue="true" />
-    <ListPreference
-	        android:key="pref_reviews_keyboard"
-	        android:title="@string/pref_keyboard"
-	        android:summary="@string/pref_keyboard_desc"
-	        android:defaultValue="0"
-	        android:entries="@array/keyboards"
-	        android:entryValues="@array/keyboardValues"/>
-    <CheckBoxPreference
-        	android:key="pref_disable_suggestions"
-        	android:title="@string/pref_disable_suggestions"
-        	android:summary="@string/pref_disable_suggestions_desc"
-        	android:defaultValue="true" />   
-    <CheckBoxPreference
-        	android:key="pref_show_lessons_keyboard"
-        	android:title="@string/pref_show_lessons_keyboard"
-        	android:summary="@string/pref_show_lessons_keyboard_desc"
-        	android:defaultValue="true" />
-    <CheckBoxPreference
-        	android:key="pref_large_keyboard"
-        	android:title="@string/pref_large_keyboard"
-        	android:summary="@string/pref_large_keyboard_desc"
-        	android:defaultValue="false" />
-    <CheckBoxPreference
-        	android:key="pref_vibrate"
-        	android:title="@string/pref_vibrate"
-        	android:summary="@string/pref_vibrate_desc"
-        	android:defaultValue="false"/>
-    <CheckBoxPreference
-        	android:key="pref_enter"
-        	android:title="@string/pref_enter"
-        	android:summary="@string/pref_enter_descr"
         	android:defaultValue="true" />
     <CheckBoxPreference
         	android:key="pref_lock_screen"

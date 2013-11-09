@@ -28,16 +28,10 @@
 	<string name="pref_error_popup_descr">Open info popup automatically after entering a wrong answer</string>
 	<string name="pref_userkey_descr">Copy here the "Public API Key" from your Account Settings page</string>
     <string name="pref_userkey">User API Key</string>    
-    <string name="pref_keyboard">Reviews kbd</string>
-    <string name="pref_keyboard_desc">Select keyboard type used while reviewing</string>
+    <string name="pref_review_improvements">Review Improvements</string>
+    <string name="pref_review_improvements_desc">Enable userscripts and Custom IME</string>
     <string name="pref_disable_suggestions">No suggestions</string>
     <string name="pref_disable_suggestions_desc">Disable suggestions when entering japanese words</string>
-    <string name="pref_show_lessons_keyboard">Embedded lessons kbd</string>
-    <string name="pref_show_lessons_keyboard_desc">Show embedded keyboard during lessons</string>
-    <string name="pref_large_keyboard">Tall keyboard</string>
-    <string name="pref_large_keyboard_desc">Display larger embedded keyboard</string>
-    <string name="pref_enter">Review keyboard Enter</string>
-    <string name="pref_enter_descr">Enable enter key in embedded keyboard</string>
     <string name="pref_ignore_button">Ignore Button</string>
     <string name="pref_ignore_button_descr">Enable porting of Rui Pinheiro\'s ignore button</string>
     <string name="pref_wanikani_improve">WaniKani improve</string>
@@ -72,8 +66,6 @@
     <string name="pref_export_file">Filename</string>
     <string name="pref_export_file_desc">Name of file where exported DB files will be saved
         when Export dest is set to filesystem</string>
-    <string name="pref_vibrate">Key vibration</string>
-    <string name="pref_vibrate_desc">Vibrate when pressing keys in the embedded keyboard</string>
     <string name="tag_next_review">Next Review</string>
     <string name="tag_reviews_now">Now</string>
     <string name="tag_next_hour">Next hour</string>
@@ -264,17 +256,7 @@
     <string name="rec_end">Merging with master facts table</string>
     <string name="rec_fixup_db">Fixing suspect levels</string>
     <string name="rec_error">Something went wrong. Check connectivity and retry</string>
-    
-    <string name="kbd_message_title">Did you know?</string>
-    <string name="kbd_message_text">
-        You can use the enter button on the embedded keyboard instead of
-        the submit button on the web page. This solves the problem, found
-        on some devices, of the soft keyboard popping up from time to time.
-        You can also disable the embedded keyboard and give a try with your
-        default keyboard (uncheck Settings/Embedded reviews kbd).
-    </string>
-    <string name="kbd_message_ok">OK, got it</string>
-    
+        
     <string name="ignore_button_message_title">Ignore button</string>
     <string name="ignore_button_message_text">        
 		Anyone using this feature is responsible for using it correctly.\n 
