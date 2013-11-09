@@ -331,7 +331,7 @@ public class TimerThreadsReaper {
 	private void addWrapper (List<AudioTagWrapper> wrappers, Thread thread) 
 	{
 		TimerTask tasks [];
-		Object obj;
+		Object obj, task;
 		Runnable r;
 		String tname;
 		int i, size, tcount;
@@ -362,12 +362,21 @@ public class TimerThreadsReaper {
 		if (obj == null)
 			return;
 		
-
 		size = (Integer) obj;
+		
 		for (i = 0; i < size; i++) {
-			if (tasks[i].getClass ().getCanonicalName ()
+			try {
+				/* We must handle tasks with care since it can change while we are running */
+				task = tasks [i];
+				if (task == null)
+					continue;
+			} catch (Throwable t) {
+				continue;
+			}
+			
+			if (task.getClass ().getCanonicalName ()
 					.equals ("android.webkit.HTML5Audio.TimeupdateTask")) {
-				obj = getField (tasks [i], "this$0", Object.class);
+				obj = getField (task, "this$0", Object.class);
 				if (obj != null)
 					wrappers.add (new AudioTagWrapper (tcount, obj));
 			}
@@ -388,7 +397,7 @@ public class TimerThreadsReaper {
 		Field field;
 		Object obj;
 
-		pclass = parent.getClass();
+		pclass = parent.getClass();		
 		try {
 			field = pclass.getDeclaredField (name);
 			if (field == null)
