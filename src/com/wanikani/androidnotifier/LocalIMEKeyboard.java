@@ -307,7 +307,7 @@ public class LocalIMEKeyboard implements Keyboard {
 				imm.hideSoftInputFromWindow (ew.getWindowToken (), 0);
 			}
 			
-			qvw.setVisibility (bpos.qvisible && show ? View.VISIBLE : View.GONE);
+			showQuestionPatch (bpos.qvisible && show);
 		}
 		
 	}
@@ -692,7 +692,7 @@ public class LocalIMEKeyboard implements Keyboard {
 			"}" +
 			"var form, tbox;" +
 			"form = $(\"#answer-form fieldset\");" +
-			"form.css ('visibility','hidden');" +
+			"form.css ('visibility', 'hidden');" +
 			"tbox = $(\"#user-response\");" +
 			"wknJSListener.sync (form.hasClass (\"correct\"), form.hasClass (\"incorrect\"), " +
 			"                    tbox.val (), " + JS_REVIEWS_P + ");";
@@ -700,6 +700,7 @@ public class LocalIMEKeyboard implements Keyboard {
 	 * Uninstalls the triggers, when the keyboard is hidden
 	 */
 	private static final String JS_STOP_TRIGGERS =
+			"var form;" +
 			"form = $(\"#answer-form fieldset\");" +
 			"form.css ('visibility','visible');" +
 			"$.jStorage.stopListening (\"currentItem\", window.wknNewQuestion);" +
@@ -725,6 +726,10 @@ public class LocalIMEKeyboard implements Keyboard {
 	
 	private static final String JS_INFO_POPUP =
 			"$('#option-item-info span').click()";
+	
+	private static final String JS_SHOW_QUESTION =
+			"$('#character span').css ('visibility', '%s');";
+
 	
 	/// Parent activity
 	WebReviewActivity wav;
@@ -899,11 +904,18 @@ public class LocalIMEKeyboard implements Keyboard {
 		imm.hideSoftInputFromWindow (ew.getWindowToken (), 0);
 		wv.js (JS_STOP_TRIGGERS);
 		divw.setVisibility (View.GONE);
-		qvw.setVisibility (View.GONE);
+		showQuestionPatch (false);
 		if (isWKIEnabled)
 			wki.uninitPage ();
 		if (SettingsActivity.getReviewOrder (wav))
 			wv.js (ifReviews (ReviewOrder.JS_UNINIT_CODE));
+	}
+	
+	public void showQuestionPatch (boolean enable)
+	{
+		qvw.setVisibility (enable ? View.VISIBLE : View.GONE);
+		bpos.qvisible = enable;
+		wv.js (String.format (JS_SHOW_QUESTION, enable ? "hidden" : "visible"));
 	}
 
 	/**
@@ -970,16 +982,14 @@ public class LocalIMEKeyboard implements Keyboard {
 		
 		if (!name.endsWith (".png")) {
 			adjustWidth (qvw, params, name);
-			qvw.setVisibility (View.VISIBLE);
 			qvw.setTextSize (size);
-			qvw.setBackgroundColor (cmap.get (type));
+			//qvw.setBackgroundColor (cmap.get (type));
 			qvw.setTextColor (Color.WHITE);
 			qvw.setText (name);
-			bpos.qvisible = true;
-		} else {
-			qvw.setVisibility (View.GONE);
-			bpos.qvisible = false;
-		}
+			showQuestionPatch (true);
+		} else
+			showQuestionPatch (false);
+		
 		
 		qvw.setLayoutParams (params);
 	}
@@ -1139,7 +1149,7 @@ public class LocalIMEKeyboard implements Keyboard {
 		if (toggleFontOverride ())
 			wv.js (JS_OVERRIDE);
 		else
-			qvw.setVisibility (View.GONE);
+			showQuestionPatch (false);
 	}
 	
 	protected void setInputType ()
