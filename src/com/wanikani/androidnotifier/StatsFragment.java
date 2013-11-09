@@ -1005,14 +1005,16 @@ public class StatsFragment extends Fragment implements Tab {
 	{
 		this.cs = cs;
 		
-		srsds.setCoreStats (cs);
-		kanjids.setCoreStats (cs);
-		vocabds.setCoreStats (cs);
-		for (TYChart tyc : charts)
-			tyc.refresh ();
+		if (!isDetached ()) {
+			srsds.setCoreStats (cs);
+			kanjids.setCoreStats (cs);
+			vocabds.setCoreStats (cs);
+			for (TYChart tyc : charts)
+				tyc.refresh ();
 		
-		for (GenericChart gc : gcharts)
-			gc.setCoreStats (cs);
+			for (GenericChart gc : gcharts)
+				gc.setCoreStats (cs);
+		}
 	}
 
 	/**
