@@ -157,10 +157,8 @@ public class WebReviewActivity extends Activity {
     			intent = new Intent (Intent.ACTION_VIEW);	    		
 	    		intent.setData (Uri.parse (url));
 	    		startActivity (intent);		
-	    	} else {
-	    		keyboard.reset ();
+	    	} else
 	    		view.loadUrl (url);
-	    	}
 	    	
 	    	return false;
 	    }
@@ -187,6 +185,7 @@ public class WebReviewActivity extends Activity {
 	    public void onPageStarted (WebView view, String url, Bitmap favicon)  
 	    {  
 	        bar.setVisibility (View.VISIBLE);
+    		keyboard.reset ();
 		}
 	
 		/**
