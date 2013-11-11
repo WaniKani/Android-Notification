@@ -690,14 +690,16 @@ public class WebReviewActivity extends Activity {
 	 */
 	protected boolean backIsSafe ()
 	{
-		String rpage, url;
+		String lpage, rpage, url;
 		
 		url = wv.getUrl ();		
-		rpage = "http://www.wanikani.com/lesson";
+		lpage = "http://www.wanikani.com/lesson";
+		rpage = "http://www.wanikani.com/review";
 		
 		return kbstatus.backIsSafe () &&
 				/* Need this because the reviews summary page is dangerous */
 				!(url.contains (rpage) || rpage.contains (url)) &&
+				!(url.contains (lpage) || lpage.contains (url)) &&
 				!url.contains ("http://www.wanikani.com/quickview");
 	}
 	
