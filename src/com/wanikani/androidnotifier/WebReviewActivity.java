@@ -694,7 +694,7 @@ public class WebReviewActivity extends Activity {
 		String rpage, url;
 		
 		url = wv.getUrl ();		
-		rpage = SettingsActivity.getURL (this);
+		rpage = "http://www.wanikani.com/lesson";
 		
 		return kbstatus.backIsSafe () &&
 				/* Need this because the reviews summary page is dangerous */
