@@ -20,18 +20,34 @@ public class ReviewOrder {
 "        '<tr><td>Rad</td><td align=\"right\"><span id=\"wkroRadCount\"></span></td></tr>'+\r\n" + 
 "        '<tr><td>Kan</td><td align=\"right\"><span id=\"wkroKanCount\"></span></td></tr>'+\r\n" + 
 "        '<tr><td>Voc</td><td align=\"right\"><span id=\"wkroVocCount\"></span></td></tr>'+\r\n" + 
-"        '</tbody></table></div><div id=\"divSt\">Not Ordered!</div><button id=\"reorderBtn\" type=\"button\" onclick=\"window.wknReorder()\">Reorder!</button></div>';\r\n" + 
+"        '</tbody></table></div><div id=\"divSt\">Not Ordered!</div>'+\r\n" + 
+"        '<button id=\"reorderBtn1\" type=\"button\" onclick=\"window.wknReorderBulk();\">Bulk Mode</button>'+\r\n" + 
+"        '<button id=\"reorderBtn2\" type=\"button\" onclick=\"window.wknReorderSingle();\">Single Mode</button>'+\r\n" + 
+"        '</div>';\r\n" + 
 "    $.jStorage.listenKeyChange(\"activeQueue\",displayUpdate);\r\n" + 
-//"	window.addEventListener('reorderWK',reorder); \r\n" + 
+//"	window.addEventListener('reorderWKSingle',reorderSingle); \r\n" + 
+//"	window.addEventListener('reorderWKBulk',reorderBulk); \r\n" + 
 "    displayUpdate();\r\n" + 
 "	console.log('init() end');\r\n" + 
 "}\r\n" + 
 "\r\n" + 
-//"function reorder(){\r\n" +
-"window.wknReorder = function() {\r\n" +
+"window.wknReorderBulk = function() {\r\n" +
+"    //Reordering method following original parameters of 10 activeQueue list\r\n" + 
+"    method = \"BULK\";\r\n" + 
+"    reorder();\r\n" + 
+"}\r\n" + 
+"\r\n" + 
+"window.wknReorderSingle = function() {\r\n" +
+"    //Reordering method following the 1 activeQueue list, that makes both reading/meaning coming in pairs.\r\n" + 
+"    method = \"SINGLE\";\r\n" + 
+"    reorder();\r\n" + 
+"}\r\n" + 
+"\r\n" + 
+"function reorder(){\r\n" + 
 "    console.log('reorder() start');\r\n" + 
 "    var divSt = get(\"divSt\");\r\n" + 
-"    reorderBtn.style.visibility=\"hidden\";\r\n" + 
+"    reorderBtn1.style.visibility=\"hidden\";\r\n" + 
+"    reorderBtn2.style.visibility=\"hidden\";\r\n" + 
 "    divSt.innerHTML = 'Reordering.. please wait!';\r\n" + 
 "        \r\n" + 
 "    var cur = $.jStorage.get(\"currentItem\");\r\n" + 
@@ -72,9 +88,9 @@ public class ReviewOrder {
 "        }\r\n" + 
 "    }\r\n" + 
 "    \r\n" + 
-"    for(var i=0;i<removedCount;i++){\r\n" + 
-"        actList.push(revList.pop());\r\n" + 
-"    }\r\n" + 
+"    if(method=='BULK')\r\n" + 
+"        for(var i=0;i<removedCount;i++)\r\n" + 
+"        	actList.push(revList.pop());\r\n" + 
 "    \r\n" + 
 "    console.log('Ordered ReviewQueue:');\r\n" + 
 "    for(var i=0;i<revList.length;i++){\r\n" + 
@@ -115,12 +131,14 @@ public class ReviewOrder {
 "    kanSpan.innerHTML = kanC;\r\n" + 
 "    vocSpan.innerHTML = vocC;\r\n" + 
 "}\r\n" + 
+"var method = \"\";\r\n" + 
 
 // Glue code //
 "if ($(\"#wkroStatus\").length > 0) {" +
 "    $(\"#wkroStatus\").show (); " +
 "    $(\"#divSt\").show (); " +
-"    $(\"#reorderBtn\").show (); " +
+"    $(\"#reorderBtn1\").show (); " +
+"    $(\"#reorderBtn2\").show (); " +
 "} else {" +
 "    init();\r\n" + 
 "    console.log('script load end');" +
@@ -129,5 +147,6 @@ public class ReviewOrder {
 	public static final String JS_UNINIT_CODE =
 "$(\"#wkroStatus\").hide ();" +
 "$(\"#divSt\").hide (); " +
-"$(\"#reorderBtn\").hide ();";
+"$(\"#reorderBtn1\").hide ();" +
+"$(\"#reorderBtn2\").hide ();";
 }
