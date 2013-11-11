@@ -650,7 +650,8 @@ public class LocalIMEKeyboard implements Keyboard {
 			"        e = $(\"#character\");" +
 			"        e.text (e.text ().replace (/〜/g, \"~\")); " +
 			"   }" +
-			"   wknJSListener.newQuestion (qtype);" +			
+			"   if ($(\"#quiz\").is (\":visible\"))" +
+			"       wknJSListener.newQuestion (qtype);" +			
 			"};" +
 			"$.jStorage.listenKeyChange (\"l/currentQuizItem\", window.wknNewQuiz);" +
 			"var oldShow = jQuery.fn.show;" +
@@ -901,15 +902,25 @@ public class LocalIMEKeyboard implements Keyboard {
 	@Override
 	public void hide ()
 	{
-		imm.hideSoftInputFromWindow (ew.getWindowToken (), 0);
+		reset ();
 		wv.js (JS_STOP_TRIGGERS);
-		divw.setVisibility (View.GONE);
-		showQuestionPatch (false);
 		if (isWKIEnabled)
 			wki.uninitPage ();
 		if (SettingsActivity.getReviewOrder (wav))
 			wv.js (ifReviews (ReviewOrder.JS_UNINIT_CODE));
 	}
+	
+	/**
+	 * Hides the keyboard. 
+	 */
+	@Override
+	public void reset ()
+	{
+		imm.hideSoftInputFromWindow (ew.getWindowToken (), 0);
+		divw.setVisibility (View.GONE);
+		showQuestionPatch (false);
+	}
+	
 	
 	public void showQuestionPatch (boolean enable)
 	{

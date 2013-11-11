@@ -68,7 +68,16 @@ public class NativeKeyboard implements Keyboard {
 	@Override
 	public void hide ()
 	{
-		muteH.setVisibility (View.GONE);
+		reset ();
+	}
+	
+	/**
+	 * Resets the keyboard.
+	 */
+	@Override
+	public void reset ()
+	{
+		muteH.setVisibility (View.GONE);		
 	}
 	
 	/**

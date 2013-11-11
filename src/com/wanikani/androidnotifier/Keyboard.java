@@ -28,6 +28,12 @@ import android.widget.ImageButton;
 public interface Keyboard {
 
 	/**
+	 * Called when a new URL is reloaded. This is the proper place to hide the keyboard when
+	 * exiting a review/lesson sessions
+	 */
+	public void reset ();
+	
+	/**
 	 * Show the keyboard
 	 * @param hasEnter set if the enter key should be shown. May not make sense 
 	 * on all the implementations
