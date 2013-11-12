@@ -872,8 +872,11 @@ public class LocalIMEKeyboard implements Keyboard {
 	{
 		lastQuestionVersion = -1;
 		wv.js (JS_INIT_TRIGGERS);
+
 		if (SettingsActivity.getReviewOrder (wav))
 			wv.js (ifReviews (ReviewOrder.JS_CODE));
+		if (SettingsActivity.getLessonOrder (wav))
+			wv.js (ifLessons (LessonOrder.JS_CODE));
 		
 		isWKIEnabled = SettingsActivity.getWaniKaniImprove (wav); 
 		if (isWKIEnabled)
@@ -908,6 +911,8 @@ public class LocalIMEKeyboard implements Keyboard {
 			wki.uninitPage ();
 		if (SettingsActivity.getReviewOrder (wav))
 			wv.js (ifReviews (ReviewOrder.JS_UNINIT_CODE));
+		if (SettingsActivity.getLessonOrder (wav))
+			wv.js (ifReviews (LessonOrder.JS_UNINIT_CODE));
 	}
 	
 	/**
@@ -1127,6 +1132,11 @@ public class LocalIMEKeyboard implements Keyboard {
 		return "if (" + JS_REVIEWS_P + ") {" + js + "}";
 	}
 	
+	public static String ifLessons (String js)
+	{
+		return "if (!" + JS_REVIEWS_P + ") {" + js + "}";
+	}
+
 	protected boolean overrideFont ()
 	{
 		SharedPreferences prefs;
