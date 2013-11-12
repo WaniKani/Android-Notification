@@ -1,5 +1,10 @@
 package com.wanikani.androidnotifier;
 
+/*
+ * A port of the alucardeck's WK Reorder script (http://www.wanikani.com/chat/api-and-third-party-apps/3023)
+ * The script can be downloaded from here: http://userscripts.org/scripts/show/174704
+ * I had to replace events with direct function calls because they don't seem to work on all android devices
+ */
 public class ReviewOrder {
 	
 	public static final String JS_CODE =
