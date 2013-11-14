@@ -31,12 +31,54 @@ public class LessonOrder {
 "    var divSt = get(\"divSt\");\r\n" + 
 "    var reorderBtn = get(\"reorderBtn\");\r\n" + 
 "    reorderBtn.style.visibility=\"hidden\";\r\n" + 
-"    divSt.innerHTML = '<img src=\"http://images.wikia.com/nonsensopedia/images/5/58/Rickroll.gif\"/>';\r\n" + 
-"    var character = get(\"main-info\");\r\n" + 
-"    character.innerHTML = '<img src=\"http://stream1.gifsoup.com/view3/1732953/trololo-lol-short-o.gif\"/>';\r\n" + 
-"    var hb = get(\"header-buttons\");\r\n" + 
-"    hb.innerHTML = '<img src=\"http://stream1.gifsoup.com/view3/1732953/trololo-lol-short-o.gif\"/>';\r\n" + 
-"    console.log('reorder() end');\r\n" + 
+"    divSt.innerHTML = 'Reordering.. please wait!';\r\n" + 
+"	var actList = $.jStorage.get(\"l/activeQueue\");\r\n" + 
+"	var lesList = $.jStorage.get(\"l/lessonQueue\");\r\n" + 
+"    \r\n" + 
+"    var removedCount = 0;\r\n" + 
+"    for(var i=1;i<actList.length;i++){\r\n" + 
+"        var it = actList[i];\r\n" + 
+"        actList.splice(i--,1);\r\n" + 
+"        lesList.push(it);\r\n" + 
+"        removedCount++;\r\n" + 
+"    }\r\n" + 
+"    console.log('Items removed from ActiveQueue: '+removedCount);\r\n" + 
+"    \r\n" + 
+"    for(var i=lesList.length-1;i>=0;i--){\r\n" + 
+"        var it=lesList[i];\r\n" + 
+"        if(it.kan){\r\n" + 
+"           lesList.splice(i,1);\r\n" + 
+"           lesList.push(it);\r\n" + 
+"        }\r\n" + 
+"    }\r\n" + 
+"    for(var i=lesList.length-1;i>=0;i--){\r\n" + 
+"        var it=lesList[i];\r\n" + 
+"        if(it.rad){\r\n" + 
+"           lesList.splice(i,1);\r\n" + 
+"           lesList.push(it);\r\n" + 
+"        }\r\n" + 
+"    }\r\n" + 
+"    \r\n" + 
+"    for(var i=0;i<removedCount;i++){\r\n" + 
+"        actList.push(lesList.pop());\r\n" + 
+"    }\r\n" + 
+"        \r\n" + 
+"    console.log('Ordered LessonQueue:');\r\n" + 
+"    for(var i=0;i<lesList.length;i++){\r\n" + 
+"        var it=lesList[i];\r\n" + 
+"        if(it.rad)\r\n" + 
+"        	console.log('rad '+it.rad);\r\n" + 
+"        else if(it.kan)\r\n" + 
+"           	console.log('kan '+it.kan);\r\n" + 
+"        else if(it.voc)\r\n" + 
+"            console.log('voc '+it.voc);\r\n" + 
+"    }\r\n" + 
+"    \r\n" + 
+"    $.jStorage.set(\"l/lessonQueue\",lesList);\r\n" + 
+"    $.jStorage.set(\"l/activeQueue\",actList);\r\n" + 
+"    divSt.innerHTML = 'Done!';\r\n" + 
+"    console.log('reorder() end');\r\n" +
+"    location.reload();" +		// Added because we do not provide a reload button
 "}\r\n" + 
 "\r\n" + 
 // Glue code //
