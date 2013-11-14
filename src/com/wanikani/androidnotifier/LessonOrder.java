@@ -78,7 +78,6 @@ public class LessonOrder {
 "    $.jStorage.set(\"l/activeQueue\",actList);\r\n" + 
 "    divSt.innerHTML = 'Done!';\r\n" + 
 "    console.log('reorder() end');\r\n" +
-"    location.reload();" +		// Added because we do not provide a reload button
 "}\r\n" + 
 "\r\n" + 
 // Glue code //
