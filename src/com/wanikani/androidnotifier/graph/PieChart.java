@@ -37,7 +37,7 @@ import com.wanikani.androidnotifier.graph.PiePlot.DataSet;
  * A simple 3-d pie chart, comprising of the plot itself, a title and 
  * a legend. The look and feel tries to match the style of the dashboard.
  */
-public class PieChart extends LinearLayout {
+public class PieChart extends IconizableChart {
 
 	/**
 	 * A dataset that is not displayed. 
@@ -56,20 +56,11 @@ public class PieChart extends LinearLayout {
 		
 	}
 
-	/// The inflater
-	LayoutInflater inflater;
-	
-	/// The chart title
-	TextView title;
-	
 	/// The real pie plot image
 	PiePlot plot;
 	
 	/// The legend
 	LinearLayout legend;
-	
-	/// A spinner, which is displayed when no data has been published yet
-	ProgressBar spinner;
 	
 	/// The alert layout
 	View alertPanel;
@@ -77,49 +68,22 @@ public class PieChart extends LinearLayout {
 	/// The alert message
 	TextView alertMessage;
 	
+	/// Is data available
+	boolean available;
+	
 	/**
-	 * Constructor. It only shows the spinner and the title, until 
-	 * {@link #setData(List)} gets called.
+	 * Constructor. 
 	 * @param ctxt context
 	 * @param attrs attributes
 	 */
 	public PieChart (Context ctxt, AttributeSet attrs)
 	{
-		super (ctxt, attrs);
-			
-		inflater = (LayoutInflater) 
-				ctxt.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		super (ctxt, attrs, R.layout.piechart);
 		
-		inflater.inflate (R.layout.piechart, this);
 		plot = (PiePlot) findViewById (R.id.pc_plot);
 		legend = (LinearLayout) findViewById (R.id.pc_legend);
-		title = (TextView) findViewById (R.id.pc_title);
-		spinner = (ProgressBar) findViewById (R.id.pc_spinner);
 		alertPanel = findViewById (R.id.pc_lay_alert);
 		alertMessage = (TextView) findViewById (R.id.pc_alert);
-		
-		loadAttributes (ctxt, attrs);
-		
-		spin (true);
-	}
-	
-	/**
-	 * Performs the actual job of reading the attributes and updating 
-	 * the look. Meant for cascading (which is not done at this stage).
-	 * @param ctxt the context
-	 * @param attrs the attributes
-	 */
-	void loadAttributes (Context ctxt, AttributeSet attrs)
-	{
-		TypedArray a;
-		
-		a = ctxt.obtainStyledAttributes (attrs, R.styleable.PieChart);
-			 
-		title.setText (a.getString (R.styleable.PieChart_title));
-				
-		a.recycle ();		
-		
-		plot.loadAttributes (ctxt, attrs);
 	}
 	
 	/**
@@ -152,7 +116,8 @@ public class PieChart extends LinearLayout {
 			}			
 		}
 		
-		spin (false);
+		available = true;
+		dataAvailable ();
 	}	
 	
 	/**
@@ -178,27 +143,21 @@ public class PieChart extends LinearLayout {
 	}
 	
 	/**
-	 * Shows or hides the spinner. Correspondingly, plot and legend are 
-	 * hidden or shown. 
-	 * @param enabled if the spinner should be shown
-	 */
-	public void spin (boolean enabled)
-	{
-		spinner.setVisibility (enabled ? View.VISIBLE : View.GONE);
-		plot.setVisibility (enabled ? View.GONE : View.VISIBLE);
-		legend.setVisibility (enabled ? View.GONE : View.VISIBLE);
-		alertPanel.setVisibility (View.GONE);
-	}
-	
-	/**
 	 * Shows an alert message
 	 */
 	public void alert (String msg)
 	{
-		spinner.setVisibility (View.GONE);
+		setState (State.OPEN);
+		
 		plot.setVisibility (View.GONE);
 		legend.setVisibility (View.GONE);
 		alertPanel.setVisibility (View.VISIBLE);
 		alertMessage.setText (msg);
+	}
+	
+	protected void loadData ()
+	{
+		if (available)
+			dataAvailable ();
 	}
 }

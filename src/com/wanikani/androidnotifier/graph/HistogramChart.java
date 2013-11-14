@@ -34,6 +34,7 @@ import com.wanikani.androidnotifier.R;
  */
 
 public class HistogramChart extends LinearLayout {
+	
 
 	/// The inflater
 	LayoutInflater inflater;
