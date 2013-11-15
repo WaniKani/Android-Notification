@@ -564,6 +564,13 @@ public class LocalIMEKeyboard implements Keyboard {
 		{
 			frozen = false;
 		}		
+		
+		@JavascriptInterface ()
+		public void refreshWKLO ()
+		{
+			if (SettingsActivity.getLessonOrder (wav))
+				wv.js (ifLessons (LessonOrder.JS_REFRESH_CODE));
+		}
 	}
 	
 	
@@ -628,6 +635,9 @@ public class LocalIMEKeyboard implements Keyboard {
 			"         this.selector == \"#screen-lesson-done\" || " +   			
 			"         this.selector == \"#screen-time-out\"))" +
 			"			wknJSListener.timeout (false);" +			
+			"    if (arguments [0] == \"hidden\" && " +
+			"        (this.selector == \"#screen-lesson-ready\"))" +
+			"			wknJSListener.refreshWKLO ();" +			
 			"    return res;" +
 			"};" +
 			"var oldRemoveClass = jQuery.fn.removeClass;" +

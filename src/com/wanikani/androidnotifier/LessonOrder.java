@@ -88,6 +88,10 @@ public class LessonOrder {
 "    console.log('script load end');" +
 "}";			
 
+	public static final String JS_REFRESH_CODE =
+"    var divSt = document.getElementById (\"divSt\");\r\n" + 
+"    divSt.innerHTML = 'Not Ordered!</div><button id=\"reorderBtn\" type=\"button\" onclick=\"window.wknReorder();\">Reorder!</button>';\r\n";			
+	
 	public static final String JS_UNINIT_CODE =
 "$(\"#divSt\").hide ();";
 }
