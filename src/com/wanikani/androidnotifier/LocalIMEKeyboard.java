@@ -90,7 +90,7 @@ public class LocalIMEKeyboard implements Keyboard {
 		@Override
 		public void onScroll (int dx, int dy)
 		{
-			scroll (dx, dy);
+			wv.js (JS_UPDATE_POSITION);
 		}
 	}
 	
@@ -314,10 +314,13 @@ public class LocalIMEKeyboard implements Keyboard {
 	
 	private class JSListenerShow implements Runnable {
 		
+		int sequence;
+		
 		Rect frect, trect;
 		
-		public JSListenerShow (Rect frect, Rect trect)
+		public JSListenerShow (int sequence, Rect frect, Rect trect)
 		{
+			this.sequence = sequence;
 			this.frect = frect;
 			this.trect = trect;
 			
@@ -326,13 +329,14 @@ public class LocalIMEKeyboard implements Keyboard {
 		
 		public void run ()
 		{
-			replace (frect, trect);
+			if (updateSequence (sequence))
+				replace (frect, trect);
 		}
 	}
 	
 	private class JSListenerShowQuestion implements Runnable {
 		
-		int version;
+		int sequence;
 		
 		Item.Type type;
 		
@@ -342,9 +346,9 @@ public class LocalIMEKeyboard implements Keyboard {
 		
 		int size;
 		
-		public JSListenerShowQuestion (int version, Item.Type type, String name, Rect rect, int size)
+		public JSListenerShowQuestion (int sequence, Item.Type type, String name, Rect rect, int size)
 		{
-			this.version = version;
+			this.sequence = sequence;
 			this.type = type;
 			this.name = name;
 			this.rect = rect;
@@ -355,10 +359,8 @@ public class LocalIMEKeyboard implements Keyboard {
 		
 		public void run ()
 		{
-			if (version > lastQuestionVersion) {			
+			if (updateSequence (sequence))
 				showQuestion (type, name, rect, size);
-				lastQuestionVersion = version;
-			} 
 		}
 	}
 
@@ -395,20 +397,10 @@ public class LocalIMEKeyboard implements Keyboard {
 			return changed;
 		}
 		
-		public void shift (int yofs)
-		{
-			if (frect != null)
-				frect.offset (0, yofs);
-			
-			if (trect != null)
-				trect.offset (0, yofs);
-		}
-		
 		public boolean shallShow ()
 		{
 			return visible && !timeout;
-		}
-		
+		}		
 	}
 
 	/**
@@ -428,7 +420,7 @@ public class LocalIMEKeyboard implements Keyboard {
 		 * @param tbottom textbox bottom-right Y coordinate
 		 */
 		@JavascriptInterface
-		public void replace (int fleft, int ftop, int fright, int fbottom,
+		public void replace (int sequence, int fleft, int ftop, int fright, int fbottom,
 							 int tleft, int ttop, int tright, int tbottom)
 		{
 			fleft = (int) TypedValue.applyDimension (TypedValue.COMPLEX_UNIT_DIP, fleft, dm);
@@ -441,7 +433,7 @@ public class LocalIMEKeyboard implements Keyboard {
 			ttop = (int) TypedValue.applyDimension (TypedValue.COMPLEX_UNIT_DIP, ttop, dm);
 			tbottom = (int) TypedValue.applyDimension (TypedValue.COMPLEX_UNIT_DIP, tbottom, dm);
 
-			new JSListenerShow (new Rect (fleft, ftop, fright, fbottom),
+			new JSListenerShow (sequence, new Rect (fleft, ftop, fright, fbottom),
 								new Rect (tleft, ttop, tright, tbottom));
 		}
 
@@ -457,7 +449,7 @@ public class LocalIMEKeyboard implements Keyboard {
 		}
 
 		@JavascriptInterface
-		public void overrideQuestion (int version, String radical, String kanji, String vocab, 
+		public void overrideQuestion (int sequence, String radical, String kanji, String vocab, 
 								 	  int left, int top, int right, int bottom, String size)
 		{
 			Item.Type type;
@@ -492,7 +484,7 @@ public class LocalIMEKeyboard implements Keyboard {
 				xsize = 0;
 			}
 			
-			new JSListenerShowQuestion (version, type, name, new Rect (left, top, right, bottom), xsize);
+			new JSListenerShowQuestion (sequence, type, name, new Rect (left, top, right, bottom), xsize);
 		}
 		
 		/**
@@ -584,7 +576,7 @@ public class LocalIMEKeyboard implements Keyboard {
 	 * The javascript triggers. They are installed when the keyboard is shown.
 	 */
 	private static final String JS_INIT_TRIGGERS =
-			"window.wknNewQuestionVersion = 1;" +
+			"window.wknSequence = 1;" +
 			"window.wknReplace = function () {" +
 			"   var form, frect, txt, trect, button, brect;" +
 			"   form = document.getElementById (\"answer-form\");" +
@@ -593,8 +585,9 @@ public class LocalIMEKeyboard implements Keyboard {
 			"   frect = form.getBoundingClientRect ();" +
 			"   trect = txt.getBoundingClientRect ();" +
 			"   brect = button.getBoundingClientRect ();" +
-			"   wknJSListener.replace (frect.left, frect.top, frect.right, frect.bottom," +
+			"   wknJSListener.replace (window.wknSequence, frect.left, frect.top, frect.right, frect.bottom," +
 			"						   trect.left, trect.top, brect.left, trect.bottom);" +
+			"   window.wknSequence++;" +
 			"};" +
 			"window.wknOverrideQuestion = function () {" +
 			"   var item, question, rect, style;" +
@@ -603,13 +596,13 @@ public class LocalIMEKeyboard implements Keyboard {
 			"   question = question.getElementsByTagName (\"span\") [0];" +
 			"   rect = question.getBoundingClientRect ();" +
 			"   style = window.getComputedStyle (question, null);" +
-			"   wknJSListener.overrideQuestion (window.wknNewQuestionVersion," +
+			"   wknJSListener.overrideQuestion (window.wknSequence," +
 			"                                   item.rad ? item.rad : null," +
 			"							        item.kan ? item.kan : null," +
 			"							        item.voc ? item.voc : null, " +
 			"							        rect.left, rect.top, rect.right, rect.bottom," +
 			"							        style.getPropertyValue(\"font-size\"));" +
-			"   window.wknNewQuestionVersion++;" +			
+			"   window.wknSequence++;" +			
 			"};" +
 			"window.wknNewQuestion = function (entry, type) {" +
 			"   var qtype, e;" +
@@ -717,6 +710,13 @@ public class LocalIMEKeyboard implements Keyboard {
 			"$.jStorage.stopListening (\"currentItem\", window.wknNewQuestion);" +
 			"$.jStorage.stopListening (\"l/currentQuizItem\", window.wknNewQuiz);";
 	
+	private static final String JS_UPDATE_POSITION = 
+			"if (window.wknReplace != null) { " +
+			"    window.wknReplace ();" +
+			"    if (" + JS_REVIEWS_P + ")" +
+			"       window.wknOverrideQuestion ();" +
+			"}";
+	
 	/**
 	 * Clicks the "next" button. Similar to {@link #JS_INJECT_ANSWER}, but it does
 	 * not touch the user-response field 
@@ -807,8 +807,8 @@ public class LocalIMEKeyboard implements Keyboard {
     /// Was suggestion disabled last time we checked?
     boolean disableSuggestions;
     
-    /// Last Question version
-    int lastQuestionVersion;
+    /// Last Sequence number received from JS
+    int lastSequence;
     
     /**
      * Constructor
@@ -880,7 +880,7 @@ public class LocalIMEKeyboard implements Keyboard {
 	@Override
 	public void show (boolean hasEnter)
 	{
-		lastQuestionVersion = -1;
+		lastSequence = -1;
 		wv.js (JS_INIT_TRIGGERS);
 
 		if (SettingsActivity.getReviewOrder (wav))
@@ -934,8 +934,7 @@ public class LocalIMEKeyboard implements Keyboard {
 		imm.hideSoftInputFromWindow (ew.getWindowToken (), 0);
 		divw.setVisibility (View.GONE);
 		showQuestionPatch (false);
-	}
-	
+	}	
 	
 	public void showQuestionPatch (boolean enable)
 	{
@@ -1018,26 +1017,6 @@ public class LocalIMEKeyboard implements Keyboard {
 		
 		
 		qvw.setLayoutParams (params);
-	}
-	
-	/**
-	 * Called when the webview is scrolled. It moves the edittext as well
-	 * @param dx the horizontal displacement
-	 * @param dy the vertical displacement
-	 */
-	protected void scroll (int dx, int dy)
-	{
-		RelativeLayout.LayoutParams rparams;
-
-		rparams = (RelativeLayout.LayoutParams) divw.getLayoutParams ();
-		rparams.topMargin -= dy;
-		divw.setLayoutParams (rparams);
-		
-		rparams = (RelativeLayout.LayoutParams) qvw.getLayoutParams ();
-		rparams.topMargin -= dy;
-		qvw.setLayoutParams (rparams);
-		
-		bpos.shift (-dy);
 	}
 	
 	/**
@@ -1195,6 +1174,15 @@ public class LocalIMEKeyboard implements Keyboard {
 			disableSuggestions = false;
 			ew.setInputType (InputType.TYPE_CLASS_TEXT);
 		}
+	}
+	
+	private boolean updateSequence (int sequence)
+	{
+		if (sequence > lastSequence) {
+			lastSequence = sequence;
+			return true;
+		} else
+			return false;
 	}
 
 }
