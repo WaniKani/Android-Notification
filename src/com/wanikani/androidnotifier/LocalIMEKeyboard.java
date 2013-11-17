@@ -12,6 +12,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Typeface;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.text.Editable;
 import android.text.InputType;
@@ -82,7 +83,7 @@ public class LocalIMEKeyboard implements Keyboard {
 	 * of our text box with that of the HTML form.
 	 */
 	private class WebViewListener implements FocusWebView.Listener {
-
+		
 		/**
 		 * Called when the webview scrolls vertically. We relay the event
 		 * to {@link LocalIMEKeyboard#scroll(int, int)}.
@@ -90,8 +91,28 @@ public class LocalIMEKeyboard implements Keyboard {
 		@Override
 		public void onScroll (int dx, int dy)
 		{
-			wv.js (JS_UPDATE_POSITION);
+			Handler handler;
+			
+			scroll (dx, dy);
+			handler = new Handler ();
+			handler.postDelayed (new UpdatePositionTask (), 707);
 		}
+	}
+	
+	private class UpdatePositionTask implements Runnable {
+		
+		public UpdatePositionTask ()
+		{
+			lpt = this;
+		}
+		
+		@Override
+		public void run ()
+		{
+			if (lpt == this && bpos.visible)
+				wv.js (JS_UPDATE_POSITION);			
+		}
+		
 	}
 	
 	/**
@@ -395,6 +416,15 @@ public class LocalIMEKeyboard implements Keyboard {
 			}
 			
 			return changed;
+		}
+		
+		public void shift (int yofs)
+		{
+			if (frect != null)
+				frect.offset (0, yofs);
+			
+			if (trect != null)
+				trect.offset (0, yofs);
 		}
 		
 		public boolean shallShow ()
@@ -810,6 +840,9 @@ public class LocalIMEKeyboard implements Keyboard {
     /// Last Sequence number received from JS
     int lastSequence;
     
+    /// Last scheduled position task
+    UpdatePositionTask lpt;
+    
     /**
      * Constructor
      * @param wav parent activity
@@ -916,6 +949,7 @@ public class LocalIMEKeyboard implements Keyboard {
 	public void hide ()
 	{
 		reset ();
+		bpos.visible = false;
 		wv.js (JS_STOP_TRIGGERS);
 		if (isWKIEnabled)
 			wki.uninitPage ();
@@ -1019,6 +1053,26 @@ public class LocalIMEKeyboard implements Keyboard {
 		qvw.setLayoutParams (params);
 	}
 	
+	/**
+	 * Called when the webview is scrolled. It moves the edittext as well
+	 * @param dx the horizontal displacement
+	 * @param dy the vertical displacement
+	 */
+	protected void scroll (int dx, int dy)
+	{
+		RelativeLayout.LayoutParams rparams;
+
+		rparams = (RelativeLayout.LayoutParams) divw.getLayoutParams ();
+		rparams.topMargin -= dy;
+		divw.setLayoutParams (rparams);
+		
+		rparams = (RelativeLayout.LayoutParams) qvw.getLayoutParams ();
+		rparams.topMargin -= dy;
+		qvw.setLayoutParams (rparams);
+		
+		bpos.shift (-dy);
+	}
+
 	/**
 	 * Called when the HTML textbox changes class. It changes the edit text accordingly.
 	 * @param clazz the CSS class
