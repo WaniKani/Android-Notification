@@ -94,6 +94,18 @@ public class MenuHandler {
 		}
 		
 		/**
+		 * Customize font
+		 */
+		public void customFont ()
+		{
+			Intent intent;
+			
+			intent = new Intent (ctxt, CustomFontActivity.class);
+			
+			ctxt.startActivity (intent);			
+		}
+		
+		/**
 		 * Start meters activity
 		 */
 		public void meters ()
@@ -190,6 +202,10 @@ public class MenuHandler {
 			
 		case R.id.em_meters:
 			listener.meters ();
+			break;
+			
+		case R.id.em_customfonts:
+			listener.customFont ();
 			break;
 			
 		default:

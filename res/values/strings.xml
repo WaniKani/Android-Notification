@@ -99,6 +99,7 @@
     <string name="em_ignore">Ignore</string>
     <string name="em_fonts">JP fonts</string>
     <string name="em_meters">Meters</string>
+    <string name="em_custom_fonts">Choose JP font</string>
     <string name="pref_enabled_descr">Show event icon when you have reviews</string>
     <string name="status_msg_error">Error connecting to WaniKani</string>
     <string name="status_msg_partial">Network error. Partial results</string>
@@ -309,5 +310,13 @@
     
     <string name="tag_me_notice">Note: these are approximate values, 
         	regarding the API only (e.g. browsing sessions are excluded)</string>
-   
+        	
+    <string name="tag_current_fonts">Current font</string>
+    <string name="tag_current_font_description">
+        If multiple fonts are selected, they will be rotated during reviews</string>
+    <string name="tag_import_font">Import font&#8230;</string>
+    
+    <string name="tag_system_font">System font</string>
+    <string name="tag_motoya_font">Motoya Maruberi Rounded</string>
+    <string name="tag_delete">delete</string>
 </resources>
