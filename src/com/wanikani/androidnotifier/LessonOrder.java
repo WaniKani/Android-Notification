@@ -20,7 +20,7 @@ public class LessonOrder {
 "	var stats = $(\"#stats\")[0];\r\n" + 
 "    var t = document.createElement('div');\r\n" + 
 "    stats.appendChild(t);\r\n" + 
-"    t.innerHTML = '<div id=\"divSt\">Not Ordered!</div><button id=\"reorderBtn\" type=\"button\" onclick=\"window.wknReorder();\">Reorder!</button></div>';\r\n" + 
+"    t.innerHTML = '<div id=\"divSt\"><div>Not Ordered!</div><button id=\"reorderBtn\" type=\"button\" onclick=\"window.wknReorder();\">Reorder!</button></div>';\r\n" + 
 //"    window.addEventListener('reorderWK',reorder); \r\n" + 
 "    console.log('init() end');\r\n" + 
 "}\r\n" + 
@@ -90,7 +90,7 @@ public class LessonOrder {
 
 	public static final String JS_REFRESH_CODE =
 "    var divSt = document.getElementById (\"divSt\");\r\n" + 
-"    divSt.innerHTML = 'Not Ordered!</div><button id=\"reorderBtn\" type=\"button\" onclick=\"window.wknReorder();\">Reorder!</button>';\r\n";			
+"    divSt.innerHTML = '<div>Not Ordered!</div><button id=\"reorderBtn\" type=\"button\" onclick=\"window.wknReorder();\">Reorder!</button>'";
 	
 	public static final String JS_UNINIT_CODE =
 "$(\"#divSt\").hide ();";
