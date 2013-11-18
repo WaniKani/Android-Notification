@@ -24,10 +24,16 @@
         	android:layout_height="wrap_content"
         	android:text="@string/tag_current_font_description"/>  
 		<Button 
+		    android:id="@+id/cf_import"
 		    android:layout_width="match_parent"
 		    android:layout_height="wrap_content"
-		    android:text="@string/tag_import_font"/>     
-       
+		    android:text="@string/tag_import_from_file"/>     
+		<Button 
+		    android:id="@+id/cf_download"
+		    android:layout_width="match_parent"
+		    android:layout_height="wrap_content"
+		    android:text="@string/tag_download_from_web"/>     
+		
 		<ListView 
 		    android:id="@+id/cf_samples"
 		    android:layout_width="wrap_content"

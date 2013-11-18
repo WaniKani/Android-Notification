@@ -314,9 +314,16 @@
     <string name="tag_current_fonts">Current font</string>
     <string name="tag_current_font_description">
         If multiple fonts are selected, they will be rotated during reviews</string>
-    <string name="tag_import_font">Import font&#8230;</string>
+    <string name="tag_import_from_file">Import from file&#8230;</string>
+    <string name="tag_download_from_web">Download from web&#8230;</string>
+    <string name="tag_cf_import">Import a font</string>   
+    <string name="tag_cf_download">Download a font</string>
+    <string name="tag_cf_name">Font name</string>
+    <string name="tag_cf_path">Font path</string>
+    <string name="tag_cf_url">Starting URL</string>
     
-    <string name="tag_system_font">System font</string>
-    <string name="tag_motoya_font">Motoya Maruberi Rounded</string>
+    <string name="tag_cf_cancel">Cancel</string>
+    <string name="tag_cf_ok">Import</string>
+    
     <string name="tag_delete">delete</string>
 </resources>

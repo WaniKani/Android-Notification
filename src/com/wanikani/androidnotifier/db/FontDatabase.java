@@ -1,10 +1,11 @@
 package com.wanikani.androidnotifier.db;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.Vector;
 
-import com.wanikani.androidnotifier.R;
-
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.Cursor;
@@ -33,7 +34,57 @@ import android.preference.PreferenceManager;
 
 public class FontDatabase {
 
+	public enum WellKnownFont {
+		
+		SYSTEM {
+			public int getId ()
+			{
+				return -1;
+			}
+			
+			public String getName ()
+			{
+				return "System font";
+			}			
+			
+			public String getURL ()
+			{
+				return null;
+			}
+		},
+		
+		MOTOYA {
+			public int getId ()
+			{
+				return -2;
+			}
+
+			public String getName ()
+			{
+				return "Motoya Maruberi Rounded";
+			}
+			
+			public String getURL ()
+			{
+				return "http://github.com/android/platform_frameworks_base/blob/master/data/fonts/MTLmr3m.ttf";
+			}
+		};
+				
+		public abstract int getId ();
+		
+		public abstract String getName ();
+		
+		public abstract String getURL ();
+		
+		public String getPrefKey ()
+		{
+			return null;
+		}
+	}
+	
 	public static class FontEntry {
+		
+		public int id;
 		
 		public String name;
 		
@@ -42,12 +93,25 @@ public class FontDatabase {
 		public Typeface face;
 		
 		public boolean enabled;
+		
+		public boolean system;
 				
-		public FontEntry (String name, String filename, boolean enabled)
+		public FontEntry (WellKnownFont wkf, String filename, boolean enabled, boolean system)
 		{
+			id = wkf.getId ();
+			name = wkf.getName ();
+			this.filename = filename;
+			this.enabled = enabled;
+			this.system = system;
+		}
+
+		public FontEntry (int id, String name, String filename, boolean enabled, boolean system)
+		{
+			this.id = id;
 			this.name = name;
 			this.filename = filename;
 			this.enabled = enabled;
+			this.system = system;
 		}
 		
 		public boolean load ()
@@ -77,7 +141,7 @@ public class FontDatabase {
 		/** The SQL create statement */
 		private static final String SQL_CREATE = 
 				"CREATE TABLE " + TABLE + " (" +
-						C_ID + " INTEGER PRIMARY KEY," +
+						C_ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
 						C_NAME + " TEXT UNIQUE," +
 						C_FILENAME + " TEXT" +				
 						C_ENABLED + " INTEGER DEFAULT 1" +
@@ -86,6 +150,9 @@ public class FontDatabase {
 		/** The SQL drop statement */
 		private static final String SQL_DROP = 
 				"DROP TABLE IF EXISTS " + TABLE;
+		
+		private static final String SQL_WHERE_ID =
+				"WHERE " + C_ID + " = ?";
 		
 		/**
 		 * Creates the table
@@ -112,14 +179,15 @@ public class FontDatabase {
 			String cols [];
 			Cursor c;
 			
-			cols = new String [] { C_NAME, C_FILENAME, C_ENABLED };
+			cols = new String [] { C_ID, C_NAME, C_FILENAME, C_ENABLED };
 			ans = new Vector<FontEntry> ();
 			
 			c = null;
 			try {
 				c = db.query (TABLE, cols, null, null, null, null, C_ID);
 				while (c.moveToNext ())
-					ans.add (new FontEntry (c.getString (0), c.getString (1), c.getInt (2) > 0));
+					ans.add (new FontEntry (c.getInt (0), c.getString (1), 
+											c.getString (2), c.getInt (3) > 0, false));
 			} finally {
 				if (c != null)
 					c.close ();
@@ -127,6 +195,20 @@ public class FontDatabase {
 					
 			return ans;
 		}		
+		
+		public static void setEnabled (SQLiteDatabase db, FontEntry fe, boolean enabled)
+		{
+			ContentValues cv;
+			
+			cv = new ContentValues ();
+			cv.put (C_ENABLED, enabled ? 1 : 0);			
+			db.update (TABLE, cv, SQL_WHERE_ID, new String [] { Integer.toString (fe.id) } );
+		}
+		
+		public static void delete (SQLiteDatabase db, FontEntry fe)
+		{
+			db.delete (TABLE, SQL_WHERE_ID, new String [] { Integer.toString (fe.id) } );
+		}
 	}
 	
 	/**
@@ -177,7 +259,7 @@ public class FontDatabase {
 	private static final String PREF_SYS_ENABLED = PREFIX + "SYS_ENABLED";
 
 	private static final String PREF_MOTOYA_ENABLED = PREFIX + "MOTOYA_ENABLED";
-
+	
 	/**
 	 * Cosntructor
 	 * @param ctxt the context
@@ -247,12 +329,12 @@ public class FontDatabase {
 		ans = new Vector<FontEntry> ();
 		
 		prefs = PreferenceManager.getDefaultSharedPreferences (ctxt);
-		fe = new FontEntry (ctxt.getString (R.string.tag_motoya_font), JAPANESE_TYPEFACE_FONT,
-							prefs.getBoolean (PREF_MOTOYA_ENABLED, true));
+		fe = new FontEntry (WellKnownFont.MOTOYA, JAPANESE_TYPEFACE_FONT,
+							prefs.getBoolean (PREF_MOTOYA_ENABLED, true), true);
 		haveMotoya = fe.load ();
 		
-		ans.add (new FontEntry (ctxt.getString (R.string.tag_system_font), null, 
-				 prefs.getBoolean (PREF_SYS_ENABLED, !haveMotoya)));
+		ans.add (new FontEntry (WellKnownFont.SYSTEM, null, 
+				 prefs.getBoolean (PREF_SYS_ENABLED, !haveMotoya), true));
 		if (haveMotoya = fe.load ())
 			ans.add (fe);
 		
@@ -268,5 +350,52 @@ public class FontDatabase {
 		
 		return ans;
 	}
+	
+	public static void delete (Context ctxt, FontEntry fe)
+	{
+		FontDatabase fdb;
+		
+		new File (fe.filename).delete ();
 
+		if (fe.system)
+			return;
+		
+		fdb = new FontDatabase (ctxt);
+		fdb.openW ();
+		try {
+			FontTable.delete (fdb.db, fe);
+		} finally {
+			fdb.close ();
+		}
+	}
+
+	public static void setEnabled (Context ctxt, FontEntry fe, boolean enabled)
+	{
+		SharedPreferences prefs;
+		FontDatabase fdb;
+		String key;
+
+		if (fe.system) {
+			prefs = PreferenceManager.getDefaultSharedPreferences (ctxt);
+			if (fe.id == WellKnownFont.SYSTEM.getId ())
+				key = PREF_SYS_ENABLED;
+			else if (fe.id == WellKnownFont.MOTOYA.getId ())
+				key = PREF_MOTOYA_ENABLED;
+			else
+				key = null;
+			
+			if (key != null) {
+				prefs.edit ().putBoolean (key, enabled).commit ();
+				return;
+			}
+		} 
+		
+		fdb = new FontDatabase (ctxt);
+		fdb.openW ();
+		try {
+			FontTable.setEnabled (fdb.db, fe, enabled);
+		} finally {
+			fdb.close ();
+		}
+	}
 }
