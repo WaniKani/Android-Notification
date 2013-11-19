@@ -131,7 +131,7 @@ public class ProgressChart extends TableLayout {
 		super (ctxt, attrs);
 			
 		inflater = (LayoutInflater) 
-				ctxt.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		ctxt.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 	}
 		
 	public SubPlot addData (String title)

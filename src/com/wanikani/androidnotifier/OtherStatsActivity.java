@@ -634,7 +634,6 @@ public class OtherStatsActivity extends Activity {
 		opb.setVisibility (View.VISIBLE);
 		new Task (Job.OTHER, MeterSpec.T.OTHER_STATS.get (this), conn, this, opb, false, 
 				  Item.Type.RADICAL, Item.Type.VOCABULARY).execute (olisteners.toArray (new ItemListener [0]));
-		levelsChart.spin (true);
 		levelsChart.setVisibility (View.VISIBLE);
 		sv.fullScroll (ScrollView.FOCUS_DOWN);
 	}

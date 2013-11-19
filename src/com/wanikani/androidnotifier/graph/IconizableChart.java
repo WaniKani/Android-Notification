@@ -48,114 +48,215 @@ public abstract class IconizableChart extends LinearLayout {
 
 	protected enum State {
 		
-		CLOSED {
-			public State toggle ()
+		CLOSED  {
+			public State evRefresh ()
+			{
+				return ICONIZED_RETRIEVING;
+			}
+			
+			public State evToggle ()
 			{
 				return RETRIEVING;
 			}
 			
-			public State dataAvailable ()
+			public State evDataAvailable ()
 			{
-				return CLOSED;
+				return ICONIZED;
+			}
+			
+			public boolean spinning ()
+			{
+				return false;
 			}
 
 			public boolean canClose ()
 			{
 				return false;
 			}
+			
+			public boolean isOpen ()
+			{
+				return false;
+			}			
 		},
 		
-		RETRIEVING {
+		ICONIZED_RETRIEVING  {
+
+			public State evRefresh ()
+			{
+				return ICONIZED_RETRIEVING;
+			}
+			
+			public State evToggle ()
+			{
+				return RETRIEVING;
+			}
+			
+			public State evDataAvailable ()
+			{
+				return ICONIZED;
+			}
+			
 			public boolean spinning ()
 			{
 				return true;
 			}
 
-			public State toggle ()
-			{
-				return CLOSED;
-			}
-			
-			public State dataAvailable ()
-			{
-				return OPEN;
-			}
-
 			public boolean canClose ()
 			{
-				return true;
+				return false;
+			}
+
+			public boolean isOpen ()
+			{
+				return false;
 			}			
 		},
 		
-		OPEN {			
-			public boolean open ()
+		RETRIEVING  {
+
+			public State evRefresh ()
 			{
-				return true;
+				return RETRIEVING;
 			}
 			
-			public State toggle ()
+			public State evToggle ()
 			{
-				return CLOSED;
-			}			
-
-			public State dataAvailable ()
+				return ICONIZED_RETRIEVING;
+			}
+			
+			public State evDataAvailable ()
 			{
 				return OPEN;
 			}
-
-			public boolean canClose ()
-			{
-				return true;
-			}			
-		},
-		
-		REFRESHING {
+			
 			public boolean spinning ()
 			{
 				return true;
 			}
-			
-			public boolean open ()
+
+			public boolean canClose ()
 			{
 				return true;
 			}
-			
-			public State toggle ()
+
+			public boolean isOpen ()
 			{
-				return CLOSED;
+				return false;
+			}			
+		},
+
+		ICONIZED  {
+
+			public State evRefresh ()
+			{
+				return ICONIZED_RETRIEVING;
 			}
 			
-			public State dataAvailable ()
+			public State evToggle ()
 			{
 				return OPEN;
+			}
+			
+			public State evDataAvailable ()
+			{
+				return ICONIZED;
+			}
+			
+			public boolean spinning ()
+			{
+				return false;
+			}
+
+			public boolean canClose ()
+			{
+				return false;
+			}
+			
+			public boolean isOpen ()
+			{
+				return false;
+			}						
+		},
+		
+		OPEN  {
+
+			public State evRefresh ()
+			{
+				return REFRESHING;
+			}
+			
+			public State evToggle ()
+			{
+				return ICONIZED;
+			}
+			
+			public State evDataAvailable ()
+			{
+				return OPEN;
+			}
+			
+			public boolean spinning ()
+			{
+				return false;
 			}
 
 			public boolean canClose ()
 			{
 				return true;
-			}			
+			}
+			
+			public boolean isOpen ()
+			{
+				return true;
+			}						
+		},		
+		
+		REFRESHING  {
+
+			public State evRefresh ()
+			{
+				return REFRESHING;
+			}
+			
+			public State evToggle ()
+			{
+				return ICONIZED_RETRIEVING;
+			}
+			
+			public State evDataAvailable ()
+			{
+				return OPEN;
+			}
+			
+			public boolean spinning ()
+			{
+				return true;
+			}
+
+			public boolean canClose ()
+			{
+				return true;
+			}
+			
+			public boolean isOpen ()
+			{
+				return true;
+			}									
 		};
 		
-		public boolean spinning ()
-		{
-			return false;
-		}
+		public abstract State evRefresh ();
 		
-		public boolean open ()
-		{
-			return false;
-		}
+		public abstract State evToggle ();
+		
+		public abstract State evDataAvailable ();
+		
+		public abstract boolean spinning ();
 		
 		public abstract boolean canClose ();
 		
-		public boolean willOpen ()
-		{
-			return canClose ();
-		}
-
-		public abstract State toggle ();
+		public abstract boolean isOpen ();
 		
-		public abstract State dataAvailable ();		
 	}
 	
 	/// The inflater
@@ -180,6 +281,9 @@ public abstract class IconizableChart extends LinearLayout {
 	
 	/// Expander close bitmap
 	Bitmap closeBmp;
+	
+	/// Data has been requested yet
+	boolean dataRequested;
 	
 	/**
 	 * Constructor. It only shows the spinner and the title, until 
@@ -231,7 +335,7 @@ public abstract class IconizableChart extends LinearLayout {
 		a.recycle ();
 	}
 			
-	protected void setState (State state)
+	private void setState (State state)
 	{
 		Bitmap bmp;
 
@@ -241,19 +345,26 @@ public abstract class IconizableChart extends LinearLayout {
 		icb.setImageBitmap (bmp);
 		
 		spinner.setVisibility (state.spinning () ? View.VISIBLE : View.GONE);
-		contents.setVisibility (state.open () ? View.VISIBLE : View.GONE);
+		contents.setVisibility (state.isOpen () ? View.VISIBLE : View.GONE);
 	}
 	
 	private void toggle ()
 	{
-		setState (state.toggle ());
-		if (state.willOpen ())
+		setState (state.evToggle ());
+		if (!dataRequested) {
+			dataRequested = true;
 			loadData ();
+		}
 	}
 	
 	protected void dataAvailable ()
 	{
-		setState (state.dataAvailable ());
+		setState (state.evDataAvailable ());
+	}
+	
+	protected void startRefresh ()
+	{
+		setState (state.evRefresh ());
 	}
 	
 	protected abstract void loadData ();	

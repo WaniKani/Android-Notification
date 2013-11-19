@@ -147,7 +147,7 @@ public class PieChart extends IconizableChart {
 	 */
 	public void alert (String msg)
 	{
-		setState (State.OPEN);
+		dataAvailable ();
 		
 		plot.setVisibility (View.GONE);
 		legend.setVisibility (View.GONE);
