@@ -63,6 +63,11 @@
         	android:summary="@string/pref_review_order_descr"
         	android:defaultValue="false" />    
     	<CheckBoxPreference
+        	android:key="pref_lesson_order"
+        	android:title="@string/pref_lesson_order"
+        	android:summary="@string/pref_lesson_order_descr"
+        	android:defaultValue="false" />    
+    	<CheckBoxPreference
         	android:key="pref_error_popup"
         	android:title="@string/pref_error_popup"
         	android:summary="@string/pref_error_popup_descr"

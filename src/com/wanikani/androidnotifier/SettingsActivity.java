@@ -73,6 +73,8 @@ public class SettingsActivity
 	private static final String KEY_PREF_WANIKANI_IMPROVE = "pref_wanikani_improve";
 	/** Review Order */
 	private static final String KEY_PREF_REVIEW_ORDER = "pref_review_order";
+	/** Lesson Order */
+	private static final String KEY_PREF_LESSON_ORDER = "pref_lesson_order";
 	/** Info popup */
 	private static final String KEY_PREF_ERROR_POPUP = "pref_error_popup";
 	/** Enable 42+ mode. Must match preferences.xml */
@@ -302,6 +304,9 @@ public class SettingsActivity
 		pref = findPreference (KEY_PREF_REVIEW_ORDER);
 		pref.setEnabled (getUseIntegratedBrowser (prefs));
 
+		pref = findPreference (KEY_PREF_LESSON_ORDER);
+		pref.setEnabled (getUseIntegratedBrowser (prefs));
+
 		pref = findPreference (KEY_PREF_ERROR_POPUP);
 		pref.setEnabled (getUseIntegratedBrowser (prefs));
 
@@ -329,6 +334,9 @@ public class SettingsActivity
 		pref = findPreference (KEY_PREF_REVIEW_ORDER);
 		pref.setEnabled (lime);
 		
+		pref = findPreference (KEY_PREF_LESSON_ORDER);
+		pref.setEnabled (lime);
+
 		pref = findPreference (KEY_PREF_WANIKANI_IMPROVE);
 		pref.setEnabled (lime);									
 	}
@@ -465,6 +473,11 @@ public class SettingsActivity
 		return prefs (ctxt).getBoolean (KEY_PREF_REVIEW_ORDER, false);
 	}
 	
+	public static boolean getLessonOrder (Context ctxt)
+	{
+		return prefs (ctxt).getBoolean (KEY_PREF_LESSON_ORDER, false);
+	}
+
 	public static boolean getDisableSuggestions (Context ctxt)
 	{
 		return prefs (ctxt).getBoolean (KEY_PREF_DISABLE_SUGGESTIONS, true);
