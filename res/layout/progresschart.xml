@@ -1,43 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:custom="http://schemas.android.com/apk/res/com.wanikani.androidnotifier"    
-    style="@style/Table"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical" >
+    android:layout_height="wrap_content" 
+    android:orientation="vertical">
 
-    <TableRow
+    <include layout="@layout/graph_title" />
+
+    <TableLayout
+        android:id="@+id/gt_contents"
+        style="@style/ProgressPlot"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" >
+        android:layout_height="wrap_content"/>
+        
 
-        <TextView
-            android:id="@+id/pp_title"
-            style="@style/ProgressTitle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:text="@string/jlpt1" />
-
-        <com.wanikani.androidnotifier.graph.ProgressPlot
-            android:id="@+id/pp_plot"
-            style="@style/ProgressPlot"
-            android:layout_width="0dip"
-            android:layout_height="@dimen/m_progress_size"
-            custom:ratio="0"
-            android:layout_weight="1" />
-    </TableRow>
-
-    <TableRow>
-		<View
-		    android:layout_width="0dip"
-		    android:layout_height="0dip"/>
-        <LinearLayout
-            android:id="@+id/pp_legend"
-            style="@style/ChartLegend"
-            android:layout_width="0dip"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:orientation="vertical" />
-    </TableRow>
-
-</TableLayout>
+</LinearLayout>

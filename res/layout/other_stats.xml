@@ -26,25 +26,17 @@
             android:orientation="vertical"
             android:visibility="gone" >
 
-            <TextView
-                style="@style/ChartTitle"
-                android:text="@string/ct_jlpt_progress" />
-
             <com.wanikani.androidnotifier.graph.ProgressChart
-                style="@style/ProgressPlot"                        
                 android:id="@+id/os_jlpt"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                custom:title="@string/ct_jlpt_progress"  />
             
-            <TextView
-                style="@style/ChartTitle"
-                android:text="@string/ct_joyo_progress" />
-
             <com.wanikani.androidnotifier.graph.ProgressChart
-                style="@style/ProgressPlot"                        
                 android:id="@+id/os_joyo"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                custom:title="@string/ct_joyo_progress" />
             
        		<com.wanikani.androidnotifier.graph.HistogramChart 
        		    android:id="@+id/os_kanji_levels"
