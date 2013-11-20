@@ -5,26 +5,10 @@
     style="@style/Background"
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
-
-    <RelativeLayout
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" >
-
-        <ProgressBar
-            android:id="@id/pb_status"
-            style="@style/Spinner"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentTop="true"
-            android:visibility="gone" />
-
-       <LinearLayout
-            android:id="@+id/os_panel"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:visibility="gone" >
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
 
             <com.wanikani.androidnotifier.graph.ProgressChart
                 android:id="@+id/os_jlpt"
@@ -44,29 +28,12 @@
                 android:layout_height="wrap_content"
                 custom:ticks="10"
                 custom:title="@string/os_kanji_levels"/>
-            
-       		<Button
-       		    android:id="@+id/os_more"
-       		    android:text="@string/tag_more_stats"
-       		    android:layout_width="wrap_content"
-       		    android:layout_height="wrap_content"
-       		    android:layout_gravity="center_horizontal"
-       		    android:visibility="gone"/>
-       		
-       		<ProgressBar
-    	    	android:id="@+id/os_pb_other"
-            	style="?android:attr/progressBarStyleHorizontal"
-            	android:layout_width="match_parent"
-            	android:layout_height="wrap_content" 
-            	android:visibility="gone" />
-       		       		
+                   		       		
        		<com.wanikani.androidnotifier.graph.HistogramChart 
        		    android:id="@+id/os_levels"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 custom:ticks="10"
                 custom:title="@string/os_levels"/>
-            </LinearLayout>
-       </RelativeLayout>
-
+	</LinearLayout>       		
 </ScrollView>

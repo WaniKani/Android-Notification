@@ -34,6 +34,12 @@ import com.wanikani.androidnotifier.R;
  */
 
 public class HistogramChart extends IconizableChart {
+
+	public static interface DataSource {
+		
+		public void loadData ();
+		
+	}
 	
 	/// The real histogram
 	HistogramPlot plot;
@@ -47,7 +53,8 @@ public class HistogramChart extends IconizableChart {
 	/// The alert message
 	TextView alertMessage;
 	
-	boolean available;
+	/// Data source
+	DataSource dsource;
 	
 	/**
 	 * Constructor. It only shows the spinner and the title, until 
@@ -63,6 +70,11 @@ public class HistogramChart extends IconizableChart {
 		legend = (LinearLayout) findViewById (R.id.hc_legend);
 		alertPanel = findViewById (R.id.hc_lay_alert);
 		alertMessage = (TextView) findViewById (R.id.hc_alert);
+	}
+	
+	public void setDataSource (DataSource dsource)
+	{
+		this.dsource = dsource;
 	}
 	
 	/**
@@ -86,7 +98,6 @@ public class HistogramChart extends IconizableChart {
 			}
 		}
 		
-		available = true;
 		dataAvailable ();
 	}	
 	
@@ -148,7 +159,7 @@ public class HistogramChart extends IconizableChart {
 	
 	protected void loadData ()
 	{
-		if (available)
-			dataAvailable ();
+		if (dsource != null)
+			dsource.loadData ();
 	}	
 }

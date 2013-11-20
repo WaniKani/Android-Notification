@@ -1,6 +1,7 @@
 package com.wanikani.androidnotifier;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.List;
@@ -35,39 +36,22 @@ import com.wanikani.wklib.Vocabulary;
 
 public class OtherStatsActivity extends Activity {
 	
-	private enum Job {
-		
-		BASE, OTHER
-		
-	};
-	
-	private class RetryListener implements DialogInterface.OnClickListener {
-		
-		@Override
-		public void onClick (DialogInterface ifc, int which)
-		{
-			refresh ();
-		}		
-	}
+	private class KanjiDataSource implements HistogramChart.DataSource {
 
-	private class CancelListener implements DialogInterface.OnClickListener {
-		
 		@Override
-		public void onClick (DialogInterface ifc, int which)
+		public void loadData () 
 		{
-			finish ();
-		}		
+			refreshKanji ();
+		}
 	}
 	
-	private class MoreListener implements View.OnClickListener {
-		
+	private class OtherDataSource implements HistogramChart.DataSource {
+
 		@Override
-		public void onClick (View view)
+		public void loadData () 
 		{
-			view.setVisibility (View.GONE);
-			showMore ();
+			refreshOther ();
 		}
-		
 	}
 
 	private class ItemListener {
@@ -77,7 +61,7 @@ public class OtherStatsActivity extends Activity {
 			/* empty */
 		}
 		
-		public void update ()
+		public void update (EnumSet<Item.Type> types)
 		{
 			/* empty */
 		}
@@ -154,14 +138,16 @@ public class OtherStatsActivity extends Activity {
 			}
 		}
 
-		public void update ()
+		public void update (EnumSet<Item.Type> types)
 		{
 			List<ProgressPlot.DataSet> l;
 			
-			l = new Vector<ProgressPlot.DataSet> (slds.values ());
-			l.add (rds);
+			if (types.contains (Item.Type.KANJI)) {			
+				l = new Vector<ProgressPlot.DataSet> (slds.values ());
+				l.add (rds);
 			
-			plot.setData (l);
+				plot.setData (l);
+			}
 		}
 		
 	}
@@ -181,13 +167,22 @@ public class OtherStatsActivity extends Activity {
 		private EnumMap<SRSLevel, Integer> imap;
 
 		/// The actual data
-		private List<HistogramPlot.Samples> bars; 
+		private List<HistogramPlot.Samples> bars;
 		
-		public ItemDistribution (Context ctxt, HistogramChart chart)
+		/// Item needed for this chart
+		private EnumSet<Item.Type> types; 
+
+		/// Item types collected so far
+		private EnumSet<Item.Type> availableTypes; 
+		
+		public ItemDistribution (Context ctxt, EnumSet<Item.Type> types, HistogramChart chart)
 		{
 			Resources res;
 
+			this.types = types;
 			this.chart = chart;
+			
+			availableTypes = EnumSet.noneOf (Item.Type.class);
 			
 			res = ctxt.getResources ();
 								
@@ -214,8 +209,13 @@ public class OtherStatsActivity extends Activity {
 			initBars (levels);
 		}
 		
-		public void update ()
+		public void update (EnumSet<Item.Type> types)
 		{
+			availableTypes.addAll (types);
+			for (Item.Type t : this.types)
+				if (!availableTypes.contains (t))
+					return;
+			
 			chart.setData (series, bars, -1);
 		}
 
@@ -276,42 +276,26 @@ public class OtherStatsActivity extends Activity {
 	 */
 	private class Task extends AsyncTask<ItemListener, Integer, Boolean> {
 
-		/// WK connection
-		private Connection conn;
-		
 		/// The meter
 		private Connection.Meter meter;
-		
-		/// Must reset
-		private boolean reset;
 		
 		/// List of item types to load
 		private EnumSet<Item.Type>types;
 		
-		/// Progress bar
-		private ProgressBar pb;
+		/// Shall listeners be reset
+		private boolean reset;
+		
+		/// Listeners set
+		private List<ItemListener> listeners;
 		
 		/// Number of levels to load at once
 		private static final int BUNCH_SIZE = 5;
 		
-		/// The job type
-		private Job job;
-		
-		public Task (Job job, Connection.Meter meter, Connection conn, Context ctxt, 
-					 ProgressBar pb, boolean reset, Item.Type...types)
+		public Task (Connection.Meter meter, EnumSet<Item.Type> types, boolean reset)
 		{
-			int i;
-			
-			this.job = job;
-			this.conn = conn;
 			this.meter = meter;
-			this.pb = pb;
+			this.types = types;
 			this.reset = reset;
-			
-			this.types = EnumSet.noneOf (Item.Type.class);
-			
-			for (i = 0; i < types.length; i++)
-				this.types.add (types [i]);
 		}
 				
 		/**
@@ -327,6 +311,8 @@ public class OtherStatsActivity extends Activity {
 			ItemLibrary<Vocabulary> vlib;
 			int i, j, levels, bunch [];
 
+			this.listeners = new Vector<ItemListener> ();
+			Collections.addAll (this.listeners, listeners);
 			try {
 				levels = conn.getUserInformation (meter).level;
 			} catch (IOException e) {
@@ -337,7 +323,7 @@ public class OtherStatsActivity extends Activity {
 
 			if (reset)
 				for (ItemListener l : listeners)
-					l.reset (levels);				
+					l.reset (levels);
 			
 			try {
 				if (types.contains (Item.Type.RADICAL)) {
@@ -384,8 +370,7 @@ public class OtherStatsActivity extends Activity {
 		@Override
 		protected void onProgressUpdate (Integer... i)
 		{
-			if (pb != null)
-				pb.setProgress (i [i.length - 1]);
+			/* Not used yet */
 		}
 		
 		/**
@@ -395,8 +380,37 @@ public class OtherStatsActivity extends Activity {
 		@Override
 		protected void onPostExecute (Boolean ok)
 		{
-			completed (job, ok);
+			if (ok)
+				for (ItemListener l : listeners)
+					l.update (types);
+			
+			completed (types, ok);
 		}
+	}
+	
+	private static class PendingTask {
+		
+		Connection.Meter meter;
+		
+		EnumSet <Item.Type> types;
+		
+		List<ItemListener> listeners;
+		
+		public PendingTask (Connection.Meter meter, EnumSet<Item.Type> types, List<ItemListener> listeners)
+		{
+			this.meter = meter;
+			this.types = types;
+			this.listeners = listeners;
+		}
+		
+		public boolean clear (EnumSet<Item.Type> atypes)
+		{
+			for (Item.Type t : atypes)
+				types.remove (t);
+			
+			return !types.isEmpty ();
+		}
+		
 	}
 
 	private Connection conn;
@@ -411,10 +425,6 @@ public class OtherStatsActivity extends Activity {
 	
 	private List<ItemListener> olisteners;
 
-	private ProgressBar spinner;
-	
-	private ProgressBar opb;
-	
 	private ProgressChart jlptChart;
 
 	private ProgressChart joyoChart;
@@ -426,11 +436,13 @@ public class OtherStatsActivity extends Activity {
 	private ItemDistribution itemd;
 	
 	private ItemDistribution kanjid;
+	
+	private EnumSet<Item.Type> availableTypes; 
+	
+	private List<PendingTask> tasks;
+	
+	private boolean taskRunning;
 
-	private View panel;
-	
-	private boolean visible;	
-	
 	private static final String KLIB_JLPT_1 =
 		"氏統保第結派案策基価提挙応企検藤沢裁証援施井護展態鮮視条幹独宮率衛張監環審義訴株姿閣衆評影松撃佐核整融製票渉響推請器士討攻崎督授催及憲離激摘系批郎健盟従修隊織拡故振弁就異献厳維浜遺塁邦素遣抗模雄益緊標" +
 		"宣昭廃伊江僚吉盛皇臨踏壊債興源儀創障継筋闘葬避司康善逮迫惑崩紀聴脱級博締救執房撤削密措志載陣我為抑幕染奈傷択秀徴弾償功拠秘拒刑塚致繰尾描鈴盤項喪伴養懸街契掲躍棄邸縮還属慮枠恵露沖緩節需射購揮充貢鹿却端" +
@@ -507,16 +519,18 @@ public class OtherStatsActivity extends Activity {
 	{		
 		super.onCreate (bundle);
 
+		availableTypes = EnumSet.noneOf (Item.Type.class);
+		tasks = new Vector<PendingTask> ();
+		
 		setContentView (R.layout.other_stats);
 		
-		spinner = (ProgressBar) findViewById (R.id.pb_status);
-		opb = (ProgressBar) findViewById (R.id.os_pb_other);
-		panel = findViewById (R.id.os_panel);
 		jlptChart = (ProgressChart) findViewById (R.id.os_jlpt);
 		joyoChart = (ProgressChart) findViewById (R.id.os_joyo);
 		kanjiLevelsChart = (HistogramChart) findViewById (R.id.os_kanji_levels);
 		levelsChart = (HistogramChart) findViewById (R.id.os_levels);
-		levelsChart.setVisibility (View.GONE);
+		
+		kanjiLevelsChart.setDataSource (new KanjiDataSource ());
+		levelsChart.setDataSource (new OtherDataSource ());
 
 		conn = new Connection (SettingsActivity.getLogin (this));
 		if (cache == null)
@@ -539,14 +553,12 @@ public class OtherStatsActivity extends Activity {
 		addKanjiListener (joyoChart, R.string.joyo6, KLIB_JOYO_6);
 		addKanjiListener (joyoChart, R.string.joyoS, KLIB_JOYO_S);
 
-		kanjid = new ItemDistribution (this, kanjiLevelsChart);
-		itemd = new ItemDistribution (this, levelsChart);
+		kanjid = new ItemDistribution (this, EnumSet.of (Item.Type.KANJI), kanjiLevelsChart);
+		itemd = new ItemDistribution (this, EnumSet.allOf (Item.Type.class), levelsChart);
 		
 		listeners.add (kanjid);
 		listeners.add (itemd);
 		olisteners.add (itemd);
-
-		refresh ();
 	}
 		
 	@Override
@@ -558,84 +570,53 @@ public class OtherStatsActivity extends Activity {
 			cache = (ItemsCache) intent.getSerializableExtra (EXTRA_CACHE);		
 	}
 	
-	@Override
-	public void onResume ()
-	{
-		super.onResume ();
-		
-		visible = true;
-	}
-	
-	@Override
-	public void onPause ()
-	{
-		super.onPause ();
-		
-		visible = false;
-	}
-
 	protected void addKanjiListener (ProgressChart chart, int id, String library)
 	{
 		listeners.add (new KanjiProgressChart (chart, getString (id), library));
 	}
 	
-	protected void refresh ()
+	private void refresh (Connection.Meter meter, EnumSet<Item.Type> types, List<ItemListener> listeners)
 	{
-		spinner.setVisibility (View.VISIBLE);
-		new Task (Job.BASE, MeterSpec.T.MORE_STATS.get (this), conn, this, null, 
-				  true, Item.Type.KANJI).execute (listeners.toArray (new ItemListener [0]));
-	}
-	
-	protected void completed (Job job, boolean ok)
-	{
-		Button more;
+		EnumSet<Item.Type> nrt; 
 		
-		spinner.setVisibility (View.GONE);
-		opb.setVisibility (View.GONE);
-		
-		if (ok) {
-			panel.setVisibility (View.VISIBLE);
-			for (ItemListener l : listeners)
-				l.update ();
-			
-			if (job == Job.BASE) {
-				more = (Button) findViewById (R.id.os_more);
-				more.setVisibility (View.VISIBLE);
-				more.setOnClickListener (new MoreListener ());
-			}
-		} else
-			showErrorMessage ();
-	}
-
-	protected void showErrorMessage ()
-	{
-		AlertDialog.Builder builder;
-		Dialog dialog;
-		
-		if (!visible)
+		if (taskRunning) {
+			tasks.add (new PendingTask (meter, types, listeners));
 			return;
+		}
 		
-		builder = new AlertDialog.Builder (this);
-		builder.setTitle (R.string.other_stats_error_message_title);
-		builder.setMessage (R.string.other_stats_error_message_text);
-		builder.setPositiveButton (R.string.other_stats_message_retry, new RetryListener ());
-		builder.setNegativeButton (R.string.other_stats_message_cancel, new CancelListener ());
+		taskRunning = true;
+		nrt = EnumSet.noneOf (Item.Type.class);
+		for (Item.Type t : types)
+			if (!availableTypes.contains (t))
+				nrt.add (t);
 		
-		dialog = builder.create ();
-		
-		dialog.show ();		
+		new Task (meter, nrt, availableTypes.isEmpty ()).execute (listeners.toArray (new ItemListener [0]));		
 	}
 	
-	protected void showMore ()
+	protected void refreshKanji ()
 	{
-		ScrollView sv;
-		
-		sv = (ScrollView) findViewById (R.id.os_scroll);
-		opb.setVisibility (View.VISIBLE);
-		new Task (Job.OTHER, MeterSpec.T.OTHER_STATS.get (this), conn, this, opb, false, 
-				  Item.Type.RADICAL, Item.Type.VOCABULARY).execute (olisteners.toArray (new ItemListener [0]));
-		levelsChart.setVisibility (View.VISIBLE);
-		sv.fullScroll (ScrollView.FOCUS_DOWN);
+		refresh (MeterSpec.T.MORE_STATS.get (this), EnumSet.of (Item.Type.KANJI), listeners);			
 	}
-
+	
+	protected void refreshOther ()
+	{
+		refresh (MeterSpec.T.OTHER_STATS.get (this), EnumSet.allOf (Item.Type.class), olisteners);
+	}	
+	
+	protected void completed (EnumSet<Item.Type> types, boolean ok)
+	{
+		PendingTask task;
+	
+		taskRunning = false;
+		if (ok) {
+			availableTypes.addAll (types);
+			while (!tasks.isEmpty ()) {
+				task = tasks.remove (0);
+				if (task.clear (availableTypes)) {
+					refresh (task.meter, task.types, task.listeners);
+					return;
+				}
+			}
+		}
+	}
 }
