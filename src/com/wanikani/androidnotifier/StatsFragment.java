@@ -1251,7 +1251,7 @@ public class StatsFragment extends Fragment implements Tab {
 
 			try {
 				if (types.contains (Item.Type.RADICAL)) {
-					rlib = conn.getRadicals (meter);
+					rlib = conn.getRadicals (meter, false);
 					for (ItemListener l : listeners)
 						l.newRadical (rlib);
 				}
@@ -1261,7 +1261,7 @@ public class StatsFragment extends Fragment implements Tab {
 
 			try {
 				if (types.contains (Item.Type.KANJI)) {
-					klib = conn.getKanji (meter);
+					klib = conn.getKanji (meter, false);
 					for (ItemListener l : listeners)
 						l.newKanji (klib);
 				}
@@ -1278,7 +1278,7 @@ public class StatsFragment extends Fragment implements Tab {
 						bunch = new int [Math.min (BUNCH_SIZE, levels - i + 1)];
 						for (j = 0; j < BUNCH_SIZE && i <= levels; j++)
 							bunch [j] = i++;
-						vlib = conn.getVocabulary (meter, bunch);
+						vlib = conn.getVocabulary (meter, bunch, false);
 						for (ItemListener l : listeners)
 							l.newVocab (vlib);
 						publishProgress ((100 * (i - 1)) / (levels + 2));
@@ -1407,8 +1407,6 @@ public class StatsFragment extends Fragment implements Tab {
 	
 	private List<PendingTask> tasks;
 	
-	private boolean taskRunning;
-
 	private static final String KLIB_JLPT_1 =
 		"氏統保第結派案策基価提挙応企検藤沢裁証援施井護展態鮮視条幹独宮率衛張監環審義訴株姿閣衆評影松撃佐核整融製票渉響推請器士討攻崎督授催及憲離激摘系批郎健盟従修隊織拡故振弁就異献厳維浜遺塁邦素遣抗模雄益緊標" +
 		"宣昭廃伊江僚吉盛皇臨踏壊債興源儀創障継筋闘葬避司康善逮迫惑崩紀聴脱級博締救執房撤削密措志載陣我為抑幕染奈傷択秀徴弾償功拠秘拒刑塚致繰尾描鈴盤項喪伴養懸街契掲躍棄邸縮還属慮枠恵露沖緩節需射購揮充貢鹿却端" +
@@ -1494,6 +1492,9 @@ public class StatsFragment extends Fragment implements Tab {
 		
 		kanjid = new ItemDistribution (EnumSet.of (Item.Type.KANJI));
 		itemd = new ItemDistribution (EnumSet.allOf (Item.Type.class));
+				
+		availableTypes = EnumSet.noneOf (Item.Type.class);
+		tasks = new Vector<PendingTask> ();
 
 		listeners.add (kanjid);
 		listeners.add (itemd);
@@ -1677,11 +1678,7 @@ public class StatsFragment extends Fragment implements Tab {
 		
 		tyc.setDataSource (ds);
 		charts.add (tyc);
-		
-		
-		availableTypes = EnumSet.noneOf (Item.Type.class);
-		tasks = new Vector<PendingTask> ();
-		
+				
 		jlptChart = (ProgressChart) parent.findViewById (R.id.os_jlpt);
 		joyoChart = (ProgressChart) parent.findViewById (R.id.os_joyo);
 		kanjiLevelsChart = (HistogramChart) parent.findViewById (R.id.os_kanji_levels);
@@ -2003,13 +2000,11 @@ public class StatsFragment extends Fragment implements Tab {
 	{
 		PendingTask task;
 				
-		while (!tasks.isEmpty ()) {
+		if (!tasks.isEmpty ()) {
 			task = tasks.remove (0);
-			if (task.clear (availableTypes)) {
-				new Task (main.getConnection (), task.meter, task.types).
-					execute (listeners.toArray (new ItemListener [0]));				
-				return;
-			}
+			task.clear (availableTypes);
+			new Task (main.getConnection (), task.meter, task.types).
+				execute (task.listeners.toArray (new ItemListener [0]));				
 		}		
 	}
 	
