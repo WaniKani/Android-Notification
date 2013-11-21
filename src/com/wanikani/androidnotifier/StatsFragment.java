@@ -2071,7 +2071,13 @@ public class StatsFragment extends Fragment implements Tab {
 		for (GenericChart chart : gcharts)
 			if (chart.scrolling ())
 				return true;
-
+		
+		if (kanjiLevelsChart.scrolling ())
+			return true;
+		
+		if (levelsChart.scrolling ())
+			return true;
+		
 		return false; 
 	}
 	
