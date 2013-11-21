@@ -978,12 +978,12 @@ public class StatsFragment extends Fragment implements Tab {
 			this.titleId = titleId;
 			
 			slds = new EnumMap<SRSLevel, ProgressPlot.DataSet> (SRSLevel.class);
-			slds.put (SRSLevel.APPRENTICE, new ProgressPlot.DataSet ());
-			slds.put (SRSLevel.GURU, new ProgressPlot.DataSet ());
-			slds.put (SRSLevel.MASTER, new ProgressPlot.DataSet ());
-			slds.put (SRSLevel.ENLIGHTEN, new ProgressPlot.DataSet ());
-			slds.put (SRSLevel.BURNED, new ProgressPlot.DataSet ());			
-			rds = new ProgressPlot.DataSet ();
+			slds.put (SRSLevel.APPRENTICE, new ProgressPlot.DataSet (0));
+			slds.put (SRSLevel.GURU, new ProgressPlot.DataSet (0));
+			slds.put (SRSLevel.MASTER, new ProgressPlot.DataSet (0));
+			slds.put (SRSLevel.ENLIGHTEN, new ProgressPlot.DataSet (0));
+			slds.put (SRSLevel.BURNED, new ProgressPlot.DataSet (0));			
+			rds = new ProgressPlot.DataSet (library.length ());
 			
 		}
 		
@@ -1006,18 +1006,18 @@ public class StatsFragment extends Fragment implements Tab {
 			res = getResources ();
 
 			slds.get (SRSLevel.APPRENTICE).set (getString (R.string.tag_apprentice), 
-							  					res.getColor (R.color.apprentice), 0);
+							  					res.getColor (R.color.apprentice));
 			slds.get (SRSLevel.GURU).set (getString (R.string.tag_guru), 
-							  			  res.getColor (R.color.guru), 0);
+							  			  res.getColor (R.color.guru));
 			slds.get (SRSLevel.MASTER).set (getString (R.string.tag_master), 
-							  				res.getColor (R.color.master), 0);
+							  				res.getColor (R.color.master));
 			slds.get (SRSLevel.ENLIGHTEN).set (getString (R.string.tag_enlightened), 
-							  				   res.getColor (R.color.enlightened), 0);
+							  				   res.getColor (R.color.enlightened));
 			slds.get (SRSLevel.BURNED).set (getString (R.string.tag_burned), 
-							  				res.getColor (R.color.burned), 0);
+							  				res.getColor (R.color.burned));
 			
 			rds.set (getString (R.string.tag_locked),
-					 res.getColor (R.color.locked), library.length ());
+					 res.getColor (R.color.locked));
 		}
 		
 		public void newKanji (ItemLibrary<Kanji> kanji)
