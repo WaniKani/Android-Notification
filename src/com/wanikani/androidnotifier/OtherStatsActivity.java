@@ -23,6 +23,7 @@ import android.widget.ScrollView;
 
 import com.wanikani.androidnotifier.graph.HistogramChart;
 import com.wanikani.androidnotifier.graph.HistogramPlot;
+import com.wanikani.androidnotifier.graph.IconizableChart;
 import com.wanikani.androidnotifier.graph.ProgressChart;
 import com.wanikani.androidnotifier.graph.ProgressPlot;
 import com.wanikani.wklib.Connection;
@@ -36,7 +37,7 @@ import com.wanikani.wklib.Vocabulary;
 
 public class OtherStatsActivity extends Activity {
 	
-	private class KanjiDataSource implements HistogramChart.DataSource {
+	private class KanjiDataSource implements IconizableChart.DataSource {
 
 		@Override
 		public void loadData () 
@@ -45,7 +46,7 @@ public class OtherStatsActivity extends Activity {
 		}
 	}
 	
-	private class OtherDataSource implements HistogramChart.DataSource {
+	private class OtherDataSource implements IconizableChart.DataSource {
 
 		@Override
 		public void loadData () 
@@ -518,6 +519,9 @@ public class OtherStatsActivity extends Activity {
 	public void onCreate (Bundle bundle) 
 	{		
 		super.onCreate (bundle);
+		
+		KanjiDataSource kds;
+		OtherDataSource ods;
 
 		availableTypes = EnumSet.noneOf (Item.Type.class);
 		tasks = new Vector<PendingTask> ();
@@ -529,8 +533,13 @@ public class OtherStatsActivity extends Activity {
 		kanjiLevelsChart = (HistogramChart) findViewById (R.id.os_kanji_levels);
 		levelsChart = (HistogramChart) findViewById (R.id.os_levels);
 		
-		kanjiLevelsChart.setDataSource (new KanjiDataSource ());
-		levelsChart.setDataSource (new OtherDataSource ());
+		kds = new KanjiDataSource ();
+		ods = new OtherDataSource ();
+		
+		jlptChart.setDataSource (kds);
+		joyoChart.setDataSource (kds);
+		kanjiLevelsChart.setDataSource (kds);
+		levelsChart.setDataSource (ods);
 
 		conn = new Connection (SettingsActivity.getLogin (this));
 		if (cache == null)

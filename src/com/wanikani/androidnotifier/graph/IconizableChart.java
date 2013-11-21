@@ -36,6 +36,12 @@ import com.wanikani.androidnotifier.R;
 
 public abstract class IconizableChart extends LinearLayout {
 	
+	public static interface DataSource {
+		
+		public void loadData ();
+		
+	}
+	
 	class IconizeButtonListener implements View.OnClickListener {
 		
 		@Override
@@ -285,6 +291,9 @@ public abstract class IconizableChart extends LinearLayout {
 	/// Data has been requested yet
 	boolean dataRequested;
 	
+	/// Data source
+	DataSource dsource;
+	
 	/**
 	 * Constructor. It only shows the spinner and the title, until 
 	 * {@link #setData(List)} gets called.
@@ -367,5 +376,15 @@ public abstract class IconizableChart extends LinearLayout {
 		setState (state.evRefresh ());
 	}
 	
-	protected abstract void loadData ();	
+	public void setDataSource (DataSource dsource)
+	{
+		this.dsource = dsource;
+	}
+	
+	protected void loadData ()
+	{
+		if (dsource != null)
+			dsource.loadData ();
+	}	
+
 }

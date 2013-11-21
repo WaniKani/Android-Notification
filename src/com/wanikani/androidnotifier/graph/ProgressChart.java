@@ -113,6 +113,8 @@ public class ProgressChart extends IconizableChart {
 					legend.addView (item);
 				}
 			}
+			
+			dataAvailable ();
 		}	
 
 	}
@@ -152,12 +154,5 @@ public class ProgressChart extends IconizableChart {
 			setText (ds.description);
 		((TextView) item.findViewById (R.id.leg_value)).
 			setText (Integer.toString (Math.round (ds.value)));		
-	}
-
-	@Override
-	protected void loadData () 
-	{
-		dataAvailable ();
-	}
-	
+	}	
 }
