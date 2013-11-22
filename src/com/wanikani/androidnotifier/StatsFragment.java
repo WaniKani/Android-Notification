@@ -4,8 +4,6 @@ import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Collections;
-import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.Hashtable;
 import java.util.List;
@@ -15,7 +13,6 @@ import java.util.Vector;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.content.res.Resources;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -32,21 +29,18 @@ import com.wanikani.androidnotifier.graph.HistogramChart;
 import com.wanikani.androidnotifier.graph.HistogramPlot;
 import com.wanikani.androidnotifier.graph.IconizableChart;
 import com.wanikani.androidnotifier.graph.Pager;
-import com.wanikani.androidnotifier.graph.ProgressChart;
-import com.wanikani.androidnotifier.graph.ProgressPlot;
 import com.wanikani.androidnotifier.graph.Pager.Series;
 import com.wanikani.androidnotifier.graph.PieChart;
 import com.wanikani.androidnotifier.graph.PieChart.InfoSet;
 import com.wanikani.androidnotifier.graph.PiePlot.DataSet;
+import com.wanikani.androidnotifier.graph.ProgressChart;
 import com.wanikani.androidnotifier.graph.TYChart;
+import com.wanikani.androidnotifier.stats.ItemDistributionChart;
+import com.wanikani.androidnotifier.stats.KanjiProgressChart;
+import com.wanikani.androidnotifier.stats.NetworkEngine;
 import com.wanikani.wklib.Connection;
 import com.wanikani.wklib.Item;
-import com.wanikani.wklib.ItemLibrary;
-import com.wanikani.wklib.Kanji;
-import com.wanikani.wklib.Radical;
 import com.wanikani.wklib.SRSDistribution;
-import com.wanikani.wklib.SRSLevel;
-import com.wanikani.wklib.Vocabulary;
 
 /* 
  *  Copyright (c) 2013 Alberto Cuda
@@ -911,438 +905,14 @@ public class StatsFragment extends Fragment implements Tab {
 		}		
 	}
 	
-	private class KanjiIDataSource implements IconizableChart.DataSource {
-
-		@Override
-		public void loadData () 
-		{
-			refreshKanji ();
-		}
-	}
-	
-	private class OtherIDataSource implements IconizableChart.DataSource {
-
-		@Override
-		public void loadData () 
-		{
-			refreshOther ();
-		}
-	}
-
-	private class ItemListener {
-		
-		public void startUpdate (int levels)
-		{
-			/* empty */
-		}
-		
-		public void update (EnumSet<Item.Type> types)
-		{
-			/* empty */
-		}
-
-		public void newRadical (ItemLibrary<Radical> radicals)
-		{
-			/* empty */
-		}
-		
-		public void newKanji (ItemLibrary<Kanji> kanji)
-		{
-			/* empty */
-		}
-
-		public void newVocab (ItemLibrary<Vocabulary> vocabs)
-		{
-			/* empty */
-		}
-		
-	}
-	
-	private class KanjiProgressChart extends ItemListener {
-		
-		ProgressChart.SubPlot plot;
-		
-		String library;
-		
-		EnumMap<SRSLevel, ProgressPlot.DataSet> slds;
-		
-		ProgressPlot.DataSet rds;
-		
-		boolean dataAvailable;
-		
-		int titleId;
-		
-		public KanjiProgressChart (int titleId, String library)
-		{
-			this.library = library;
-			this.titleId = titleId;
-			
-			slds = new EnumMap<SRSLevel, ProgressPlot.DataSet> (SRSLevel.class);
-			slds.put (SRSLevel.APPRENTICE, new ProgressPlot.DataSet (0));
-			slds.put (SRSLevel.GURU, new ProgressPlot.DataSet (0));
-			slds.put (SRSLevel.MASTER, new ProgressPlot.DataSet (0));
-			slds.put (SRSLevel.ENLIGHTEN, new ProgressPlot.DataSet (0));
-			slds.put (SRSLevel.BURNED, new ProgressPlot.DataSet (0));			
-			rds = new ProgressPlot.DataSet (library.length ());
-			
-		}
-		
-		public void setChart (ProgressChart chart)
-		{			
-			plot = chart.addData (getString (titleId));
-			
-			updatePlot ();
-		}
-		
-		public void unsetChart ()
-		{
-			plot = null;
-		}
-		
-		public void attach ()
-		{
-			Resources res;
-			
-			res = getResources ();
-
-			slds.get (SRSLevel.APPRENTICE).set (getString (R.string.tag_apprentice), 
-							  					res.getColor (R.color.apprentice));
-			slds.get (SRSLevel.GURU).set (getString (R.string.tag_guru), 
-							  			  res.getColor (R.color.guru));
-			slds.get (SRSLevel.MASTER).set (getString (R.string.tag_master), 
-							  				res.getColor (R.color.master));
-			slds.get (SRSLevel.ENLIGHTEN).set (getString (R.string.tag_enlightened), 
-							  				   res.getColor (R.color.enlightened));
-			slds.get (SRSLevel.BURNED).set (getString (R.string.tag_burned), 
-							  				res.getColor (R.color.burned));
-			
-			rds.set (getString (R.string.tag_locked),
-					 res.getColor (R.color.locked));
-		}
-		
-		public void newKanji (ItemLibrary<Kanji> kanji)
-		{
-			for (Kanji k : kanji.list) {
-				if (k.stats != null && library.contains (k.character)) {
-					slds.get (k.stats.srs).value++;
-					rds.value--;
-				}
-			}
-		}
-
-		public void update (EnumSet<Item.Type> types)
-		{			
-			dataAvailable |= types.contains (Item.Type.KANJI);
-			
-			updatePlot ();
-		}
-		
-		private void updatePlot ()
-		{
-			List<ProgressPlot.DataSet> l;
-
-			if (dataAvailable && plot != null) {
-				l = new Vector<ProgressPlot.DataSet> (slds.values ());
-				l.add (rds);
-			
-				if (!isDetached ())
-					plot.setData (l);				
-			}
-		}
-	}
-	
-	private class ItemDistribution extends ItemListener {
-
-		/// The series
-		private List<HistogramPlot.Series> series;
-
-		/// The chart to be updated
-		private HistogramChart chart;
-
-		/// The SRS to series mapping
-		private EnumMap<SRSLevel, HistogramPlot.Series> map;
-		
-		/// The SRS to idx mapping
-		private EnumMap<SRSLevel, Integer> imap;
-
-		/// The actual data
-		private List<HistogramPlot.Samples> bars;
-		
-		/// Item needed for this chart
-		private EnumSet<Item.Type> types; 
-
-		/// Item types collected so far
-		private EnumSet<Item.Type> availableTypes;
-		
-		public ItemDistribution (EnumSet<Item.Type> types)
-		{
-			this.types = types;
-			
-			availableTypes = EnumSet.noneOf (Item.Type.class);
-			
-			series = new Vector<HistogramPlot.Series> ();
-			map = new EnumMap<SRSLevel, HistogramPlot.Series> (SRSLevel.class);
-			imap = new EnumMap<SRSLevel, Integer> (SRSLevel.class);
-			
-			add (SRSLevel.APPRENTICE);
-			add (SRSLevel.GURU);
-			add (SRSLevel.MASTER);
-			add (SRSLevel.ENLIGHTEN);
-			add (SRSLevel.BURNED);
-			
-			imap.put (SRSLevel.APPRENTICE, 0);
-			imap.put (SRSLevel.GURU, 1);
-			imap.put (SRSLevel.MASTER, 2);
-			imap.put (SRSLevel.ENLIGHTEN, 3);
-			imap.put (SRSLevel.BURNED, 4);
-		}
-		
-		private void add (SRSLevel level)		
-		{			
-			HistogramPlot.Series s;
-			
-			s = new HistogramPlot.Series ();			
-			series.add (s);
-			map.put (level, s);
-		}
-		
-		public void attach ()
-		{
-			Resources res;
-			
-			res = getResources ();
-			
-			set (res, SRSLevel.APPRENTICE, R.string.tag_apprentice, R.color.apprentice);
-			set (res, SRSLevel.GURU, R.string.tag_guru, R.color.guru);
-			set (res, SRSLevel.MASTER, R.string.tag_master, R.color.master);
-			set (res, SRSLevel.ENLIGHTEN, R.string.tag_enlightened, R.color.enlightened);
-			set (res, SRSLevel.BURNED, R.string.tag_burned, R.color.burned);
-		}
-		
-		private void set (Resources res, SRSLevel level, int string, int color)		
-		{			
-			map.get (level).set (res.getString (string), res.getColor (color));
-		}
-
-		public void setChart (HistogramChart chart)
-		{
-			this.chart = chart;
-		}
-		
-		public void unsetChart ()
-		{
-			chart = null;
-		}
-		
-		public void startUpdate (int levels)
-		{
-			if (bars == null)
-				initBars (levels);
-		}
-
-		public void update (EnumSet<Item.Type> types)
-		{
-			availableTypes.addAll (types);
-			
-			for (Item.Type t : this.types)
-				if (!availableTypes.contains (t))
-					return;
-			
-			if (chart != null)
-				chart.setData (series, bars, -1);
-		}
-
-		private void initBars (int levels)
-		{
-			HistogramPlot.Samples bar;
-			int i;
-			
-			bars = new Vector<HistogramPlot.Samples> ();
-			for (i = 1; i <= levels; i++) {
-				bar = new HistogramPlot.Samples (Integer.toString (i));
-				bar.samples.add (new HistogramPlot.Sample (map.get (SRSLevel.APPRENTICE)));
-				bar.samples.add (new HistogramPlot.Sample (map.get (SRSLevel.GURU)));
-				bar.samples.add (new HistogramPlot.Sample (map.get (SRSLevel.MASTER)));
-				bar.samples.add (new HistogramPlot.Sample (map.get (SRSLevel.ENLIGHTEN)));
-				bar.samples.add (new HistogramPlot.Sample (map.get (SRSLevel.BURNED)));
-				bars.add (bar);
-			}
-		}
-				
-		public void newRadical (ItemLibrary<Radical> radicals)
-		{
-			for (Item i : radicals.list)
-				put (i);
-		}
-		
-		public void newKanji (ItemLibrary<Kanji> kanji)
-		{
-			for (Item i : kanji.list)
-				put (i);
-		}
-
-		public void newVocab (ItemLibrary<Vocabulary> vocabs)
-		{
-			for (Item i : vocabs.list)
-				put (i);			
-		}
-
-		private void put (Item i)
-		{
-			if (i.stats != null)	// stats is null for locked items
-				bars.get (i.level - 1).samples.get (imap.get (i.stats.srs)).value++;
-		}
-						
-	}
-
-	/**
-	 * The asynch task that loads all the info from WK, feeds the database and
-	 * publishes the progress.
-	 */
-	private class Task extends AsyncTask<ItemListener, Integer, Boolean> {
-
-		/// The connection
-		private Connection conn;
-		
-		/// The meter
-		private Connection.Meter meter;
-		
-		/// List of item types to load
-		private EnumSet<Item.Type>types;
-		
-		/// Listeners set
-		private List<ItemListener> listeners;
-		
-		/// Number of levels to load at once
-		private static final int BUNCH_SIZE = 5;
-		
-		public Task (Connection conn, Connection.Meter meter, EnumSet<Item.Type> types)
-		{
-			this.conn = conn;
-			this.meter = meter;
-			this.types = types;
-		}
-				
-		/**
-		 * The reconstruction process itself. It opens a DB reconstruction object,
-		 * loads all the items, and retrieves the new core stats 
-		 * @return true if everything is ok
-		 */
-		@Override
-		protected Boolean doInBackground (ItemListener... listeners)
-		{
-			ItemLibrary<Radical> rlib;
-			ItemLibrary<Kanji> klib;
-			ItemLibrary<Vocabulary> vlib;
-			int i, j, levels, bunch [];
-
-			this.listeners = new Vector<ItemListener> ();
-			Collections.addAll (this.listeners, listeners);
-			try {
-				levels = conn.getUserInformation (meter).level;
-			} catch (IOException e) {
-				return false;
-			}
-			
-			for (ItemListener l : listeners)
-				l.startUpdate (levels);
-
-			publishProgress ((100 * 1) / (levels + 2));
-
-			try {
-				if (types.contains (Item.Type.RADICAL)) {
-					rlib = conn.getRadicals (meter, false);
-					for (ItemListener l : listeners)
-						l.newRadical (rlib);
-				}
-			} catch (IOException e) {
-				return false;
-			} 
-
-			try {
-				if (types.contains (Item.Type.KANJI)) {
-					klib = conn.getKanji (meter, false);
-					for (ItemListener l : listeners)
-						l.newKanji (klib);
-				}
-			} catch (IOException e) {
-				return false;
-			} 
-
-			publishProgress ((100 * 2) / (levels + 2));
-			
-			try {
-				if (types.contains (Item.Type.VOCABULARY)) {
-					i = 1;
-					while (i <= levels) {
-						bunch = new int [Math.min (BUNCH_SIZE, levels - i + 1)];
-						for (j = 0; j < BUNCH_SIZE && i <= levels; j++)
-							bunch [j] = i++;
-						vlib = conn.getVocabulary (meter, bunch, false);
-						for (ItemListener l : listeners)
-							l.newVocab (vlib);
-						publishProgress ((100 * (i - 1)) / (levels + 2));
-					}
-				}
-			} catch (IOException e) {
-				return false;
-			} 
-
-			return true;
-		}	
-				
-		@Override
-		protected void onProgressUpdate (Integer... i)
-		{
-			/* Not used yet */
-		}
-		
-		/**
-		 * Ends the reconstruction process by telling everybody how it went.
-		 * @param ok if everything was ok
-		 */
-		@Override
-		protected void onPostExecute (Boolean ok)
-		{
-			if (ok)
-				for (ItemListener l : listeners)
-					l.update (types);
-			
-			completed (types, ok);
-		}
-	}
-	
-	private static class PendingTask {
-		
-		Connection.Meter meter;
-		
-		EnumSet <Item.Type> types;
-		
-		List<ItemListener> listeners;
-		
-		public PendingTask (Connection.Meter meter, EnumSet<Item.Type> types, List<ItemListener> listeners)
-		{
-			this.meter = meter;
-			this.types = types;
-			this.listeners = listeners;
-		}
-		
-		public boolean clear (EnumSet<Item.Type> atypes)
-		{
-			for (Item.Type t : atypes)
-				types.remove (t);
-			
-			return !types.isEmpty ();
-		}
-		
-	}
-
-
 	/// The main activity
 	MainActivity main;
 	
 	/// The root view of the fragment
 	View parent;
+	
+	/// The network engine
+	NetworkEngine netwe;
 	
 	/// All the TY charts. This is needed to lock and unlock scrolling
 	List<TYChart> charts;
@@ -1382,30 +952,6 @@ public class StatsFragment extends Fragment implements Tab {
 		
 	/// Level source
 	LevelupSource levels;
-	
-	private List<ItemListener> listeners;
-	
-	private List<ItemListener> olisteners;
-
-	private ProgressChart jlptChart;
-
-	private ProgressChart joyoChart;
-	
-	private HistogramChart levelsChart;
-	
-	private HistogramChart kanjiLevelsChart;
-	
-	private ItemDistribution itemd;
-	
-	private ItemDistribution kanjid;
-	
-	private List<KanjiProgressChart> jlptc;
-	
-	private List<KanjiProgressChart> joyoc;
-	
-	private EnumSet<Item.Type> availableTypes; 
-	
-	private List<PendingTask> tasks;
 	
 	private static final String KLIB_JLPT_1 =
 		"氏統保第結派案策基価提挙応企検藤沢裁証援施井護展態鮮視条幹独宮率衛張監環審義訴株姿閣衆評影松撃佐核整融製票渉響推請器士討攻崎督授催及憲離激摘系批郎健盟従修隊織拡故振弁就異献厳維浜遺塁邦素遣抗模雄益緊標" +
@@ -1487,68 +1033,38 @@ public class StatsFragment extends Fragment implements Tab {
 		gcharts = new Vector<GenericChart> ();
 		hdbc = new HistoryDatabaseCache ();
 		
-		listeners = new Vector<ItemListener> ();		
-		olisteners = new Vector<ItemListener> ();		
+		netwe = new NetworkEngine ();
 		
-		kanjid = new ItemDistribution (EnumSet.of (Item.Type.KANJI));
-		itemd = new ItemDistribution (EnumSet.allOf (Item.Type.class));
-				
-		availableTypes = EnumSet.noneOf (Item.Type.class);
-		tasks = new Vector<PendingTask> ();
+		netwe.add (new ItemDistributionChart (R.id.os_kanji_levels, MeterSpec.T.OTHER_STATS, EnumSet.of (Item.Type.KANJI)));
+		netwe.add (new ItemDistributionChart (R.id.os_levels, MeterSpec.T.MORE_STATS, EnumSet.allOf (Item.Type.class)));
 
-		listeners.add (kanjid);
-		listeners.add (itemd);
-		olisteners.add (itemd);
-		
-		jlptc = new Vector<KanjiProgressChart> ();
-		addKanjiListener (jlptc, R.string.jlpt5, KLIB_JLPT_5);		
-		addKanjiListener (jlptc, R.string.jlpt4, KLIB_JLPT_4);		
-		addKanjiListener (jlptc, R.string.jlpt3, KLIB_JLPT_3);		
-		addKanjiListener (jlptc, R.string.jlpt2, KLIB_JLPT_2);		
-		addKanjiListener (jlptc, R.string.jlpt1, KLIB_JLPT_1);
-		
-		joyoc = new Vector<KanjiProgressChart> ();
-		addKanjiListener (joyoc, R.string.joyo1, KLIB_JOYO_1);
-		addKanjiListener (joyoc, R.string.joyo2, KLIB_JOYO_2);
-		addKanjiListener (joyoc, R.string.joyo3, KLIB_JOYO_3);
-		addKanjiListener (joyoc, R.string.joyo4, KLIB_JOYO_4);
-		addKanjiListener (joyoc, R.string.joyo5, KLIB_JOYO_5);
-		addKanjiListener (joyoc, R.string.joyo6, KLIB_JOYO_6);
-		addKanjiListener (joyoc, R.string.joyoS, KLIB_JOYO_S);
+		netwe.add (new KanjiProgressChart (R.id.os_jlpt, MeterSpec.T.OTHER_STATS, R.string.jlpt5, KLIB_JLPT_5));		
+		netwe.add (new KanjiProgressChart (R.id.os_jlpt, MeterSpec.T.OTHER_STATS, R.string.jlpt4, KLIB_JLPT_4));		
+		netwe.add (new KanjiProgressChart (R.id.os_jlpt, MeterSpec.T.OTHER_STATS, R.string.jlpt3, KLIB_JLPT_3));		
+		netwe.add (new KanjiProgressChart (R.id.os_jlpt, MeterSpec.T.OTHER_STATS, R.string.jlpt2, KLIB_JLPT_2));		
+		netwe.add (new KanjiProgressChart (R.id.os_jlpt, MeterSpec.T.OTHER_STATS, R.string.jlpt1, KLIB_JLPT_1));		
+
+		netwe.add (new KanjiProgressChart (R.id.os_joyo, MeterSpec.T.OTHER_STATS, R.string.joyo1, KLIB_JOYO_1));		
+		netwe.add (new KanjiProgressChart (R.id.os_joyo, MeterSpec.T.OTHER_STATS, R.string.joyo2, KLIB_JOYO_2));		
+		netwe.add (new KanjiProgressChart (R.id.os_joyo, MeterSpec.T.OTHER_STATS, R.string.joyo3, KLIB_JOYO_3));		
+		netwe.add (new KanjiProgressChart (R.id.os_joyo, MeterSpec.T.OTHER_STATS, R.string.joyo4, KLIB_JOYO_4));		
+		netwe.add (new KanjiProgressChart (R.id.os_joyo, MeterSpec.T.OTHER_STATS, R.string.joyo5, KLIB_JOYO_5));		
+		netwe.add (new KanjiProgressChart (R.id.os_joyo, MeterSpec.T.OTHER_STATS, R.string.joyo6, KLIB_JOYO_6));		
+		netwe.add (new KanjiProgressChart (R.id.os_joyo, MeterSpec.T.OTHER_STATS, R.string.joyoS, KLIB_JOYO_S));		
 	}
 	
-	protected void addKanjiListener (List<KanjiProgressChart> charts, int id, String library)
-	{
-		KanjiProgressChart kpc;
-		
-		kpc = new KanjiProgressChart (id, library);
-		
-		charts.add (kpc);
-		listeners.add (kpc);
-	}	
-
 	@Override
 	public void onAttach (Activity main)
 	{
 		super.onAttach (main);
 		
-		this.main = (MainActivity) main;
-		
+		this.main = (MainActivity) main;		
 		this.main.register (this);
 		
 		hdbc.open (main);
 		
 		if (rlist != null)
 			rlist.rd.attach (main);
-		
-		kanjid.attach ();
-		itemd.attach ();
-		
-		for (KanjiProgressChart kc : jlptc)
-			kc.attach ();
-		
-		for (KanjiProgressChart kc : joyoc)
-			kc.attach ();		
 	}
 	
 	@Override
@@ -1633,32 +1149,24 @@ public class StatsFragment extends Fragment implements Tab {
 			task = new GetCoreStatsTask (main, main.getConnection ());
 			task.execute ();
 		}
-		
-		kanjid.setChart (kanjiLevelsChart);
-		itemd.setChart (levelsChart);		
-		
-		for (KanjiProgressChart c : jlptc)
-			c.setChart (jlptChart);
-
-		for (KanjiProgressChart c : joyoc)
-			c.setChart (joyoChart);
-
+				
 		return parent;
     }
+	
+	@Override
+	public void onActivityCreated (Bundle bundle)
+	{
+		super.onActivityCreated (bundle);
+		
+		netwe.bind (main, parent);
+	}
 	
 	@Override
 	public void onDestroyView ()
 	{
 		super.onDestroyView ();
-		
-		kanjid.unsetChart ();
-		itemd.unsetChart ();
 
-		for (KanjiProgressChart c : jlptc)
-			c.unsetChart ();
-
-		for (KanjiProgressChart c : joyoc)
-			c.unsetChart ();
+		netwe.unbind ();
 	}
 	
 	/**
@@ -1668,8 +1176,6 @@ public class StatsFragment extends Fragment implements Tab {
 	 */
 	private void attach (int chart, DataSource ds)
 	{
-		KanjiIDataSource kds;
-		OtherIDataSource ods;
 		TYChart tyc;
 
 		tyc = (TYChart) parent.findViewById (chart);
@@ -1678,19 +1184,6 @@ public class StatsFragment extends Fragment implements Tab {
 		
 		tyc.setDataSource (ds);
 		charts.add (tyc);
-				
-		jlptChart = (ProgressChart) parent.findViewById (R.id.os_jlpt);
-		joyoChart = (ProgressChart) parent.findViewById (R.id.os_joyo);
-		kanjiLevelsChart = (HistogramChart) parent.findViewById (R.id.os_kanji_levels);
-		levelsChart = (HistogramChart) parent.findViewById (R.id.os_levels);
-		
-		kds = new KanjiIDataSource ();
-		ods = new OtherIDataSource ();
-		
-		jlptChart.setDataSource (kds);
-		joyoChart.setDataSource (kds);
-		kanjiLevelsChart.setDataSource (kds);
-		levelsChart.setDataSource (ods);
 	}
 	
 	@Override
@@ -1980,44 +1473,6 @@ public class StatsFragment extends Fragment implements Tab {
 		return ans;
 	}
 	
-	private void refresh (Connection.Meter meter, EnumSet<Item.Type> types, List<ItemListener> listeners)
-	{
-		boolean empty;
-		
-		empty = tasks.isEmpty ();
-		tasks.add (new PendingTask (meter, types, listeners));
-		if (empty)
-			runQueue ();
-	}
-
-	private void completed (EnumSet<Item.Type> types, boolean ok)
-	{
-		availableTypes.addAll (types);		
-		runQueue ();
-	}
-	
-	private void runQueue ()
-	{
-		PendingTask task;
-				
-		if (!tasks.isEmpty ()) {
-			task = tasks.remove (0);
-			task.clear (availableTypes);
-			new Task (main.getConnection (), task.meter, task.types).
-				execute (task.listeners.toArray (new ItemListener [0]));				
-		}		
-	}
-	
-	protected void refreshKanji ()
-	{
-		refresh (MeterSpec.T.MORE_STATS.get (main), EnumSet.of (Item.Type.KANJI), listeners);			
-	}
-	
-	protected void refreshOther ()
-	{
-		refresh (MeterSpec.T.OTHER_STATS.get (main), EnumSet.allOf (Item.Type.class), olisteners);
-	}	
-	
 	@Override
 	public void spin (boolean enable)
 	{
@@ -2067,10 +1522,7 @@ public class StatsFragment extends Fragment implements Tab {
 			if (chart.scrolling ())
 				return true;
 		
-		if (kanjiLevelsChart.scrolling ())
-			return true;
-		
-		if (levelsChart.scrolling ())
+		if (netwe.scrolling ())
 			return true;
 		
 		return false; 
