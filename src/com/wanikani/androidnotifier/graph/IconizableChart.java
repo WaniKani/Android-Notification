@@ -357,6 +357,17 @@ public abstract class IconizableChart extends LinearLayout {
 		contents.setVisibility (state.isOpen () ? View.VISIBLE : View.GONE);
 	}
 	
+	public void setOpen (boolean open)
+	{
+		if (open != state.isOpen ())
+			toggle ();
+	}
+	
+	public boolean isOpen ()
+	{
+		return state.isOpen ();
+	}
+	
 	private void toggle ()
 	{
 		setState (state.evToggle ());

@@ -13,9 +13,12 @@ import java.util.Vector;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.content.res.Resources;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -33,7 +36,6 @@ import com.wanikani.androidnotifier.graph.Pager.Series;
 import com.wanikani.androidnotifier.graph.PieChart;
 import com.wanikani.androidnotifier.graph.PieChart.InfoSet;
 import com.wanikani.androidnotifier.graph.PiePlot.DataSet;
-import com.wanikani.androidnotifier.graph.ProgressChart;
 import com.wanikani.androidnotifier.graph.TYChart;
 import com.wanikani.androidnotifier.stats.ItemDistributionChart;
 import com.wanikani.androidnotifier.stats.KanjiProgressChart;
@@ -935,6 +937,12 @@ public class StatsFragment extends Fragment implements Tab {
 	/// The Vocab progress plot datasource
 	VocabDataSource vocabds;
 	
+	int preserved [] = new int [] { 
+			R.id.pc_srs, R.id.ty_srs, 
+			R.id.pc_vocab, R.id.ty_vocab,
+			R.id.pc_kanji, R.id.ty_kanji,
+			R.id.hi_levels };
+	
 	/// Overall number of kanji
 	private static final int ALL_THE_KANJI = 1700;
 	
@@ -952,6 +960,10 @@ public class StatsFragment extends Fragment implements Tab {
 		
 	/// Level source
 	LevelupSource levels;
+	
+	public static final String PREFIX = StatsFragment.class.getName () + ".";
+	
+	public static final String KEY_OPEN = PREFIX + "POPEN.";
 	
 	private static final String KLIB_JLPT_1 =
 		"氏統保第結派案策基価提挙応企検藤沢裁証援施井護展態鮮視条幹独宮率衛張監環審義訴株姿閣衆評影松撃佐核整融製票渉響推請器士討攻崎督授催及憲離激摘系批郎健盟従修隊織拡故振弁就異献厳維浜遺塁邦素遣抗模雄益緊標" +
@@ -1160,7 +1172,7 @@ public class StatsFragment extends Fragment implements Tab {
 		
 		netwe.bind (main, parent);
 	}
-	
+		
 	@Override
 	public void onDestroyView ()
 	{
@@ -1168,6 +1180,40 @@ public class StatsFragment extends Fragment implements Tab {
 
 		netwe.unbind ();
 	}
+	
+	@Override
+	public void onStart ()
+	{
+		super.onStart ();
+		
+		SharedPreferences prefs;
+		IconizableChart ic;
+		int i;
+		
+		prefs = PreferenceManager.getDefaultSharedPreferences (main);
+		for (i = 0; i < preserved.length; i++) {
+			ic = (IconizableChart) parent.findViewById (preserved [i]);
+			ic.setOpen (prefs.getBoolean (KEY_OPEN + i, false));
+		}			
+	}
+
+	@Override
+	public void onStop ()
+	{
+		super.onStop ();
+		
+		Editor prefs;
+		IconizableChart ic;
+		int i;
+		
+		prefs = PreferenceManager.getDefaultSharedPreferences (main).edit ();
+		for (i = 0; i < preserved.length; i++) {
+			ic = (IconizableChart) parent.findViewById (preserved [i]);
+			prefs.putBoolean (KEY_OPEN + i, ic.isOpen ());
+		}
+		
+		prefs.commit ();
+	}	
 	
 	/**
 	 * Binds each datasource to its chart 
