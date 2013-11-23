@@ -943,6 +943,13 @@ public class StatsFragment extends Fragment implements Tab {
 			R.id.pc_kanji, R.id.ty_kanji,
 			R.id.hi_levels };
 	
+	int semiPreserved [] = new int [] {
+			R.id.os_jlpt, R.id.os_joyo,
+			R.id.os_kanji_levels, R.id.os_levels
+	};
+	
+	private Map<Integer, Boolean> semiPreservedState;
+	
 	/// Overall number of kanji
 	private static final int ALL_THE_KANJI = 1700;
 	
@@ -1045,6 +1052,7 @@ public class StatsFragment extends Fragment implements Tab {
 		gcharts = new Vector<GenericChart> ();
 		hdbc = new HistoryDatabaseCache ();
 		
+		semiPreservedState = new Hashtable<Integer, Boolean> ();
 		netwe = new NetworkEngine ();
 		
 		netwe.add (new ItemDistributionChart (R.id.os_kanji_levels, MeterSpec.T.OTHER_STATS, EnumSet.of (Item.Type.KANJI)));
@@ -1172,7 +1180,7 @@ public class StatsFragment extends Fragment implements Tab {
 		
 		netwe.bind (main, parent);
 	}
-		
+	
 	@Override
 	public void onDestroyView ()
 	{
@@ -1188,13 +1196,20 @@ public class StatsFragment extends Fragment implements Tab {
 		
 		SharedPreferences prefs;
 		IconizableChart ic;
+		Boolean value;
 		int i;
 		
 		prefs = PreferenceManager.getDefaultSharedPreferences (main);
 		for (i = 0; i < preserved.length; i++) {
 			ic = (IconizableChart) parent.findViewById (preserved [i]);
-			ic.setOpen (prefs.getBoolean (KEY_OPEN + i, false));
-		}			
+			ic.setOpen (prefs.getBoolean (KEY_OPEN + preserved [i], false));
+		}
+		
+		for (i = 0; i < semiPreserved.length; i++) {
+			ic = (IconizableChart) parent.findViewById (semiPreserved [i]);
+			value = semiPreservedState.get (semiPreserved [i]);
+			ic.setOpen (value != null ? value : false);
+		}					
 	}
 
 	@Override
@@ -1209,10 +1224,14 @@ public class StatsFragment extends Fragment implements Tab {
 		prefs = PreferenceManager.getDefaultSharedPreferences (main).edit ();
 		for (i = 0; i < preserved.length; i++) {
 			ic = (IconizableChart) parent.findViewById (preserved [i]);
-			prefs.putBoolean (KEY_OPEN + i, ic.isOpen ());
+			prefs.putBoolean (KEY_OPEN + preserved [i], ic.isOpen ());
 		}
-		
 		prefs.commit ();
+		
+		for (i = 0; i < semiPreserved.length; i++) {
+			ic = (IconizableChart) parent.findViewById (semiPreserved [i]);
+			semiPreservedState.put (semiPreserved [i], ic.isOpen ());
+		}					
 	}	
 	
 	/**
