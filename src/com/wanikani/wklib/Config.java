@@ -19,7 +19,7 @@ package com.wanikani.wklib;
 
 public class Config {
 	
-	public static final String DEF_URL = "http://www.wanikani.com/api/v1.1"; 
+	public static final String DEF_URL = "http://www.wanikani.com/api/v1.2"; 
 
 	public static final String DEF_GRAVATAR_URL = "http://www.gravatar.com/avatar"; 
 	
