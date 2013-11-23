@@ -954,13 +954,20 @@ public class HistoryDatabase {
 		/** The levelup day. Not nullable */
 		private static final String C_DAY = "day";
 				
+		/** The vacation days on that level. Not nullable */
+		private static final String C_VACATION = "vacation";
+
 		/** The create statement */
 		private static final String SQL_CREATE = 
 				"CREATE TABLE " + TABLE + " (" +
-
-						C_LEVEL + " INTEGER PRIMARY KEY," +
-						
-						C_DAY + " INTEGER NOT NULL)";
+						C_LEVEL + " INTEGER PRIMARY KEY," +						
+						C_DAY + " INTEGER NOT NULL," +
+						C_VACATION + " INTEGER NOT NULL DEFAULT 0)";
+		
+		/** The alter statement needed to upgrade from version 1 */
+		private static final String SQL_UPGRADE_FROM_V1 = 
+				"ALTER TABLE " + TABLE + " ADD COLUMN " +
+						C_VACATION + " INTEGER NOT NULL DEFAULT 0";		
 
 		/** The drop statement */
 		private static final String SQL_DROP = 
@@ -969,17 +976,17 @@ public class HistoryDatabase {
 		/** Tries to insert a new row into the table. If a row at the
 		 *  same level already exists, it is retained. */
 		private static final String SQL_INSERT_OR_IGNORE =
-				"INSERT OR IGNORE INTO " + TABLE + " VALUES (?, ?)";
+				"INSERT OR IGNORE INTO " + TABLE + " VALUES (?, ?, ?)";
 		
 		/** Tries to insert a new row into the table. If a row at the
 		 *  same level already exists, it is updated. */
 		private static final String SQL_INSERT_OR_UPDATE =
-				"INSERT OR REPLACE INTO " + TABLE + " VALUES (?, ?)";
+				"INSERT OR REPLACE INTO " + TABLE + " VALUES (?, ?, ?)";
 
 		/** Inserts a new row into the table. If a row at the same level
 		 *  already exists, it is replaced */
 		private static final String SQL_REPLACE =
-				"REPLACE INTO " + TABLE + " VALUES (?, ?)";
+				"REPLACE INTO " + TABLE + " VALUES (?, ?, ?)";
 
 		/**
 		 * Creates the table
@@ -988,6 +995,15 @@ public class HistoryDatabase {
 		public static void onCreate (SQLiteDatabase db)
 		{
 			db.execSQL (SQL_CREATE);
+		}
+		
+		/**
+		 * Upgrade from version 1
+		 * @param db the database
+		 */
+		public static void upgradeFromV1 (SQLiteDatabase db)
+		{
+			db.execSQL (SQL_UPGRADE_FROM_V1);
 		}
 		
 		/**
@@ -1007,16 +1023,18 @@ public class HistoryDatabase {
 		 * @param db the database
 		 * @param level the level number
 		 * @param day the day number
+		 * @param vacation the number of vacation days
 		 * @throws SQLException if something goes wrong. May indicate the db is broken
 		 */
-		public static void insertOrIgnore (SQLiteDatabase db, int level, int day)
+		public static void insertOrIgnore (SQLiteDatabase db, int level, int day, int vacation)
 			throws SQLException
 		{
 			String values [];
 			
 			values = new String [] {
 				Integer.toString (level), 
-				Integer.toString (day)
+				Integer.toString (day),
+				Integer.toString (vacation)
 			};
 
 			db.execSQL (SQL_INSERT_OR_IGNORE, values);		
@@ -1028,16 +1046,18 @@ public class HistoryDatabase {
 		 * @param db the database
 		 * @param level the level number
 		 * @param day the day number
+		 * @param vacation the number of vacation days
 		 * @throws SQLException if something goes wrong. May indicate the db is broken
 		 */
-		public static void insertOrUpdate (SQLiteDatabase db, int level, int day)
+		public static void insertOrUpdate (SQLiteDatabase db, int level, int day, int vacation)
 			throws SQLException
 		{
 			String values [];
 			
 			values = new String [] {
 				Integer.toString (level), 
-				Integer.toString (day)
+				Integer.toString (day),
+				Integer.toString (vacation)
 			};
 
 			db.execSQL (SQL_INSERT_OR_UPDATE, values);		
@@ -1047,10 +1067,8 @@ public class HistoryDatabase {
 		 * Returns the entire contents of the table.
 		 * @param db the database
 		 * @return the level to day mapping
-		 * @throws SQLException if something goes wrong. May indicate the db is broken
 		 */
 		public static Map<Integer, Integer> getLevelups (SQLiteDatabase db)
-			throws SQLException
 		{
 			Map<Integer, Integer> ans;
 			String cols [];
@@ -1064,6 +1082,8 @@ public class HistoryDatabase {
 				c = db.query (TABLE, cols, null, null, null, null, null);
 				while (c.moveToNext ())
 					ans.put (c.getInt (0), c.getInt (1));
+			} catch (SQLException e) {
+				/* return empty hashtable */
 			} finally {
 				if (c != null)
 					c.close ();
@@ -1111,6 +1131,7 @@ public class HistoryDatabase {
 			for (Map.Entry<Integer, Integer> e : map.entrySet ()) {
 				stmt.bindLong (1, e.getKey ());
 				stmt.bindLong (2, e.getValue());
+				stmt.bindLong (3, 0);
 				stmt.executeInsert ();
 			}
 		}
@@ -1123,7 +1144,7 @@ public class HistoryDatabase {
 	static class OpenHelper extends SQLiteOpenHelper {
 		
 		/** DB Version. Hope I'll never need to change it */
-		private static final int VERSION = 1;
+		private static final int VERSION = 2;
 		
 		/** The db file */
 		private static final String NAME = "history.db";
@@ -1147,7 +1168,9 @@ public class HistoryDatabase {
 		@Override
 		public void onUpgrade (SQLiteDatabase db, int oldv, int newv)
 		{
-			/* Hope I'll never need it */
+			if (oldv < 2)
+				Levels.upgradeFromV1 (db);			
+			
 		}
 		
 	}
@@ -1157,6 +1180,9 @@ public class HistoryDatabase {
 	
 	/** The database */
 	private SQLiteDatabase db;
+	
+	/** Synchronization */
+	public static final Object MUTEX = new Object ();
 		
 	/**
 	 * Cosntructor
@@ -1276,7 +1302,7 @@ public class HistoryDatabase {
 		today = ui.getDay ();
 		
 		Facts.fillGap (db, today);
-		Levels.insertOrIgnore (db, ui.level, today);
+		Levels.insertOrIgnore (db, ui.level, today, 0);
 		
 		Facts.insert (db, today, srs);		
 	}
@@ -1295,12 +1321,14 @@ public class HistoryDatabase {
 	{
 		HistoryDatabase hdb;
 		
-		hdb = new HistoryDatabase (ctxt);
-		hdb.openW ();
-		try {
-			hdb.insert (ui, srs);
-		} finally {
-			hdb.close ();
+		synchronized (MUTEX) {
+			hdb = new HistoryDatabase (ctxt);
+			hdb.openW ();
+			try {
+				hdb.insert (ui, srs);
+			} finally {
+				hdb.close ();
+			}
 		}
 	}
 	
@@ -1327,13 +1355,15 @@ public class HistoryDatabase {
 	{
 		HistoryDatabase hdb;
 		
-		hdb = new HistoryDatabase (ctxt);
-		hdb.openW ();
-		try {
-			return hdb.getCoreStats (ui);
-		} finally {
-			hdb.close ();
-		}		
+		synchronized (MUTEX) {
+			hdb = new HistoryDatabase (ctxt);
+			hdb.openW ();
+			try {
+				return hdb.getCoreStats (ui);
+			} finally {
+				hdb.close ();
+			}
+		}
 	}
 	
 	/**
@@ -1360,9 +1390,10 @@ public class HistoryDatabase {
 	 * has been detected
 	 * @param level the level
 	 * @param daty the day
+	 * @param vacation the vacation days
 	 */
-	public void updateLevelup (int level, int day)
+	public void updateLevelup (int level, int day, int vacation)
 	{
-		Levels.insertOrUpdate (db, level, day);
+		Levels.insertOrUpdate (db, level, day, vacation);
 	}
 }

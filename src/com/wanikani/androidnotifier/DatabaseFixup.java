@@ -97,27 +97,29 @@ public class DatabaseFixup {
 		boolean change;
 		int i;
 		
-		hdb = new HistoryDatabase (ctxt);
-		prefs = PreferenceManager.getDefaultSharedPreferences (ctxt);
+		synchronized (HistoryDatabase.MUTEX) {
+			hdb = new HistoryDatabase (ctxt);
+			prefs = PreferenceManager.getDefaultSharedPreferences (ctxt);
 
-		/* Just in case it gets interrupted ... */
-		prefs.edit ().putBoolean (SHOULD_RUN, true).commit ();
-		try {
-			hdb.openW ();
-			ui = conn.getUserInformation (meter);
-			levelups = hdb.getLevelups ();
-			for (i = 0; i < 2 * ui.level; i++) {
-				change = false;
-				slup = getSuspectLevelups (levelups, ui.level);			
-				for (Integer l : slup)
-					change |= fixLevel (hdb, ui, l, levelups);
-				if (!change)
-					break;
-			}
+			/* Just in case it gets interrupted ... */
+			prefs.edit ().putBoolean (SHOULD_RUN, true).commit ();
+			try {
+				hdb.openW ();
+				ui = conn.getUserInformation (meter);
+				levelups = hdb.getLevelups ();
+				for (i = 0; i < 2 * ui.level; i++) {
+					change = false;
+					slup = getSuspectLevelups (levelups, ui.level);			
+					for (Integer l : slup)
+						change |= fixLevel (hdb, ui, l, levelups);
+					if (!change)
+						break;
+				}
 			
-			prefs.edit ().putBoolean (SHOULD_RUN, false).commit ();
-		} finally {
-			hdb.close ();
+				prefs.edit ().putBoolean (SHOULD_RUN, false).commit ();
+			} finally {
+				hdb.close ();
+			}
 		}
 	}
 	
@@ -130,7 +132,7 @@ public class DatabaseFixup {
 		for (Item i : lib.list) {
 			day = ui.getDay (i.getUnlockedDate ());
 			if (day >= minday) {
-				hdb.updateLevelup (level, day);
+				hdb.updateLevelup (level, day, 0);
 				levelups.put (level, day);
 				return true;
 			}

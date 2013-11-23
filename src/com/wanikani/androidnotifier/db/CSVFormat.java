@@ -48,15 +48,17 @@ public class CSVFormat implements Format {
 	{
 		HistoryDatabase db;
 		
-		db = new HistoryDatabase (ctxt);
+		synchronized (HistoryDatabase.MUTEX) {
+			db = new HistoryDatabase (ctxt);
 
-		try {
-			db.openR ();
+			try {
+				db.openR ();
 			
-			doExport (new PrintStream (os), db);			
-		} finally {
-			db.close ();
-		}				
+				doExport (new PrintStream (os), db);			
+			} finally {
+				db.close ();
+			}
+		}
 	}
 	
 	protected void doExport (PrintStream os, HistoryDatabase db)
