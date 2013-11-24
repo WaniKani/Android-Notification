@@ -379,12 +379,14 @@ public abstract class Item implements Serializable {
 			meaningNote = Util.getString (obj, "meaning_note");
 			if (obj.has ("reading_note"))
 				readingNote = Util.getString (obj, "reading_note");
+			/* -- untested
 			if (!obj.isNull ("user_synoyms")) {
 				synonyms = obj.getJSONArray ("user_synonyms");
 				userSynonyms = new String [synonyms.length ()];
 				for (i = 0; i < userSynonyms.length; i++)
 					userSynonyms [i] = synonyms.getString (i);
 			}
+			*/
 				
 		}
 	};
