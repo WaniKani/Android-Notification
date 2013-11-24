@@ -101,7 +101,7 @@ public class HistoryDatabase {
 		public int maxVocab;
 		
 		/** Contents of the levels table */
-		public Map<Integer, Integer> levelups;
+		public Map<Integer, LevelInfo> levelInfo;
 		
 		/**
 		 * Constructor.
@@ -111,7 +111,7 @@ public class HistoryDatabase {
 		 * @param maxRadicals maximum number of unlocked/burned radicals so far
 		 * @param maxKanji maximum number of unlocked/burned kanji so far
 		 * @param maxVocab maximum number of unlocked/burned vocab items so far
-		 * @param levelups contents of the levels table
+		 * @param levelInfo contents of the levels table
 		 */
 		public CoreStats (int maxUnlockedRadicals, 
 						  int maxUnlockedKanji, 
@@ -119,7 +119,7 @@ public class HistoryDatabase {
 						  int maxRadicals,
 						  int maxKanji,
 						  int maxVocab,
-						  Map<Integer, Integer> levelups)
+						  Map<Integer, LevelInfo> levelInfo)
 		{
 			this.maxUnlockedRadicals = maxUnlockedRadicals;
 			this.maxUnlockedKanji = maxUnlockedKanji;
@@ -127,8 +127,22 @@ public class HistoryDatabase {
 			this.maxRadicals = maxRadicals;
 			this.maxKanji = maxKanji;
 			this.maxVocab = maxVocab;
-			this.levelups = levelups;
+			this.levelInfo = levelInfo;
 		}
+	}
+	
+	public static class LevelInfo {
+		
+		public int day;
+		
+		public int vacation;
+		
+		public LevelInfo (int day, int vacation)
+		{
+			this.day = day;
+			this.vacation = vacation;
+		}
+		
 	}
 	
 	/**
@@ -503,7 +517,7 @@ public class HistoryDatabase {
 									getIntOrZero (c, 3),
 									getIntOrZero (c, 4),
 									getIntOrZero (c, 5),
-									Levels.getLevelups (db, ui));
+									Levels.getLevelInfo (db, ui));
 			} catch (SQLException e) {
 				cs = new CoreStats (0, 0, 0, 0, 0, 0, null);
 			} finally {
@@ -745,8 +759,8 @@ public class HistoryDatabase {
 		/** User information data. Needed to convert dates into days */
 		private UserInformation ui;
 		
-		/** The levelups hashtable, mapping levels to leveup days */
-		private Map<Integer, Integer> levelups;
+		/** The levels table, mapping levels to levelup and vacation days */
+		private Map<Integer, LevelInfo> levelups;
 		
 		/**
 		 * Constructor.
@@ -763,7 +777,7 @@ public class HistoryDatabase {
 			db.execSQL (SQL_CREATE);
 			db.execSQL (SQL_COPY_FROM_FACTS);			
 			
-			levelups = Levels.getLevelups (db);
+			levelups = Levels.getLevelInfo (db);
 			
 			radicalStmtU = db.compileStatement 
 					(String.format (SQL_ABOVE, C_UNLOCKED_RADICALS));
@@ -817,7 +831,7 @@ public class HistoryDatabase {
 		private void checkLevelup (Item i)
 		{
 			Date unlock;
-			Integer cday;
+			LevelInfo ci;
 			int day;
 			
 			unlock = i.getUnlockedDate ();
@@ -825,9 +839,11 @@ public class HistoryDatabase {
 				return;
 			
 			day = ui.getDay (unlock);
-			cday = levelups.get (i.level);
-			if (cday == null || cday > day)
-				levelups.put (i.level, day);
+			ci = levelups.get (i.level);
+			if (ci == null)
+				levelups.put (i.level, new LevelInfo (day, 0));
+			else if (ci.day > day)
+				ci.day = day;
 		}
 		
 		/**
@@ -928,7 +944,7 @@ public class HistoryDatabase {
 		 */
 		private void merge ()
 		{
-			Levels.setLevelups (db, levelups);
+			Levels.setLevelInfo (db, levelups);
 			db.execSQL (SQL_COPY_TO_FACTS);
 		}
 		
@@ -987,6 +1003,12 @@ public class HistoryDatabase {
 		 *  already exists, it is replaced */
 		private static final String SQL_REPLACE =
 				"REPLACE INTO " + TABLE + " VALUES (?, ?, ?)";
+		
+		/** Adds some more vacation days to a given level */
+		private static final String SQL_ADD_VACATION =
+				"UPDATE " + TABLE + 
+					" SET " + C_VACATION + " = " + C_VACATION + " + ? " +
+					" WHERE " + C_LEVEL + " = ?";
 
 		/**
 		 * Creates the table
@@ -1068,20 +1090,20 @@ public class HistoryDatabase {
 		 * @param db the database
 		 * @return the level to day mapping
 		 */
-		public static Map<Integer, Integer> getLevelups (SQLiteDatabase db)
+		public static Map<Integer, LevelInfo> getLevelInfo (SQLiteDatabase db)
 		{
-			Map<Integer, Integer> ans;
+			Map<Integer, LevelInfo> ans;
 			String cols [];
 			Cursor c;
 			
-			cols = new String [] { C_LEVEL, C_DAY };
-			ans = new Hashtable<Integer, Integer> ();
+			cols = new String [] { C_LEVEL, C_DAY, C_VACATION };
+			ans = new Hashtable<Integer, LevelInfo> ();
 			
 			c = null;
 			try {
 				c = db.query (TABLE, cols, null, null, null, null, null);
 				while (c.moveToNext ())
-					ans.put (c.getInt (0), c.getInt (1));
+					ans.put (c.getInt (0), new LevelInfo (c.getInt (1), c.getInt(2)));
 			} catch (SQLException e) {
 				/* return empty hashtable */
 			} finally {
@@ -1101,15 +1123,15 @@ public class HistoryDatabase {
 		 * @return the level to day mapping
 		 * @throws SQLException if something goes wrong. May indicate the db is broken
 		 */
-		public static final Map<Integer, Integer> getLevelups (SQLiteDatabase db, UserInformation ui)
+		public static final Map<Integer, LevelInfo> getLevelInfo (SQLiteDatabase db, UserInformation ui)
 		{
-			Map<Integer, Integer> ans;
+			Map<Integer, LevelInfo> ans;
 			
-			ans = getLevelups (db);
+			ans = getLevelInfo (db);
 			/* The last test is an heuristic way to tell whether no reconstruction process
 			 * has been done yet */
 			if (ui != null && ui.level > 1 && ans.get (ui.level) == null && ans.get (ui.level - 1) != null)
-				ans.put (ui.level, ui.getDay () + 1);
+				ans.put (ui.level, new LevelInfo (ui.getDay () + 1, 0));
 
 			return ans;
 		}
@@ -1122,18 +1144,32 @@ public class HistoryDatabase {
 		 * @param db the database
 		 * @param map a map
 		 */
-		public static void setLevelups (SQLiteDatabase db, Map<Integer, Integer> map)
+		public static void setLevelInfo (SQLiteDatabase db, Map<Integer, LevelInfo> map)
 		{
 			SQLiteStatement stmt;
 			
 			stmt = db.compileStatement (SQL_REPLACE);			
 			
-			for (Map.Entry<Integer, Integer> e : map.entrySet ()) {
+			for (Map.Entry<Integer, LevelInfo> e : map.entrySet ()) {
 				stmt.bindLong (1, e.getKey ());
-				stmt.bindLong (2, e.getValue());
-				stmt.bindLong (3, 0);
+				stmt.bindLong (2, e.getValue().day);
+				stmt.bindLong (3, e.getValue ().vacation);
 				stmt.executeInsert ();
 			}
+		}
+		
+		/**
+		 * Adds some more vacation days to a given level
+		 * @param level the level to update
+		 * @param days the extra days
+		 */
+		public static void addVacation (SQLiteDatabase db, long level, long days)
+		{
+			Object args [];
+			
+			args = new Object [] { days, level }; 
+			
+			db.execSQL (SQL_ADD_VACATION, args);
 		}
 		
 	}
@@ -1370,9 +1406,9 @@ public class HistoryDatabase {
 	 * Returns the levelups hashtable
 	 * @return the levels-day mapping
 	 */
-	public Map<Integer, Integer> getLevelups ()
+	public Map<Integer, LevelInfo> getLevelInfo ()
 	{
-		return getLevelups (null);
+		return getLevelInfo (null);
 	}
 
 	/**
@@ -1380,9 +1416,9 @@ public class HistoryDatabase {
 	 * @param ui the user information
 	 * @return the levels-day mapping
 	 */
-	public Map<Integer, Integer> getLevelups (UserInformation ui)
+	public Map<Integer, LevelInfo> getLevelInfo (UserInformation ui)
 	{
-		return Levels.getLevelups (db, ui);		
+		return Levels.getLevelInfo (db, ui);		
 	}
 	
 	/**
@@ -1395,5 +1431,26 @@ public class HistoryDatabase {
 	public void updateLevelup (int level, int day, int vacation)
 	{
 		Levels.insertOrUpdate (db, level, day, vacation);
+	}
+	
+	/**
+	 * Add more vacation days to a given level
+	 * @param ctxt the context
+	 * @param level the level
+	 * @param vacation number of vacation days
+	 */
+	public static void addVacation (Context ctxt, int level, int vacation)
+	{
+		HistoryDatabase hdb;
+		
+		synchronized (MUTEX) {
+			hdb = new HistoryDatabase (ctxt);
+			hdb.openW ();
+			try {
+				Levels.addVacation (hdb.db, level, vacation);
+			} finally {
+				hdb.close ();
+			}
+		}
 	}
 }

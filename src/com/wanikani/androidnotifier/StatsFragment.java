@@ -221,22 +221,22 @@ public class StatsFragment extends Fragment implements Tab {
 		 */
 		public void setCoreStats (HistoryDatabase.CoreStats cs)
 		{
-			if (cs.levelups != null)
-				loadLevelups (cs.levelups);
+			if (cs.levelInfo != null)
+				loadLevelInfo (cs.levelInfo);
 		}
 		
 		/**
 		 * Creates the levelups hashtable. Called by 
 		 * {@link #setCoreStats(com.wanikani.androidnotifier.db.HistoryDatabase.CoreStats)},
 		 * so there is no need to access the DB.
-		 * @param levelups
+		 * @param levelInfo the level information
 		 */
-		private void loadLevelups (Map<Integer, Integer> levelups)
+		private void loadLevelInfo (Map<Integer, HistoryDatabase.LevelInfo> levelInfo)
 		{
 			markers.clear ();
 
-			for (Map.Entry<Integer, Integer> e : levelups.entrySet ()) {
-				markers.put (e.getValue (), newMarker (e.getValue (), e.getKey ()));
+			for (Map.Entry<Integer, HistoryDatabase.LevelInfo> e : levelInfo.entrySet ()) {
+				markers.put (e.getValue ().day, newMarker (e.getValue ().day, e.getKey ()));
 			}
 		}		
 		
@@ -623,16 +623,17 @@ public class StatsFragment extends Fragment implements Tab {
 		protected Map<Integer, Integer> getDays ()
 		{
 			Map<Integer, Integer> ans;
-			Integer lday, cday;
+			HistoryDatabase.LevelInfo li;
+			Integer lday;
 			int i;
 
 			lday = 0;
 			ans = new Hashtable<Integer, Integer> ();
 			for (i = 1; i <= dd.level; i++) {
-				cday = cs.levelups.get (i);
-				if (cday != null && lday != null && lday < cday)
-					ans.put (i - 1, cday - lday);
-				lday = cday;
+				li = cs.levelInfo.get (i);
+				if (li != null && lday != null && lday < li.day)
+					ans.put (i - 1, li.day - lday);
+				lday = li.day + li.vacation;
 			}
 
 			return ans;
@@ -704,7 +705,7 @@ public class StatsFragment extends Fragment implements Tab {
 		{
 			View nlw, avgw;
 			TextView tw, nltag;
-			Integer lastlup;
+			HistoryDatabase.LevelInfo lastli;
 			Float delay, avgl;
 			Calendar cal;
 			String s;
@@ -719,14 +720,14 @@ public class StatsFragment extends Fragment implements Tab {
 				tw.setText (beautify (delay));
 				
 				tw = (TextView) parent.findViewById (R.id.tv_eta_next);
-				lastlup = cs.levelups.get (dd.level);
-				if (lastlup != null) {
+				lastli = cs.levelInfo.get (dd.level);
+				if (lastli != null) {
 					cal = Calendar.getInstance ();
 					cal.setTime (dd.creation);
 					cal.set (Calendar.HOUR_OF_DAY, 0);
 					cal.set (Calendar.MINUTE, 0);
 					cal.set (Calendar.SECOND, 0);
-					cal.add (Calendar.DATE, lastlup);
+					cal.add (Calendar.DATE, lastli.day + lastli.vacation);
 					delay -= ((float) System.currentTimeMillis () - cal.getTimeInMillis ()) / (24 * 3600 * 1000);
 					delay -= 0.5F;	/* This compensates the fact that granularity is one day */										
 
