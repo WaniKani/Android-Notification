@@ -633,7 +633,7 @@ public class StatsFragment extends Fragment implements Tab {
 				li = cs.levelInfo.get (i);
 				if (li != null && lday != null && lday < li.day)
 					ans.put (i - 1, li.day - lday);
-				lday = li.day + li.vacation;
+				lday = li != null ? (li.day + li.vacation) : null;
 			}
 
 			return ans;
