@@ -163,6 +163,7 @@ class DashboardData {
 	private static final String KEY_TITLE = PREFIX + "title";
 	private static final String KEY_LEVEL = PREFIX + "level";
 	private static final String KEY_CREATION = PREFIX + "creation";
+	private static final String KEY_VACATION = PREFIX + "vacation";
 	
 	private static final String KEY_LESSONS_AVAILABLE = PREFIX + "lessons_available";
 	private static final String KEY_REVIEWS_AVAILABLE = PREFIX + "reviews_available";
@@ -217,6 +218,8 @@ class DashboardData {
 	
 	public int reviewsAvailableNextDay;
 	
+	public boolean vacation;
+	
 	public OptionalData od;
 
 	public IOException e;
@@ -238,6 +241,7 @@ class DashboardData {
 		level = ui.level;
 		gravatar = ui.gravatarBitmap;
 		creation = ui.creationDate;
+		vacation = ui.vacationDate != null;
 
 		reviewsAvailable = sq.reviewsAvailable;
 		lessonsAvailable = sq.lessonsAvailable;
@@ -312,6 +316,7 @@ class DashboardData {
 		/* It could be null, if e != null */
 		if (creation != null)
 			bundle.putLong (KEY_CREATION, creation.getTime ());
+		bundle.putBoolean (KEY_VACATION, vacation);
 		
 		bundle.putInt (KEY_LESSONS_AVAILABLE, lessonsAvailable);
 		bundle.putInt (KEY_REVIEWS_AVAILABLE, reviewsAvailable);
@@ -366,6 +371,7 @@ class DashboardData {
 		level = bundle.getInt (KEY_LEVEL);
 		if (bundle.containsKey (KEY_CREATION))
 			creation = new Date (bundle.getLong (KEY_CREATION));
+		vacation = bundle.getBoolean (KEY_VACATION);
 		
 		lessonsAvailable = bundle.getInt (KEY_LESSONS_AVAILABLE);
 		reviewsAvailable = bundle.getInt (KEY_REVIEWS_AVAILABLE);
