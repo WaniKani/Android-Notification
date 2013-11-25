@@ -199,8 +199,10 @@ public class WebReviewActivity extends Activity {
 	    {  
 			bar.setVisibility (View.GONE);
 
-			if (url.startsWith ("http"))
-				wv.js (JS_INIT_KBD);			
+			if (url.startsWith ("http")) {
+				wv.js (JS_INIT_KBD);
+				wv.js (ExternalFramePlacer.JS_CODE);
+			}
 	    }
 	}
 	
