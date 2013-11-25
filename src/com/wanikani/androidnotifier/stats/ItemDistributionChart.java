@@ -48,6 +48,9 @@ public class ItemDistributionChart implements NetworkEngine.Chart {
 	/// Item types collected so far
 	private EnumSet<Item.Type> availableTypes;
 	
+	/// The datasrouce
+	IconizableChart.DataSource ds;
+	
 	public ItemDistributionChart (int id, MeterSpec.T mtype, EnumSet<Item.Type> types)
 	{
 		this.id = id;
@@ -94,7 +97,10 @@ public class ItemDistributionChart implements NetworkEngine.Chart {
 		set (res, SRSLevel.ENLIGHTEN, R.string.tag_enlightened, R.color.enlightened);
 		set (res, SRSLevel.BURNED, R.string.tag_burned, R.color.burned);
 
-		chart.setDataSource (netwe.getDataSource (mtype.get (main), types));
+		if (ds == null)
+			ds = netwe.getDataSource (mtype.get (main), types);
+		
+		chart.setDataSource (ds);
 	}
 	
 	@Override

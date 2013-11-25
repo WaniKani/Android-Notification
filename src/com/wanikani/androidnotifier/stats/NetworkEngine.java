@@ -44,6 +44,8 @@ public class NetworkEngine {
 		
 		EnumSet<Item.Type> types;
 		
+		PendingTask task;
+		
 		public DataSource (Connection.Meter meter, EnumSet<Item.Type> types)
 		{
 			this.meter = meter;
@@ -53,7 +55,8 @@ public class NetworkEngine {
 		@Override
 		public void loadData () 
 		{
-			refresh (meter, types);
+			if (task == null || task.completed)
+				task = refresh (meter, types);
 		}
 	}
 	
@@ -65,21 +68,17 @@ public class NetworkEngine {
 
 		/// The connection
 		private Connection conn;
-		
-		/// The meter
-		private Connection.Meter meter;
-		
-		/// List of item types to load
-		private EnumSet<Item.Type>types;
+
+		/// The task description
+		private PendingTask task;
 		
 		/// Number of levels to load at once
 		private static final int BUNCH_SIZE = 5;
 		
-		public Task (Connection conn, Connection.Meter meter, EnumSet<Item.Type> types)
+		public Task (Connection conn, PendingTask task)
 		{
 			this.conn = conn;
-			this.meter = meter;
-			this.types = types;
+			this.task = task;
 		}
 				
 		/**
@@ -96,7 +95,7 @@ public class NetworkEngine {
 			int i, j, levels, bunch [];
 
 			try {
-				levels = conn.getUserInformation (meter).level;
+				levels = conn.getUserInformation (task.meter).level;
 			} catch (IOException e) {
 				return false;
 			}
@@ -107,8 +106,8 @@ public class NetworkEngine {
 			publishProgress ((100 * 1) / (levels + 2));
 
 			try {
-				if (types.contains (Item.Type.RADICAL)) {
-					rlib = conn.getRadicals (meter, false);
+				if (task.types.contains (Item.Type.RADICAL)) {
+					rlib = conn.getRadicals (task.meter, false);
 					for (Chart c : charts)
 						c.newRadical (rlib);
 				}
@@ -117,8 +116,8 @@ public class NetworkEngine {
 			} 
 
 			try {
-				if (types.contains (Item.Type.KANJI)) {
-					klib = conn.getKanji (meter, false);
+				if (task.types.contains (Item.Type.KANJI)) {
+					klib = conn.getKanji (task.meter, false);
 					for (Chart c : charts)
 						c.newKanji (klib);
 				}
@@ -129,13 +128,13 @@ public class NetworkEngine {
 			publishProgress ((100 * 2) / (levels + 2));
 			
 			try {
-				if (types.contains (Item.Type.VOCABULARY)) {
+				if (task.types.contains (Item.Type.VOCABULARY)) {
 					i = 1;
 					while (i <= levels) {
 						bunch = new int [Math.min (BUNCH_SIZE, levels - i + 1)];
 						for (j = 0; j < BUNCH_SIZE && i <= levels; j++)
 							bunch [j] = i++;
-						vlib = conn.getVocabulary (meter, bunch, false);
+						vlib = conn.getVocabulary (task.meter, bunch, false);
 						for (Chart c : charts)
 							c.newVocab (vlib);
 						publishProgress ((100 * (i - 1)) / (levels + 2));
@@ -163,9 +162,9 @@ public class NetworkEngine {
 		{
 			if (ok)
 				for (Chart c : charts)
-					c.update (types);
+					c.update (task.types);
 			
-			completed (types, ok);
+			completed (task, ok);
 		}
 	}
 	
@@ -174,6 +173,8 @@ public class NetworkEngine {
 		Connection.Meter meter;
 		
 		EnumSet <Item.Type> types;
+		
+		boolean completed;
 		
 		public PendingTask (Connection.Meter meter, EnumSet<Item.Type> types)
 		{
@@ -212,19 +213,25 @@ public class NetworkEngine {
 		return new DataSource (meter, types);
 	}
 	
-	private void refresh (Connection.Meter meter, EnumSet<Item.Type> types)
+	private PendingTask refresh (Connection.Meter meter, EnumSet<Item.Type> types)
 	{
+		PendingTask task;
 		boolean empty;
 		
 		empty = tasks.isEmpty ();
-		tasks.add (new PendingTask (meter, types));
+		task = new PendingTask (meter, types);
+		tasks.add (task);
 		if (empty)
 			runQueue ();
+		
+		return task;
 	}
 
-	private void completed (EnumSet<Item.Type> types, boolean ok)
+	private void completed (PendingTask task, boolean ok)
 	{
-		availableTypes.addAll (types);		
+		task.completed = true;
+		availableTypes.addAll (task.types);
+		tasks.remove (0);
 		runQueue ();
 	}
 	
@@ -233,9 +240,9 @@ public class NetworkEngine {
 		PendingTask task;
 				
 		if (!tasks.isEmpty ()) {
-			task = tasks.remove (0);
+			task = tasks.get (0);
 			task.clear (availableTypes);
-			new Task (conn, task.meter, task.types).execute ();				
+			new Task (conn, task).execute ();				
 		}		
 	}
 	

@@ -88,7 +88,10 @@ public class KanjiProgressChart implements NetworkEngine.Chart {
 
 		chart = (ProgressChart) view.findViewById (id);
 		
-		chart.setDataSource (netwe.getDataSource (mtype.get (main), EnumSet.of (Item.Type.KANJI)));
+		if (ds == null)
+			ds = netwe.getDataSource (mtype.get (main), EnumSet.of (Item.Type.KANJI));
+		
+		chart.setDataSource (ds);
 
 		plot = chart.addData (title);
 		
