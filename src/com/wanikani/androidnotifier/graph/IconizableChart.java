@@ -343,7 +343,7 @@ public abstract class IconizableChart extends LinearLayout {
 				
 		a.recycle ();
 	}
-			
+	
 	private void setState (State state)
 	{
 		Bitmap bmp;
@@ -365,7 +365,7 @@ public abstract class IconizableChart extends LinearLayout {
 	
 	public boolean isOpen ()
 	{
-		return state.isOpen ();
+		return state.canClose ();
 	}
 	
 	private void toggle ()
