@@ -152,7 +152,7 @@ public class NotificationService
 	 */
 	public static final String ACTION_NEW_DATA = 
 			PREFIX + "NEW_DATA";
-
+	
 	/** The ID associated to the reviews notification icon */
 	private static final int NOT_REVIEWS_ID = 1;
 	
@@ -162,6 +162,9 @@ public class NotificationService
 	/** The cron schedule alarm time shared preferences key */
 	private static final String PREFS_CRON_NEXT = PREFIX + "CRON_NEXT";
 	
+	/** Last known vacation day. Defaults to -1 */
+	public static final String PREFS_LAST_VACATION = PREFIX + "LAST_VACATION";
+
 	/** The cron interval. Default is one day */
 	private static final long CRON_INTERVAL = 24 * 3600 * 1000;
 	
@@ -245,7 +248,7 @@ public class NotificationService
 		if (now >= next) {
 			ok = false;
 			try {				
-				ok = runDailyJobs ();
+				ok = runDailyJobs (prefs);
 			} finally {
 				if (ok) {
 					next = normalize (now + CRON_INTERVAL);
@@ -281,15 +284,17 @@ public class NotificationService
 	/**
 	 * This is the method that is guaranteed to be called exactly once a day, if 
 	 * the phone is turned on. If it is not turned on, it is called as soon as possible.
+	 * @param prefs the preferences
 	 * @param <code>true</code> if completed successfully 
 	 */
-	protected boolean runDailyJobs ()
+	protected boolean runDailyJobs (SharedPreferences prefs)
 	{
 		SRSDistribution srs;
 		UserInformation ui;
 		Connection conn;
 		UserLogin login;
 		Connection.Meter meter;
+		int vday, lvday, nvdays;
 		
 		try {
 			meter = MeterSpec.T.NOTIFY_DAILY_JOBS.get (this);
@@ -301,6 +306,18 @@ public class NotificationService
 			ui = conn.getUserInformation (meter);
 			
 			HistoryDatabase.insert (this, ui, srs);
+			
+			/* Update vacation mode */
+			if (ui.vacationDate != null) {
+				vday = ui.getDay (ui.vacationDate);
+				lvday = prefs.getInt (PREFS_LAST_VACATION, -1);
+				vday = Math.max (vday, lvday);
+				nvdays = ui.getDay () - vday;
+				if (nvdays > 0) {
+					HistoryDatabase.addVacation (this, ui.level, nvdays);
+					prefs.edit ().putInt (PREFS_LAST_VACATION, ui.getDay ()).commit ();
+				}
+			}
 			
 		} catch (IOException e) {
 			return false;

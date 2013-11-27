@@ -18,6 +18,8 @@ import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.text.SpannableStringBuilder;
+import android.text.style.ForegroundColorSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -494,6 +496,10 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 		 */
 		public void refresh (Resources res)
 		{
+			SpannableStringBuilder sb;
+			String us [];
+			int i;
+			
 			if (currentFilter != levelf)
 				level.setText (Integer.toString (item.level));				
 			
@@ -503,8 +509,19 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 			} else
 				srs.setVisibility (View.INVISIBLE);
 			
-			info.setText (iinfo.getInfo (res, item));			
-			meaning.setText (showAnswers ? item.meaning : "");
+			info.setText (iinfo.getInfo (res, item));
+			if (showAnswers) {
+				sb = new SpannableStringBuilder ();
+				if (item.stats != null && item.stats.userSynonyms != null) {
+					us = item.stats.userSynonyms;
+					for (i = 0; i < us.length; i++) 
+						sb.append (us [i]).append (", ");
+					sb.setSpan (new ForegroundColorSpan (importantColor), 0, sb.length (), 0);
+				}
+				sb.append (item.meaning);
+				meaning.setText (sb);
+			} else
+				meaning.setText ("");
 			
 			icl.setURL (item.getURL ());
 		}

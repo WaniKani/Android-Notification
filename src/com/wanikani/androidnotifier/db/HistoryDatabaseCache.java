@@ -244,46 +244,48 @@ public class HistoryDatabaseCache {
 			Cursor c;
 			int i, day;
 			
-			page = new Page (interval [0]);
-			hdb = new HistoryDatabase (ctxt);
-			c = null;
-			try {
-				i = interval [0].start;
-				hdb.openR ();
-				c = hdb.selectFacts (interval [0].start, interval [0].stop);
-				ltype = null;
-				segment = null;
-				day = interval [0].start - 1; /* A safe default in case we got an empty set */
-				while (c.moveToNext ()) {
-					day = HistoryDatabase.Facts.getDay (c);
-					if (day != i) {
-						page.segments.add (new PageSegment (i, day - 1, 
-								                            ltype = HistoryDatabase.FactType.MISSING));
-						i = day;
-					}
+			synchronized (HistoryDatabase.MUTEX) { 
+				page = new Page (interval [0]);
+				hdb = new HistoryDatabase (ctxt);
+				c = null;
+				try {
+					i = interval [0].start;
+					hdb.openR ();
+					c = hdb.selectFacts (interval [0].start, interval [0].stop);
+					ltype = null;
+					segment = null;
+					day = interval [0].start - 1; /* A safe default in case we got an empty set */
+					while (c.moveToNext ()) {
+						day = HistoryDatabase.Facts.getDay (c);
+						if (day != i) {
+							page.segments.add (new PageSegment (i, day - 1, 
+								                            	ltype = HistoryDatabase.FactType.MISSING));
+							i = day;
+						}
 						
-					type = HistoryDatabase.Facts.getType (c);
-					if (type != ltype) {
-						ltype = type;
-						segment = new PageSegment (i, i, type);
-						page.segments.add (segment);
-					}
-					if (type != HistoryDatabase.FactType.MISSING)
-						segment.srsl.add (HistoryDatabase.Facts.getSRSDistribution (c));
+						type = HistoryDatabase.Facts.getType (c);
+						if (type != ltype) {
+							ltype = type;
+							segment = new PageSegment (i, i, type);
+							page.segments.add (segment);
+						}
+						if (type != HistoryDatabase.FactType.MISSING)
+							segment.srsl.add (HistoryDatabase.Facts.getSRSDistribution (c));
 					
-					segment.interval.stop = i;
-					i++;
-				}
+						segment.interval.stop = i;
+						i++;
+					}
 				
-				if (day < interval [0].stop)
-					page.segments.add (new PageSegment (day + 1, interval [0].stop, 
-                            		   ltype = HistoryDatabase.FactType.MISSING));
-			} catch (SQLException e) {
-				return dummyPage (interval [0]);
-			} finally {
-				if (c != null)					
-					c.close ();
-				hdb.close ();
+					if (day < interval [0].stop)
+						page.segments.add (new PageSegment (day + 1, interval [0].stop, 
+										   ltype = HistoryDatabase.FactType.MISSING));
+				} catch (SQLException e) {
+					return dummyPage (interval [0]);
+				} finally {
+					if (c != null)					
+						c.close ();
+					hdb.close ();
+				}
 			}
 			
 			return page;
