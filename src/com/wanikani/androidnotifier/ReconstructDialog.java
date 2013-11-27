@@ -283,78 +283,80 @@ public class ReconstructDialog {
 			hdb = null;
 			rt = null;
 			meter = MeterSpec.T.RECONSTRUCT_DIALOG.get (ctxt);
-			try {
-				hdb = new HistoryDatabase (ctxt);
-				hdb.openW ();
+			synchronized (HistoryDatabase.MUTEX) {
+				try {
+					hdb = new HistoryDatabase (ctxt);
+					hdb.openW ();
 
-				ui = conn.getUserInformation (meter);
-				steps = (2 * itemStepsFor (ui.level, RADICALS_CHUNK)) +   
-						(2 * itemStepsFor (ui.level, KANJI_CHUNK)) +
-						(2 * itemStepsFor (ui.level, VOCAB_CHUNK)) + 1;
-				step = 0;
+					ui = conn.getUserInformation (meter);
+					steps = (2 * itemStepsFor (ui.level, RADICALS_CHUNK)) +   
+							(2 * itemStepsFor (ui.level, KANJI_CHUNK)) +
+							(2 * itemStepsFor (ui.level, VOCAB_CHUNK)) + 1;
+					step = 0;
 				
-				u = new Update (step++, steps, ctxt.getString (R.string.rec_start));
-				publishProgress (u);
-				rt = hdb.startReconstructing (ui);
-				for (i = 1; i <= ui.level; i += RADICALS_CHUNK) {
-					j = i + RADICALS_CHUNK - 1;
-					if (j > ui.level)
-						j = ui.level;
-					u = new Update (step++, steps, 
-									ctxt.getString (R.string.rec_radicals_r, i, j));
+					u = new Update (step++, steps, ctxt.getString (R.string.rec_start));
 					publishProgress (u);
-					rlib = conn.getRadicals (meter, array (i, j));
-					u = new Update (step++, steps, ctxt.getString (R.string.rec_radicals_w));
+					rt = hdb.startReconstructing (ui);
+					for (i = 1; i <= ui.level; i += RADICALS_CHUNK) {
+						j = i + RADICALS_CHUNK - 1;
+						if (j > ui.level)
+							j = ui.level;
+						u = new Update (step++, steps, 
+										ctxt.getString (R.string.rec_radicals_r, i, j));
+						publishProgress (u);
+						rlib = conn.getRadicals (meter, array (i, j));
+						u = new Update (step++, steps, ctxt.getString (R.string.rec_radicals_w));
+						publishProgress (u);
+						for (Radical r : rlib.list)
+							rt.load (r);
+					}
+					
+					for (i = 1; i <= ui.level; i += KANJI_CHUNK) {
+						j = i + KANJI_CHUNK - 1;
+						if (j > ui.level)
+							j = ui.level;
+						u = new Update (step++, steps, 
+										ctxt.getString (R.string.rec_kanji_r, i, j));
+						publishProgress (u);
+						klib = conn.getKanji (meter, array (i, j));
+						u = new Update (step++, steps, ctxt.getString (R.string.rec_kanji_w));
+						publishProgress (u);
+						for (Kanji kanji : klib.list)
+							rt.load (kanji);
+					}
+					
+					for (i = 1; i <= ui.level; i += VOCAB_CHUNK) {
+						j = i + VOCAB_CHUNK - 1;
+						if (j > ui.level)
+							j = ui.level;
+						u = new Update (step++, steps, 
+										ctxt.getString (R.string.rec_vocab_r, i, j));
+						publishProgress (u);
+						vlib = conn.getVocabulary (meter, array (i, j));
+						u = new Update (step++, steps, ctxt.getString (R.string.rec_vocab_w));
+						publishProgress (u);
+						for (Vocabulary vocab : vlib.list)
+							rt.load (vocab);
+					}
+					
+					hdb.endReconstructing (rt);
+				
+					u = new Update (step++, steps, ctxt.getString (R.string.rec_fixup_db));
 					publishProgress (u);
-					for (Radical r : rlib.list)
-						rt.load (r);
+					DatabaseFixup.run (ctxt, conn);
+					
+					return hdb.getCoreStats (ui);
+				
+				} catch (SQLException e) {
+					return null;
+				} catch (IOException e) {
+					return null;
+				} finally {
+					if (rt != null)
+						rt.close ();
+					if (hdb != null)
+						hdb.close ();
 				}
-				
-				for (i = 1; i <= ui.level; i += KANJI_CHUNK) {
-					j = i + KANJI_CHUNK - 1;
-					if (j > ui.level)
-						j = ui.level;
-					u = new Update (step++, steps, 
-									ctxt.getString (R.string.rec_kanji_r, i, j));
-					publishProgress (u);
-					klib = conn.getKanji (meter, array (i, j));
-					u = new Update (step++, steps, ctxt.getString (R.string.rec_kanji_w));
-					publishProgress (u);
-					for (Kanji kanji : klib.list)
-						rt.load (kanji);
-				}
-				
-				for (i = 1; i <= ui.level; i += VOCAB_CHUNK) {
-					j = i + VOCAB_CHUNK - 1;
-					if (j > ui.level)
-						j = ui.level;
-					u = new Update (step++, steps, 
-									ctxt.getString (R.string.rec_vocab_r, i, j));
-					publishProgress (u);
-					vlib = conn.getVocabulary (meter, array (i, j));
-					u = new Update (step++, steps, ctxt.getString (R.string.rec_vocab_w));
-					publishProgress (u);
-					for (Vocabulary vocab : vlib.list)
-						rt.load (vocab);
-				}
-
-				hdb.endReconstructing (rt);
-				
-				u = new Update (step++, steps, ctxt.getString (R.string.rec_fixup_db));
-				publishProgress (u);
-				DatabaseFixup.run (ctxt, conn);
-				
-				return hdb.getCoreStats (ui);
-				
-			} catch (SQLException e) {
-				return null;
-			} catch (IOException e) {
-				return null;
-			} finally {
-				if (rt != null)
-					rt.close ();
-				if (hdb != null)
-					hdb.close ();
 			}
 		}	
 						

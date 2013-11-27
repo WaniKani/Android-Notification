@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Comparator;
 import java.util.Date;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -348,10 +349,18 @@ public abstract class Item implements Serializable {
 		
 		public Item.Performance meaning;		
 
+		public String readingNote;
+		
+		public String meaningNote;
+		
+		public String userSynonyms [];
+		
 		Stats (JSONObject obj, boolean hasReading)
 			throws JSONException
 		{
+			JSONArray synonyms;
 			String s;
+			int i;
 			
 			s = obj.getString ("srs");
 			srs = SRSLevel.fromString (s);
@@ -366,6 +375,19 @@ public abstract class Item implements Serializable {
 			if (hasReading)
 				reading = new Item.Performance (obj, "reading");			
 			meaning = new Item.Performance (obj, "meaning");
+			
+			meaningNote = Util.getString (obj, "meaning_note");
+			if (obj.has ("reading_note"))
+				readingNote = Util.getString (obj, "reading_note");
+			/* -- untested
+			if (!obj.isNull ("user_synoyms")) {
+				synonyms = obj.getJSONArray ("user_synonyms");
+				userSynonyms = new String [synonyms.length ()];
+				for (i = 0; i < userSynonyms.length; i++)
+					userSynonyms [i] = synonyms.getString (i);
+			}
+			*/
+				
 		}
 	};
 	
@@ -416,8 +438,8 @@ public abstract class Item implements Serializable {
 		meaning = Util.getString (obj, "meaning");
 		level = Util.getInt (obj, "level");
 		
-		if (!obj.isNull ("stats"))
-			stats = new Stats (obj.getJSONObject ("stats"), hasReading ());
+		if (!obj.isNull ("user_specific"))
+			stats = new Stats (obj.getJSONObject ("user_specific"), hasReading ());
 		
 		/* Only for critical items */
 		if (!obj.isNull ("percentage"))

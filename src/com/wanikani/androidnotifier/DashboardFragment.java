@@ -384,7 +384,7 @@ public class DashboardFragment extends Fragment implements Tab {
 			setVisibility (R.id.btn_result, View.GONE);
 			setVisibility (R.id.btn_review, View.VISIBLE);
 		} else {
-			setText (R.id.tv_next_review_val, niceInterval (dd.nextReviewDate));
+			setText (R.id.tv_next_review_val, niceInterval (dd.nextReviewDate, dd.vacation));
 			setVisibility (R.id.tv_next_review, View.VISIBLE);
 			setVisibility (R.id.tv_next_review_val, View.VISIBLE);
 			setVisibility (R.id.btn_result, View.VISIBLE);
@@ -476,7 +476,7 @@ public class DashboardFragment extends Fragment implements Tab {
 	 * @param date the date to format
 	 * @return a string to be displayed
 	 */
-	private String niceInterval (Date date)
+	private String niceInterval (Date date, boolean vacation)
 	{
 		float days, hours, minutes;
 		boolean forward;
@@ -485,6 +485,8 @@ public class DashboardFragment extends Fragment implements Tab {
 		int x;
 			
 		res = getResources ();
+		if (vacation)
+			return res.getString (R.string.fmt_vacation);
 		if (date == null)
 			return res.getString (R.string.fmt_no_reviews);
 		

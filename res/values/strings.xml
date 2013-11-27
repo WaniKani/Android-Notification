@@ -120,7 +120,8 @@
     <string name="fmt_seconds">&lt;1 minute</string>
     <string name="tag_available_now">Review now</string>
     <string name="fmt_no_reviews">None yet!</string>
-
+    <string name="fmt_vacation">休止</string>
+    
     <string name="fmt_level">Level %d</string>
     <string name="fmt_title">Sect %s</string>
     <string name="fmt_lessons">You can unlock %d items</string>

@@ -91,47 +91,56 @@ public class DatabaseFixup {
 	{
 		SharedPreferences prefs;
 		UserInformation ui;
-		Map<Integer, Integer> levelups;
+		Map<Integer, HistoryDatabase.LevelInfo> levelInfo;
 		List<Integer> slup;
 		HistoryDatabase hdb;
 		boolean change;
 		int i;
 		
-		hdb = new HistoryDatabase (ctxt);
-		prefs = PreferenceManager.getDefaultSharedPreferences (ctxt);
+		synchronized (HistoryDatabase.MUTEX) {
+			hdb = new HistoryDatabase (ctxt);
+			prefs = PreferenceManager.getDefaultSharedPreferences (ctxt);
 
-		/* Just in case it gets interrupted ... */
-		prefs.edit ().putBoolean (SHOULD_RUN, true).commit ();
-		try {
-			hdb.openW ();
-			ui = conn.getUserInformation (meter);
-			levelups = hdb.getLevelups ();
-			for (i = 0; i < 2 * ui.level; i++) {
-				change = false;
-				slup = getSuspectLevelups (levelups, ui.level);			
-				for (Integer l : slup)
-					change |= fixLevel (hdb, ui, l, levelups);
-				if (!change)
-					break;
-			}
+			/* Just in case it gets interrupted ... */
+			prefs.edit ().putBoolean (SHOULD_RUN, true).commit ();
+			try {
+				hdb.openW ();
+				ui = conn.getUserInformation (meter);
+				levelInfo = hdb.getLevelInfo ();
+				for (i = 0; i < 2 * ui.level; i++) {
+					change = false;
+					slup = getSuspectLevelups (levelInfo, ui.level);			
+					for (Integer l : slup)
+						change |= fixLevel (hdb, ui, l, levelInfo);
+					if (!change)
+						break;
+				}
 			
-			prefs.edit ().putBoolean (SHOULD_RUN, false).commit ();
-		} finally {
-			hdb.close ();
+				prefs.edit ().putBoolean (SHOULD_RUN, false).commit ();
+			} finally {
+				hdb.close ();
+			}
 		}
 	}
 	
 	private boolean tryFix (HistoryDatabase hdb, UserInformation ui, ItemLibrary<Item> lib, 
-							Map<Integer, Integer> levelups, int level, int minday)
+							Map<Integer, HistoryDatabase.LevelInfo> levelInfo, int level, int minday)
 	{
-		int day;
+		HistoryDatabase.LevelInfo li;
+		int day, vacation;
 		
 		Collections.sort (lib.list, Item.SortByTime.INSTANCE_ASCENDING);
+		li = levelInfo.get (level);
+		if (li != null)
+			vacation = li.vacation;
+		else
+			vacation = 0;
+		
 		for (Item i : lib.list) {
 			day = ui.getDay (i.getUnlockedDate ());
 			if (day >= minday) {
-				hdb.updateLevelup (level, day);
-				levelups.put (level, day);
+				hdb.updateLevelup (level, day, vacation);
+				levelInfo.put (level, new HistoryDatabase.LevelInfo (day, vacation));
 				return true;
 			}
 		}		
@@ -140,43 +149,44 @@ public class DatabaseFixup {
 	}
 	
 	private boolean fixLevel (HistoryDatabase hdb, UserInformation ui, int level, 
-						      Map<Integer, Integer> levelups)
+						      Map<Integer, HistoryDatabase.LevelInfo> levelInfo)
 		throws IOException, SQLException
 	{
-		Integer plday;
+		HistoryDatabase.LevelInfo pli;
 		
-		plday = levelups.get (level - 1);
-		if (plday == null)
+		pli = levelInfo.get (level - 1);
+		if (pli == null)
 			return false;
 		
 		if (tryFix (hdb, ui, new ItemLibrary<Item> (conn.getRadicals (meter, level)), 
-					levelups, level, plday + RADICALS_MIN_DAYS))
+					levelInfo, level, pli.day + RADICALS_MIN_DAYS))
 			return true;
 				
 		if (tryFix (hdb, ui, new ItemLibrary<Item> (conn.getKanji (meter, level)), 
-				levelups, level, plday + KANJI_MIN_DAYS))
+					levelInfo, level, pli.day + KANJI_MIN_DAYS))
 			return true;
 
 		return false;
 	}
 	
-	private static List<Integer> getSuspectLevelups (Map<Integer, Integer> levelups, int levels)
+	private static List<Integer> getSuspectLevelups (Map<Integer, HistoryDatabase.LevelInfo> levelInfo, int levels)
 	{
+		HistoryDatabase.LevelInfo li;
 		List<Integer> ans;
-		Integer lday, cday;
+		Integer lday;
 		int i, delta;
 		
 		lday = null;
 		ans = new Vector<Integer> ();
 		for (i = 1; i <= levels; i++) {
-			cday = levelups.get (i);
-			if (cday != null) {
+			li = levelInfo.get (i);
+			if (li != null) {
 				if (lday != null) {
-					delta = cday - lday;
+					delta = li.day - lday;
 					if (delta < SUSPECT_DAYS)
 						ans.add (i);
 				}
-				lday = cday;
+				lday = li.day;
 			}
 		}
 		
@@ -192,7 +202,7 @@ public class DatabaseFixup {
 		if (!prefs.getBoolean (SHOULD_RUN, true))
 			return 0;
 		
-		slups = getSuspectLevelups (cs.levelups, level);
+		slups = getSuspectLevelups (cs.levelInfo, level);
 		
 		return slups != null ? slups.size () : 0;
 	}
@@ -208,3 +218,4 @@ public class DatabaseFixup {
 		new Task (listener).execute ();
 	}
 }
+

@@ -49,6 +49,8 @@ public class UserInformation {
 	
 	public Date creationDate;
 	
+	public Date vacationDate;
+	
 	private static final long ONE_DAY = 24 * 60 * 60 * 1000;
 	
 	UserInformation (JSONObject obj)
@@ -64,6 +66,7 @@ public class UserInformation {
 		topicsCount = Util.getInt (obj, "topics_count");
 		postsCount = Util.getInt (obj, "posts_count");
 		creationDate = Util.getDate (obj, "creation_date");
+		vacationDate = Util.getDate (obj, "vacation_date");
 	}
 	
 	private static Calendar getNormalizedCalendar (Date date)
