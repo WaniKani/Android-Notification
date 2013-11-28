@@ -322,7 +322,8 @@ public class LocalIMEKeyboard implements Keyboard {
 		{
 			if (show) {
 				divw.setVisibility (View.VISIBLE);
-				imm.showSoftInput (wv, InputMethodManager.SHOW_IMPLICIT);
+				imm.showSoftInput (wv, InputMethodManager.SHOW_FORCED);
+				ew.requestFocus ();
 			} else {
 				divw.setVisibility (View.GONE);
 				imm.hideSoftInputFromWindow (ew.getWindowToken (), 0);
@@ -1012,9 +1013,10 @@ public class LocalIMEKeyboard implements Keyboard {
 			next.setLayoutParams (params);		
 		}
 			
-		divw.setVisibility (View.VISIBLE);
-		
-		ew.requestFocus ();
+		if (bpos.shallShow ()) {
+			divw.setVisibility (View.VISIBLE);		
+			ew.requestFocus ();
+		}
 	}
 	
 	private void adjustWidth (TextView view, RelativeLayout.LayoutParams params, String text)
