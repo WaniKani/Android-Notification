@@ -327,4 +327,13 @@
     <string name="tag_cf_ok">Import</string>
     
     <string name="tag_delete">delete</string>
+    <string name="tag_download">download&#8230;</string>
+    <string name="tag_download_failed">Download failed</string>
+    
+    <string name="tag_already_exists">Duplicated font name</string>
+    <string name="tag_bad_url">Bad URL</string>
+    <string name="tag_empty_name">Name can\'t be empty</string>
+    <string name="tag_cant_read">File can\'t be opened</string>
+    <string name="tag_invalid_font">Can\'t open this font file</string>
+    
 </resources>

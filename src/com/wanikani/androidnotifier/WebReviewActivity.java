@@ -1,5 +1,7 @@
 package com.wanikani.androidnotifier;
 
+import java.io.File;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -19,6 +21,7 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.webkit.CookieSyncManager;
+import android.webkit.DownloadListener;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
@@ -27,6 +30,7 @@ import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 /* 
  *  Copyright (c) 2013 Alberto Cuda
@@ -153,7 +157,7 @@ public class WebReviewActivity extends Activity {
 	    {
     		Intent intent;
 
-    		if (!url.contains ("wanikani.com")) {
+    		if (!url.contains ("wanikani.com") && !download) {
     			intent = new Intent (Intent.ACTION_VIEW);	    		
 	    		intent.setData (Uri.parse (url));
 	    		startActivity (intent);		
@@ -440,6 +444,39 @@ public class WebReviewActivity extends Activity {
 		}
 		
 	}
+	
+	private class FileDownloader implements DownloadListener, FileDownloadTask.Listener {
+		
+		@Override
+		public void onDownloadStart (String url, String userAgent, String contentDisposition, 
+									 String mimetype, long contentLength)
+		{			
+			dbar.setVisibility (View.VISIBLE);
+			new FileDownloadTask (WebReviewActivity.this, downloadPrefix, this).execute (url);
+		}				
+		
+		@Override
+		public void setProgress (int percentage)
+		{
+			dbar.setProgress (percentage);
+		}
+		
+		@Override
+		public void done (File file)
+		{
+			Intent results;
+
+			dbar.setVisibility (View.GONE);
+			if (file != null) {			
+				results = new Intent ();
+				results.putExtra (EXTRA_FILENAME, file.getAbsolutePath ());
+				setResult (RESULT_OK, results);
+				finish ();
+			} else
+				Toast.makeText (WebReviewActivity.this, getString (R.string.tag_download_failed), 
+						   	 	Toast.LENGTH_LONG).show ();
+		}
+	}
 
 	/** The web view, where the web contents are rendered */
 	FocusWebView wv;
@@ -459,12 +496,22 @@ public class WebReviewActivity extends Activity {
 	/** The web progress bar */
 	ProgressBar bar;
 			
+	/** The web download progress bar */
+	ProgressBar dbar;
+
 	/** The local prefix of this class */
 	private static final String PREFIX = "com.wanikani.androidnotifier.WebReviewActivity.";
 	
 	/** Open action, invoked to start this action */
 	public static final String OPEN_ACTION = PREFIX + "OPEN";
 	
+	/** Download action, invoked to download a file */
+	public static final String DOWNLOAD_ACTION = PREFIX + "DOWNLOAD";
+	
+	public static final String EXTRA_DOWNLOAD_PREFIX = PREFIX + "download_prefix";
+
+	public static final String EXTRA_FILENAME = PREFIX + "filename";
+
 	/** Flush caches bundle key */
 	private static final String KEY_FLUSH_CACHES = PREFIX + "flushCaches";
 	
@@ -526,6 +573,12 @@ public class WebReviewActivity extends Activity {
 	
 	/** The mute button */
 	private ImageButton muteH;	
+	
+	/** Shall we download a file? */
+	private boolean download;
+	
+	/** Download prefix */
+	private String downloadPrefix;
 		
 	/**
 	 * Called when the action is initially displayed. It initializes the objects
@@ -558,6 +611,7 @@ public class WebReviewActivity extends Activity {
 		kbstatus = KeyboardStatus.INVISIBLE;
 		
 		bar = (ProgressBar) findViewById (R.id.pb_reviews);
+		dbar = (ProgressBar) findViewById (R.id.pb_download);
 		
 		ignbtn = (ImageButton) findViewById (R.id.btn_ignore);
 		ignbtn.setOnClickListener (new IgnoreButtonListener ());
@@ -579,6 +633,12 @@ public class WebReviewActivity extends Activity {
 		wv.setScrollBarStyle (ScrollView.SCROLLBARS_OUTSIDE_OVERLAY);
 		wv.setWebViewClient (new WebViewClientImpl ());
 		wv.setWebChromeClient (new WebChromeClientImpl ());		
+
+		download = getIntent ().getAction ().equals (DOWNLOAD_ACTION);
+		if (download) {
+			downloadPrefix = getIntent ().getStringExtra (EXTRA_DOWNLOAD_PREFIX);
+			wv.setDownloadListener (new FileDownloader ());
+		} 
 		
 		wv.loadUrl (getIntent ().getData ().toString ());
 		
@@ -593,14 +653,6 @@ public class WebReviewActivity extends Activity {
 			rtask = reaper.createTask (new Handler (), 2, 7000);
 			rtask.setListener (new ReaperTaskListener ());
 		}
-	}
-	
-	@Override
-	public void onNewIntent (Intent intent)
-	{
-		super.onNewIntent (intent);
-		
-		wv.loadUrl (intent.getData ().toString ());		
 	}
 	
 	@Override
