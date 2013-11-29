@@ -1,20 +1,17 @@
 package com.wanikani.androidnotifier.db;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Vector;
 
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.graphics.Typeface;
-import android.preference.PreferenceManager;
 
 /* 
  *  Copyright (c) 2013 Alberto Cuda
@@ -395,14 +392,7 @@ public class FontDatabase {
 	/** The database */
 	private SQLiteDatabase db;
 		
-	/// The japanese typeface path
-	private static final String JAPANESE_TYPEFACE_FONT = "/system/fonts/MTLmr3m.ttf";
-	
 	private static final String PREFIX = FontDatabase.class.getName () + ".";
-	
-	private static final String PREF_SYS_ENABLED = PREFIX + "SYS_ENABLED";
-
-	private static final String PREF_MOTOYA_ENABLED = PREFIX + "MOTOYA_ENABLED";
 	
 	public static final Object MUTEX = new Object ();
 	
@@ -471,8 +461,6 @@ public class FontDatabase {
 	{
 		FontDatabase fdb;
 		
-		new File (fe.filename).delete ();
-
 		synchronized (MUTEX) { 
 			fdb = new FontDatabase (ctxt);
 			fdb.openW ();
@@ -510,6 +498,9 @@ public class FontDatabase {
 			fdb = new FontDatabase (ctxt);
 			fdb.openW ();
 			try {
+				if (fe.id == -1)
+					FontTable.insertFont (fdb.db, fe.name, fe.filename, fe.url, false, available, false);
+				
 				FontTable.setAvailable (fdb.db, fe, available);
 			} finally {
 				fdb.close ();

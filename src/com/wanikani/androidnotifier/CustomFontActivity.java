@@ -4,19 +4,18 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
+import java.util.Vector;
 
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.webkit.WebView;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -27,7 +26,6 @@ import android.widget.Toast;
 
 import com.wanikani.androidnotifier.db.FontDatabase;
 import com.wanikani.androidnotifier.db.FontDatabase.FontEntry;
-import com.wanikani.androidnotifier.db.FontDatabase.FontTable;
 
 public class CustomFontActivity extends Activity {
 
@@ -162,105 +160,150 @@ public class CustomFontActivity extends Activity {
 		}
 	}
 	
-	class FontImportListener implements View.OnClickListener {
-			
+	abstract class ImportDialog implements View.OnClickListener {
+
 		Button button;
 		
-		View view;
+		View dview;
 		
-		public FontImportListener (Button button)
+		int titleid, locid;
+		
+		TextView namevw;
+		
+		TextView locvw;
+		
+		private final String PREFIX = ImportDialog.class.getName () + ".";
+		
+		private final String KEY_ID = PREFIX + "ID";
+
+		private final String KEY_NAME = PREFIX + "NAME";
+		
+		private final String KEY_LOC = PREFIX + "LOC";
+
+		public ImportDialog (Button button, int titleid, int locid)
 		{
 			this.button = button;
+			this.titleid = titleid;
+			this.locid = locid;
 		}
 		
+		public void saveInstanceState (Bundle bundle)
+		{
+			bundle.putInt (KEY_ID, button.getId ());
+			bundle.putString (KEY_NAME, namevw.getText ().toString ());
+			bundle.putString (KEY_LOC, locvw.getText ().toString ());
+		}
+		
+		public void restoreInstanceState (Bundle bundle)
+		{
+			if (!bundle.containsKey (KEY_ID) || bundle.getInt (KEY_ID) != button.getId ())
+				return;
+			
+			onClick (button);
+			
+			namevw.setText (bundle.getString (KEY_NAME));
+			locvw.setText (bundle.getString (KEY_LOC));
+		}		
+				
 		@Override
 		public void onClick (View view)
 		{
-			String name, file;
-			FontEntry fe;
+			String name, loc;
 			
 			if (view == button) {
-				this.view = showDialog (R.string.tag_cf_import, R.string.tag_cf_path, this);
+				dview = showDialog (titleid, locid, this);
+				namevw = ((TextView) dview.findViewById (R.id.fd_name));
+				locvw = ((TextView) dview.findViewById (R.id.fd_location));
 				return;				
 			} 
 			
-			if (this.view == null)
+			if (dview == null)
 				return;
-			
-			name = ((TextView) this.view.findViewById (R.id.fd_name)).getText ().toString ();
-			file = ((TextView) this.view.findViewById (R.id.fd_location)).getText ().toString ();
-			
-			name = name.trim ();
+						
+			name = namevw.getText ().toString ().trim ();
+			loc = locvw.getText ().toString ().trim ();
+			if (validate (name, loc)) { 
+				doImport (name, loc);
+				dialog.dismiss ();				
+			}
+		}
+		
+		protected boolean validate (String name, String loc)
+		{
 			if (name.length () == 0) {
 				message (R.string.tag_empty_name);
-				return;
+				return false;
 			}
 			
 			if (FontDatabase.exists (CustomFontActivity.this, name)) {
 				message (R.string.tag_already_exists);
-				return;
+				return false;
 			}
 				
-			if (!new File (file).canRead ()) {
-				message (R.string.tag_cant_read);
-				return;
-			}
-						
-			fe = new FontEntry (-1, name, file, null, false, false, false);
-			
-			download (fe);			
-			
-			dialog.dismiss ();
+			return true;
 		}
+		
+		protected abstract void doImport (String name, String loc);
 	}
 	
-	class FontDownloadListener implements View.OnClickListener {
-		
-		Button button;
-		
-		View view;
-		
-		public FontDownloadListener (Button button)
+	class FontImportListener extends ImportDialog {
+			
+		public FontImportListener (Button button)
 		{
-			this.button = button;
+			super (button, R.string.tag_cf_import, R.string.tag_cf_path);
+		}
+
+		@Override
+		protected boolean validate (String name, String loc)
+		{
+			if (!super.validate (name, loc))
+				return false;
+			
+			if (!new File (loc).canRead ()) {
+				message (R.string.tag_cant_read);
+				return false;
+			}
+
+			return true;
 		}
 		
 		@Override
-		public void onClick (View view)
+		protected void doImport (String name, String loc)
+		{						
+			fe = new FontEntry (-1, name, loc, null, false, false, false);
+			
+			importFile (fe, false);		
+		}
+	}
+	
+	class FontDownloadListener extends ImportDialog {
+		
+		public FontDownloadListener (Button button)
 		{
-			String name, url;
-			FontEntry fe;
+			super (button, R.string.tag_cf_download, R.string.tag_cf_url);
+		}
+		
+		@Override
+		public boolean validate (String name, String loc)
+		{
+			if (!validate (name, loc))
+				return false;
 			
-			if (view == button) {				
-				this.view = showDialog (R.string.tag_cf_download, R.string.tag_cf_url, this);
-				return;
-			}
-			
-			if (this.view == null)
-				return;
-			
-			name = ((TextView) this.view.findViewById (R.id.fd_name)).getText ().toString ();
-			url = ((TextView) this.view.findViewById (R.id.fd_location)).getText ().toString ();
-			
-			name = name.trim ();
-			if (name.length () == 0) {
-				message (R.string.tag_empty_name);
-				return;
-			}
-			
-			if (FontDatabase.exists (CustomFontActivity.this, name)) {
-				message (R.string.tag_already_exists);
-				return;
-			}
-				
 			try {
-				new URL (url);
+				new URL (loc);
 			} catch (MalformedURLException e) {
 				message (R.string.tag_bad_url);
-				return;
+				return false;
 			}
-						
-			fe = new FontEntry (-1, name, null, url, false, false, false);
+			
+			return true;
+		}
+		
+		public void doImport (String name, String loc)
+		{
+			FontEntry fe;
+			
+			fe = new FontEntry (-1, name, null, loc, false, false, false);
 			
 			download (fe);
 		}
@@ -284,15 +327,22 @@ public class CustomFontActivity extends Activity {
 	
 	Dialog dialog;
 	
+	ImportDialog idial;
+	
 	FontEntry fe;
+	
+	List<ImportDialog> idials;
 	
 	@Override
 	public void onCreate (Bundle bundle) 
 	{		
 		super.onCreate (bundle);
 		
+		ImportDialog idial;
 		Button btn;
 
+		idials = new Vector<ImportDialog> ();
+		
 		setContentView (R.layout.customfont);
 		
 		fla = new FontListAdapter ();
@@ -300,28 +350,53 @@ public class CustomFontActivity extends Activity {
 		flist.setAdapter (fla);
 		
 		btn = (Button) findViewById (R.id.cf_import);
-		btn.setOnClickListener (new FontImportListener (btn));
+		idial = new FontImportListener (btn);
+		idials.add (idial);
+		btn.setOnClickListener (idial);
 		
 		btn = (Button) findViewById (R.id.cf_download);
-		btn.setOnClickListener (new FontDownloadListener (btn));
+		idial = new FontDownloadListener (btn);
+		idials.add (idial);
+		btn.setOnClickListener (idial);
+	}
+
+	@Override
+	protected void onSaveInstanceState (Bundle bundle)
+	{
+		TextView tv;
+		
+		super.onSaveInstanceState (bundle);
+		if (idial != null && dialog.isShowing ())
+			idial.saveInstanceState (bundle);
+	}
+	
+	@Override
+	protected void onRestoreInstanceState (Bundle bundle)
+	{
+		super.onRestoreInstanceState (bundle);
+		
+		for (ImportDialog idial : idials)
+			idial.restoreInstanceState (bundle);												
 	}
 	
 	@Override
 	public void onPause ()
 	{
 		super.onPause ();
-		
+
 		if (dialog != null && dialog.isShowing ())
 			dialog.dismiss ();
 	}
 
-	private View showDialog (int titleid, int locid, View.OnClickListener listener)
+	private View showDialog (int titleid, int locid, ImportDialog idial)
 	{
 		LayoutInflater inflater;
 		AlertDialog.Builder builder;
 		TextView lview;
 		View view;
 					
+		this.idial = idial;
+
 		inflater = getLayoutInflater (); 
 		view = inflater.inflate (R.layout.fontdialog, null);
 		lview = (TextView) view.findViewById (R.id.fd_location_tag);
@@ -337,7 +412,7 @@ public class CustomFontActivity extends Activity {
 		dialog = builder.create ();
 		dialog.show ();
 		
-		((AlertDialog) dialog).getButton (Dialog.BUTTON_POSITIVE).setOnClickListener (listener);
+		((AlertDialog) dialog).getButton (Dialog.BUTTON_POSITIVE).setOnClickListener (idial);
 		
 		
 		return view;
@@ -345,6 +420,9 @@ public class CustomFontActivity extends Activity {
 	
 	private void delete (FontEntry fe)
 	{
+		if (fe.url != null)
+			new File (fe.filename).delete ();
+		
 		FontDatabase.delete (this, fe);
 		fla.invalidate ();
 	}
@@ -363,6 +441,20 @@ public class CustomFontActivity extends Activity {
 		startActivityForResult (intent, 1);
 	}
 
+	protected void importFile (FontEntry fe, boolean downloaded)
+	{
+		if (fe.load () != null) {
+			fe.load ();
+			FontDatabase.setAvailable (this, fe, true);
+			fla.invalidate ();
+		} else {
+			if (downloaded)
+				new File (fe.filename).delete ();
+			
+			message (R.string.tag_invalid_font);
+		}		
+	}
+	
 	@Override
 	protected void onActivityResult (int reqCode, int resCode, Intent data)
 	{
@@ -372,13 +464,7 @@ public class CustomFontActivity extends Activity {
 			
 		case RESULT_OK:
 			fe.filename = data.getStringExtra (WebReviewActivity.EXTRA_FILENAME);
-			if (Typeface.createFromFile (fe.filename) != null) {
-				FontDatabase.setAvailable (this, fe, true);
-				fla.invalidate ();
-			} else {
-				new File (fe.filename).delete ();
-				message (R.string.tag_invalid_font);
-			}
+			importFile (fe, true);
 		}				
 	}
 	
