@@ -153,9 +153,6 @@ public class SettingsActivity
 	 * containing the notifications enabled state  */
 	public static final String E_ENABLED = "enabled";
 	
-	/// The japanese typeface path
-	private static final String JAPANESE_TYPEFACE_FONT = "/system/fonts/MTLmr3m.ttf";
-	
 	/** 
 	 * Called when the activity is first created. We setup the menu, basing on the  
 	 * current preferences.
@@ -713,24 +710,6 @@ public class SettingsActivity
 			i = new Intent (ACT_CHANGED);
 			sendBroadcast (i);
 		}
-	}
-	
-	public static Typeface getJapaneseFont (Context ctxt)
-	{
-		try {
-			return Typeface.createFromFile (JAPANESE_TYPEFACE_FONT);
-		} catch (Exception e) {
-			/* empty */
-		}
-		
-		try {
-			if (ctxt != null)
-				return Typeface.createFromAsset (ctxt.getAssets (), "MTLmr3m.ttf");
-		} catch (Exception e) {
-			/* empty */
-		}
-		
-		return null;
 	}
 }
 

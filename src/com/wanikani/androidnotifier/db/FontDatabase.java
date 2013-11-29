@@ -111,7 +111,7 @@ public class FontDatabase {
 			return null;
 		}		
 	}
-	
+		
 	public static class FontEntry {
 		
 		public int id;
@@ -165,6 +165,38 @@ public class FontDatabase {
 		}
 	}
 	
+	public static class FontBox {
+		
+		int idx;
+		
+		List<FontEntry> fes;
+		
+		private FontBox (List<FontEntry> fes)
+		{
+			this.fes = fes;
+		}
+		
+		public Typeface nextFont ()
+		{
+			Typeface ans;
+			
+			if (fes == null || fes.isEmpty ())
+				return null;
+			
+			ans = fes.get (idx %= fes.size ()).load ();
+			
+			idx++;
+			
+			return ans;
+		}
+		
+		public boolean isTrivial ()
+		{
+			return fes == null || fes.isEmpty () ||
+			   (fes.size () == 1 && !WellKnownFont.SYSTEM.is (fes.get (0)));
+		}
+	}
+	
 	public static class FontTable {
 
 		private static final String TABLE = "font";
@@ -205,6 +237,9 @@ public class FontDatabase {
 		private static final String SQL_WHERE_NAME =
 				C_NAME + " = ?";
 
+		private static final String SQL_WHERE_ENABLED =
+				C_ENABLED + " > 0";
+
 		/**
 		 * Creates the table
 		 * @param db the database
@@ -223,7 +258,7 @@ public class FontDatabase {
 			db.execSQL (SQL_DROP);
 		}
 		
-		public static List<FontEntry> getFonts (SQLiteDatabase db)
+		public static List<FontEntry> getFonts (SQLiteDatabase db, String where)
 			throws SQLException
 		{
 			List<FontEntry> ans;
@@ -235,7 +270,7 @@ public class FontDatabase {
 			
 			c = null;
 			try {
-				c = db.query (TABLE, cols, null, null, null, null, C_WELL_KNOWN);
+				c = db.query (TABLE, cols, where, null, null, null, C_WELL_KNOWN);
 				while (c.moveToNext ())
 					ans.add (new FontEntry (c.getInt (0), c.getString (1), c.getString (2), 
 											c.getString (3), c.getInt (4) > 0,
@@ -248,6 +283,18 @@ public class FontDatabase {
 			return ans;			
 		}		
 		
+		public static List<FontEntry> getFonts (SQLiteDatabase db)
+				throws SQLException
+		{
+			return getFonts (db, null);
+		}
+
+		public static List<FontEntry> getEnabledFonts (SQLiteDatabase db)
+				throws SQLException
+		{
+			return getFonts (db, C_ENABLED);
+		}
+
 		public static void insertFont (SQLiteDatabase db, String name, String filename, 
 		 					           String url, boolean enabled, boolean available, 
 		 					           boolean wellknown)
@@ -457,6 +504,30 @@ public class FontDatabase {
 		return ans;
 	}
 	
+	public static List<FontEntry> getEnabledFonts (Context ctxt)
+	{
+		List<FontEntry> ans;
+		FontDatabase fdb;
+
+		synchronized (MUTEX) {
+			fdb = new FontDatabase (ctxt);
+			fdb.openR ();
+			try {
+				ans = FontTable.getEnabledFonts (fdb.db); 
+			} finally {
+				if (fdb != null)
+					fdb.close ();
+			}
+		}
+		
+		return ans;
+	}
+	
+	public static FontBox getFontBox (Context ctxt)
+	{
+		return new FontBox (getEnabledFonts (ctxt));
+	}
+
 	public static void delete (Context ctxt, FontEntry fe)
 	{
 		FontDatabase fdb;
