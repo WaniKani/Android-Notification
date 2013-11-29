@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:background="@drawable/table_background">
+    
+    <CheckBox
+     	    android:id="@+id/cf_enabled"
+     	    android:layout_gravity="center_vertical"
+     	    android:layout_width="wrap_content"
+     	    android:layout_height="wrap_content" />
+    
+    <LinearLayout
+        android:layout_width="0dip"
+        android:layout_weight="1"
+     	android:layout_gravity="center_vertical"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+     	<TextView
+          		style="@style/Estimates"
+	           	android:id="@+id/cf_font"
+    	        android:layout_width="wrap_content"
+           		android:layout_height="wrap_content" />
+
+       <TextView
+           		android:id="@+id/cf_font_sample"
+           		style="@style/FontSample"
+           		android:layout_width="wrap_content"
+           		android:layout_height="wrap_content"
+           		android:text="&#x3042;&#x306E;&#x308C;&#x30B7;&#x30F0;&#x30DB;\n&#x5E73;&#x96EA;&#x8FCE;&#x9AA8;&#x6C34;&#x76F4;"/>           		
+    </LinearLayout>
+    
+    <Button
+        android:id="@+id/cf_download"
+        style="@style/AlertButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:text="@string/tag_download" />    
+    <Button
+        android:id="@+id/cf_delete"
+        style="@style/AlertButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:text="@string/tag_delete" />    
+
+</LinearLayout>

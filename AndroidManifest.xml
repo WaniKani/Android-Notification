@@ -33,12 +33,13 @@
         <activity android:name="MetersActivity" />
         <activity android:name="OtherStatsActivity" 
             	  android:configChanges="orientation|keyboardHidden|screenSize"/>
-
+        <activity android:name="CustomFontActivity"/>
+        
         <activity android:name="WebReviewActivity"
             	  android:windowSoftInputMode="adjustPan"
             	  android:hardwareAccelerated="false"
                	  android:configChanges="orientation|keyboardHidden|screenSize" android:launchMode="singleTop" android:process=":webview"/>
-        
+                
         <receiver
             android:name="NotificationService$Receiver"
             android:enabled="true"

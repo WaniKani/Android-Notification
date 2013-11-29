@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android" 
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"        
+    	android:orientation="vertical" 
+    	style="@style/Background">
+            
+    <TextView
+       style="@style/ChartTitle"
+       android:layout_width="match_parent"
+       android:layout_height="wrap_content"
+       android:text="@string/tag_current_fonts" />
+
+   <LinearLayout
+       style="@style/Table"
+       android:layout_width="match_parent"
+       android:layout_height="wrap_content"
+       android:orientation="vertical" >
+              
+    	<TextView 
+    		style="@android:style/TextAppearance.Small"
+        	android:layout_width="match_parent" 
+        	android:layout_height="wrap_content"
+        	android:text="@string/tag_current_font_description"/>  
+		<Button 
+		    android:id="@+id/cf_import"
+		    android:layout_width="match_parent"
+		    android:layout_height="wrap_content"
+		    android:text="@string/tag_import_from_file"/>     
+		<Button 
+		    android:id="@+id/cf_download"
+		    android:layout_width="match_parent"
+		    android:layout_height="wrap_content"
+		    android:text="@string/tag_download_from_web"/>     
+		
+		<ListView 
+		    android:id="@+id/cf_samples"
+		    android:layout_width="match_parent"
+		    android:layout_height="wrap_content"
+		    android:layout_gravity="center_horizontal"/>
+    </LinearLayout>
+</LinearLayout>
