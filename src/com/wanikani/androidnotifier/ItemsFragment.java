@@ -468,8 +468,8 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 			hpsw.setCallback (icl);
 			row.setOnClickListener (icl);
 			
-			if (fbox != null)
-				glyphText.setTypeface (fbox.nextFont ());			
+			if (jtf != null)
+				glyphText.setTypeface (jtf);			
 		}
 		
 		/**
@@ -787,6 +787,8 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 		 */
 		private void invalidate ()
 		{		
+			if (fbox != null)
+				jtf = fbox.nextFont ();
 			filteredItems = isd != null ? isd.filter (allItems) : allItems;  
 			Collections.sort (filteredItems, cmp);
 			notifyDataSetChanged ();
@@ -1196,8 +1198,11 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 	/// The current filter
 	private Filter currentFilter;
 	
-	/// The japanese typeface
+	/// The japanese typeface set
 	private FontBox fbox;
+	
+	/// The current japanese typeface
+	private Typeface jtf;
 	
 	/// Need to restart refresh
 	private boolean resumeRefresh;
@@ -1334,6 +1339,7 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 		showAnswers = prefs.getBoolean (KEY_SHOW_ANSWERS, true);
 		
 		fbox = FontDatabase.getFontBox (getActivity ());
+		jtf = fbox.nextFont ();
 		
 		alarm.screenOn ();
 		
