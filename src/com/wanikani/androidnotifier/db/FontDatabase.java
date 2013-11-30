@@ -193,7 +193,7 @@ public class FontDatabase {
 		public boolean isTrivial ()
 		{
 			return fes == null || fes.isEmpty () ||
-			   (fes.size () == 1 && !WellKnownFont.SYSTEM.is (fes.get (0)));
+			   (fes.size () == 1 && WellKnownFont.SYSTEM.is (fes.get (0)));
 		}
 	}
 	
