@@ -1184,6 +1184,9 @@ public class LocalIMEKeyboard implements Keyboard {
 	{
 		SharedPreferences prefs;
 
+		if (!canOverrideFonts ())
+			return false;
+		
 		prefs = PreferenceManager.getDefaultSharedPreferences (wav);
 		
 		return prefs.getBoolean (PREF_FONT_OVERRIDE, false);
