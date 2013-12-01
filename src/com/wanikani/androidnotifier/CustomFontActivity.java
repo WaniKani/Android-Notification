@@ -26,6 +26,7 @@ import android.widget.Toast;
 
 import com.wanikani.androidnotifier.db.FontDatabase;
 import com.wanikani.androidnotifier.db.FontDatabase.FontEntry;
+import com.wanikani.androidnotifier.db.FontDatabase.WellKnownFont;
 
 public class CustomFontActivity extends Activity {
 
@@ -151,7 +152,30 @@ public class CustomFontActivity extends Activity {
 			
 			holder = (FontHolder) button.getTag ();
 			if (holder != null)
-				FontDatabase.setEnabled (CustomFontActivity.this, holder.fe, checked);			
+				FontDatabase.setEnabled (CustomFontActivity.this, holder.fe, checked);
+			
+			updateChecks ();
+		}
+		
+		private void updateChecks ()
+		{
+			FontEntry sys;
+			boolean nonsys;
+			
+			rescan ();
+			nonsys = false;
+			sys = null;
+			for (FontEntry fe : fonts) {
+				if (WellKnownFont.SYSTEM.is (fe))
+					sys = fe;
+				else if (fe.enabled)
+					nonsys = true;
+			}
+			if (!nonsys && sys != null) {
+				FontDatabase.setEnabled (CustomFontActivity.this, sys, true);
+				sys.enabled = true;
+				notifyDataSetChanged ();
+			}
 		}
 		
 		public void rescan ()
@@ -363,8 +387,6 @@ public class CustomFontActivity extends Activity {
 	@Override
 	protected void onSaveInstanceState (Bundle bundle)
 	{
-		TextView tv;
-		
 		super.onSaveInstanceState (bundle);
 		if (idial != null && dialog.isShowing ())
 			idial.saveInstanceState (bundle);
