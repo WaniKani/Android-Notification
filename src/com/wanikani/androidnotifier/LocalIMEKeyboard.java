@@ -2,8 +2,6 @@ package com.wanikani.androidnotifier;
 
 import java.util.EnumMap;
 
-import android.app.AlertDialog;
-import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
@@ -11,7 +9,6 @@ import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
-import android.graphics.Typeface;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.text.Editable;
@@ -28,12 +25,14 @@ import android.view.inputmethod.InputMethodManager;
 import android.webkit.JavascriptInterface;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 
+import com.wanikani.androidnotifier.db.FontDatabase;
+import com.wanikani.androidnotifier.db.FontDatabase.FontBox;
+import com.wanikani.androidnotifier.db.FontDatabase.WellKnownFont;
 import com.wanikani.wklib.Item;
 import com.wanikani.wklib.JapaneseIME;
 
@@ -322,7 +321,8 @@ public class LocalIMEKeyboard implements Keyboard {
 		{
 			if (show) {
 				divw.setVisibility (View.VISIBLE);
-				imm.showSoftInput (wv, InputMethodManager.SHOW_IMPLICIT);
+				imm.showSoftInput (wv, InputMethodManager.SHOW_FORCED);
+				ew.requestFocus ();
 			} else {
 				divw.setVisibility (View.GONE);
 				imm.hideSoftInputFromWindow (ew.getWindowToken (), 0);
@@ -399,6 +399,9 @@ public class LocalIMEKeyboard implements Keyboard {
 		
 		/// Is the qbox visible
 		boolean qvisible;
+		
+		/// Is this a review session
+		boolean reviews;
 		
 		public boolean update (Rect frect, Rect trect)
 		{
@@ -538,6 +541,7 @@ public class LocalIMEKeyboard implements Keyboard {
 		@JavascriptInterface
 		public void sync (boolean correct, boolean incorrect, String text, boolean reviews)
 		{
+			bpos.reviews = reviews;
 			if (correct)
 				new JSListenerSetClass ("correct", reviews);
 			if (incorrect)
@@ -623,7 +627,8 @@ public class LocalIMEKeyboard implements Keyboard {
 			"   var item, question, rect, style;" +
 			"   item = $.jStorage.get (\"currentItem\");" +
 			"   question = document.getElementById (\"character\");" +
-			"   question = question.getElementsByTagName (\"span\") [0];" +
+			"   if (question.getElementsByTagName (\"span\").length > 0)" +
+			"       question = question.getElementsByTagName (\"span\") [0];" +
 			"   rect = question.getBoundingClientRect ();" +
 			"   style = window.getComputedStyle (question, null);" +
 			"   wknJSListener.overrideQuestion (window.wknSequence," +
@@ -638,7 +643,8 @@ public class LocalIMEKeyboard implements Keyboard {
 			"   var qtype, e;" +
 			"   qtype = $.jStorage.get (\"questionType\");" +
 			"   window.wknReplace ();" +
-			"   window.wknOverrideQuestion ();" +			
+			"   if (" + JS_REVIEWS_P + ")" +
+			"        window.wknOverrideQuestion ();" +			
 			"   if ($(\"#character\").hasClass (\"vocabulary\")) {" +
 			"        e = $(\"#character span\");" +
 			"        e.text (e.text ().replace (/〜/g, \"~\")); " +
@@ -825,8 +831,7 @@ public class LocalIMEKeyboard implements Keyboard {
     /// Set if the ignore button must be shown, because the answer is incorrect
     boolean canIgnore;
     
-    /// The japanese typeface font, if available
-    Typeface jtf;
+    FontBox fbox;
 
     /// Is the text box frozen because it is waiting for a class change
     boolean frozen;
@@ -877,9 +882,6 @@ public class LocalIMEKeyboard implements Keyboard {
 		ew.setImeOptions (EditorInfo.IME_ACTION_DONE);
 		
 		qvw = (TextView) wav.findViewById (R.id.txt_question_override);
-		jtf = SettingsActivity.getJapaneseFont (wav);
-		if (jtf != null)
-			qvw.setTypeface (jtf);			
 		
 		next = (Button) wav.findViewById (R.id.ime_next);
 		next.setOnClickListener (imel);
@@ -913,6 +915,8 @@ public class LocalIMEKeyboard implements Keyboard {
 	@Override
 	public void show (boolean hasEnter)
 	{
+		fbox = FontDatabase.getFontBox (wav);
+		
 		lastSequence = -1;
 		wv.js (JS_INIT_TRIGGERS);
 
@@ -1012,9 +1016,10 @@ public class LocalIMEKeyboard implements Keyboard {
 			next.setLayoutParams (params);		
 		}
 			
-		divw.setVisibility (View.VISIBLE);
-		
-		ew.requestFocus ();
+		if (bpos.shallShow ()) {
+			divw.setVisibility (View.VISIBLE);		
+			ew.requestFocus ();
+		}
 	}
 	
 	private void adjustWidth (TextView view, RelativeLayout.LayoutParams params, String text)
@@ -1045,6 +1050,7 @@ public class LocalIMEKeyboard implements Keyboard {
 			//qvw.setBackgroundColor (cmap.get (type));
 			qvw.setTextColor (Color.WHITE);
 			qvw.setText (name);
+			qvw.setTypeface (fbox != null ? fbox.nextFont () : null);
 			showQuestionPatch (true);
 		} else
 			showQuestionPatch (false);
@@ -1184,6 +1190,9 @@ public class LocalIMEKeyboard implements Keyboard {
 	{
 		SharedPreferences prefs;
 
+		if (!canOverrideFonts ())
+			return false;
+		
 		prefs = PreferenceManager.getDefaultSharedPreferences (wav);
 		
 		return prefs.getBoolean (PREF_FONT_OVERRIDE, false);
@@ -1204,7 +1213,7 @@ public class LocalIMEKeyboard implements Keyboard {
 	@Override
 	public boolean canOverrideFonts ()
 	{
-		return jtf != null;
+		return fbox != null && !fbox.isTrivial () && bpos.reviews;
 	}
 	
 	@Override

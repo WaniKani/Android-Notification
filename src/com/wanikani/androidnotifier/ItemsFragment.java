@@ -32,6 +32,8 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 
+import com.wanikani.androidnotifier.db.FontDatabase;
+import com.wanikani.androidnotifier.db.FontDatabase.FontBox;
 import com.wanikani.wklib.Connection;
 import com.wanikani.wklib.Item;
 import com.wanikani.wklib.Kanji;
@@ -785,6 +787,8 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 		 */
 		private void invalidate ()
 		{		
+			if (fbox != null)
+				jtf = fbox.nextFont ();
 			filteredItems = isd != null ? isd.filter (allItems) : allItems;  
 			Collections.sort (filteredItems, cmp);
 			notifyDataSetChanged ();
@@ -1194,7 +1198,10 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 	/// The current filter
 	private Filter currentFilter;
 	
-	/// The japanese typeface
+	/// The japanese typeface set
+	private FontBox fbox;
+	
+	/// The current japanese typeface
 	private Typeface jtf;
 	
 	/// Need to restart refresh
@@ -1205,7 +1212,6 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 		rimg = new RadicalImages ();
 		alarm = new Alarm ();
 		refreshTask = new RefreshTask ();
-		jtf = SettingsActivity.getJapaneseFont (null);
 			
 		currentLevel = -1;		
 	}
@@ -1331,6 +1337,9 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 		
 		prefs = SettingsActivity.prefs (getActivity ());
 		showAnswers = prefs.getBoolean (KEY_SHOW_ANSWERS, true);
+		
+		fbox = FontDatabase.getFontBox (getActivity ());
+		jtf = fbox.nextFont ();
 		
 		alarm.screenOn ();
 		

@@ -99,6 +99,7 @@
     <string name="em_ignore">Ignore</string>
     <string name="em_fonts">JP fonts</string>
     <string name="em_meters">Meters</string>
+    <string name="em_custom_fonts">Choose JP font</string>
     <string name="pref_enabled_descr">Show event icon when you have reviews</string>
     <string name="status_msg_error">Error connecting to WaniKani</string>
     <string name="status_msg_partial">Network error. Partial results</string>
@@ -310,5 +311,29 @@
     
     <string name="tag_me_notice">Note: these are approximate values, 
         	regarding the API only (e.g. browsing sessions are excluded)</string>
-   
+        	
+    <string name="tag_current_fonts">Current font</string>
+    <string name="tag_current_font_description">
+        If multiple fonts are selected, they will be rotated during reviews</string>
+    <string name="tag_import_from_file">Import from file&#8230;</string>
+    <string name="tag_download_from_web">Download from web&#8230;</string>
+    <string name="tag_cf_import">Import a font</string>   
+    <string name="tag_cf_download">Download a font</string>
+    <string name="tag_cf_name">Font name</string>
+    <string name="tag_cf_path">Font path</string>
+    <string name="tag_cf_url">Starting URL</string>
+    
+    <string name="tag_cf_cancel">Cancel</string>
+    <string name="tag_cf_ok">Import</string>
+    
+    <string name="tag_delete">delete</string>
+    <string name="tag_download">download&#8230;</string>
+    <string name="tag_download_failed">Download failed</string>
+    
+    <string name="tag_already_exists">Duplicated font name</string>
+    <string name="tag_bad_url">Bad URL</string>
+    <string name="tag_empty_name">Name can\'t be empty</string>
+    <string name="tag_cant_read">File can\'t be opened</string>
+    <string name="tag_invalid_font">Can\'t open this font file</string>
+    
 </resources>
