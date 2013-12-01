@@ -400,6 +400,9 @@ public class LocalIMEKeyboard implements Keyboard {
 		/// Is the qbox visible
 		boolean qvisible;
 		
+		/// Is this a review session
+		boolean reviews;
+		
 		public boolean update (Rect frect, Rect trect)
 		{
 			boolean changed;
@@ -538,6 +541,7 @@ public class LocalIMEKeyboard implements Keyboard {
 		@JavascriptInterface
 		public void sync (boolean correct, boolean incorrect, String text, boolean reviews)
 		{
+			bpos.reviews = reviews;
 			if (correct)
 				new JSListenerSetClass ("correct", reviews);
 			if (incorrect)
@@ -623,7 +627,8 @@ public class LocalIMEKeyboard implements Keyboard {
 			"   var item, question, rect, style;" +
 			"   item = $.jStorage.get (\"currentItem\");" +
 			"   question = document.getElementById (\"character\");" +
-			"   question = question.getElementsByTagName (\"span\") [0];" +
+			"   if (question.getElementsByTagName (\"span\").length > 0)" +
+			"       question = question.getElementsByTagName (\"span\") [0];" +
 			"   rect = question.getBoundingClientRect ();" +
 			"   style = window.getComputedStyle (question, null);" +
 			"   wknJSListener.overrideQuestion (window.wknSequence," +
@@ -638,7 +643,8 @@ public class LocalIMEKeyboard implements Keyboard {
 			"   var qtype, e;" +
 			"   qtype = $.jStorage.get (\"questionType\");" +
 			"   window.wknReplace ();" +
-			"   window.wknOverrideQuestion ();" +			
+			"   if (" + JS_REVIEWS_P + ")" +
+			"        window.wknOverrideQuestion ();" +			
 			"   if ($(\"#character\").hasClass (\"vocabulary\")) {" +
 			"        e = $(\"#character span\");" +
 			"        e.text (e.text ().replace (/〜/g, \"~\")); " +
@@ -1207,7 +1213,7 @@ public class LocalIMEKeyboard implements Keyboard {
 	@Override
 	public boolean canOverrideFonts ()
 	{
-		return fbox != null && !fbox.isTrivial ();
+		return fbox != null && !fbox.isTrivial () && bpos.reviews;
 	}
 	
 	@Override
