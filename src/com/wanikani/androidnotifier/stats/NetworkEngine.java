@@ -55,7 +55,7 @@ public class NetworkEngine {
 		@Override
 		public void loadData () 
 		{
-			if (task == null || task.completed)
+			if (task == null || !task.completed)
 				task = refresh (meter, types);
 		}
 	}
@@ -73,7 +73,7 @@ public class NetworkEngine {
 		private PendingTask task;
 		
 		/// Number of levels to load at once
-		private static final int BUNCH_SIZE = 5;
+		private static final int BUNCH_SIZE = 50;
 		
 		public Task (Connection conn, PendingTask task)
 		{
@@ -94,6 +94,9 @@ public class NetworkEngine {
 			ItemLibrary<Vocabulary> vlib;
 			int i, j, levels, bunch [];
 
+			if (task.types.isEmpty ())
+				return true;
+			
 			try {
 				levels = conn.getUserInformation (task.meter).level;
 			} catch (IOException e) {
