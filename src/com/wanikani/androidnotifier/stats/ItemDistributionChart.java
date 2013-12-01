@@ -101,6 +101,8 @@ public class ItemDistributionChart implements NetworkEngine.Chart {
 			ds = netwe.getDataSource (mtype.get (main), types);
 		
 		chart.setDataSource (ds);
+		
+		updatePlot ();
 	}
 	
 	@Override
@@ -128,6 +130,11 @@ public class ItemDistributionChart implements NetworkEngine.Chart {
 	{
 		availableTypes.addAll (types);
 		
+		updatePlot ();
+	}
+	
+	private void updatePlot ()
+	{
 		for (Item.Type t : this.types)
 			if (!availableTypes.contains (t))
 				return;
