@@ -86,7 +86,7 @@ public class FontDatabase {
 			
 			public String getFilename ()
 			{
-				return "/system/fonts/MTLmr3m.ttf";
+				return null;
 			}			
 			
 			public int sinceVersion ()
@@ -144,7 +144,7 @@ public class FontDatabase {
 		
 		public boolean canBeDeleted ()
 		{
-			return available && !WellKnownFont.SYSTEM.is (this); 
+			return available && url != null; 
 		}
 		
 		public boolean canBeDownloaded ()
@@ -426,7 +426,7 @@ public class FontDatabase {
 												  f.getURL (), false, false, true);
 					} else
 						FontTable.insertFont (db, f.getName (), null, f.getURL (), 
-											  false, true, true);
+											  false, f == WellKnownFont.SYSTEM, true);
 				}
 			}
 		}
