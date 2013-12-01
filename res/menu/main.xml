@@ -7,7 +7,7 @@
     <item android:id="@+id/em_meters" android:title="@string/em_meters" 
           android:showAsAction="ifRoom|withText" android:icon="@drawable/ic_menu_view"/>
     <item android:id="@+id/em_customfonts" android:title="@string/em_custom_fonts" 
-          android:showAsAction="ifRoom|withText" android:icon="@drawable/ic_menu_font"/>
+          android:showAsAction="ifRoom|withText" android:icon="@drawable/ic_menu_change_font"/>
     <item android:id="@+id/em_export" android:title="@string/em_export" 
           android:showAsAction="ifRoom|withText" android:icon="@drawable/ic_menu_save"/>
 </menu>
