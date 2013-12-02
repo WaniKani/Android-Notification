@@ -447,13 +447,23 @@ public class WebReviewActivity extends Activity {
 	
 	private class FileDownloader implements DownloadListener, FileDownloadTask.Listener {
 		
+		FileDownloadTask fdt;
+		
 		@Override
 		public void onDownloadStart (String url, String userAgent, String contentDisposition, 
 									 String mimetype, long contentLength)
 		{			
 			dbar.setVisibility (View.VISIBLE);
-			new FileDownloadTask (WebReviewActivity.this, downloadPrefix, this).execute (url);
+			cancel ();			
+			fdt = new FileDownloadTask (WebReviewActivity.this, downloadPrefix, this);
+			fdt.execute (url);
 		}				
+		
+		private void cancel ()
+		{
+			if (fdt != null)
+				fdt.cancel ();			
+		}
 		
 		@Override
 		public void setProgress (int percentage)
@@ -579,6 +589,9 @@ public class WebReviewActivity extends Activity {
 	
 	/** Download prefix */
 	private String downloadPrefix;
+	
+	/** The file downloader, if any */
+	private FileDownloader fda;
 		
 	/**
 	 * Called when the action is initially displayed. It initializes the objects
@@ -637,7 +650,7 @@ public class WebReviewActivity extends Activity {
 		download = getIntent ().getAction ().equals (DOWNLOAD_ACTION);
 		if (download) {
 			downloadPrefix = getIntent ().getStringExtra (EXTRA_DOWNLOAD_PREFIX);
-			wv.setDownloadListener (new FileDownloader ());
+			wv.setDownloadListener (fda = new FileDownloader ());
 		} 
 		
 		wv.loadUrl (getIntent ().getData ().toString ());
@@ -691,6 +704,9 @@ public class WebReviewActivity extends Activity {
 
 		if (reaper != null)
 			reaper.stopAll ();
+		
+		if (fda != null)
+			fda.cancel ();
 		
 		if (SettingsActivity.getLeakKludge (this))
 			System.exit (0);
