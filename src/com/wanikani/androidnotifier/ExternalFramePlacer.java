@@ -6,6 +6,57 @@ package com.wanikani.androidnotifier;
  * 		-- Alberto
  */
 public class ExternalFramePlacer {
+
+	/* The tags must be in sync with arrays.xml: SettingsActivity depends on this */
+	enum Dictionary {
+		JISHO {
+			public String kanji ()
+			{
+				return "http://jisho.org/kanji/details/{0}";
+			}
+
+			public String vocab ()
+			{
+				return "http://jisho.org/words?common=on&jap={0}";
+			}
+		},
+		TANGORIN {
+			public String kanji ()
+			{
+				return "http://tangorin.com/kanji/{0}";
+			}
+
+			public String vocab ()
+			{
+				return "http://tangorin.com/general/{0}";
+			}
+		},
+		EJJE {
+			public String kanji ()
+			{
+				return "http://ejje.weblio.jp/content/{0}";
+			}
+
+			public String vocab ()
+			{
+				return "http://ejje.weblio.jp/content/{0}";
+			}
+		},
+		JISHO_BETA {
+			public String kanji ()
+			{
+				return "http://beta.jisho.org/search/{0}%23kanji";
+			}
+
+			public String vocab ()
+			{
+				return "http://beta.jisho.org/search/{0}";
+			}
+		};
+		
+		public abstract String kanji ();
+		public abstract String vocab ();
+	}
 	
 	public static final String JS_CODE = 
 "(function() {\r\n" + 
@@ -69,6 +120,7 @@ public class ExternalFramePlacer {
 "     */\r\n" + 
 "    getFrameURL: function(type) {\r\n" + 
 "      // Instantiate the defaults if they aren't in place already.\r\n" + 
+/*
 "      if (!$.jStorage.get(Utility.URL_KEY_FORMAT.format(Utility.KANJI))) {\r\n" + 
 "        $.jStorage.set(Utility.URL_KEY_FORMAT.format(Utility.KANJI), Utility.KANJI_URL_DEFAULT);\r\n" + 
 "      }\r\n" + 
@@ -76,7 +128,12 @@ public class ExternalFramePlacer {
 "      if (!$.jStorage.get(Utility.URL_KEY_FORMAT.format(Utility.VOCAB))) {\r\n" + 
 "        $.jStorage.set(Utility.URL_KEY_FORMAT.format(Utility.VOCAB), Utility.VOCAB_URL_DEFAULT);\r\n" + 
 "      }\r\n" + 
-"      \r\n" + 
+"      \r\n" +
+*/
+/* Glue code */
+"        $.jStorage.set(Utility.URL_KEY_FORMAT.format(Utility.KANJI), '%s');\r\n" + 
+"        $.jStorage.set(Utility.URL_KEY_FORMAT.format(Utility.VOCAB), '%s');\r\n" + 
+	
 "      // Get the requested type, or default to a vocab item if `type` is invalid.\r\n" + 
 "      return $.jStorage.get(Utility.URL_KEY_FORMAT.format(type)) || $.jStorage.get(Utility.URL_KEY_FORMAT.format(Utility.VOCAB));\r\n" + 
 "    },\r\n" + 
@@ -137,7 +194,7 @@ public class ExternalFramePlacer {
 "        body.removeChild(tempInput);\r\n" + 
 "      }\r\n" + 
 "      newIframe.setAttribute('src', frameURL);\r\n" + 
-"      newIframe.style.width = '100%';\r\n" + 
+"      newIframe.style.width = '100%%';\r\n" + 
 "      newIframe.style.height = '600px';\r\n" + 
 "      \r\n" + 
 "      // Create a container div for the iframe and insert it.\r\n" + 
@@ -218,4 +275,10 @@ public class ExternalFramePlacer {
 "    }\r\n" + 
 "  }, 50);\r\n" + 
 "})()";
+
+	
+	public static void run (FocusWebView wv, Dictionary dict)
+	{
+		wv.js (String.format (JS_CODE, dict.kanji (), dict.vocab ()));
+	}
 }

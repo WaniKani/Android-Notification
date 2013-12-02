@@ -66,7 +66,19 @@
         	android:key="pref_lesson_order"
         	android:title="@string/pref_lesson_order"
         	android:summary="@string/pref_lesson_order_descr"
-        	android:defaultValue="false" />    
+        	android:defaultValue="false" />
+    	<CheckBoxPreference
+    	    android:key="pref_external_frame_placer"
+    	    android:title="@string/pref_external_frame_placer"
+    	    android:summary="@string/pref_external_frame_placer_descr"
+    	    android:defaultValue="false"/>
+    	<ListPreference
+	        android:key="pref_external_frame_placer_dict"
+	        android:title="@string/pref_external_frame_placer_dict"
+	        android:summary="@string/pref_external_frame_placer_dict"
+	        android:defaultValue="JISHO"
+	        android:entries="@array/dictionaryURL"
+	        android:entryValues="@array/dictionaryURLValues"/>    	
     	<CheckBoxPreference
         	android:key="pref_error_popup"
         	android:title="@string/pref_error_popup"
@@ -122,7 +134,7 @@
 	        android:key="pref_export_dest"
 	        android:title="@string/pref_export_dest"
 	        android:summary="@string/pref_export_dest_desc"
-	        android:defaultValue="0"
+	        android:defaultValue="JISHO"
 	        android:entries="@array/exports"
 	        android:entryValues="@array/exportValues"/>
 	        
