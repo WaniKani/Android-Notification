@@ -1,10 +1,17 @@
 package com.wanikani.androidnotifier;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.Vector;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -203,7 +210,7 @@ public class CustomFontActivity extends Activity {
 		private final String KEY_NAME = PREFIX + "NAME";
 		
 		private final String KEY_LOC = PREFIX + "LOC";
-
+		
 		public ImportDialog (Button button, int titleid, int locid)
 		{
 			this.button = button;
@@ -247,8 +254,8 @@ public class CustomFontActivity extends Activity {
 			name = namevw.getText ().toString ().trim ();
 			loc = locvw.getText ().toString ().trim ();
 			if (validate (name, loc)) { 
-				doImport (name, loc);
 				dialog.dismiss ();				
+				doImport (name, loc);
 			}
 		}
 		
@@ -310,7 +317,7 @@ public class CustomFontActivity extends Activity {
 		@Override
 		public boolean validate (String name, String loc)
 		{
-			if (!validate (name, loc))
+			if (!super.validate (name, loc))
 				return false;
 			
 			try {
@@ -345,6 +352,8 @@ public class CustomFontActivity extends Activity {
 	
 	public static final String PREFIX = "font-";
 	
+	private static final String UNZIP_PREFIX = PREFIX + "uz-";
+
 	ListView flist;
 	
 	FontListAdapter fla;
@@ -382,6 +391,8 @@ public class CustomFontActivity extends Activity {
 		idial = new FontDownloadListener (btn);
 		idials.add (idial);
 		btn.setOnClickListener (idial);
+		
+		cleanup ();
 	}
 
 	@Override
@@ -408,6 +419,25 @@ public class CustomFontActivity extends Activity {
 
 		if (dialog != null && dialog.isShowing ())
 			dialog.dismiss ();
+	}
+	
+	private void cleanup ()
+	{
+		List<FontEntry> fes;
+		Set<String> used;
+		File dir;
+		
+		fes = FontDatabase.getFonts (this);
+		used = new HashSet<String> ();
+		for (FontEntry fe : fes)
+			if (fe.filename != null)
+				used.add (new File (fe.filename).getName ());
+		
+		dir = getFilesDir ();
+		for (File f : dir.listFiles ()) {
+			if (f.getName ().startsWith (PREFIX) && !used.contains (f.getName ()))
+				f.delete ();
+		}
 	}
 
 	private View showDialog (int titleid, int locid, ImportDialog idial)
@@ -462,18 +492,100 @@ public class CustomFontActivity extends Activity {
 			
 		startActivityForResult (intent, 1);
 	}
+	
+	protected boolean extract (FontEntry pfe, ZipInputStream zis, ZipEntry ze, String filename)
+	{
+		FontEntry fe;
+		OutputStream os;
+		String ename;
+		boolean ok;
+		File output;
+		byte buf [];
+		int rd;
+		
+		ename = ze.getName ();
+		ename = new File (ename).getName ();			
+		
+		output = null;
+		os = null;
+		ok = false;
+		try {
+			output = new File (getFilesDir (), filename);
+			os = new FileOutputStream (output);
+			buf = new byte [1024];
+			while (true) {
+				rd = zis.read (buf);
+				if (rd < 0)
+					break;
+				os.write (buf, 0, rd);			
+			}
+			os.close ();
+
+			fe = new FontEntry (-1, pfe.name + "; " + ename, output.getAbsolutePath (), 
+								 pfe.url, false, true, false);
+			ok = fe.load () != null && FontDatabase.insertFixDuplicates (this, fe, true);			
+		} catch (Exception e) {
+			/* empty */
+		} finally {
+			if (!ok)
+				output.delete ();
+		}
+		
+		return ok;
+	}
+	
+	protected boolean readAsArchive (FontEntry fe)
+	{
+		ZipInputStream zis;
+		File entry;		
+		long suffix;
+		ZipEntry ze;
+		boolean once;
+		
+		suffix = System.currentTimeMillis ();		
+		zis = null;
+		once = false;
+		try {
+			zis = new ZipInputStream (new FileInputStream (fe.filename));
+			while (true) {
+				ze = zis.getNextEntry ();
+				if (ze == null)
+					break;
+				
+				once |= extract (fe, zis, ze, UNZIP_PREFIX + (suffix++));
+			}
+		} catch (Exception e) {
+			return once;
+		} finally {
+			try {
+				if (zis != null)
+					zis.close ();
+			} catch (Exception e) {
+				/* empty */
+			}
+		}
+		
+		return once;
+	}
 
 	protected void importFile (FontEntry fe, boolean downloaded)
 	{
+		boolean archive;
+
 		if (fe.load () != null) {
 			fe.load ();
 			FontDatabase.setAvailable (this, fe, true);
 			fla.invalidate ();
 		} else {
+			archive = readAsArchive (fe);				
+			
 			if (downloaded)
 				new File (fe.filename).delete ();
 			
-			message (R.string.tag_invalid_font);
+			if (archive)
+				fla.invalidate ();
+			else
+				message (R.string.tag_invalid_font);
 		}		
 	}
 	

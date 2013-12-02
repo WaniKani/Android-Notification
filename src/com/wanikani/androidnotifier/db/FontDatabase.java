@@ -144,7 +144,8 @@ public class FontDatabase {
 		
 		public boolean canBeDeleted ()
 		{
-			return available && url != null; 
+			return available && 
+					(!wellknown || url != null); 
 		}
 		
 		public boolean canBeDownloaded ()
@@ -577,6 +578,29 @@ public class FontDatabase {
 				fdb.close ();
 			}
 		}
+	}
+	
+	public static boolean insertFixDuplicates (Context ctxt, FontEntry fe, boolean available)
+	{
+		String bname;
+		int i;
+		
+		synchronized (MUTEX) {
+			if (!exists (ctxt, fe.name)) {
+				setAvailable (ctxt, fe, available);
+				return true;
+			}
+			bname = fe.name;
+			for (i = 1; i < 20; i++) {
+				fe.name = bname + " " + i;
+				if (!exists (ctxt, fe.name)) {
+					setAvailable (ctxt, fe, available);
+					return true;
+				} 
+			}
+		}
+		
+		return false;
 	}
 	
 	public static boolean exists (Context ctxt, String name)
