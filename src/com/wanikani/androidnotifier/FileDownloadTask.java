@@ -26,11 +26,18 @@ public class FileDownloadTask extends AsyncTask<String, Integer, File>{
 	
 	private String prefix;
 	
+	private boolean cancelled;
+	
 	public FileDownloadTask (Context ctxt, String prefix, Listener listener)
 	{
 		this.ctxt = ctxt;
 		this.prefix = prefix;
 		this.listener = listener;
+	}
+	
+	public void cancel ()
+	{
+		cancelled = true;
 	}
 
 	@Override
@@ -67,7 +74,7 @@ public class FileDownloadTask extends AsyncTask<String, Integer, File>{
 			buf = new byte [8192];
 			read = 0;
 			delta = next = size / 10;
-			while (true) {
+			while (!cancelled) {
 				br = is.read (buf);
 				if (br < 0)
 					break;
@@ -98,7 +105,7 @@ public class FileDownloadTask extends AsyncTask<String, Integer, File>{
 			}  catch (IOException e) {
 				ok = false;
 			}
-			if (!ok && outf != null)
+			if (cancelled || !ok && outf != null)
 				outf.delete ();
 		}		
 		
@@ -108,12 +115,14 @@ public class FileDownloadTask extends AsyncTask<String, Integer, File>{
 	@Override
 	public void onProgressUpdate (Integer... percentage)
 	{
-		listener.setProgress (percentage [0]);
+		if (!cancelled)
+			listener.setProgress (percentage [0]);
 	}
 	
 	@Override
 	public void onPostExecute (File file)
 	{
-		listener.done (file);
+		if (!cancelled)
+			listener.done (file);
 	}
 }
