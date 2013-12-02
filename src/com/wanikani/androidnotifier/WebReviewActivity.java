@@ -669,6 +669,13 @@ public class WebReviewActivity extends Activity {
 	}
 	
 	@Override
+	public void onNewIntent (Intent intent)
+	{
+		super.onNewIntent (intent);
+	    wv.loadUrl (intent.getData ().toString ());
+	}
+
+	@Override
 	protected void onResume ()
 	{
 		Window window;
