@@ -671,8 +671,13 @@ public class WebReviewActivity extends Activity {
 	@Override
 	public void onNewIntent (Intent intent)
 	{
+		String curl, nurl;
+		
 		super.onNewIntent (intent);
-	    wv.loadUrl (intent.getData ().toString ());
+		curl = wv.getOriginalUrl ();
+		nurl = intent.getData ().toString ();
+		if (curl == null || !curl.equals (nurl))		
+			wv.loadUrl (nurl);
 	}
 
 	@Override
