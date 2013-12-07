@@ -75,6 +75,10 @@ public class SettingsActivity
 	private static final String KEY_PREF_REVIEW_ORDER = "pref_review_order";
 	/** Lesson Order */
 	private static final String KEY_PREF_LESSON_ORDER = "pref_lesson_order";
+	/** Frame placer */
+	private static final String KEY_PREF_EXTERNAL_FRAME_PLACER = "pref_external_frame_placer";
+	/** Frame placer dictionary */
+	private static final String KEY_PREF_EXTERNAL_FRAME_PLACER_DICT = "pref_external_frame_placer_dict";
 	/** Info popup */
 	private static final String KEY_PREF_ERROR_POPUP = "pref_error_popup";
 	/** Enable 42+ mode. Must match preferences.xml */
@@ -182,6 +186,7 @@ public class SettingsActivity
 		onSharedPreferenceChanged (prefs, KEY_PREF_REVIEW_IMPROVEMENTS);
 		onSharedPreferenceChanged (prefs, KEY_PREF_EXPORT_DEST);
 		onSharedPreferenceChanged (prefs, KEY_PREF_EXPORT_FILE);
+		onSharedPreferenceChanged (prefs, KEY_PREF_EXTERNAL_FRAME_PLACER);
 		inited = true;
 		
 		prefs.registerOnSharedPreferenceChangeListener (this);
@@ -253,6 +258,8 @@ public class SettingsActivity
 				setString (pref, KEY_PREF_EXPORT_FILE, DataExporter.getDefaultExportFile (this));
 		} else if (key.equals (KEY_PREF_REVIEW_IMPROVEMENTS))
 			runReviewImprovementsHooks (prefs);
+		else if (key.equals (KEY_PREF_EXTERNAL_FRAME_PLACER))
+			runExternalFramePlacerHooks (prefs);
 		 
 		updateConfig (prefs);
 	}
@@ -345,6 +352,15 @@ public class SettingsActivity
 		
 		pref = findPreference (KEY_PREF_EXPORT_FILE);
 		pref.setEnabled (getExportDestination (prefs) == DataExporter.Destination.FILESYSTEM);
+	}
+
+	@SuppressWarnings ("deprecation")
+	private void runExternalFramePlacerHooks (SharedPreferences prefs)
+	{
+		Preference pref;
+		
+		pref = findPreference (KEY_PREF_EXTERNAL_FRAME_PLACER_DICT);
+		pref.setEnabled (getExternalFramePlacer (prefs));
 	}
 
 	public static SharedPreferences prefs (Context ctxt)
@@ -479,6 +495,31 @@ public class SettingsActivity
 	{
 		return prefs (ctxt).getBoolean (KEY_PREF_DISABLE_SUGGESTIONS, true);
 	}
+
+	public static boolean getExternalFramePlacer (Context ctxt)
+	{
+		return getExternalFramePlacer (prefs (ctxt));
+	}
+	
+	public static boolean getExternalFramePlacer (SharedPreferences prefs)
+	{
+		return prefs.getBoolean (KEY_PREF_EXTERNAL_FRAME_PLACER, false);
+	}
+
+	public static ExternalFramePlacer.Dictionary getExternalFramePlacerDictionary (Context ctxt)
+	{
+		ExternalFramePlacer.Dictionary dict;
+		String tag;
+		
+		tag = prefs (ctxt).getString (KEY_PREF_EXTERNAL_FRAME_PLACER_DICT, 
+									  ExternalFramePlacer.Dictionary.JISHO.name ());
+
+		dict = ExternalFramePlacer.Dictionary.valueOf (tag);
+		if (dict == null)
+			dict = ExternalFramePlacer.Dictionary.JISHO;
+		
+		return dict;
+	}	
 
 	public static boolean getErrorPopup (Context ctxt)
 	{

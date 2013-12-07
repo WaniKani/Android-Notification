@@ -201,10 +201,17 @@ public class WebReviewActivity extends Activity {
 		@Override  
 	    public void onPageFinished (WebView view, String url)  
 	    {  
+			ExternalFramePlacer.Dictionary dict;
+			
 			bar.setVisibility (View.GONE);
 
-			if (url.startsWith ("http"))
-				wv.js (JS_INIT_KBD);			
+			if (url.startsWith ("http")) {
+				wv.js (JS_INIT_KBD);
+				if (SettingsActivity.getExternalFramePlacer (WebReviewActivity.this)) {
+					dict = SettingsActivity.getExternalFramePlacerDictionary (WebReviewActivity.this);
+					ExternalFramePlacer.run (wv, dict);
+				}
+			}
 	    }
 	}
 	
