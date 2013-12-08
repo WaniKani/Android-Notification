@@ -1,8 +1,10 @@
 package com.wanikani.androidnotifier.db;
 
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Map;
+import java.util.Set;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -11,11 +13,13 @@ import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
+import android.net.UrlQuerySanitizer.ValueSanitizer;
 
 import com.wanikani.wklib.Item;
 import com.wanikani.wklib.Kanji;
 import com.wanikani.wklib.Radical;
 import com.wanikani.wklib.SRSDistribution;
+import com.wanikani.wklib.SRSDistribution.Level;
 import com.wanikani.wklib.UserInformation;
 import com.wanikani.wklib.Vocabulary;
 
@@ -303,6 +307,18 @@ public class HistoryDatabase {
 		private static final String WHERE_DAY_IS =
 				C_DAY + " = ?";
 		
+		/** Where condition, selecting the record of a specific day, 
+		 *  and the existing line is missing 
+		 */
+		private static final String WHERE_DAY_IS_AND_MISSING = 
+				WHERE_DAY_IS + " AND " + C_UNLOCKED_RADICALS + " IS NULL";
+		
+		/** Where condition, selecting the record of a specific day, 
+		 *  and the existing line is not complete 
+		 */
+		private static final String WHERE_DAY_IS_AND_INCOMPLETE = 
+				WHERE_DAY_IS + " AND " + C_GURU_RADICALS + " IS NULL";
+
 		/**
 		 * Creates the table
 		 * @param db the database
@@ -453,6 +469,67 @@ public class HistoryDatabase {
 			}
 		}
 
+		public static int importDay (SQLiteDatabase db, int day, SRSDistribution srs, FactType type)
+		{
+			ContentValues cv;
+			String where, args [];
+			
+			args = new String [] { Integer.toString (day) };
+			
+			cv = new ContentValues ();
+			switch (type) {
+			case MISSING:
+				return 0;
+				
+			case PARTIAL:
+				cv.put (C_UNLOCKED_RADICALS, srs.apprentice.radicals);
+				cv.put (C_UNLOCKED_KANJI, srs.apprentice.kanji);
+				cv.put (C_UNLOCKED_VOCAB, srs.apprentice.vocabulary);
+
+				cv.put (C_BURNED_RADICALS, srs.burned.radicals);
+				cv.put (C_BURNED_KANJI, srs.burned.kanji);
+				cv.put (C_BURNED_VOCAB, srs.burned.vocabulary);
+				
+				where = WHERE_DAY_IS_AND_MISSING;
+				break;
+				
+			case COMPLETE:
+				cv.put (C_GURU_RADICALS, srs.guru.radicals);
+				cv.put (C_GURU_KANJI, srs.guru.kanji);
+				cv.put (C_GURU_VOCAB, srs.guru.vocabulary);
+
+				cv.put (C_MASTER_RADICALS, srs.master.radicals);
+				cv.put (C_MASTER_KANJI, srs.master.kanji);
+				cv.put (C_MASTER_VOCAB, srs.master.vocabulary);
+				
+				cv.put (C_ENLIGHTEN_RADICALS, srs.enlighten.radicals);
+				cv.put (C_ENLIGHTEN_KANJI, srs.enlighten.kanji);
+				cv.put (C_ENLIGHTEN_VOCAB, srs.enlighten.vocabulary);
+				
+				cv.put (C_UNLOCKED_RADICALS, 
+						srs.apprentice.radicals + srs.guru.radicals + 
+						srs.master.radicals + srs.enlighten.radicals);
+				cv.put (C_UNLOCKED_KANJI,
+						srs.apprentice.kanji + srs.guru.kanji +
+						srs.master.kanji + srs.enlighten.kanji);
+				cv.put (C_UNLOCKED_VOCAB,
+						srs.apprentice.vocabulary + srs.guru.vocabulary +
+						srs.master.vocabulary + srs.enlighten.vocabulary);
+
+				cv.put (C_BURNED_RADICALS, srs.burned.radicals);
+				cv.put (C_BURNED_KANJI, srs.burned.kanji);
+				cv.put (C_BURNED_VOCAB, srs.burned.vocabulary);				
+
+				where = WHERE_DAY_IS_AND_INCOMPLETE;
+				break;
+				
+			default:
+				return 0;
+			}
+			
+			return db.update (TABLE, cv, where, args);
+		}
+		
 		/**
 		 * Returns a cursor referring to the whole db.
 		 * @param db the sql database
@@ -1009,7 +1086,14 @@ public class HistoryDatabase {
 				"UPDATE " + TABLE + 
 					" SET " + C_VACATION + " = " + C_VACATION + " + ? " +
 					" WHERE " + C_LEVEL + " = ?";
-
+		
+		/** Find all the levels reached when WKM wasn't collecting */
+		private static final String SQL_RECONSTRUCT_LEVELS =
+				"SELECT " + TABLE + "." + C_LEVEL +
+				" FROM " + TABLE + ", " + Facts.TABLE + 
+				" WHERE " + TABLE + "." + C_DAY + " = " + Facts.TABLE + "." + Facts.C_DAY + 
+				"  AND  " + Facts.TABLE + "." + Facts.C_GURU_RADICALS + " IS NULL";
+ 
 		/**
 		 * Creates the table
 		 * @param db the database
@@ -1172,6 +1256,34 @@ public class HistoryDatabase {
 			db.execSQL (SQL_ADD_VACATION, args);
 		}
 		
+		/**
+		 * Returns the set of levels that were reconstructed.
+		 * This is done by looking for all the levelups that happen on a day
+		 * where the facts table is incomplete
+		 * @param db the database 
+		 */
+		public static Set<Integer> getReconstructedLevels (SQLiteDatabase db)
+			throws SQLException
+		{
+			Set<Integer> ans;
+			Cursor c;
+			
+			ans = new HashSet<Integer> ();					
+			
+			c = null;
+			try {
+				c = db.rawQuery (SQL_RECONSTRUCT_LEVELS, new String [0]);
+				while (c.moveToNext ())
+					ans.add (c.getInt (0));
+			} finally {
+				if (c != null)
+					c.close ();
+			}
+					
+			return ans;
+			
+		}
+		
 	}
 	
 	/**
@@ -1215,7 +1327,7 @@ public class HistoryDatabase {
 	private OpenHelper helper;
 	
 	/** The database */
-	private SQLiteDatabase db;
+	SQLiteDatabase db;
 	
 	/** Synchronization */
 	public static final Object MUTEX = new Object ();
@@ -1422,7 +1534,7 @@ public class HistoryDatabase {
 	}
 	
 	/**
-	 * Updates the leveup table. To be done only when a serious inconsistency
+	 * Updates the levelup table. To be done only when a serious inconsistency
 	 * has been detected
 	 * @param level the level
 	 * @param daty the day
@@ -1452,5 +1564,5 @@ public class HistoryDatabase {
 				hdb.close ();
 			}
 		}
-	}
+	}		
 }

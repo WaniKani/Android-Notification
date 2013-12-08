@@ -615,5 +615,10 @@ public class DashboardFragment extends Fragment implements Tab {
 	{
 		return c == Contents.DASHBOARD;
 	}
-
+	
+	@Override
+	public void flushDatabase ()
+	{
+		/* empty */
+	}
 }

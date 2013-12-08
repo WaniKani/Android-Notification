@@ -1897,4 +1897,10 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 	{
 		return MeterSpec.T.ITEMS.get (main);
 	}
+	
+	@Override
+	public void flushDatabase ()
+	{
+		/* empty */
+	}	
 }

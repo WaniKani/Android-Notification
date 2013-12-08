@@ -10,4 +10,6 @@
           android:showAsAction="ifRoom|withText" android:icon="@drawable/ic_menu_change_font"/>
     <item android:id="@+id/em_export" android:title="@string/em_export" 
           android:showAsAction="ifRoom|withText" android:icon="@drawable/ic_menu_save"/>
+    <item android:id="@+id/em_import" android:title="@string/em_import" 
+          android:showAsAction="ifRoom|withText" android:icon="@drawable/ic_menu_restore"/>
 </menu>

@@ -97,4 +97,9 @@ public interface Tab {
 	  * @return <tt>true</tt> if it does
 	  */
 	 public boolean contains (Contents c);
+	 
+	 /**
+	  * Tells this tab that the facts table is changed
+	  */
+	 public void flushDatabase ();
 }

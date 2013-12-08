@@ -1,5 +1,6 @@
 package com.wanikani.androidnotifier.db;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 
@@ -30,7 +31,18 @@ import android.database.SQLException;
  */
 public interface Format {
 	
+	public static class ImportResult {
+		
+		public int read;
+		
+		public int updated;
+		
+	}
+	
 	public void export (OutputStream os)
+		throws IOException, SQLException;
+	
+	public ImportResult importFile (File file)
 		throws IOException, SQLException;
 	
 	public String getType ();
