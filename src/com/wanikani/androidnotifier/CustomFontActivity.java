@@ -243,8 +243,7 @@ public class CustomFontActivity extends Activity {
 			
 			if (view == button) {
 				dview = showDialog (titleid, locid, this);
-				namevw = ((TextView) dview.findViewById (R.id.fd_name));
-				locvw = ((TextView) dview.findViewById (R.id.fd_location));
+				dialogShown (dview);
 				return;				
 			} 
 			
@@ -257,6 +256,12 @@ public class CustomFontActivity extends Activity {
 				dialog.dismiss ();				
 				doImport (name, loc);
 			}
+		}
+		
+		protected void dialogShown (View dview)
+		{
+			namevw = ((TextView) dview.findViewById (R.id.fd_name));
+			locvw = ((TextView) dview.findViewById (R.id.fd_location));			
 		}
 		
 		protected boolean validate (String name, String loc)
@@ -274,6 +279,11 @@ public class CustomFontActivity extends Activity {
 			return true;
 		}
 		
+		public boolean handle (Uri uri)
+		{
+			return false;
+		}
+		
 		protected abstract void doImport (String name, String loc);
 	}
 	
@@ -281,7 +291,15 @@ public class CustomFontActivity extends Activity {
 			
 		public FontImportListener (Button button)
 		{
-			super (button, R.string.tag_cf_import, R.string.tag_cf_path);
+			super (button, R.string.tag_cf_import, R.string.tag_cf_path);						
+		}
+
+		@Override
+		protected void dialogShown (View dview)
+		{
+			super.dialogShown (dview);
+			
+			dview.findViewById (R.id.fd_hint).setVisibility (View.VISIBLE);
 		}
 
 		@Override
@@ -305,6 +323,21 @@ public class CustomFontActivity extends Activity {
 			
 			importFile (fe, false);		
 		}
+		
+		@Override
+		public boolean handle (Uri uri)
+		{
+			if (super.handle (uri))
+				return true;
+			
+			if (uri.getScheme ().equals ("file")) {
+				onClick (button);
+				locvw.setText (uri.getPath ());				
+				return true;
+			}				
+			
+			return false;
+		}		
 	}
 	
 	class FontDownloadListener extends ImportDialog {
@@ -338,6 +371,21 @@ public class CustomFontActivity extends Activity {
 			
 			download (fe);
 		}
+		
+		@Override
+		public boolean handle (Uri uri)
+		{
+			if (super.handle (uri))
+				return true;
+			
+			if (uri.getScheme ().equals ("http") || uri.getScheme ().equals ("https")) {
+				onClick (button);
+				locvw.setText (uri.toString ());				
+				return true;
+			}				
+			
+			return false;
+		}				
 	}
 
 	public class CancelListener implements DialogInterface.OnClickListener {
@@ -393,6 +441,27 @@ public class CustomFontActivity extends Activity {
 		btn.setOnClickListener (idial);
 		
 		cleanup ();
+		
+		checkIntent ();
+	}
+	
+	protected void checkIntent ()
+	{
+		String action;
+		Intent intent;
+		Uri uri;
+		
+		intent = getIntent ();
+		
+		action = intent.getAction ();
+		if (action.equals (Intent.ACTION_VIEW) ||
+		    action.equals (Intent.ACTION_EDIT)) {
+			
+			uri = intent.getData ();
+			for (ImportDialog idial : idials)
+				if (idial.handle (uri))
+					break;
+		}		
 	}
 
 	@Override

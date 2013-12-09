@@ -36,19 +36,28 @@
   				<action android:name="android.intent.action.VIEW" />
   				<action android:name="android.intent.action.EDIT" />
   				<category android:name="android.intent.category.DEFAULT" />
-  				<category android:name="android.intent.category.BROWSABLE" />
-  				<data
-    				android:mimeType="*/*"
-    				android:host="*" 
-    				android:pathPattern=".*\\.csv"
-  				/>
-			</intent-filter>
-        </activity>
+	  			<data android:scheme="file" />
+  				<data android:host="*" />
+  				<data android:pathPattern=".*\\.csv"/>
+			    <data android:mimeType="*/*" />
+  			</intent-filter>
+ 		</activity>
         <activity android:name="SettingsActivity" />
         <activity android:name="MetersActivity" />
         <activity android:name="OtherStatsActivity" 
             	  android:configChanges="orientation|keyboardHidden|screenSize"/>
-        <activity android:name="CustomFontActivity"/>
+        
+        <activity android:name="CustomFontActivity">
+			<intent-filter>
+  				<action android:name="android.intent.action.VIEW" />
+  				<action android:name="android.intent.action.EDIT" />
+  				<category android:name="android.intent.category.DEFAULT" />  				
+	  			<data android:scheme="file" />
+  				<data android:host="*" />
+  				<data android:pathPattern=".*\\.ttf"/>
+			    <data android:mimeType="*/*" />
+  			</intent-filter>
+        </activity>
         
         <activity android:name="WebReviewActivity"
             	  android:windowSoftInputMode="adjustPan"

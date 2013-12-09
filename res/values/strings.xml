@@ -344,6 +344,9 @@
     <string name="tag_cant_read">File can\'t be opened</string>
     <string name="tag_empty_file">File can\'t be empty</string>
     <string name="tag_invalid_font">Can\'t open this font file</string>
+    <string name="tag_font_hint">Hint: you can also open a font (TTF) file from a 
+        	file manager. If you select the	WaniKani Mobile app, you won\'t have to enter the 
+        	path manually</string>
     
     <string name="id_title">Import DB</string>
     <string name="id_description">
