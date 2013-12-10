@@ -502,7 +502,7 @@ public class LocalIMEKeyboard implements Keyboard {
 				name = kanji;
 			} else if (vocab != null) {
 				type = Item.Type.VOCABULARY;
-				name = vocab;
+				name = vocab.replace ('〜', '~');
 			} else {
 				type = null;
 				name = null;
