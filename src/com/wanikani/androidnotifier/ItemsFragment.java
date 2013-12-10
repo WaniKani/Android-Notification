@@ -526,6 +526,9 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 				meaning.setText ("");
 			
 			icl.setURL (item.getURL ());
+
+			if (jtf != null)
+				glyphText.setTypeface (jtf);						
 		}
 	}
 	
@@ -787,8 +790,6 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 		 */
 		private void invalidate ()
 		{		
-			if (fbox != null)
-				jtf = fbox.nextFont ();
 			filteredItems = isd != null ? isd.filter (allItems) : allItems;  
 			Collections.sort (filteredItems, cmp);
 			notifyDataSetChanged ();
@@ -1553,6 +1554,9 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 		if (sfilter != currentFilter)
 			return;
 
+		if (fbox != null)
+			jtf = fbox.nextFont ();
+
 		iad.clear ();
 		iad.addAll (list);
 		iad.notifyDataSetChanged ();
@@ -1582,6 +1586,9 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 	{
 		if (sfilter != currentFilter)
 			return;
+
+		if (fbox != null)
+			jtf = fbox.nextFont ();
 
 		iad.clear ();
 		iad.notifyDataSetChanged ();
@@ -1890,4 +1897,10 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 	{
 		return MeterSpec.T.ITEMS.get (main);
 	}
+	
+	@Override
+	public void flushDatabase ()
+	{
+		/* empty */
+	}	
 }

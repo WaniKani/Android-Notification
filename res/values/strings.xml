@@ -43,6 +43,13 @@
     <string name="pref_lesson_order">Lesson Order</string>
     <string name="pref_lesson_order_descr">Teach radicals and kanji first. Port of
         		\@Alucardeck\'s WKLO script</string>
+    <string name="pref_external_frame_placer">External frame placer</string>
+    <string name="pref_external_frame_placer_descr">
+        		Enable \@jeshuamorrissey\'s script, showing an external dictionary page
+        		in the lessons module (requires a large screen)</string>
+    <string name="pref_external_frame_placer_dict">External frame placer dictionary</string>
+    <string name="pref_external_frame_placer_dict_descr">
+        		Select dictionary to use when displaying definitions in the lessons module</string>
     <string name="pref_url">Review URL</string>
     <string name="pref_url_desc">Wanikani review URL</string>
     <string name="pref_lesson_url">Lessons URL</string>
@@ -96,6 +103,7 @@
     <string name="em_settings">Settings</string>
     <string name="em_dashboard">Dashboard</string>
     <string name="em_export">Export</string>
+    <string name="em_import">Import</string>
     <string name="em_ignore">Ignore</string>
     <string name="em_fonts">JP fonts</string>
     <string name="em_meters">Meters</string>
@@ -334,6 +342,23 @@
     <string name="tag_bad_url">Bad URL</string>
     <string name="tag_empty_name">Name can\'t be empty</string>
     <string name="tag_cant_read">File can\'t be opened</string>
+    <string name="tag_empty_file">File can\'t be empty</string>
     <string name="tag_invalid_font">Can\'t open this font file</string>
+    <string name="tag_font_hint">Hint: you can also open a font (TTF) file from a 
+        	file manager. If you select the	WaniKani Mobile app, you won\'t have to enter the 
+        	path manually</string>
+    
+    <string name="id_title">Import DB</string>
+    <string name="id_description">
+        	This tool imports the historical database from a file created by the export menu item
+        	(usually it is called wkexport.csv). 
+        	It won\'t touch existing data, but it can be used to fill the \"gray\" areas when data
+        	has been reconstructed or is missing.\nHint: you can also open the export file from a 
+        	file manager. If you select the	WaniKani Mobile app, you won\'t have to enter the 
+        	path manually</string>
+    <string name="id_location_tag">Import database dump from</string>
+    <string name="id_import">Import</string>
+    <string name="id_import_failed">Import failed: %s</string>
+    <string name="id_import_ok">Import succeeded: %1$d entries parsed, %2$d imported</string>
     
 </resources>

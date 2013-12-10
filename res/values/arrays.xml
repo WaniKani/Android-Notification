@@ -24,5 +24,20 @@
 	    <item name="SINCE_LAST_RESET">Amount since last reset</item>
 	    <item name="AVG_DAY">Daily average</item>
 	    <item name="AVG_MONTH">Monthly average</item>
-	</string-array>    
+	</string-array> 
+	
+	
+	<string-array name="dictionaryURL">
+	    <item name="JISHO">Jisho.org</item>
+	    <item name="TANGORIN">tangorin.com</item>
+	    <item name="EJJE">ejje.weblio.jp</item>
+	    <item name="JISHO_BETA">beta.jisho.org</item>
+	</string-array>
+	<string-array name="dictionaryURLValues">
+	    <item name="JISHO">JISHO</item>
+	    <item name="TANGORIN">TANGORIN</item>
+	    <item name="EJJE">EJJE</item>
+	    <item name="JISHO_BETA">JISHO_BETA</item>
+	</string-array>
+	
 </resources>

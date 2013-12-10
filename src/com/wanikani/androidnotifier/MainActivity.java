@@ -6,11 +6,8 @@ import java.io.OutputStream;
 import java.util.List;
 import java.util.Vector;
 
-import android.app.AlertDialog;
-import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageInfo;
@@ -149,6 +146,12 @@ public class MainActivity extends FragmentActivity implements Runnable {
 				 tab.refreshComplete (dd);
 		 }
 		 
+		 public void flushDatabase ()
+		 {
+			 for (Tab tab : tabs)
+				 tab.flushDatabase ();
+		 }
+		 
 		 /**
 		  * Broadcasts the flush request, to clear all the tabs' caches 
 		  * @see Tab#flush()
@@ -205,6 +208,7 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	 * 	<li>@link {@link SettingsActivity#ACT_NOTIFY}: Enable the notification
 	 * 			flag
 	 * 	<li>@link {@link #ACTION_REFRESH}: force a refresh onto the dashboard.
+	 *  <li>@link {@link #ACTION_CLEAR}: force a complete refresh (including stats)
 	 * </ul>
 	 * All the events that cause a refresh of dashboard data, will also
 	 * trigger a cache flush.
@@ -245,7 +249,8 @@ public class MainActivity extends FragmentActivity implements Runnable {
 				rtype = i.getBooleanExtra (E_FLUSH_CACHES, true) ? 
 						Tab.RefreshType.FULL : Tab.RefreshType.MEDIUM;
 				refresh (rtype);
-			}
+			} else if (action.equals (ACTION_CLEAR))
+				flushDatabase ();
 		}
 		
 	}
@@ -431,6 +436,16 @@ public class MainActivity extends FragmentActivity implements Runnable {
 			if (dd != null)
 				refreshComplete (dd, false);
 		}		
+
+		@Override
+		public void importFile ()
+		{
+			Intent intent;
+			
+			intent = new Intent (MainActivity.this, ImportActivity.class);
+			intent.setAction (Intent.ACTION_DEFAULT);
+			startActivity (intent);
+		}
 	}
 	
 	private class DBFixupListener implements DatabaseFixup.Listener {
@@ -545,6 +560,10 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	 */
 	public static final String ACTION_REFRESH = PREFIX + "REFRESH";
 	
+	/** An action that should be invoked when the history DB is changed
+	 */
+	public static final String ACTION_CLEAR = PREFIX + "CLEAR";
+
 	/**
 	 * Extra parameter to {@link #ACTION_REFRESH}, to tell if caches should be flushed 
 	 * or not.
@@ -814,6 +833,7 @@ public class MainActivity extends FragmentActivity implements Runnable {
 		filter = new IntentFilter (SettingsActivity.ACT_CREDENTIALS);
 		filter.addAction (SettingsActivity.ACT_NOTIFY);
 		filter.addAction (ACTION_REFRESH);
+		filter.addAction (ACTION_CLEAR);
 		lbm.registerReceiver (receiver, filter);
 		
 		filter = new IntentFilter (ACTION_REFRESH);
@@ -1317,5 +1337,10 @@ public class MainActivity extends FragmentActivity implements Runnable {
 		
 		if (statsf != null && statsf.isResumed ())
 			statsf.setFixup (dbfixup);
+	}
+	
+	private void flushDatabase ()
+	{
+		pad.flushDatabase ();
 	}
 }

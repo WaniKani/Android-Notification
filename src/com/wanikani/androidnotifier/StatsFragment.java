@@ -1108,7 +1108,7 @@ public class StatsFragment extends Fragment implements Tab {
 	{
 		this.cs = cs;
 		
-		if (!isDetached ()) {
+		if (getActivity () != null) {
 			srsds.setCoreStats (cs);
 			kanjids.setCoreStats (cs);
 			vocabds.setCoreStats (cs);
@@ -1618,9 +1618,7 @@ public class StatsFragment extends Fragment implements Tab {
 	{
 		if (this.rlist == rlist) {
 			
-			hdbc.flush ();
-			
-			setCoreStats (cs);
+			flushDatabase ();
 			
 			rlist = null;
 		}
@@ -1641,4 +1639,12 @@ public class StatsFragment extends Fragment implements Tab {
 	{
 		return c == Contents.STATS;
 	}
+	
+	@Override
+	public void flushDatabase ()
+	{
+		hdbc.flush ();		
+		setCoreStats (cs);
+	}
+	
 }

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"    
+    android:padding="@dimen/m_half_gap">
+    <TextView
+        android:id="@+id/id_location_tag"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/id_location_tag"
+        android:textAppearance="?android:attr/textAppearanceMedium"/>
+    
+    <EditText
+        android:id="@+id/id_location"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="textUri"/>
+    
+    <TextView
+        android:id="@+id/id_message"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:visibility="gone"/>
+    
+    <TextView
+        android:id="@+id/id_description"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/id_description"
+        android:textAppearance="?android:attr/textAppearanceSmall" />
+    
+    <Button
+        android:id="@+id/id_import"
+    	android:layout_width="wrap_content"
+    	android:layout_height="wrap_content"
+    	android:layout_gravity="center_horizontal"
+    	android:text="@string/id_import"/>
+</LinearLayout>

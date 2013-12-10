@@ -83,5 +83,11 @@ public class DashboardStatsFragment extends TabsFragment {
 			super.spin (enable);
 	}
 
+	@Override
+	public void flushDatabase ()
+	{
+		for (Tab t : fragments)
+			t.flushDatabase ();
+	}
 	
 }

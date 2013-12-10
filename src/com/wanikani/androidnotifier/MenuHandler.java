@@ -86,6 +86,14 @@ public class MenuHandler {
 		}
 		
 		/**
+		 * Import item called
+		 */
+		public void importFile ()
+		{
+			/* empty */
+		}
+		
+		/**
 		 * Toggle override fonts
 		 */
 		public void fonts ()
@@ -194,6 +202,10 @@ public class MenuHandler {
 			
 		case R.id.em_export:
 			listener.export ();
+			break;
+			
+		case R.id.em_import:
+			listener.importFile ();
 			break;
 			
 		case R.id.em_fonts:
