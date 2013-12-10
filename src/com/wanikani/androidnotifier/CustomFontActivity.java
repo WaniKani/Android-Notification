@@ -454,6 +454,9 @@ public class CustomFontActivity extends Activity {
 		intent = getIntent ();
 		
 		action = intent.getAction ();
+		if (action == null)
+			return;
+		
 		if (action.equals (Intent.ACTION_VIEW) ||
 		    action.equals (Intent.ACTION_EDIT)) {
 			
