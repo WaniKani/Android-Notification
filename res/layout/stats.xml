@@ -32,7 +32,7 @@
                 android:layout_height="match_parent"
                 android:text="@string/ct_eta"
                 android:visibility="gone" />
-
+            
             <LinearLayout
                 android:id="@+id/ctab_eta"
                 style="@style/Table"
@@ -105,6 +105,23 @@
                 </LinearLayout>
             </LinearLayout>
 
+            <com.wanikani.androidnotifier.graph.HistogramChart
+                android:id="@+id/hi_levels"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                custom:ticks="0"
+                custom:title="@string/ct_levels" />            
+
+            <TextView 
+                style="@style/statsTitle"
+                android:layout_gravity="center_horizontal"
+                android:text="@string/tag_all_items"/>
+            
+            <LinearLayout 
+                style="@style/LTable"
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
             <com.wanikani.androidnotifier.graph.PieChart
                 android:id="@+id/pc_srs"
                 android:layout_width="match_parent"
@@ -115,39 +132,32 @@
                 android:id="@+id/ty_srs"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                custom:title="@string/ct_srs_distribution" />
-
-            <com.wanikani.androidnotifier.graph.HistogramChart
-                android:id="@+id/hi_levels"
+                custom:title="@string/ct_srs_history" />
+			</LinearLayout>
+            
+            <TextView 
+                style="@style/statsTitle"
+                android:layout_gravity="center_horizontal"
+                android:text="@string/tag_kanji"/>
+            
+            <LinearLayout 
+                style="@style/LTable"
+                android:orientation="vertical"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                custom:ticks="0"
-                custom:title="@string/ct_levels" />
-
+                android:layout_height="wrap_content">
+            
             <com.wanikani.androidnotifier.graph.PieChart
                 android:id="@+id/pc_kanji"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                custom:title="@string/ct_kanji_progress" />
+                custom:title="@string/ct_srs_distribution" />
 
             <com.wanikani.androidnotifier.graph.TYChart
                 android:id="@+id/ty_kanji"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                custom:title="@string/ct_kanji_progress" />
-
-            <com.wanikani.androidnotifier.graph.PieChart
-                android:id="@+id/pc_vocab"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                custom:title="@string/ct_vocab_progress" />
-
-            <com.wanikani.androidnotifier.graph.TYChart
-                android:id="@+id/ty_vocab"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                custom:title="@string/ct_vocab_progress" />
-
+                custom:title="@string/ct_srs_history" />
+            
             <com.wanikani.androidnotifier.graph.ProgressChart
                 android:id="@+id/os_jlpt"
                 android:layout_width="match_parent"
@@ -166,6 +176,30 @@
                 android:layout_height="wrap_content"
                 custom:ticks="10"
                 custom:title="@string/os_kanji_levels" />
+            </LinearLayout>
+            
+            <TextView 
+                style="@style/statsTitle"
+                android:layout_gravity="center_horizontal"
+                android:text="@string/tag_vocab"/>
+            
+            <LinearLayout 
+                style="@style/LTable"
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+            
+            <com.wanikani.androidnotifier.graph.PieChart
+                android:id="@+id/pc_vocab"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                custom:title="@string/ct_srs_distribution" />
+
+            <com.wanikani.androidnotifier.graph.TYChart
+                android:id="@+id/ty_vocab"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                custom:title="@string/ct_srs_history" />
 
             <com.wanikani.androidnotifier.graph.HistogramChart
                 android:id="@+id/os_levels"
@@ -173,6 +207,7 @@
                 android:layout_height="wrap_content"
                 custom:ticks="10"
                 custom:title="@string/os_levels" />
+            </LinearLayout>
         </LinearLayout>
     </RelativeLayout>
 

@@ -65,6 +65,10 @@
 	    <item name="android:padding">@dimen/m_gap</item>
 	</style>
         
+    <style parent="Table" name="LTable">
+	    <item name="android:background">@drawable/ltable_background</item>
+	</style>
+    
     <style parent="AppTheme" name="Row">
         <item name="android:layout_height">@dimen/m_rythm</item>
         <item name="android:layout_margin">@dimen/m_half_gap</item>
@@ -274,6 +278,13 @@
         <item name="android:padding">@dimen/m_gap</item>                
 	</style>
 	
+    <style name="statsTitle" parent ="AppTheme">
+        <item name="android:textAppearance">?android:attr/textAppearanceLarge</item>
+        <item name="android:textStyle">italic</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:gravity">top|center</item>
+    </style>
     <style name="ChartTitle" parent ="AppTheme">
         <item name="android:textAppearance">?android:attr/textAppearanceLarge</item>
         <item name="android:layout_width">match_parent</item>

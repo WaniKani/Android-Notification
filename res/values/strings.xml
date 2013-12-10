@@ -210,6 +210,10 @@
     <string name="tag_other_stats">Other&#8230;</string>
     <string name="tag_more_stats">More&#8230;</string>
     
+    <string name="tag_all_items">All Items</string>
+    <string name="tag_kanji">Kanji</string>
+    <string name="tag_vocab">Vocabulary</string>
+    
     <string name="os_levels">SRS by level</string>
     <string name="os_kanji_levels">Kanji SRS by level</string>
     
@@ -223,8 +227,7 @@
     <string name="fmt_eta_next_past">%s ago</string>    
     
     <string name="ct_srs_distribution">SRS Distribution</string>
-    <string name="ct_kanji_progress">Kanji Progress</string>
-    <string name="ct_vocab_progress">Vocab Progress</string>
+    <string name="ct_srs_history">SRS History</string>
     <string name="ct_levels">Levelup time</string>
     
     <string name="ct_jlpt_progress">JLPT Progress</string>
