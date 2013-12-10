@@ -3,6 +3,8 @@ package com.wanikani.androidnotifier;
 /*
  * I've basically copied here only the contents of unsafeWindow.WKO_ignoreAnswer, while the 
  * triggering is made by users of this class (only LocalIMEKeyboard, so far).
+ * Also, had to move the onItemUpdated() function outside of main(), to call it at startup.
+ * This is needed to make the frame appear on the first item. 
  * 		-- Alberto
  */
 public class ExternalFramePlacer {
@@ -220,12 +222,7 @@ public class ExternalFramePlacer {
 "      container.appendChild(iframeContainerDiv);\r\n" + 
 "    }\r\n" + 
 "  };\r\n" + 
-"  \r\n" + 
-"  function main() {\r\n" + 
-"    // If we are currently in a lesson...\r\n" + 
-"    var currentURL = window.location.href;\r\n" + 
-"    if (currentURL.indexOf('lesson/session') >= 0) {\r\n" + 
-"      $.jStorage.listenKeyChange(Utility.WK_CURRENT_ITEM_KEY, function(key) {\r\n" + 
+"  function onItemUpdated(key) {" +
 "        // Get the new value of the current item.\r\n" + 
 "        var newValue = $.jStorage.get(key);\r\n" + 
 "        \r\n" + 
@@ -247,7 +244,16 @@ public class ExternalFramePlacer {
 "          var container = document.querySelector(Utility.LESSON_INSERTION_POINT_FORMATS[i].format(japaneseType));\r\n" + 
 "          Utility.insertFrame(container, japanese, japaneseType);\r\n" + 
 "        }\r\n" + 
-"      });\r\n" + 
+"  }" +
+"  \r\n" + 
+"  function main() {\r\n" + 
+"    // If we are currently in a lesson...\r\n" + 
+"    var currentURL = window.location.href;\r\n" + 
+"    if (currentURL.indexOf('lesson/session') >= 0) {\r\n" +
+"      $.jStorage.listenKeyChange(Utility.WK_CURRENT_ITEM_KEY, onItemUpdated);\r\n" + 
+"      item = $.jStorage.get(Utility.WK_CURRENT_ITEM_KEY, null);\r\n" +
+"      if (item != null)\r\n" +
+"          onItemUpdated (Utility.WK_CURRENT_ITEM_KEY);\r\n" + 
 "    }\r\n" + 
 "    \r\n" + 
 "    // Otherwise, we must be one either the vocab or kanji page.\r\n" + 
