@@ -718,7 +718,7 @@ public class LocalIMEKeyboard implements Keyboard {
 			"  wknJSListener.timeout ($(\"#timeout\").is (\":visible\"));" +
 			"  window.wknNewQuestion ();" +
 			"} else if ($(\"#quiz\").is (\":visible\")) {" +
-			"  window.wknNewQuestion ();" +
+			"  window.wknNewQuiz ();" +
 			"  wknJSListener.showKeyboard ();" +
 			"  wknJSListener.timeout (" +
 			"        $(\"#screen-quiz-ready\").is (\":visible\") || " +
