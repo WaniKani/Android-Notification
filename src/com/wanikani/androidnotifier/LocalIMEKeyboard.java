@@ -9,6 +9,7 @@ import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.Typeface;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.text.Editable;
@@ -32,7 +33,6 @@ import android.widget.TextView.OnEditorActionListener;
 
 import com.wanikani.androidnotifier.db.FontDatabase;
 import com.wanikani.androidnotifier.db.FontDatabase.FontBox;
-import com.wanikani.androidnotifier.db.FontDatabase.WellKnownFont;
 import com.wanikani.wklib.Item;
 import com.wanikani.wklib.JapaneseIME;
 
@@ -502,7 +502,7 @@ public class LocalIMEKeyboard implements Keyboard {
 				name = kanji;
 			} else if (vocab != null) {
 				type = Item.Type.VOCABULARY;
-				name = vocab.replace ('〜', '~');
+				name = vocab;
 			} else {
 				type = null;
 				name = null;
@@ -1033,6 +1033,7 @@ public class LocalIMEKeyboard implements Keyboard {
 	protected void showQuestion (Item.Type type, String name, Rect rect, int size)
 	{
 		RelativeLayout.LayoutParams params;
+		Typeface jtf;
 
 		if (!overrideFont ())
 			return;
@@ -1050,8 +1051,9 @@ public class LocalIMEKeyboard implements Keyboard {
 			//qvw.setBackgroundColor (cmap.get (type));
 			qvw.setTextColor (Color.WHITE);
 			qvw.setText (name);
-			qvw.setTypeface (fbox != null ? fbox.nextFont () : null);
-			showQuestionPatch (true);
+			jtf = fbox != null ? fbox.nextFont () : null;
+			qvw.setTypeface (jtf);			
+			showQuestionPatch (jtf != null);
 		} else
 			showQuestionPatch (false);
 		
