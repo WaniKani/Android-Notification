@@ -351,10 +351,11 @@
     <string name="id_title">Import DB</string>
     <string name="id_description">
         	This tool imports the historical database from a file created by the export menu item
-        	(usually it is called wkexport.csv). 
-        	It won\'t touch existing data, but it can be used to fill the \"gray\" areas when data
-        	has been reconstructed or is missing.\nHint: you can also open the export file from a 
-        	file manager. If you select the	WaniKani Mobile app, you won\'t have to enter the 
+        	(usually it is called wkexport.csv). It can be useful e.g. when changing your phone.
+        	It won\'t touch existing data, but it can fill the \"gray\" areas when data
+        	has been reconstructed or is missing. Before doing this, however, it is a good idea
+        	exporting your current DB in case something goes wrong.\nHint: you can also open the export 
+        	file from a	file manager. If you select the	WaniKani Mobile app, you won\'t have to enter the 
         	path manually</string>
     <string name="id_location_tag">Import database dump from</string>
     <string name="id_import">Import</string>
