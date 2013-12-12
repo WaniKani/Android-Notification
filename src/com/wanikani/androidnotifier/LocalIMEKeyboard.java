@@ -3,7 +3,6 @@ package com.wanikani.androidnotifier;
 import java.util.EnumMap;
 
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.Color;
@@ -13,7 +12,9 @@ import android.graphics.Typeface;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.text.Editable;
+import android.text.InputFilter;
 import android.text.InputType;
+import android.text.Spanned;
 import android.text.TextWatcher;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
@@ -63,18 +64,26 @@ import com.wanikani.wklib.JapaneseIME;
  */
 public class LocalIMEKeyboard implements Keyboard {
 
-	/**
-	 * The listener attached to the welcome message.
-	 * When the user taps the ok button, we write on the property
-	 * that it has been acknowleged, so it won't show up any more. 
-	 */
-	private class OkListener implements DialogInterface.OnClickListener {
+	private class Filter implements InputFilter {
+		
+		private static final String BANNED_CHARS = ",./;[]\\`\"=+";
 		
 		@Override
-		public void onClick (DialogInterface ifc, int which)
+		public CharSequence filter (CharSequence source, int start, int end, Spanned dest, int dstart, int dend) 
 		{
-			SettingsActivity.setCustomIMEMessage (wav, true);
-		}		
+			StringBuffer sb;
+			char c;
+			int i;
+			
+			sb = new StringBuffer ();
+			for (i = start; i < end; i++) {
+				c = source.charAt (i);
+				if (BANNED_CHARS.indexOf (c) < 0)
+					sb.append (c);
+			}
+			
+			return sb.toString ();
+	     } 	
 	}
 
 	/**
@@ -875,6 +884,7 @@ public class LocalIMEKeyboard implements Keyboard {
 		divw = wav.findViewById (R.id.ime_div);
 		imel = new IMEListener ();		
 		ew.addTextChangedListener (imel);
+		ew.setFilters (new InputFilter [] { new Filter () });
 		ew.setInputType (InputType.TYPE_CLASS_TEXT);
 		ew.setOnEditorActionListener (imel);
 		ew.setGravity (Gravity.CENTER);
