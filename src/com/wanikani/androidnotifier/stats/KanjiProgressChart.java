@@ -36,6 +36,8 @@ public class KanjiProgressChart implements NetworkEngine.Chart {
 	
 	boolean dataAvailable;
 	
+	boolean error;
+	
 	IconizableChart.DataSource ds;
 	
 	int id;
@@ -109,11 +111,13 @@ public class KanjiProgressChart implements NetworkEngine.Chart {
 		/* empty */
 	}
 	
-	public void update (EnumSet<Item.Type> types)
+	public void update (EnumSet<Item.Type> types, boolean ok)
 	{
-		dataAvailable |= types.contains (Item.Type.KANJI);
-		
-		updatePlot ();		
+		if (ok) {
+			dataAvailable |= types.contains (Item.Type.KANJI);		
+			updatePlot ();
+		} else if (types.contains (Item.Type.KANJI))
+			error ();
 	}
 
 	public void newRadical (ItemLibrary<Radical> radicals)
@@ -143,13 +147,26 @@ public class KanjiProgressChart implements NetworkEngine.Chart {
 	{
 		List<ProgressPlot.DataSet> l;
 
-		if (dataAvailable && plot != null) {
+		if (error) {
+			error ();
+			return;
+		}
+			
+		
+		if (plot != null && dataAvailable) {
 			l = new Vector<ProgressPlot.DataSet> (slds.values ());
 			l.add (rds);
 		
-			if (plot != null)
-				plot.setData (l);				
+			plot.setData (l);		
 		}
+	}
+	
+	private void error ()
+	{
+		error = true;
+		
+		if (chart != null)
+			chart.setError ();
 	}
 	
 	public boolean scrolling ()

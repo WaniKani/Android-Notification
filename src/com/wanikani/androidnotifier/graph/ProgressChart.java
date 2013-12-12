@@ -116,7 +116,7 @@ public class ProgressChart extends IconizableChart {
 			
 			dataAvailable ();
 		}	
-
+		
 	}
 
 	TableLayout contents;

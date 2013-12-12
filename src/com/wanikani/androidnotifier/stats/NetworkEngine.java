@@ -27,7 +27,7 @@ public class NetworkEngine {
 		
 		public void startUpdate (int levels);
 		
-		public void update (EnumSet<Item.Type> types);
+		public void update (EnumSet<Item.Type> types, boolean ok);
 	
 		public void newRadical (ItemLibrary<Radical> radicals);
 
@@ -163,9 +163,8 @@ public class NetworkEngine {
 		@Override
 		protected void onPostExecute (Boolean ok)
 		{
-			if (ok)
-				for (Chart c : charts)
-					c.update (task.types);
+			for (Chart c : charts)
+				c.update (task.types, ok);
 			
 			completed (task, ok);
 		}
@@ -233,7 +232,9 @@ public class NetworkEngine {
 	private void completed (PendingTask task, boolean ok)
 	{
 		task.completed = true;
-		availableTypes.addAll (task.types);
+		if (ok)
+			availableTypes.addAll (task.types);
+		
 		tasks.remove (0);
 		runQueue ();
 	}

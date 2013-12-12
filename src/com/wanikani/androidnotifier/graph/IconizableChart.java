@@ -70,6 +70,11 @@ public abstract class IconizableChart extends LinearLayout {
 				return ICONIZED;
 			}
 			
+			public State evError ()
+			{
+				return ERROR_ICONIZED;
+			}
+			
 			public boolean spinning ()
 			{
 				return false;
@@ -103,6 +108,11 @@ public abstract class IconizableChart extends LinearLayout {
 				return ICONIZED;
 			}
 			
+			public State evError ()
+			{
+				return ERROR_ICONIZED;
+			}
+
 			public boolean spinning ()
 			{
 				return true;
@@ -136,6 +146,11 @@ public abstract class IconizableChart extends LinearLayout {
 				return OPEN;
 			}
 			
+			public State evError ()
+			{
+				return ERROR;
+			}
+
 			public boolean spinning ()
 			{
 				return true;
@@ -169,6 +184,11 @@ public abstract class IconizableChart extends LinearLayout {
 				return ICONIZED;
 			}
 			
+			public State evError ()
+			{
+				return ERROR_ICONIZED;
+			}
+
 			public boolean spinning ()
 			{
 				return false;
@@ -202,6 +222,11 @@ public abstract class IconizableChart extends LinearLayout {
 				return OPEN;
 			}
 			
+			public State evError ()
+			{
+				return ERROR;
+			}
+
 			public boolean spinning ()
 			{
 				return false;
@@ -218,6 +243,87 @@ public abstract class IconizableChart extends LinearLayout {
 			}						
 		},		
 		
+		ERROR  {
+
+			public State evRefresh ()
+			{
+				return REFRESHING;
+			}
+			
+			public State evToggle ()
+			{
+				return ERROR_ICONIZED;
+			}
+			
+			public State evDataAvailable ()
+			{
+				return OPEN;
+			}
+			
+			public State evError ()
+			{
+				return ERROR;
+			}
+
+			public boolean spinning ()
+			{
+				return false;
+			}
+
+			public boolean canClose ()
+			{
+				return true;
+			}
+			
+			public boolean isOpen ()
+			{
+				return false;
+			}				
+			
+			public boolean isError ()
+			{
+				return true;
+			}
+		},		
+
+		ERROR_ICONIZED  {
+
+			public State evRefresh ()
+			{
+				return ICONIZED_RETRIEVING;
+			}
+			
+			public State evToggle ()
+			{
+				return ERROR;
+			}
+			
+			public State evDataAvailable ()
+			{
+				return ICONIZED;
+			}
+			
+			public State evError ()
+			{
+				return ERROR_ICONIZED;
+			}
+
+			public boolean spinning ()
+			{
+				return false;
+			}
+
+			public boolean canClose ()
+			{
+				return false;
+			}
+			
+			public boolean isOpen ()
+			{
+				return false;
+			}						
+		},
+
 		REFRESHING  {
 
 			public State evRefresh ()
@@ -235,6 +341,11 @@ public abstract class IconizableChart extends LinearLayout {
 				return OPEN;
 			}
 			
+			public State evError ()
+			{
+				return ERROR;
+			}
+
 			public boolean spinning ()
 			{
 				return true;
@@ -257,11 +368,18 @@ public abstract class IconizableChart extends LinearLayout {
 		
 		public abstract State evDataAvailable ();
 		
+		public abstract State evError ();
+		
 		public abstract boolean spinning ();
 		
 		public abstract boolean canClose ();
 		
 		public abstract boolean isOpen ();
+		
+		public boolean isError ()
+		{
+			return false;
+		}
 		
 	}
 	
@@ -294,6 +412,9 @@ public abstract class IconizableChart extends LinearLayout {
 	/// Data source
 	DataSource dsource;
 	
+	/// Error panel
+	View errorPanel;
+	
 	/**
 	 * Constructor. It only shows the spinner and the title, until 
 	 * {@link #setData(List)} gets called.
@@ -317,6 +438,8 @@ public abstract class IconizableChart extends LinearLayout {
 		contents = findViewById (R.id.gt_contents);
 		icb = (ImageButton) findViewById (R.id.gt_button);
 		icb.setOnClickListener (new IconizeButtonListener ());
+		
+		errorPanel = findViewById (R.id.gt_error);
 		
 		res = getResources ();
 		openBmp = BitmapFactory.decodeResource (res, R.drawable.expander_open);
@@ -355,6 +478,7 @@ public abstract class IconizableChart extends LinearLayout {
 		
 		spinner.setVisibility (state.spinning () ? View.VISIBLE : View.GONE);
 		contents.setVisibility (state.isOpen () ? View.VISIBLE : View.GONE);
+		errorPanel.setVisibility (state.isError () ? View.VISIBLE : View.GONE);
 	}
 	
 	public void setOpen (boolean open)
@@ -396,6 +520,11 @@ public abstract class IconizableChart extends LinearLayout {
 	{
 		if (dsource != null)
 			dsource.loadData ();
-	}	
-
+	}
+	
+	public void setError ()
+	{
+		dataAvailable ();
+		setState (state.evError ());
+	}
 }

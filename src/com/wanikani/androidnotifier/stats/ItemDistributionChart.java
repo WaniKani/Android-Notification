@@ -48,6 +48,9 @@ public class ItemDistributionChart implements NetworkEngine.Chart {
 	/// Item types collected so far
 	private EnumSet<Item.Type> availableTypes;
 	
+	/// Got an error
+	private boolean error;
+	
 	/// The datasrouce
 	IconizableChart.DataSource ds;
 	
@@ -126,21 +129,35 @@ public class ItemDistributionChart implements NetworkEngine.Chart {
 			initBars (levels);
 	}
 
-	public void update (EnumSet<Item.Type> types)
+	public void update (EnumSet<Item.Type> types, boolean ok)
 	{
-		availableTypes.addAll (types);
-		
-		updatePlot ();
+		if (ok) {
+			availableTypes.addAll (types);		
+			updatePlot ();
+		} else
+			error ();
 	}
 	
 	private void updatePlot ()
 	{
+		if (error) {
+			error ();
+			return;
+		}
+		
 		for (Item.Type t : this.types)
 			if (!availableTypes.contains (t))
 				return;
 		
 		if (chart != null)
 			chart.setData (series, bars, -1);
+	}
+	
+	private void error ()
+	{
+		error = true;
+		if (chart != null)
+			chart.setError ();
 	}
 
 	private void initBars (int levels)
