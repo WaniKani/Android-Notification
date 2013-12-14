@@ -19,45 +19,26 @@ import com.wanikani.wklib.Vocabulary;
 
 public class NetworkEngine {
 
-	public static interface Chart {
-
-		public void bind (NetworkEngine netwe, MainActivity main, View view);
+	public static interface State {
 		
-		public void unbind ();
-		
-		public void startUpdate (int levels);
-		
-		public void update (EnumSet<Item.Type> types, boolean ok);
-	
 		public void newRadical (ItemLibrary<Radical> radicals);
 
 		public void newKanji (ItemLibrary<Kanji> kanji);
 
 		public void newVocab (ItemLibrary<Vocabulary> vocabs);
 		
-		public boolean scrolling ();
+		public void done (boolean ok);
 	}
 	
-	private class DataSource implements IconizableChart.DataSource {
+	public static interface Chart extends IconizableChart.DataSource {
 
-		Connection.Meter meter;
+		public State startUpdate (int levels, EnumSet<Item.Type> types);
 		
-		EnumSet<Item.Type> types;
+		public void bind (MainActivity main, View view);
 		
-		PendingTask task;
+		public void unbind ();
 		
-		public DataSource (Connection.Meter meter, EnumSet<Item.Type> types)
-		{
-			this.meter = meter;
-			this.types = types;
-		}
-		
-		@Override
-		public void loadData () 
-		{
-			if (task == null || !task.completed)
-				task = refresh (meter, types);
-		}
+		public boolean scrolling ();
 	}
 	
 	/**
@@ -74,11 +55,16 @@ public class NetworkEngine {
 		
 		/// Number of levels to load at once
 		private static final int BUNCH_SIZE = 50;
+
+		/// Chart states
+		List<State> states;
 		
 		public Task (Connection conn, PendingTask task)
 		{
 			this.conn = conn;
 			this.task = task;
+			
+			states = new Vector<State> ();			
 		}
 				
 		/**
@@ -93,26 +79,36 @@ public class NetworkEngine {
 			ItemLibrary<Kanji> klib;
 			ItemLibrary<Vocabulary> vlib;
 			int i, j, levels, bunch [];
+			boolean failed;
+			State state;
 
 			if (task.types.isEmpty ())
 				return true;
 			
+			failed = false;
 			try {
 				levels = conn.getUserInformation (task.meter).level;
 			} catch (IOException e) {
-				return false;
+				failed = true;
+				levels = 1;
 			}
 			
-			for (Chart c : charts)
-				c.startUpdate (levels);
+			for (Chart c : charts) {
+				state = c.startUpdate (levels, task.types);
+				if (state != null)
+					states.add (state);
+			}
+			
+			if (failed)
+				return false;
 
 			publishProgress ((100 * 1) / (levels + 2));
 
 			try {
 				if (task.types.contains (Item.Type.RADICAL)) {
 					rlib = conn.getRadicals (task.meter, false);
-					for (Chart c : charts)
-						c.newRadical (rlib);
+					for (State s : states)
+						s.newRadical (rlib);
 				}
 			} catch (IOException e) {
 				return false;
@@ -121,8 +117,8 @@ public class NetworkEngine {
 			try {
 				if (task.types.contains (Item.Type.KANJI)) {
 					klib = conn.getKanji (task.meter, false);
-					for (Chart c : charts)
-						c.newKanji (klib);
+					for (State s : states)
+						s.newKanji (klib);
 				}
 			} catch (IOException e) {
 				return false;
@@ -138,8 +134,8 @@ public class NetworkEngine {
 						for (j = 0; j < BUNCH_SIZE && i <= levels; j++)
 							bunch [j] = i++;
 						vlib = conn.getVocabulary (task.meter, bunch, false);
-						for (Chart c : charts)
-							c.newVocab (vlib);
+						for (State s : states)
+							s.newVocab (vlib);
 						publishProgress ((100 * (i - 1)) / (levels + 2));
 					}
 				}
@@ -163,8 +159,8 @@ public class NetworkEngine {
 		@Override
 		protected void onPostExecute (Boolean ok)
 		{
-			for (Chart c : charts)
-				c.update (task.types, ok);
+			for (State s : states)
+				s.done (ok);
 			
 			completed (task, ok);
 		}
@@ -210,12 +206,7 @@ public class NetworkEngine {
 		tasks = new Vector<PendingTask> ();
 	}
 	
-	public IconizableChart.DataSource getDataSource (Connection.Meter meter, EnumSet<Item.Type> types)
-	{
-		return new DataSource (meter, types);
-	}
-	
-	private PendingTask refresh (Connection.Meter meter, EnumSet<Item.Type> types)
+	public PendingTask request (Connection.Meter meter, EnumSet<Item.Type> types)
 	{
 		PendingTask task;
 		boolean empty;
@@ -260,7 +251,7 @@ public class NetworkEngine {
 		conn = main.getConnection ();
 		
 		for (Chart chart : charts)
-			chart.bind (this, main, view);
+			chart.bind (main, view);
 	}
 	
 	public void unbind ()
@@ -276,5 +267,10 @@ public class NetworkEngine {
 				return true;
 		
 		return false;
+	}
+	
+	public void flush ()
+	{
+		availableTypes = EnumSet.noneOf (Item.Type.class);
 	}
 }

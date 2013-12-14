@@ -40,6 +40,8 @@ public abstract class IconizableChart extends LinearLayout {
 		
 		public void loadData ();
 		
+		public void flush ();
+		
 	}
 	
 	class IconizeButtonListener implements View.OnClickListener {
@@ -509,6 +511,16 @@ public abstract class IconizableChart extends LinearLayout {
 	protected void startRefresh ()
 	{
 		setState (state.evRefresh ());
+	}
+	
+	public void flush ()
+	{
+		if (dsource != null)
+			dsource.flush ();
+		if (isOpen ()) {
+			loadData ();
+			setState (state.evRefresh ());
+		}
 	}
 	
 	public void setDataSource (DataSource dsource)

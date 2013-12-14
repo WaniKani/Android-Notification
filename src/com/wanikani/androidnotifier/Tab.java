@@ -75,8 +75,9 @@ public interface Tab {
 	/**
 	 * Called when caches need to be flushed.
 	 * 	@param rtype the type of refresh to be done
+	 *  @param fg if the current tab is in foreground 
 	 */
-	public void flush (RefreshType rtype);
+	public void flush (RefreshType rtype, boolean fg);
 	
 	/**
 	 * Tells whether the tab is interested in scroll events.

@@ -1808,7 +1808,7 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 	 * so we check the null pointers. 
 	 */
 	@Override
-	public void flush (Tab.RefreshType rtype)
+	public void flush (Tab.RefreshType rtype, boolean fg)
 	{
 		/* Might be called really early! */
 		if (criticalf == null)

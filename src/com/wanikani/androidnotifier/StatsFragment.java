@@ -921,7 +921,10 @@ public class StatsFragment extends Fragment implements Tab {
 	List<TYChart> charts;
 	
 	/// All the generic (non TY) charts.
-	List<GenericChart> gcharts;	
+	List<GenericChart> gcharts;
+	
+	/// All the charts that must be flushed when requested
+	List<IconizableChart> fcharts;
 	
 	/// The core stats, used to trim graph scales
 	HistoryDatabase.CoreStats cs;
@@ -1051,27 +1054,28 @@ public class StatsFragment extends Fragment implements Tab {
 	{
 		charts = new Vector<TYChart> ();
 		gcharts = new Vector<GenericChart> ();
+		fcharts = new Vector<IconizableChart> ();
 		hdbc = new HistoryDatabaseCache ();
 		
 		semiPreservedState = new Hashtable<Integer, Boolean> ();
 		netwe = new NetworkEngine ();
 		
-		netwe.add (new ItemDistributionChart (R.id.os_kanji_levels, MeterSpec.T.OTHER_STATS, EnumSet.of (Item.Type.KANJI)));
-		netwe.add (new ItemDistributionChart (R.id.os_levels, MeterSpec.T.MORE_STATS, EnumSet.allOf (Item.Type.class)));
+		netwe.add (new ItemDistributionChart (netwe, R.id.os_kanji_levels, MeterSpec.T.OTHER_STATS, EnumSet.of (Item.Type.KANJI)));
+		netwe.add (new ItemDistributionChart (netwe, R.id.os_levels, MeterSpec.T.MORE_STATS, EnumSet.allOf (Item.Type.class)));
 
-		netwe.add (new KanjiProgressChart (R.id.os_jlpt, MeterSpec.T.OTHER_STATS, R.string.jlpt5, KLIB_JLPT_5));		
-		netwe.add (new KanjiProgressChart (R.id.os_jlpt, MeterSpec.T.OTHER_STATS, R.string.jlpt4, KLIB_JLPT_4));		
-		netwe.add (new KanjiProgressChart (R.id.os_jlpt, MeterSpec.T.OTHER_STATS, R.string.jlpt3, KLIB_JLPT_3));		
-		netwe.add (new KanjiProgressChart (R.id.os_jlpt, MeterSpec.T.OTHER_STATS, R.string.jlpt2, KLIB_JLPT_2));		
-		netwe.add (new KanjiProgressChart (R.id.os_jlpt, MeterSpec.T.OTHER_STATS, R.string.jlpt1, KLIB_JLPT_1));		
+		netwe.add (new KanjiProgressChart (netwe, R.id.os_jlpt, MeterSpec.T.OTHER_STATS, R.string.jlpt5, KLIB_JLPT_5));		
+		netwe.add (new KanjiProgressChart (netwe, R.id.os_jlpt, MeterSpec.T.OTHER_STATS, R.string.jlpt4, KLIB_JLPT_4));		
+		netwe.add (new KanjiProgressChart (netwe, R.id.os_jlpt, MeterSpec.T.OTHER_STATS, R.string.jlpt3, KLIB_JLPT_3));		
+		netwe.add (new KanjiProgressChart (netwe, R.id.os_jlpt, MeterSpec.T.OTHER_STATS, R.string.jlpt2, KLIB_JLPT_2));		
+		netwe.add (new KanjiProgressChart (netwe, R.id.os_jlpt, MeterSpec.T.OTHER_STATS, R.string.jlpt1, KLIB_JLPT_1));		
 
-		netwe.add (new KanjiProgressChart (R.id.os_joyo, MeterSpec.T.OTHER_STATS, R.string.joyo1, KLIB_JOYO_1));		
-		netwe.add (new KanjiProgressChart (R.id.os_joyo, MeterSpec.T.OTHER_STATS, R.string.joyo2, KLIB_JOYO_2));		
-		netwe.add (new KanjiProgressChart (R.id.os_joyo, MeterSpec.T.OTHER_STATS, R.string.joyo3, KLIB_JOYO_3));		
-		netwe.add (new KanjiProgressChart (R.id.os_joyo, MeterSpec.T.OTHER_STATS, R.string.joyo4, KLIB_JOYO_4));		
-		netwe.add (new KanjiProgressChart (R.id.os_joyo, MeterSpec.T.OTHER_STATS, R.string.joyo5, KLIB_JOYO_5));		
-		netwe.add (new KanjiProgressChart (R.id.os_joyo, MeterSpec.T.OTHER_STATS, R.string.joyo6, KLIB_JOYO_6));		
-		netwe.add (new KanjiProgressChart (R.id.os_joyo, MeterSpec.T.OTHER_STATS, R.string.joyoS, KLIB_JOYO_S));		
+		netwe.add (new KanjiProgressChart (netwe, R.id.os_joyo, MeterSpec.T.OTHER_STATS, R.string.joyo1, KLIB_JOYO_1));		
+		netwe.add (new KanjiProgressChart (netwe, R.id.os_joyo, MeterSpec.T.OTHER_STATS, R.string.joyo2, KLIB_JOYO_2));		
+		netwe.add (new KanjiProgressChart (netwe, R.id.os_joyo, MeterSpec.T.OTHER_STATS, R.string.joyo3, KLIB_JOYO_3));		
+		netwe.add (new KanjiProgressChart (netwe, R.id.os_joyo, MeterSpec.T.OTHER_STATS, R.string.joyo4, KLIB_JOYO_4));		
+		netwe.add (new KanjiProgressChart (netwe, R.id.os_joyo, MeterSpec.T.OTHER_STATS, R.string.joyo5, KLIB_JOYO_5));		
+		netwe.add (new KanjiProgressChart (netwe, R.id.os_joyo, MeterSpec.T.OTHER_STATS, R.string.joyo6, KLIB_JOYO_6));		
+		netwe.add (new KanjiProgressChart (netwe, R.id.os_joyo, MeterSpec.T.OTHER_STATS, R.string.joyoS, KLIB_JOYO_S));		
 	}
 	
 	@Override
@@ -1179,6 +1183,12 @@ public class StatsFragment extends Fragment implements Tab {
 	{
 		super.onActivityCreated (bundle);
 		
+		fcharts = new Vector<IconizableChart> ();
+		fcharts.add ((IconizableChart) parent.findViewById (R.id.os_kanji_levels));
+		fcharts.add ((IconizableChart) parent.findViewById (R.id.os_levels));
+		fcharts.add ((IconizableChart) parent.findViewById (R.id.os_jlpt));
+		fcharts.add ((IconizableChart) parent.findViewById (R.id.os_joyo));
+						
 		netwe.bind (main, parent);
 	}
 	
@@ -1551,9 +1561,21 @@ public class StatsFragment extends Fragment implements Tab {
 	}
 	
 	@Override
-	public void flush (Tab.RefreshType rtype)
+	public void flush (Tab.RefreshType rtype, boolean fg)
 	{
-		/* empty */
+		switch (rtype) {
+		case FULL:			
+			if (fg) {
+				netwe.flush ();
+				for (IconizableChart chart : fcharts)
+					chart.flush ();
+			}
+			/* Fall through */
+		case MEDIUM:
+			/* Fall through */
+		case LIGHT:
+			/* Fall through */ 
+		}
 	}
 	
 	/**

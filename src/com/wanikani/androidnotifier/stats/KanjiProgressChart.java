@@ -11,10 +11,10 @@ import android.view.View;
 import com.wanikani.androidnotifier.MainActivity;
 import com.wanikani.androidnotifier.MeterSpec;
 import com.wanikani.androidnotifier.R;
-import com.wanikani.androidnotifier.graph.HistogramChart;
 import com.wanikani.androidnotifier.graph.IconizableChart;
 import com.wanikani.androidnotifier.graph.ProgressChart;
 import com.wanikani.androidnotifier.graph.ProgressPlot;
+import com.wanikani.wklib.Connection.Meter;
 import com.wanikani.wklib.Item;
 import com.wanikani.wklib.ItemLibrary;
 import com.wanikani.wklib.Kanji;
@@ -24,153 +24,203 @@ import com.wanikani.wklib.Vocabulary;
 
 public class KanjiProgressChart implements NetworkEngine.Chart {
 	
+	private class ResourceData {
+		
+		Meter meter;
+		
+		String title;
+		
+		EnumMap<SRSLevel, String> tags;
+		
+		EnumMap<SRSLevel, Integer> colors;
+		
+		String lockedTag;
+		
+		int lockedColor;
+		
+		public ResourceData (MainActivity main)
+		{
+			Resources res;
+			
+			meter = mtype.get (main);
+			
+			res = main.getResources ();
+			
+			title = res.getString (titleId);
+			
+			tags = new EnumMap<SRSLevel, String> (SRSLevel.class);
+			colors = new EnumMap<SRSLevel, Integer> (SRSLevel.class);
+			
+			tags.put (SRSLevel.APPRENTICE, res.getString (R.string.tag_apprentice));
+			tags.put (SRSLevel.GURU, res.getString (R.string.tag_guru));
+			tags.put (SRSLevel.MASTER, res.getString (R.string.tag_master));
+			tags.put (SRSLevel.ENLIGHTEN, res.getString (R.string.tag_enlightened));
+			tags.put (SRSLevel.BURNED, res.getString (R.string.tag_burned));
+			lockedTag = res.getString (R.string.tag_locked);
+			
+			colors.put (SRSLevel.APPRENTICE, res.getColor (R.color.apprentice));
+			colors.put (SRSLevel.GURU, res.getColor (R.color.guru));
+			colors.put (SRSLevel.MASTER, res.getColor (R.color.master));
+			colors.put (SRSLevel.ENLIGHTEN, res.getColor (R.color.enlightened));
+			colors.put (SRSLevel.BURNED, res.getColor (R.color.burned));
+			lockedColor = res.getColor (R.color.locked);
+		}
+		
+	}
+	
+	private class State implements NetworkEngine.State {
+		
+		EnumMap<SRSLevel, ProgressPlot.DataSet> slds;
+		
+		ProgressPlot.DataSet rds;
+
+		Vector<ProgressPlot.DataSet> dses;
+		
+		boolean error;
+		
+		public State ()
+		{
+			slds = new EnumMap<SRSLevel, ProgressPlot.DataSet> (SRSLevel.class);
+			slds.put (SRSLevel.APPRENTICE, new ProgressPlot.DataSet (0));
+			slds.put (SRSLevel.GURU, new ProgressPlot.DataSet (0));
+			slds.put (SRSLevel.MASTER, new ProgressPlot.DataSet (0));
+			slds.put (SRSLevel.ENLIGHTEN, new ProgressPlot.DataSet (0));
+			slds.put (SRSLevel.BURNED, new ProgressPlot.DataSet (0));			
+			rds = new ProgressPlot.DataSet (library.length ());			
+		}
+						
+		public void loadResources (ResourceData rd)
+		{
+			for (SRSLevel srs : EnumSet.allOf (SRSLevel.class))
+				slds.get (srs).set (rd.tags.get (srs), rd.colors.get (srs));
+			rds.set (rd.lockedTag, rd.lockedColor);			
+		}
+
+		@Override
+		public void done (boolean ok)
+		{
+			error = !ok;
+			
+			dses = new Vector<ProgressPlot.DataSet> (slds.values ());
+			dses.add (rds);
+
+			updatePlot (this);
+		}
+
+		public void newRadical (ItemLibrary<Radical> radicals)
+		{
+			/* empty */
+		}
+
+		public void newKanji (ItemLibrary<Kanji> kanji)
+		{
+			for (Kanji k : kanji.list) {
+				if (k.stats != null && library.contains (k.character)) {
+					slds.get (k.stats.srs).value++;
+					rds.value--;
+				}
+			}		
+		}
+
+		public void newVocab (ItemLibrary<Vocabulary> vocabs)
+		{
+			/* empty */
+		}		
+			
+	}
+	
+	NetworkEngine netwe;
+	
 	ProgressChart chart;
 	
 	ProgressChart.SubPlot plot;
 	
 	String library;
 	
-	EnumMap<SRSLevel, ProgressPlot.DataSet> slds;
-	
-	ProgressPlot.DataSet rds;
-	
-	boolean dataAvailable;
-	
-	boolean error;
-	
-	IconizableChart.DataSource ds;
+	ResourceData rd;
 	
 	int id;
 	
 	int titleId;
 	
-	String title;
-	
 	MeterSpec.T mtype;
 	
-	public KanjiProgressChart (int id, MeterSpec.T mtype, int titleId, String library)
+	State state;
+	
+	EnumSet<Item.Type> types;
+	
+	public KanjiProgressChart (NetworkEngine netwe, int id, MeterSpec.T mtype, int titleId, String library)
 	{
+		this.netwe = netwe;
 		this.id = id;
 		this.mtype = mtype;
 		this.library = library;
 		this.titleId = titleId;
 		
-		slds = new EnumMap<SRSLevel, ProgressPlot.DataSet> (SRSLevel.class);
-		slds.put (SRSLevel.APPRENTICE, new ProgressPlot.DataSet (0));
-		slds.put (SRSLevel.GURU, new ProgressPlot.DataSet (0));
-		slds.put (SRSLevel.MASTER, new ProgressPlot.DataSet (0));
-		slds.put (SRSLevel.ENLIGHTEN, new ProgressPlot.DataSet (0));
-		slds.put (SRSLevel.BURNED, new ProgressPlot.DataSet (0));			
-		rds = new ProgressPlot.DataSet (library.length ());
-		
+		types = EnumSet.of (Item.Type.KANJI);
 	}
 
 	@Override
-	public void bind (NetworkEngine netwe, MainActivity main, View view)
+	public void bind (MainActivity main, View view)
 	{
-		Resources res;
+		if (rd == null)
+			rd = new ResourceData (main);
 		
-		res = main.getResources ();
-		
-		slds.get (SRSLevel.APPRENTICE).set (res.getString (R.string.tag_apprentice), 
-						  					res.getColor (R.color.apprentice));
-		slds.get (SRSLevel.GURU).set (res.getString (R.string.tag_guru), 
-						  			  res.getColor (R.color.guru));
-		slds.get (SRSLevel.MASTER).set (res.getString (R.string.tag_master), 
-						  				res.getColor (R.color.master));
-		slds.get (SRSLevel.ENLIGHTEN).set (res.getString (R.string.tag_enlightened), 
-						  				   res.getColor (R.color.enlightened));
-		slds.get (SRSLevel.BURNED).set (res.getString (R.string.tag_burned), 
-						  				res.getColor (R.color.burned));
-		
-		rds.set (res.getString (R.string.tag_locked),
-				 res.getColor (R.color.locked));
-		
-		title = res.getString (titleId);
+		chart = (ProgressChart) view.findViewById (id);		
+		chart.setDataSource (this);
+		plot = chart.addData (rd.title);
 
-		chart = (ProgressChart) view.findViewById (id);
-		
-		if (ds == null)
-			ds = netwe.getDataSource (mtype.get (main), EnumSet.of (Item.Type.KANJI));
-		
-		chart.setDataSource (ds);
-
-		plot = chart.addData (title);
-		
-		updatePlot ();		
+		if (state != null)
+			updatePlot (state);		
 	}
 	
 	@Override
 	public void unbind ()
 	{
+		chart = null;
 		plot = null;		
 	}
 	
-	public void startUpdate (int levels)
+	@Override
+	public State startUpdate (int levels, EnumSet<Item.Type> type)
 	{
-		/* empty */
-	}
-	
-	public void update (EnumSet<Item.Type> types, boolean ok)
-	{
-		if (ok) {
-			dataAvailable |= types.contains (Item.Type.KANJI);		
-			updatePlot ();
-		} else if (types.contains (Item.Type.KANJI))
-			error ();
-	}
-
-	public void newRadical (ItemLibrary<Radical> radicals)
-	{
-		/* empty */
-	}
-
-	public void newKanji (ItemLibrary<Kanji> kanji)
-	{
-		if (dataAvailable)
-			return;
-		
-		for (Kanji k : kanji.list) {
-			if (k.stats != null && library.contains (k.character)) {
-				slds.get (k.stats.srs).value++;
-				rds.value--;
-			}
-		}		
-	}
-
-	public void newVocab (ItemLibrary<Vocabulary> vocabs)
-	{
-		
-	}		
-		
-	private void updatePlot ()
-	{
-		List<ProgressPlot.DataSet> l;
-
-		if (error) {
-			error ();
-			return;
-		}
-			
-		
-		if (plot != null && dataAvailable) {
-			l = new Vector<ProgressPlot.DataSet> (slds.values ());
-			l.add (rds);
-		
-			plot.setData (l);		
-		}
-	}
-	
-	private void error ()
-	{
-		error = true;
-		
-		if (chart != null)
-			chart.setError ();
+		return type.contains (Item.Type.KANJI) ? new State () : null;
 	}
 	
 	public boolean scrolling ()
 	{
 		return false;
-	}	
+	}
+	
+	private void updatePlot (State state)
+	{
+		this.state = state;
+
+		/* Not bound */
+		if (chart == null)
+			return;
+		
+		if (rd != null)
+			state.loadResources (rd);
+		
+		if (state.error)
+			chart.setError ();
+		else		
+			plot.setData (state.dses);				
+	}
+
+	@Override
+	public void flush ()
+	{
+		state = null;
+	}
+	
+	@Override
+	public void loadData ()
+	{
+		if (state != null)
+			updatePlot (state);
+		else if (rd != null)
+			netwe.request (rd.meter, types);
+	}
 }
