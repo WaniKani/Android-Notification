@@ -33,22 +33,13 @@ import com.wanikani.androidnotifier.R;
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-public class HistogramChart extends LinearLayout {
+public class HistogramChart extends IconizableChart {
 
-	/// The inflater
-	LayoutInflater inflater;
-	
-	/// The chart title
-	TextView title;
-	
 	/// The real histogram
 	HistogramPlot plot;
 	
 	/// The legend
 	LinearLayout legend;
-	
-	/// A spinner, which is displayed when no data has been published yet
-	ProgressBar spinner;
 	
 	/// The alert layout
 	View alertPanel;
@@ -64,41 +55,12 @@ public class HistogramChart extends LinearLayout {
 	 */
 	public HistogramChart (Context ctxt, AttributeSet attrs)
 	{
-		super (ctxt, attrs);
+		super (ctxt, attrs, R.layout.histogramchart);
 			
-		inflater = (LayoutInflater) 
-				ctxt.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		
-		inflater.inflate (R.layout.histogramchart, this);
 		plot = (HistogramPlot) findViewById (R.id.hc_plot);
 		legend = (LinearLayout) findViewById (R.id.hc_legend);
-		title = (TextView) findViewById (R.id.hc_title);
-		spinner = (ProgressBar) findViewById (R.id.hc_spinner);
 		alertPanel = findViewById (R.id.hc_lay_alert);
 		alertMessage = (TextView) findViewById (R.id.hc_alert);
-		
-		loadAttributes (ctxt, attrs);
-		
-		spin (true);
-	}
-	
-	/**
-	 * Performs the actual job of reading the attributes and updating 
-	 * the look. Meant for cascading (which is not done at this stage).
-	 * @param ctxt the context
-	 * @param attrs the attributes
-	 */
-	void loadAttributes (Context ctxt, AttributeSet attrs)
-	{
-		TypedArray a;
-		
-		a = ctxt.obtainStyledAttributes (attrs, R.styleable.PieChart);
-			 
-		title.setText (a.getString (R.styleable.PieChart_title));
-				
-		a.recycle ();
-				
-		plot.loadAttributes (ctxt, attrs);
 	}
 	
 	/**
@@ -122,7 +84,7 @@ public class HistogramChart extends LinearLayout {
 			}
 		}
 		
-		spin (false);
+		dataAvailable ();
 	}	
 	
 	/**
@@ -151,25 +113,13 @@ public class HistogramChart extends LinearLayout {
 	}
 	
 	/**
-	 * Shows or hides the spinner. Correspondingly, plot and legend are 
-	 * hidden or shown. 
-	 * @param enabled if the spinner should be shown
-	 */
-	public void spin (boolean enabled)
-	{
-		spinner.setVisibility (enabled ? View.VISIBLE : View.GONE);
-		plot.setVisibility (enabled ? View.GONE : View.VISIBLE);
-		legend.setVisibility (enabled ? View.GONE : View.VISIBLE);
-		alertPanel.setVisibility (View.GONE);
-	}
-	
-	/**
 	 * Shows an alert message
 	 * @param msg the message
 	 * @param ocl the listener which receives an event when clicked
 	 */
 	public void alert (String msg, View.OnClickListener ocl)
 	{
+		dataAvailable ();
 		alertPanel.setVisibility (View.VISIBLE);
 		alertMessage.setText (Html.fromHtml ("<font color=\"blue\"><u>" + msg + "</u></font>"));
 		alertMessage.setClickable (true);
@@ -182,6 +132,7 @@ public class HistogramChart extends LinearLayout {
 	 */
 	public void alert (String msg)
 	{
+		dataAvailable ();
 		alertPanel.setVisibility (View.VISIBLE);
 		alertMessage.setText (msg);
 		alertMessage.setClickable (false);

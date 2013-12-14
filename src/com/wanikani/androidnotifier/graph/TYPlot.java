@@ -32,6 +32,7 @@ import android.view.View;
 import android.widget.Scroller;
 
 import com.wanikani.androidnotifier.R;
+import com.wanikani.androidnotifier.graph.IconizableChart.State;
 import com.wanikani.androidnotifier.graph.Pager.DataSet;
 import com.wanikani.wklib.UserInformation;
 
@@ -582,7 +583,7 @@ public class TYPlot extends View {
 		public void refresh ()
 		{
 			if (pager != null && gotOrigin) {
-				retrieving (true);
+				refreshing (true);
 				pager.requestData (vp.getInterval ());
 			} else
 				invalidate ();
@@ -596,7 +597,7 @@ public class TYPlot extends View {
 		{
 			if (ds.interval.equals (vp.getInterval ())) {				
 				this.ds = ds;
-				retrieving (false);
+				refreshing (false);
 				invalidate ();
 			}
 		}		
@@ -673,7 +674,6 @@ public class TYPlot extends View {
 	void setTYChart (TYChart chart)
 	{
 		this.chart = chart;
-		spin (true);
 	}
 	
 	/**
@@ -711,7 +711,6 @@ public class TYPlot extends View {
 		pager = new Pager (dsource, dsink);
 		pas.setSeries (dsource.getSeries ());
 		vp.updateSize (dsource.getMaxY ());
-		spin (true);
 	}
 
 	@Override
@@ -944,26 +943,14 @@ public class TYPlot extends View {
 		return scrolling;
 	}
 	
-	/**
-	 * Draws the spinner if attached to a chart
-	 * @param enable set if should be shown
-	 */
-	public void spin (boolean enable)
+	public void refreshing (boolean enable)
 	{
-		if (chart != null)
-			chart.spin (enable);
-	}
-
-	/**
-	 * Called when retrieving data or as soon as data has been retrieved
-	 * @param enable set if retrieving. Reset if data has been retrieved
-	 */
-	public void retrieving (boolean enable)
-	{
-		if (chart != null)
-			chart.retrieving (enable);
-		if (!enable)
-			spin (false);
+		if (chart != null) {
+			if (enable)
+				chart.startRefresh ();
+			else
+				chart.dataAvailable ();
+		}
 	}
 	
 	/**

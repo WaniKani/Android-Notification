@@ -207,6 +207,12 @@ public class Connection {
 	}
 
 	public ItemLibrary<Radical> getRadicals (Meter meter, int levels [])
+			throws IOException
+	{
+		return getRadicals (meter, levels, true);
+	}
+
+	public ItemLibrary<Radical> getRadicals (Meter meter, int levels [], boolean cacher)
 		throws IOException
 	{
 		ItemLibrary<Radical> ans;
@@ -219,19 +225,19 @@ public class Connection {
 
 		try {
 			res = call (meter, "radicals", true, levelList (levels));
-
-			return ans.add (cache.radicals.put 
-						(new ItemLibrary<Radical> (Radical.FACTORY, res.infoAsArray)));
-			
+			ans.add (new ItemLibrary<Radical> (Radical.FACTORY, res.infoAsArray));
+			if (cacher)
+				cache.radicals.put (ans);
+			return ans;			
 		} catch (JSONException e) {
 			throw new ParseException ();
 		}
 	}
 	
-	public ItemLibrary<Radical> getRadicals (Meter meter)
+	public ItemLibrary<Radical> getRadicals (Meter meter, boolean cacher)
 			throws IOException
 	{		
-		return getRadicals (meter, getAllLevels (meter));
+		return getRadicals (meter, getAllLevels (meter), cacher);
 	}
 		
 	public ItemLibrary<Kanji> getKanji (Meter meter, int level)
@@ -258,6 +264,12 @@ public class Connection {
 	public ItemLibrary<Kanji> getKanji (Meter meter, int level [])
 		throws IOException
 	{
+		return getKanji (meter, level, true);
+	}
+
+	public ItemLibrary<Kanji> getKanji (Meter meter, int level [], boolean cacher)
+		throws IOException
+	{
 		ItemLibrary<Kanji> ans;
 		Response res;
 			
@@ -269,18 +281,21 @@ public class Connection {
 		try {
 			res = call (meter, "kanji", true, levelList (level));
 
-			return ans.add (cache.kanji.put
-					(new ItemLibrary<Kanji> (Kanji.FACTORY, res.infoAsArray)));
+			ans.add (new ItemLibrary<Kanji> (Kanji.FACTORY, res.infoAsArray));
+			if (cacher)
+				cache.kanji.put (ans);
+			
+			return ans;
 				
 		} catch (JSONException e) {
 			throw new ParseException ();
 		}
 	}
 		
-	public ItemLibrary<Kanji> getKanji (Meter meter)
+	public ItemLibrary<Kanji> getKanji (Meter meter, boolean cacher)
 			throws IOException
 	{		
-		return getKanji (meter, getAllLevels (meter));
+		return getKanji (meter, getAllLevels (meter), cacher);
 	}
 	
 	public ItemLibrary<Vocabulary> getVocabulary (Meter meter, int level)
@@ -305,6 +320,12 @@ public class Connection {
 	}
 	
 	public ItemLibrary<Vocabulary> getVocabulary (Meter meter, int level [])
+		throws IOException
+	{
+		return getVocabulary (meter, level, true);
+	}
+
+	public ItemLibrary<Vocabulary> getVocabulary (Meter meter, int level [], boolean cacher)
 			throws IOException
 	{
 		ItemLibrary<Vocabulary> ans;
@@ -317,19 +338,20 @@ public class Connection {
 		
 		try {
 			res = call (meter, "vocabulary", true, levelList (level));
-
-			return ans.add (cache.vocab.put
-					(new ItemLibrary<Vocabulary> (Vocabulary.FACTORY, res.infoAsArray)));
+			ans.add (new ItemLibrary<Vocabulary> (Vocabulary.FACTORY, res.infoAsArray));
+			if (cacher)
+				cache.vocab.put (ans);
 			
+			return ans;			
 		} catch (JSONException e) {
 			throw new ParseException ();
 		}
 	}
 	
-	public ItemLibrary<Vocabulary> getVocabulary (Meter meter)
+	public ItemLibrary<Vocabulary> getVocabulary (Meter meter, boolean cacher)
 			throws IOException
 	{		
-		return getVocabulary (meter, getAllLevels (meter));
+		return getVocabulary (meter, getAllLevels (meter), cacher);
 	}
 
 	public ItemLibrary<Item> getRecentUnlocks (Meter meter, int count)

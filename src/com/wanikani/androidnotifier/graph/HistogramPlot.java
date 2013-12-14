@@ -56,13 +56,23 @@ public class HistogramPlot extends View {
 		{
 			this.name = name;
 			this.color = color;
-		}
+		}			
 		
 		public Series (int color)
 		{
 			this.color = color;
 		}
 		
+		public Series ()
+		{
+			/* empty */
+		}
+		
+		public void set (String name, int color)
+		{
+			this.name = name;
+			this.color = color;
+		}					
 	}
 	
 	public static class Sample {

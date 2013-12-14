@@ -37,7 +37,7 @@ import com.wanikani.androidnotifier.R;
  * auxiliary stuff. 
  * The look and feel tries to match the style of the dashboard
  */
-public class TYChart extends LinearLayout {
+public class TYChart extends IconizableChart {
 
 	/**
 	 * A class listening for click events on the alerts message.
@@ -63,17 +63,8 @@ public class TYChart extends LinearLayout {
 		
 	}
 	
-	/// The inflater
-	LayoutInflater inflater;
-	
-	/// The chart title
-	TextView title;
-	
 	/// The real TY plot image
 	TYPlot plot;
-	
-	/// A spinner, which is displayed when no data has been published yet
-	ProgressBar spinner;
 	
 	/// The alert layout
 	View alertPanel;
@@ -98,15 +89,9 @@ public class TYChart extends LinearLayout {
 	 */
 	public TYChart (Context ctxt, AttributeSet attrs)
 	{
-		super (ctxt, attrs);
+		super (ctxt, attrs, R.layout.tychart);
 			
-		inflater = (LayoutInflater) 
-				ctxt.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		
-		inflater.inflate (R.layout.tychart, this);
 		plot = (TYPlot) findViewById (R.id.ty_plot);
-		title = (TextView) findViewById (R.id.ty_title);
-		spinner = (ProgressBar) findViewById (R.id.ty_spinner);
 		alertPanel = findViewById (R.id.ty_lay_alert);
 		alertMessage = (TextView) findViewById (R.id.ty_alert);
 		alertMessage.setOnClickListener (new AlertListener ());
@@ -116,50 +101,7 @@ public class TYChart extends LinearLayout {
 		
 		plot.setTYChart (this);
 		
-		loadAttributes (ctxt, attrs);
-		
-		spin (false);
 		hideAlert ();
-	}
-	
-	/**
-	 * Performs the actual job of reading the attributes and updating 
-	 * the look. Meant for cascading (which is not done at this stage).
-	 * @param ctxt the context
-	 * @param attrs the attributes
-	 */
-	void loadAttributes (Context ctxt, AttributeSet attrs)
-	{
-		TypedArray a;
-		
-		a = ctxt.obtainStyledAttributes (attrs, R.styleable.PieChart);
-			 
-		title.setText (a.getString (R.styleable.PieChart_title));
-				
-		a.recycle ();		
-		
-		plot.loadAttributes (ctxt, attrs);
-	}
-	
-	/**
-	 * Shows or hides the spinner. Correspondingly, plot and legend are 
-	 * hidden or shown. 
-	 * @param enabled if the spinner should be shown
-	 */
-	public void spin (boolean enabled)
-	{
-		spinner.setVisibility (enabled ? View.VISIBLE : View.GONE);
-		plot.setVisibility (enabled ? View.GONE : View.VISIBLE);
-	}
-	
-	/**
-	 * Called when data retrieval starts or ends. It shows or hides the spinner
-	 * respectively
-	 * @param enabled if starting retrieval 
-	 */
-	public void retrieving (boolean enabled)
-	{
-		spinner.setVisibility (enabled ? View.VISIBLE : View.GONE);
 	}
 	
 	/**
@@ -234,5 +176,10 @@ public class TYChart extends LinearLayout {
 	public void refresh ()
 	{
 		plot.refresh ();
-	}	
+	}
+	
+	public void loadData ()
+	{
+		/* empty */
+	}
 }

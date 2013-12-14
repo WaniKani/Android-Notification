@@ -99,10 +99,10 @@ public abstract class TabsFragment extends Fragment implements Tab {
 	}
 	
 	@Override
-	public void flush (RefreshType rtype)
+	public void flush (RefreshType rtype, boolean fg)
 	{
 		for (Tab t : fragments)
-			t.flush (rtype);		
+			t.flush (rtype, fg);		
 	}
 	
 	@Override

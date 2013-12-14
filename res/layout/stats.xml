@@ -24,92 +24,104 @@
             android:layout_alignParentLeft="true"
             android:layout_alignParentTop="true"
             android:orientation="vertical" >
-                                    
-            <RelativeLayout
-                	android:layout_width="match_parent"
-                	android:layout_height="wrap_content">"
-            	<TextView
-	                android:id="@+id/ct_eta"
-                	style="@style/ChartTitle"
-                	android:layout_width="match_parent"
-                	android:layout_height="match_parent"
-                	android:layout_alignParentBottom="true"
-                	android:text="@string/ct_eta"
-                	android:visibility="gone" />
-            	<Button
-	                android:id="@+id/btn_other_stats"
-                	android:layout_width="wrap_content"
-                	android:layout_height="wrap_content"
-                	android:layout_alignParentLeft="true"
-                	android:text="@string/tag_other_stats"/>
-            </RelativeLayout>
-    
-    		<LinearLayout
-    		    android:id="@+id/ctab_eta"
-        		style="@style/Table"
-        		android:layout_width="match_parent"
-        		android:layout_height="wrap_content"
-        		android:orientation="vertical"
-        		android:visibility="gone">
 
-    		    <LinearLayout
-    		        android:id="@+id/div_eta_avg"
-    		        android:layout_width="match_parent"
-    		        android:layout_height="wrap_content"
-    		        android:orientation="horizontal">
-        			<TextView
-	        		    android:id="@+id/tag_eta_avg"
-        		    	style="@style/Estimates"
-        		    	android:layout_weight="1"
-        		    	android:layout_width="0dip"
-        		    	android:layout_height="wrap_content"
-        		    	android:text="@string/tag_eta_avg"/>"
-        			<TextView
-	        		    android:id="@+id/tv_eta_avg"
-        		    	style="@style/Estimates"
-        		    	android:layout_width="wrap_content"
-        		    	android:layout_height="wrap_content" />    		        		      
-        		</LinearLayout>
-    		    <LinearLayout
-    		        android:id="@+id/div_eta_next"
-    		        android:layout_width="match_parent"
-    		        android:layout_height="wrap_content"
-    		        android:orientation="horizontal">
-        			<TextView
-	        		    android:id="@+id/tag_eta_next"
-        		    	style="@style/Estimates"
-        		    	android:layout_weight="1"
-        		    	android:layout_width="0dip"
-        		    	android:layout_height="wrap_content"
-        		    	android:text="@string/tag_eta_next_future" />    		        		      
-        			<TextView
-	        		    android:id="@+id/tv_eta_next"
-        		    	style="@style/Estimates"
-        		    	android:layout_width="wrap_content"
-        		    	android:layout_height="wrap_content" />    		        		      
-        		</LinearLayout>
-    		    <LinearLayout
-    		        android:id="@+id/div_eta_l50"
-    		        android:layout_width="match_parent"
-    		        android:layout_height="wrap_content"
-    		        android:orientation="horizontal">
-        			<TextView
-	        		    android:id="@+id/tag_eta_l50"
-        		    	style="@style/Estimates"
-        		    	android:layout_weight="1"
-        		    	android:layout_width="0dip"
-        		    	android:layout_height="wrap_content"
-        		    	android:text="@string/tag_eta_l50" />    		        		      
-        			<TextView
-	        		    android:id="@+id/tv_eta_l50"
-        		    	style="@style/Estimates"
-        		    	android:layout_width="wrap_content"
-        		    	android:layout_height="wrap_content" />    		        		      
-        		</LinearLayout>
-
-        	</LinearLayout>
+            <TextView
+                android:id="@+id/ct_eta"
+                style="@style/ChartTitle"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:text="@string/ct_eta"
+                android:visibility="gone" />
             
+            <LinearLayout
+                android:id="@+id/ctab_eta"
+                style="@style/Table"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone" >
 
+                <LinearLayout
+                    android:id="@+id/div_eta_avg"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal" >
+
+                    <TextView
+                        android:id="@+id/tag_eta_avg"
+                        style="@style/Estimates"
+                        android:layout_width="0dip"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/tag_eta_avg" />
+
+                    <TextView
+                        android:id="@+id/tv_eta_avg"
+                        style="@style/Estimates"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/div_eta_next"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal" >
+
+                    <TextView
+                        android:id="@+id/tag_eta_next"
+                        style="@style/Estimates"
+                        android:layout_width="0dip"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/tag_eta_next_future" />
+
+                    <TextView
+                        android:id="@+id/tv_eta_next"
+                        style="@style/Estimates"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/div_eta_l50"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal" >
+
+                    <TextView
+                        android:id="@+id/tag_eta_l50"
+                        style="@style/Estimates"
+                        android:layout_width="0dip"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/tag_eta_l50" />
+
+                    <TextView
+                        android:id="@+id/tv_eta_l50"
+                        style="@style/Estimates"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <com.wanikani.androidnotifier.graph.HistogramChart
+                android:id="@+id/hi_levels"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                custom:ticks="0"
+                custom:title="@string/ct_levels" />            
+
+            <TextView 
+                style="@style/statsTitle"
+                android:layout_gravity="center_horizontal"
+                android:text="@string/tag_all_items"/>
+            
+            <LinearLayout 
+                style="@style/LTable"
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
             <com.wanikani.androidnotifier.graph.PieChart
                 android:id="@+id/pc_srs"
                 android:layout_width="match_parent"
@@ -120,39 +132,83 @@
                 android:id="@+id/ty_srs"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                custom:title="@string/ct_srs_distribution" />
+                custom:title="@string/ct_srs_history" />
+			</LinearLayout>
             
-            <com.wanikani.androidnotifier.graph.HistogramChart
-                android:id="@+id/hi_levels"
+            <TextView 
+                style="@style/statsTitle"
+                android:layout_gravity="center_horizontal"
+                android:text="@string/tag_kanji"/>
+            
+            <LinearLayout 
+                style="@style/LTable"
+                android:orientation="vertical"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                custom:ticks="0"
-                custom:title="@string/ct_levels"/>
+                android:layout_height="wrap_content">
             
             <com.wanikani.androidnotifier.graph.PieChart
                 android:id="@+id/pc_kanji"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                custom:title="@string/ct_kanji_progress" />
+                custom:title="@string/ct_srs_distribution" />
 
             <com.wanikani.androidnotifier.graph.TYChart
                 android:id="@+id/ty_kanji"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                custom:title="@string/ct_kanji_progress" />
+                custom:title="@string/ct_srs_history" />
+            
+            <com.wanikani.androidnotifier.graph.ProgressChart
+                android:id="@+id/os_jlpt"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                custom:title="@string/ct_jlpt_progress" />
+
+            <com.wanikani.androidnotifier.graph.ProgressChart
+                android:id="@+id/os_joyo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                custom:title="@string/ct_joyo_progress" />
+
+            <com.wanikani.androidnotifier.graph.HistogramChart
+                android:id="@+id/os_kanji_levels"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                custom:ticks="10"
+                custom:title="@string/os_kanji_levels" />
+            </LinearLayout>
+            
+            <TextView 
+                style="@style/statsTitle"
+                android:layout_gravity="center_horizontal"
+                android:text="@string/tag_vocab"/>
+            
+            <LinearLayout 
+                style="@style/LTable"
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
             
             <com.wanikani.androidnotifier.graph.PieChart
                 android:id="@+id/pc_vocab"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                custom:title="@string/ct_vocab_progress" />
+                custom:title="@string/ct_srs_distribution" />
 
             <com.wanikani.androidnotifier.graph.TYChart
                 android:id="@+id/ty_vocab"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                custom:title="@string/ct_vocab_progress" />            
+                custom:title="@string/ct_srs_history" />
+
+            <com.wanikani.androidnotifier.graph.HistogramChart
+                android:id="@+id/os_levels"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                custom:ticks="10"
+                custom:title="@string/os_levels" />
             </LinearLayout>
+        </LinearLayout>
     </RelativeLayout>
 
 </ScrollView>

@@ -586,7 +586,7 @@ public class DashboardFragment extends Fragment implements Tab {
 	 * Does nothing. Needed just to implement the @link Tab interface, but
 	 * we don't keep any cache.
 	 */
-	public void flush (Tab.RefreshType rtype)
+	public void flush (Tab.RefreshType rtype, boolean fg)
 	{
 		/* empty */
 	}

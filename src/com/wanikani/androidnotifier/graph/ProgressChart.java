@@ -1,7 +1,6 @@
 package com.wanikani.androidnotifier.graph;
 
 import java.util.List;
-import java.util.Vector;
 
 import android.content.Context;
 import android.graphics.Color;
@@ -43,7 +42,7 @@ import com.wanikani.androidnotifier.graph.ProgressPlot.DataSet;
  * A simple 3-d pie chart, comprising of the plot itself, a title and 
  * a legend. The look and feel tries to match the style of the dashboard.
  */
-public class ProgressChart extends TableLayout {
+public class ProgressChart extends IconizableChart {
 	
 	public class SubPlot implements View.OnClickListener {
 
@@ -64,13 +63,13 @@ public class ProgressChart extends TableLayout {
 
 			ctxt = getContext ();
 
-			template = (ViewGroup) inflater.inflate (R.layout.progresschart, null);
+			template = (ViewGroup) inflater.inflate (R.layout.progresschart_template, null);
 			row = (TableRow) template.getChildAt (0);
 			legendRow = (TableRow) template.getChildAt (1);
 			template.removeAllViews ();
 			removeView (template);
-			addView (row);
-			addView (legendRow);
+			contents.addView (row);
+			contents.addView (legendRow);
 						
 			tview = (TextView) row.findViewById (R.id.pp_title);
 			spans = new SpannableString (title);
@@ -114,13 +113,14 @@ public class ProgressChart extends TableLayout {
 					legend.addView (item);
 				}
 			}
+			
+			dataAvailable ();
 		}	
-
+		
 	}
 
-	/// The inflater
-	LayoutInflater inflater;
-
+	TableLayout contents;
+	
 	/**
 	 * Constructor.
 	 * @param ctxt context
@@ -128,10 +128,9 @@ public class ProgressChart extends TableLayout {
 	 */
 	public ProgressChart (Context ctxt, AttributeSet attrs)
 	{
-		super (ctxt, attrs);
-			
-		inflater = (LayoutInflater) 
-				ctxt.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		super (ctxt, attrs, R.layout.progresschart);
+		
+		contents = (TableLayout) findViewById (R.id.gt_contents);
 	}
 		
 	public SubPlot addData (String title)
@@ -155,6 +154,5 @@ public class ProgressChart extends TableLayout {
 			setText (ds.description);
 		((TextView) item.findViewById (R.id.leg_value)).
 			setText (Integer.toString (Math.round (ds.value)));		
-	}
-	
+	}	
 }

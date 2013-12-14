@@ -80,6 +80,26 @@ public class ProgressPlot extends View {
 			this.color = color;
 			this.value = value;
 		}
+		
+		/**
+		 * Constructor.
+		 * @param value the value
+		 */
+		public DataSet (float value)
+		{
+			this.value = value;
+		}
+		
+		/**
+		 * Updates its internal fields
+		 * @param description the legend description
+		 * @param color the color
+		 */
+		public void set (String description, int color)
+		{
+			this.description = description;
+			this.color = color;
+		}		
 	}
 	
 	/// The current datasets

@@ -156,9 +156,12 @@ public class MainActivity extends FragmentActivity implements Runnable {
 		  * Broadcasts the flush request, to clear all the tabs' caches 
 		  * @see Tab#flush()
 		  * @param rtype the type of refresh
+		  * @param idx the tab currently in foreground
 		  */
-		 public void flush (Tab.RefreshType rtype)
+		 public void flush (Tab.RefreshType rtype, int idx)
 		 {
+			 Tab fgtab;
+			 
 			 if (conn != null) {
 				 switch (rtype) {
 				 case FULL:				 
@@ -170,8 +173,10 @@ public class MainActivity extends FragmentActivity implements Runnable {
 				 }
 			 }
 			 
+			 fgtab = idx < 0 || idx >= tabs.size () ? null : tabs.get (idx);
+
 			 for (Tab tab : tabs)
-				 tab.flush (rtype);			 
+				 tab.flush (rtype, fgtab == tab);			 
 		 }
 		 
 		 /**
@@ -903,11 +908,11 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	 * 	@param rtype the type of refresh 
 	 */
 	private void refresh (Tab.RefreshType rtype)
-	{
+	{		
 			if (rtask != null)
 				rtask.cancel (false);
 			
-			pad.flush (rtype);
+			pad.flush (rtype, pager.getCurrentItem ());
 			
 			rtask = new RefreshTask ();
 			rtask.execute (conn);			
