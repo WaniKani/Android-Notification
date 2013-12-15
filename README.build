@@ -1,0 +1,16 @@
+How to compile this software
+============================
+
+This app is developed using the ADT (https://developer.android.com/sdk/index.html).
+
+On my system the SDK Manager is current configured with:
+- Android SDK Tools: 22.0.5
+- Android SDK Platform-tools: 18.0.1
+- Android SDK Build-tools: 17
+but these are just indicative release numbers, since I expect very different setups to work as well. 
+
+The project does not use 3rd party libraries, but android-support-v4.jar must be in the Java build path.  
+
+
+
+   
