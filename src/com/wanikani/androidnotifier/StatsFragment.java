@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Date;
 import java.util.EnumSet;
 import java.util.Hashtable;
 import java.util.List;
@@ -42,7 +44,10 @@ import com.wanikani.androidnotifier.stats.KanjiProgressChart;
 import com.wanikani.androidnotifier.stats.NetworkEngine;
 import com.wanikani.wklib.Connection;
 import com.wanikani.wklib.Item;
+import com.wanikani.wklib.ItemLibrary;
+import com.wanikani.wklib.Radical;
 import com.wanikani.wklib.SRSDistribution;
+import com.wanikani.wklib.SRSLevel;
 
 /* 
  *  Copyright (c) 2013 Alberto Cuda
@@ -664,6 +669,7 @@ public class StatsFragment extends Fragment implements Tab {
 			
 			show |= updateL50 (days);
 			show |= updateNextLevel (days);
+			show |= updateShortest ();
 			vity = show ? View.VISIBLE : View.GONE;
 		
 			parent.findViewById (R.id.ct_eta).setVisibility (vity);
@@ -715,24 +721,16 @@ public class StatsFragment extends Fragment implements Tab {
 				lastli = cs.levelInfo.get (dd.level);
 				if (lastli != null) {
 					cal = Calendar.getInstance ();
-					cal.setTime (dd.creation);
-					cal.set (Calendar.HOUR_OF_DAY, 0);
-					cal.set (Calendar.MINUTE, 0);
-					cal.set (Calendar.SECOND, 0);
+					cal.setTime (normalize (dd.creation));
 					cal.add (Calendar.DATE, lastli.day + lastli.vacation);
 					delay -= ((float) System.currentTimeMillis () - cal.getTimeInMillis ()) / (24 * 3600 * 1000);
 					delay -= 0.5F;	/* This compensates the fact that granularity is one day */										
 
-					if (delay <= avgl) {
+					if (delay <= avgl && delay >= 0) {
 						nltag = (TextView) main.findViewById (R.id.tag_eta_next);
 						nlw.setVisibility (View.VISIBLE);
-						if (delay > 0) {
-							nltag.setText (R.string.tag_eta_next_future);
-							s = main.getString (R.string.fmt_eta_next_future, beautify (delay));
-						} else {
-							nltag.setText (R.string.tag_eta_next_past);
-							s = main.getString (R.string.fmt_eta_next_past, beautify (-delay));
-						}
+						nltag.setText (R.string.tag_eta_next_future);
+						s = main.getString (R.string.fmt_eta_next_future, beautify (delay));
 						tw.setText (s);
 					} else
 						nlw.setVisibility (View.GONE);
@@ -747,6 +745,128 @@ public class StatsFragment extends Fragment implements Tab {
 
 				return false;
 			}
+		}
+		
+		public boolean updateShortest ()
+		{
+			List<Date> rdates, kdates;
+			Date rdate, kdate, now, date;
+			TextView shvw;
+			String time;
+			int mage, days;
+			
+			shvw = (TextView) parent.findViewById (R.id.tag_eta_shortest);
+			
+			shvw.setVisibility (View.GONE);
+			if (dd.od.tlradicals == null || dd.od.tlkanji == null)
+				return false;
+			
+			now = new Date ();
+			rdates = getExpectedDates (dd.od.tlradicals, 2, now);
+			mage = (int) Math.ceil (rdates.size () * 9. / 10);
+			rdate = mage > 0 ? rdates.get (mage - 1) : now;
+			
+			kdates = getExpectedDates (dd.od.tlkanji, 3, rdate);			
+			mage = (int) Math.ceil (kdates.size () * 9. / 10);
+			kdate = mage > 0 ? kdates.get (mage - 1) : new Date ();
+			
+			date = rdate.after (kdate) ? rdate : kdate;
+			
+			/* Something funny going on */
+			if (!date.after (now))
+				return false;
+			
+			days = delta (now, date);
+			switch (days) {
+			case 0:
+				time = getString (R.string.tag_eta_today);
+				break;
+				
+			case 1:
+				time = getString (R.string.tag_eta_tomorrow);
+				break;
+				
+			default:
+				time = getString (R.string.tag_eta_in, days);
+				break;
+			}
+			
+			shvw.setVisibility (View.VISIBLE);
+			shvw.setText (getString (R.string.fmt_eta_shortest, time));
+			
+			return true;
+		}
+		
+		public int delta (Date from, Date to)
+		{
+			Calendar cal;
+			int i;
+
+			if (from.after (to))
+				return 0;
+			
+			/* Simpleminded, but it deals with DST in the correct way */
+			from = normalize (from);
+			to = normalize (to);
+			cal = Calendar.getInstance ();
+			cal.setTime (from);
+			for (i = 0; i < 10; i++) {
+				if (cal.getTime ().equals (to))
+					break;
+				cal.add (Calendar.DATE, 1);
+			}
+			
+			return i;
+		}
+		
+		private Date normalize (Date date)
+		{
+			Calendar cal;
+			
+			cal = Calendar.getInstance ();
+			cal.setTime (date);
+			cal.set (Calendar.HOUR_OF_DAY, 0);
+			cal.set (Calendar.MINUTE, 0);
+			cal.set (Calendar.SECOND, 0);
+			cal.set (Calendar.MILLISECOND, 0);
+			
+			return cal.getTime ();
+		}
+		
+		private List<Date> getExpectedDates (ItemLibrary<? extends Item> lib, int aint, Date uldate)
+		{
+			List<Date> dates;
+			Calendar cal;
+			int slevel;
+			
+			dates = new Vector<Date> ();
+			for (Item i : lib.list) {
+				cal = Calendar.getInstance ();
+				if (i.stats == null || i.stats.srs == null) {
+					slevel = -1;
+					cal.setTime (uldate);
+				} else if (i.stats.srs == SRSLevel.APPRENTICE) {
+					cal.setTime (i.stats.availableDate);
+					slevel = Math.min (i.stats.meaning.currentStreak, i.stats.reading.currentStreak); 
+				} else
+					slevel = 3;
+				
+				switch (slevel) {
+				case -1:
+					cal.add (Calendar.HOUR, 4);
+				case 0:
+					cal.add (Calendar.HOUR, 8);
+				case 1:
+					cal.add (Calendar.DATE, 1);
+				case 2:
+					cal.add (Calendar.DATE, aint);
+				}
+				dates.add (cal.getTime ());
+			}
+			
+			Collections.sort (dates);
+			
+			return dates;
 		}
 		
 		public String beautify (float days)

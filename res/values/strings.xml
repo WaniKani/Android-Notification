@@ -222,6 +222,10 @@
     <string name="tag_eta_next_future">Next level in:</string>
     <string name="tag_eta_next_past">Next level:</string>
     <string name="tag_eta_l50">Level 50 on:</string>
+    <string name="fmt_eta_shortest">You can levelup %s</string>
+    <string name="tag_eta_today">today</string>
+    <string name="tag_eta_tomorrow">tomorrow</string>
+    <string name="tag_eta_in">in %d days</string>
 
     <string name="fmt_eta_next_future">%s</string>
     <string name="fmt_eta_next_past">%s ago</string>    

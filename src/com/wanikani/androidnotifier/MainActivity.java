@@ -22,7 +22,6 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Looper;
-import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
@@ -34,12 +33,15 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
+import com.wanikani.androidnotifier.Tab.RefreshType;
 import com.wanikani.wklib.AuthenticationException;
 import com.wanikani.wklib.Connection;
 import com.wanikani.wklib.Item;
 import com.wanikani.wklib.ItemLibrary;
 import com.wanikani.wklib.ItemsCache;
+import com.wanikani.wklib.Kanji;
 import com.wanikani.wklib.LevelProgression;
+import com.wanikani.wklib.Radical;
 import com.wanikani.wklib.SRSDistribution;
 import com.wanikani.wklib.SRSLevel;
 import com.wanikani.wklib.StudyQueue;
@@ -266,8 +268,20 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	 */
 	private class RefreshTask extends AsyncTask<Connection, Void, DashboardData > {
 		
+		/// The refresh type
+		RefreshType rtype;
+		
 		/// The default "turtle" avatar
 		Bitmap defAvatar;
+		
+		/**
+		 * Constructor.
+		 * @param rtype the type of refresh to be used
+		 */
+		public RefreshTask (RefreshType rtype)
+		{
+			this.rtype = rtype;
+		}
 		
 		/**
 		 * Called before starting the task, inside the activity thread.
@@ -333,7 +347,7 @@ public class MainActivity extends FragmentActivity implements Runnable {
 				
 				refreshComplete (dd, true);
 				
-				new RefreshTaskPartII ().execute (conn);
+				new RefreshTaskPartII (rtype, dd.level).execute (conn);
 			} catch (AuthenticationException e) {
 				error (R.string.status_msg_unauthorized);
 			} catch (IOException e) {
@@ -348,7 +362,24 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	 * so it can be run after the splash screen disappears (and the startup is faster). 
 	 */
 	private class RefreshTaskPartII extends AsyncTask<Connection, Void, DashboardData.OptionalData> {
-					
+
+		/// The refresh type
+		RefreshType rtype;
+		
+		/// User level
+		int level;
+
+		/**
+		 * Constructor
+		 * @param rtype refresh type
+		 * @param level current user level
+		 */
+		public RefreshTaskPartII (RefreshType rtype, int level)
+		{
+			this.rtype = rtype;
+			this.level = level;
+		}
+		
 		/**
 		 * Called before starting the task, inside the activity thread.
 		 */
@@ -368,10 +399,12 @@ public class MainActivity extends FragmentActivity implements Runnable {
 		@Override
 		protected DashboardData.OptionalData doInBackground (Connection... conn)
 		{
-			DashboardData.OptionalDataStatus srsStatus, lpStatus, ciStatus;
+			DashboardData.OptionalDataStatus srsStatus, lpStatus, ciStatus, tlStatus;
 			SRSDistribution srs;
 			LevelProgression lp;
 			ItemLibrary<Item> critical;
+			ItemLibrary<Radical> tlradicals;
+			ItemLibrary<Kanji> tlkanji;
 			int cis;
 			
 			try {
@@ -399,8 +432,24 @@ public class MainActivity extends FragmentActivity implements Runnable {
 				cis = 0;
 			}
 			
+			if (rtype == RefreshType.FULL) {
+				try {
+					tlradicals = conn [0].getRadicals (MeterSpec.T.DASHBOARD_REFRESH.get (MainActivity.this), level);
+					tlkanji = conn [0].getKanji (MeterSpec.T.DASHBOARD_REFRESH.get (MainActivity.this), level);
+					tlStatus = DashboardData.OptionalDataStatus.RETRIEVED;
+				} catch (IOException e) {
+					tlStatus = DashboardData.OptionalDataStatus.FAILED;
+					tlradicals = null;
+					tlkanji = null;
+				}			
+			} else {
+				tlradicals = null;
+				tlkanji = null; /* Failed is weak enough to make merge choose for the older status */
+				tlStatus = DashboardData.OptionalDataStatus.FAILED;
+			}
+			
 			return new DashboardData.OptionalData (srs, srsStatus, lp, lpStatus, 
-												   cis, ciStatus);
+												   cis, ciStatus, tlradicals, tlkanji);
 		}	
 						
 		/**
@@ -729,9 +778,9 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	    		if (resumeRefresh)
 	    			refresh (Tab.RefreshType.LIGHT);
 	    		else if (ldd.isIncomplete ())
-	    			refreshOptional ();
+	    			refreshOptional (ldd.level);
 	    	} else
-	    		refresh (Tab.RefreshType.LIGHT);
+	    		refresh (Tab.RefreshType.FULL);
 	    }
 	    
 	    resumeRefresh = false;
@@ -914,19 +963,19 @@ public class MainActivity extends FragmentActivity implements Runnable {
 			
 			pad.flush (rtype, pager.getCurrentItem ());
 			
-			rtask = new RefreshTask ();
+			rtask = new RefreshTask (rtype);
 			rtask.execute (conn);			
 	}
 	
 	/**
-	 * Called when optional data needs to be refreshed. This happen in
+	 * Called when optional data needs to be refreshed. This happens in
 	 * some strange situations, e.g. when the application is stopped before
 	 * optional data, and then is resumed from a bundle. I'm not even
 	 * sure it can happen, however...
 	 */
-	private void refreshOptional ()
+	private void refreshOptional (int level)
 	{
-			new RefreshTaskPartII ().execute (conn);			
+			new RefreshTaskPartII (RefreshType.FULL, level).execute (conn);			
 	}
 
 	/**

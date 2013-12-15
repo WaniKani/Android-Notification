@@ -6,7 +6,10 @@ import java.util.Date;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 
+import com.wanikani.wklib.ItemLibrary;
+import com.wanikani.wklib.Kanji;
 import com.wanikani.wklib.LevelProgression;
+import com.wanikani.wklib.Radical;
 import com.wanikani.wklib.SRSDistribution;
 import com.wanikani.wklib.StudyQueue;
 import com.wanikani.wklib.UserInformation;
@@ -78,6 +81,15 @@ class DashboardData {
 		/** Critical items status */
 		public DashboardData.OptionalDataStatus ciStatus;
 		
+		/** Current level radicals */
+		public ItemLibrary<Radical> tlradicals;
+		
+		/** Current level kanji */
+		public ItemLibrary<Kanji> tlkanji;
+
+		/** Current level status */
+		public DashboardData.OptionalDataStatus tlStatus;
+
 		/**
 		 * Constructor. Input parameters may be null.
 		 * In order to provide consistent behaviour:
@@ -95,10 +107,13 @@ class DashboardData {
 		 * @param lpStatus level progression status
 		 * @param criticalItems number of critical items
 		 * @param ciStatus critical items status
+		 * @param tlradicals current level radicals
+		 * @param tlkanji current level kanji
 		 */
 		public OptionalData (SRSDistribution srs, DashboardData.OptionalDataStatus srsStatus, 
 							 LevelProgression lp, DashboardData.OptionalDataStatus lpStatus,
-							 int criticalItems, DashboardData.OptionalDataStatus ciStatus)
+							 int criticalItems, DashboardData.OptionalDataStatus ciStatus,
+							 ItemLibrary<Radical> tlradicals, ItemLibrary<Kanji> tlkanji)
 		{
 			this.srs = srs;
 			this.lp = lp;
@@ -107,6 +122,9 @@ class DashboardData {
 			this.srsStatus = srsStatus;
 			this.lpStatus = lpStatus;			
 			this.ciStatus = ciStatus;
+			
+			this.tlradicals = tlradicals;
+			this.tlkanji = tlkanji;
 		}
 		
 		/**
@@ -118,6 +136,7 @@ class DashboardData {
 			srsStatus = DashboardData.OptionalDataStatus.RETRIEVING;
 			lpStatus = DashboardData.OptionalDataStatus.RETRIEVING;
 			ciStatus = DashboardData.OptionalDataStatus.RETRIEVING;
+			tlStatus = DashboardData.OptionalDataStatus.RETRIEVING;
 		}
 				
 		/**
@@ -144,6 +163,13 @@ class DashboardData {
 				criticalItems = od.criticalItems;
 				ciStatus = od.ciStatus;				
 			}
+			
+			if (tlStatus != DashboardData.OptionalDataStatus.RETRIEVED &&
+				od.tlStatus == DashboardData.OptionalDataStatus.RETRIEVED) {
+					tlradicals = od.tlradicals;
+					tlkanji = od.tlkanji;
+					tlStatus = od.tlStatus;				
+			}			
 		}
 
 		/**
@@ -153,7 +179,9 @@ class DashboardData {
 		public boolean isIncomplete ()
 		{
 			return 	lpStatus != DashboardData.OptionalDataStatus.RETRIEVED ||
-					srsStatus != DashboardData.OptionalDataStatus.RETRIEVED;
+					srsStatus != DashboardData.OptionalDataStatus.RETRIEVED ||
+					ciStatus != DashboardData.OptionalDataStatus.RETRIEVED ||
+					tlStatus != DashboardData.OptionalDataStatus.RETRIEVED;
 		}
 	};
 	
@@ -198,6 +226,9 @@ class DashboardData {
 	
 	private static final String KEY_CRITICAL_ITEMS = PREFIX + "critical_items";
 	
+	private static final String KEY_CURRENT_LEVEL_RADICALS = PREFIX + "current_level_radicals";
+	private static final String KEY_CURRENT_LEVEL_KANJI = PREFIX + "current_level_kanji";
+
 	public int lessonsAvailable;
 	
 	public int reviewsAvailable;
@@ -356,6 +387,11 @@ class DashboardData {
 		if (od.ciStatus == OptionalDataStatus.RETRIEVED)
 			bundle.putInt (KEY_CRITICAL_ITEMS, od.criticalItems);
 		
+		if (od.lpStatus == OptionalDataStatus.RETRIEVED) {
+			bundle.putSerializable (KEY_CURRENT_LEVEL_RADICALS, od.tlradicals);
+			bundle.putSerializable (KEY_CURRENT_LEVEL_KANJI, od.tlkanji);
+		}
+		
 		if (e != null)
 			bundle.putSerializable (KEY_EXCEPTION, e);
 	}
@@ -431,6 +467,18 @@ class DashboardData {
 			 * will do right after calling this method */
 			od.ciStatus = OptionalDataStatus.RETRIEVING;
 			od.criticalItems = 0;
+		}
+
+		if (bundle.containsKey (KEY_CURRENT_LEVEL_RADICALS)) {
+			od.tlStatus = OptionalDataStatus.RETRIEVED;
+			od.tlradicals = (ItemLibrary<Radical>) bundle.getSerializable (KEY_CURRENT_LEVEL_RADICALS);
+			od.tlkanji = (ItemLibrary<Kanji>) bundle.getSerializable (KEY_CURRENT_LEVEL_KANJI);
+		} else {
+			/* RETRIEVING is correct, because this is what DashboardActivity
+			 * will do right after calling this method */
+			od.tlStatus = OptionalDataStatus.RETRIEVING;
+			od.tlradicals = null;
+			od.tlkanji = null;
 		}
 
 		if (bundle.containsKey (KEY_EXCEPTION))
