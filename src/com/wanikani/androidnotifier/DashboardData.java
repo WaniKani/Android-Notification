@@ -109,11 +109,13 @@ class DashboardData {
 		 * @param ciStatus critical items status
 		 * @param tlradicals current level radicals
 		 * @param tlkanji current level kanji
+		 * @param tlStatus current level item status
 		 */
 		public OptionalData (SRSDistribution srs, DashboardData.OptionalDataStatus srsStatus, 
 							 LevelProgression lp, DashboardData.OptionalDataStatus lpStatus,
 							 int criticalItems, DashboardData.OptionalDataStatus ciStatus,
-							 ItemLibrary<Radical> tlradicals, ItemLibrary<Kanji> tlkanji)
+							 ItemLibrary<Radical> tlradicals, ItemLibrary<Kanji> tlkanji,
+							 DashboardData.OptionalDataStatus tlStatus)
 		{
 			this.srs = srs;
 			this.lp = lp;
@@ -125,6 +127,7 @@ class DashboardData {
 			
 			this.tlradicals = tlradicals;
 			this.tlkanji = tlkanji;
+			this.tlStatus = tlStatus;
 		}
 		
 		/**

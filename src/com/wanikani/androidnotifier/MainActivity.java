@@ -449,7 +449,7 @@ public class MainActivity extends FragmentActivity implements Runnable {
 			}
 			
 			return new DashboardData.OptionalData (srs, srsStatus, lp, lpStatus, 
-												   cis, ciStatus, tlradicals, tlkanji);
+												   cis, ciStatus, tlradicals, tlkanji, tlStatus);
 		}	
 						
 		/**
