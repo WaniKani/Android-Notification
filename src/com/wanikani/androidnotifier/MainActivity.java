@@ -432,6 +432,8 @@ public class MainActivity extends FragmentActivity implements Runnable {
 				cis = 0;
 			}
 			
+			/* Disabled till we find a better way to update shortest  levelup time */
+			/*
 			if (rtype == RefreshType.FULL) {
 				try {
 					tlradicals = conn [0].getRadicals (MeterSpec.T.DASHBOARD_REFRESH.get (MainActivity.this), level);
@@ -444,9 +446,13 @@ public class MainActivity extends FragmentActivity implements Runnable {
 				}			
 			} else {
 				tlradicals = null;
-				tlkanji = null; /* Failed is weak enough to make merge choose for the older status */
+				tlkanji = null; 
 				tlStatus = DashboardData.OptionalDataStatus.FAILED;
 			}
+			*/
+			tlradicals = null;
+			tlkanji = null;
+			tlStatus = DashboardData.OptionalDataStatus.FAILED;
 			
 			return new DashboardData.OptionalData (srs, srsStatus, lp, lpStatus, 
 												   cis, ciStatus, tlradicals, tlkanji, tlStatus);
