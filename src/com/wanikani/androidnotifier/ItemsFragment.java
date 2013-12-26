@@ -1818,7 +1818,8 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 		case LIGHT:
 			break;
 			
-		case FULL:
+		case FULL_IMPLICIT:
+		case FULL_EXPLICIT:
 			nof.flush ();
 			levelf.flush ();
 

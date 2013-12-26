@@ -36,7 +36,7 @@ import com.wanikani.wklib.UserInformation;
  * In addition to the mere collection of data, it features some utility methods
  * to serialize/deserialize on a bundle.  
  */
-class DashboardData {
+public class DashboardData {
 	
 	/**
 	 * An additional description of the contents of {@link DashboardData.OptionalData} 

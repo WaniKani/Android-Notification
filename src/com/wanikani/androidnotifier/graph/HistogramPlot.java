@@ -593,8 +593,13 @@ public class HistogramPlot extends View {
 	 */
 	void loadAttributes (Context ctxt, AttributeSet attrs)
 	{				
+		TypedArray a;
+
 		meas = new Measures (ctxt, attrs);
-		pas = new PaintAssets (getResources (), attrs, meas);		
+		pas = new PaintAssets (getResources (), attrs, meas);
+		
+		a = ctxt.obtainStyledAttributes (attrs, R.styleable.HistogramPlot);
+		a.recycle ();
 	}
 		
 	/**
@@ -605,9 +610,22 @@ public class HistogramPlot extends View {
 	 */
 	public void setData (List<Series> series, List<Samples> bars, long cap)
 	{
+		setData (series, bars, cap, false);
+	}
+
+	/**
+	 * Sets the data samples.
+	 * @param series a list of series that will be referenced by <tt>data</tt> 
+	 * @param bars a list of samples, each representing a bar
+	 * @param cap maximum Y value admitted (may be smaller if bars are smaller than that)
+	 * @param alignLeft if set move to the origin, otherwise to the last bar
+	 */
+	public void setData (List<Series> series, List<Samples> bars, long cap, boolean alignLeft)
+	{
 		pas.setSeries (series);
 		vp = new Viewport (meas, bars.size (), getMaxY (bars, cap));
-		
+		if (alignLeft)
+			vp.setAbsPosition (0);
 		this.bars = bars;
 		
 		invalidate ();
@@ -759,8 +777,9 @@ public class HistogramPlot extends View {
 			lpaint = pas.levelupPaintInside; 
 			tbl = vp.getY (vp.yMax) + meas.margin;
 		}
-			
-		canvas.drawText (Long.toString (base), (left + right) / 2, tbl, lpaint);
+					
+		if (base > 0)
+			canvas.drawText (Long.toString (base), (left + right) / 2, tbl, lpaint);
 	}
 	
 	/**

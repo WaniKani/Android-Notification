@@ -34,8 +34,11 @@ public interface Tab {
 		/// Medium refresh: all data that could be changed by reviews
 		MEDIUM,
 		
-		/// Full refresh: clear all data
-		FULL
+		/// Full refresh: clear all data. Not explicitly requested by user
+		FULL_IMPLICIT,
+		
+		/// Full refresh: clear all data. Explicitly requested by user
+		FULL_EXPLICIT
 	}
 	
 	/**

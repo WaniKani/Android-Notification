@@ -111,13 +111,39 @@
                     	android:layout_height="wrap_content"/>
             </LinearLayout>
 
+            <TextView 
+                style="@style/statsTitle"
+                android:layout_gravity="center_horizontal"
+                android:text="@string/os_review_timeline"/>
+            
+            <LinearLayout 
+                style="@style/LTable"
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+            
+            <com.wanikani.androidnotifier.graph.HistogramChart
+                android:id="@+id/os_review_timeline_srs"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                custom:ticks="10"
+                custom:title="@string/os_review_timeline_srs" />
+            
+            <com.wanikani.androidnotifier.graph.HistogramChart
+                android:id="@+id/os_review_timeline_item"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                custom:ticks="10"
+                custom:title="@string/os_review_timeline_item" />
+            </LinearLayout>            
+
+            
             <com.wanikani.androidnotifier.graph.HistogramChart
                 android:id="@+id/hi_levels"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 custom:ticks="0"
-                custom:title="@string/ct_levels" />            
-
+                custom:title="@string/ct_levels" />
             <TextView 
                 style="@style/statsTitle"
                 android:layout_gravity="center_horizontal"

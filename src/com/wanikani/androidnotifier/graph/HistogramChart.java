@@ -71,9 +71,14 @@ public class HistogramChart extends IconizableChart {
 	 */
 	public void setData (List<HistogramPlot.Series> series, List<HistogramPlot.Samples> bars, long cap)
 	{
+		setData (series, bars, cap, false);
+	}
+
+	public void setData (List<HistogramPlot.Series> series, List<HistogramPlot.Samples> bars, long cap, boolean alignLeft)
+	{
 		LinearLayout item;		
 		
-		plot.setData (series, bars, cap);
+		plot.setData (series, bars, cap, alignLeft);
 		
 		legend.removeAllViews ();
 		for (HistogramPlot.Series s : series) {

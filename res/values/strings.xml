@@ -95,7 +95,7 @@
     
     <string name="tag_radicals_progression">Radicals</string>
     <string name="tag_kanji_progression">Kanji</string>
-    
+        
     <string name="fmt_remaining">%d remaining</string>
     <string name="fmt_to_go">%1$d/%2$d remaining</string>
     
@@ -211,11 +211,15 @@
     <string name="tag_more_stats">More&#8230;</string>
     
     <string name="tag_all_items">All Items</string>
+    <string name="tag_radicals">Radicals</string>
     <string name="tag_kanji">Kanji</string>
     <string name="tag_vocab">Vocabulary</string>
     
     <string name="os_levels">SRS by level</string>
     <string name="os_kanji_levels">Kanji SRS by level</string>
+    <string name="os_review_timeline">Reviews Timeline</string>
+    <string name="os_review_timeline_srs">SRS</string>
+    <string name="os_review_timeline_item">Type</string>
     
     <string name="ct_eta">Estimates</string>
     <string name="tag_eta_avg">Average level time:</string>

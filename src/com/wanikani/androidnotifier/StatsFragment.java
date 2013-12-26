@@ -42,6 +42,7 @@ import com.wanikani.androidnotifier.graph.TYChart;
 import com.wanikani.androidnotifier.stats.ItemDistributionChart;
 import com.wanikani.androidnotifier.stats.KanjiProgressChart;
 import com.wanikani.androidnotifier.stats.NetworkEngine;
+import com.wanikani.androidnotifier.stats.ReviewsTimelineChart;
 import com.wanikani.wklib.Connection;
 import com.wanikani.wklib.Item;
 import com.wanikani.wklib.ItemLibrary;
@@ -1061,6 +1062,9 @@ public class StatsFragment extends Fragment implements Tab {
 	/// The Vocab progress plot datasource
 	VocabDataSource vocabds;
 	
+	/// The review timeline charts
+	ReviewsTimelineChart timeline;
+	
 	int preserved [] = new int [] { 
 			R.id.pc_srs, R.id.ty_srs, 
 			R.id.pc_vocab, R.id.ty_vocab,
@@ -1069,7 +1073,8 @@ public class StatsFragment extends Fragment implements Tab {
 	
 	int semiPreserved [] = new int [] {
 			R.id.os_jlpt, R.id.os_joyo,
-			R.id.os_kanji_levels, R.id.os_levels
+			R.id.os_kanji_levels, R.id.os_levels,
+			R.id.os_review_timeline_srs, R.id.os_review_timeline_item
 	};
 	
 	private Map<Integer, Boolean> semiPreservedState;
@@ -1179,6 +1184,10 @@ public class StatsFragment extends Fragment implements Tab {
 		
 		semiPreservedState = new Hashtable<Integer, Boolean> ();
 		netwe = new NetworkEngine ();
+		
+		timeline = new ReviewsTimelineChart (netwe, R.id.os_review_timeline_item,
+											 R.id.os_review_timeline_srs, MeterSpec.T.OTHER_STATS);
+		netwe.add (timeline);
 		
 		netwe.add (new ItemDistributionChart (netwe, R.id.os_kanji_levels, MeterSpec.T.OTHER_STATS, EnumSet.of (Item.Type.KANJI)));
 		netwe.add (new ItemDistributionChart (netwe, R.id.os_levels, MeterSpec.T.MORE_STATS, EnumSet.allOf (Item.Type.class)));
@@ -1308,6 +1317,8 @@ public class StatsFragment extends Fragment implements Tab {
 		fcharts.add ((IconizableChart) parent.findViewById (R.id.os_levels));
 		fcharts.add ((IconizableChart) parent.findViewById (R.id.os_jlpt));
 		fcharts.add ((IconizableChart) parent.findViewById (R.id.os_joyo));
+		fcharts.add ((IconizableChart) parent.findViewById (R.id.os_review_timeline_item));
+		fcharts.add ((IconizableChart) parent.findViewById (R.id.os_review_timeline_srs));
 						
 		netwe.bind (main, parent);
 	}
@@ -1459,6 +1470,8 @@ public class StatsFragment extends Fragment implements Tab {
 			for (TYChart chart : charts)
 				chart.setOrigin (dd.creation);
 				
+			timeline.refresh (main.getConnection (), dd);
+			
 			break;
 		
 		case FAILED:
@@ -1684,13 +1697,15 @@ public class StatsFragment extends Fragment implements Tab {
 	public void flush (Tab.RefreshType rtype, boolean fg)
 	{
 		switch (rtype) {
-		case FULL:			
+		case FULL_EXPLICIT:			
 			if (fg) {
 				netwe.flush ();
 				for (IconizableChart chart : fcharts)
 					chart.flush ();
 			}
 			/* Fall through */
+		case FULL_IMPLICIT:
+			/* Fall through */			
 		case MEDIUM:
 			/* Fall through */
 		case LIGHT:

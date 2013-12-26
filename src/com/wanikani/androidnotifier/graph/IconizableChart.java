@@ -249,7 +249,7 @@ public abstract class IconizableChart extends LinearLayout {
 
 			public State evRefresh ()
 			{
-				return REFRESHING;
+				return ICONIZED_RETRIEVING;
 			}
 			
 			public State evToggle ()

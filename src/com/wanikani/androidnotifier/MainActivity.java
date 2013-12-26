@@ -166,7 +166,8 @@ public class MainActivity extends FragmentActivity implements Runnable {
 			 
 			 if (conn != null) {
 				 switch (rtype) {
-				 case FULL:				 
+				 case FULL_EXPLICIT:				 
+				 case FULL_IMPLICIT:				 
 					 conn.flush ();
 					 /* fall through */
 				 
@@ -254,7 +255,7 @@ public class MainActivity extends FragmentActivity implements Runnable {
 				enableNotifications (i.getBooleanExtra (SettingsActivity.E_ENABLED, true));			
 			else if (action.equals (ACTION_REFRESH)) {
 				rtype = i.getBooleanExtra (E_FLUSH_CACHES, true) ? 
-						Tab.RefreshType.FULL : Tab.RefreshType.MEDIUM;
+						Tab.RefreshType.FULL_IMPLICIT : Tab.RefreshType.MEDIUM;
 				refresh (rtype);
 			} else if (action.equals (ACTION_CLEAR))
 				flushDatabase ();
@@ -487,7 +488,7 @@ public class MainActivity extends FragmentActivity implements Runnable {
 		@Override
 		public void refresh ()
 		{
-			MainActivity.this.refresh (Tab.RefreshType.FULL);
+			MainActivity.this.refresh (Tab.RefreshType.FULL_EXPLICIT);
 		}
 		
 		@Override
@@ -786,7 +787,7 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	    		else if (ldd.isIncomplete ())
 	    			refreshOptional (ldd.level);
 	    	} else
-	    		refresh (Tab.RefreshType.FULL);
+	    		refresh (Tab.RefreshType.FULL_IMPLICIT);
 	    }
 	    
 	    resumeRefresh = false;
@@ -944,7 +945,7 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	{
 		conn = new Connection (login);
 		
-		refresh (Tab.RefreshType.FULL);
+		refresh (Tab.RefreshType.FULL_IMPLICIT);
 	}
 
 	/**
@@ -981,7 +982,7 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	 */
 	private void refreshOptional (int level)
 	{
-			new RefreshTaskPartII (RefreshType.FULL, level).execute (conn);			
+			new RefreshTaskPartII (RefreshType.FULL_IMPLICIT, level).execute (conn);			
 	}
 
 	/**
@@ -1177,6 +1178,8 @@ public class MainActivity extends FragmentActivity implements Runnable {
 			switchTo (R.id.f_error);
 		else {
 			pad.spin (false);
+			/* Publish old version. Stats fragment needs this to make graphs "slide" */
+			pad.refreshComplete (dd);
 			reschedule ();
 		}
 		

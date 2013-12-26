@@ -98,7 +98,7 @@ public class NetworkEngine {
 				if (state != null)
 					states.add (state);
 			}
-			
+
 			if (failed)
 				return false;
 
