@@ -289,19 +289,25 @@ public class ReviewsTimelineChart implements NetworkEngine.Chart {
 		
 		public boolean compatible (DashboardData dd)
 		{			
-			int nextDay;
-			long limit;
+			int nextDay, nextHour;
+			long now, dayLimit, hourLimit;
 			
-			nextDay = 0;
-			limit = System.currentTimeMillis () + 24 * 60 * 60 * 1000;
+			nextDay = nextHour = 0;
+			now = System.currentTimeMillis ();
+			hourLimit = now + 3600 * 1000;
+			dayLimit = now + 24 * 3600 * 1000;
 			for (TimelineData tl : data) {
-				if (tl.time > limit)
-					break;
-				
-				nextDay += tl.size ();
+				if (tl.time < hourLimit)
+					nextHour += tl.size ();
+
+				if (tl.time < dayLimit)
+					nextDay += tl.size ();
+				else
+					break;								
 			}
 			
-			return (dd.reviewsAvailableNextDay + dd.reviewsAvailable) == nextDay;
+			return (dd.reviewsAvailableNextDay + dd.reviewsAvailable) == nextDay &&
+				   (dd.reviewsAvailableNextHour + dd.reviewsAvailable) == nextHour;
 		}
 		
 		public void relocate (int laa [], ItemLibrary<Item> lib, int idx)
