@@ -17,6 +17,7 @@ import android.database.SQLException;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 
 import com.wanikani.androidnotifier.NotifierStateMachine.Event;
@@ -488,6 +489,8 @@ public class NotificationService
 				showLessons (dd.lessonsAvailable);
 			else
 				showLessons (0);
+			dd.serialize (PreferenceManager.getDefaultSharedPreferences(this), 
+					  	  DashboardData.Source.NOTIFICATION_SERVICE);
 		} catch (IOException e) {
 			if (event == Event.E_UNSOLICITED)
 				return;

@@ -3,13 +3,16 @@ package com.wanikani.androidnotifier;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -22,6 +25,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Looper;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
@@ -38,9 +42,7 @@ import com.wanikani.wklib.Connection;
 import com.wanikani.wklib.Item;
 import com.wanikani.wklib.ItemLibrary;
 import com.wanikani.wklib.ItemsCache;
-import com.wanikani.wklib.Kanji;
 import com.wanikani.wklib.LevelProgression;
-import com.wanikani.wklib.Radical;
 import com.wanikani.wklib.SRSDistribution;
 import com.wanikani.wklib.SRSLevel;
 import com.wanikani.wklib.StudyQueue;
@@ -370,12 +372,10 @@ public class MainActivity extends FragmentActivity implements Runnable {
 		@Override
 		protected DashboardData.OptionalData doInBackground (Connection... conn)
 		{
-			DashboardData.OptionalDataStatus srsStatus, lpStatus, ciStatus, tlStatus;
+			DashboardData.OptionalDataStatus srsStatus, lpStatus, ciStatus;
 			SRSDistribution srs;
 			LevelProgression lp;
 			ItemLibrary<Item> critical;
-			ItemLibrary<Radical> tlradicals;
-			ItemLibrary<Kanji> tlkanji;
 			int cis;
 			
 			try {
@@ -402,31 +402,8 @@ public class MainActivity extends FragmentActivity implements Runnable {
 				ciStatus = DashboardData.OptionalDataStatus.FAILED;
 				cis = 0;
 			}
-			
-			/* Disabled till we find a better way to update shortest  levelup time */
-			/*
-			if (rtype == RefreshType.FULL) {
-				try {
-					tlradicals = conn [0].getRadicals (MeterSpec.T.DASHBOARD_REFRESH.get (MainActivity.this), level);
-					tlkanji = conn [0].getKanji (MeterSpec.T.DASHBOARD_REFRESH.get (MainActivity.this), level);
-					tlStatus = DashboardData.OptionalDataStatus.RETRIEVED;
-				} catch (IOException e) {
-					tlStatus = DashboardData.OptionalDataStatus.FAILED;
-					tlradicals = null;
-					tlkanji = null;
-				}			
-			} else {
-				tlradicals = null;
-				tlkanji = null; 
-				tlStatus = DashboardData.OptionalDataStatus.FAILED;
-			}
-			*/
-			tlradicals = null;
-			tlkanji = null;
-			tlStatus = DashboardData.OptionalDataStatus.FAILED;
-			
-			return new DashboardData.OptionalData (srs, srsStatus, lp, lpStatus, 
-												   cis, ciStatus, tlradicals, tlkanji, tlStatus);
+						
+			return new DashboardData.OptionalData (srs, srsStatus, lp, lpStatus, cis, ciStatus);
 		}	
 						
 		/**
@@ -742,7 +719,10 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	{
 	    super.onStart ();
 	    
+	    SharedPreferences prefs;	    
 	    DashboardData ldd;
+	    
+	    prefs = PreferenceManager.getDefaultSharedPreferences (this);
 	    
 	    /* A refresh task may be going on, if the review activity
 	     * has sent a refresh request before disappearing
@@ -756,8 +736,21 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	    			refresh (Tab.RefreshType.LIGHT);
 	    		else if (ldd.isIncomplete ())
 	    			refreshOptional ();
-	    	} else
+	    	} else {
+	    		Map map;
+	    		
+	    		map = prefs.getAll();
+	    		
+	    		ldd = DashboardData.fromPreferences (prefs, DashboardData.Source.MAIN_ACTIVITY);
+	    		if (ldd == null || ldd.nextReviewDate.before (new Date ()))
+	    			ldd = DashboardData.fromPreferences (prefs, DashboardData.Source.NOTIFICATION_SERVICE);
+	    		if (ldd == null || ldd.nextReviewDate.before (new Date ()))
+	    			;	    		
+	    		else
+	    			refreshComplete (ldd, false);
+	    		
 	    		refresh (Tab.RefreshType.FULL_IMPLICIT);
+	    	}
 	    }
 	    
 	    resumeRefresh = false;
@@ -1050,14 +1043,16 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	 */
 	private void refreshComplete (DashboardData dd, boolean intermediate)
 	{
-		if (!intermediate)
-			pad.spin (false);
-
 		if (this.dd == null)
 			switchTo (R.id.f_main);
-		
-		if (this.dd != null)
+		else
 			dd.merge (this.dd);
+
+		if (!intermediate) {
+			dd.serialize (PreferenceManager.getDefaultSharedPreferences(this), 
+						  DashboardData.Source.MAIN_ACTIVITY);
+			pad.spin (false);
+		}
 
 		this.dd = dd;
 		

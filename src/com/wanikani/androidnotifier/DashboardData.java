@@ -1,15 +1,15 @@
 package com.wanikani.androidnotifier;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.Date;
 
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 
-import com.wanikani.wklib.ItemLibrary;
-import com.wanikani.wklib.Kanji;
 import com.wanikani.wklib.LevelProgression;
-import com.wanikani.wklib.Radical;
 import com.wanikani.wklib.SRSDistribution;
 import com.wanikani.wklib.StudyQueue;
 import com.wanikani.wklib.UserInformation;
@@ -57,6 +57,26 @@ public class DashboardData {
 		
 	};
 	
+	public enum Source {
+		
+		MAIN_ACTIVITY {
+			public String getPrefix () 
+			{
+				return "ma";
+			}
+		},
+		
+		NOTIFICATION_SERVICE {
+			public String getPrefix ()
+			{
+				return "ns"; 
+			}
+		};
+		
+		public abstract String getPrefix ();
+		
+	}
+	
 	/**
 	 * A container of all the fields that may not (yet) been available
 	 * when the dashboard is displayed. The object may be partially populated.
@@ -81,15 +101,6 @@ public class DashboardData {
 		/** Critical items status */
 		public DashboardData.OptionalDataStatus ciStatus;
 		
-		/** Current level radicals */
-		public ItemLibrary<Radical> tlradicals;
-		
-		/** Current level kanji */
-		public ItemLibrary<Kanji> tlkanji;
-
-		/** Current level status */
-		public DashboardData.OptionalDataStatus tlStatus;
-
 		/**
 		 * Constructor. Input parameters may be null.
 		 * In order to provide consistent behaviour:
@@ -107,15 +118,10 @@ public class DashboardData {
 		 * @param lpStatus level progression status
 		 * @param criticalItems number of critical items
 		 * @param ciStatus critical items status
-		 * @param tlradicals current level radicals
-		 * @param tlkanji current level kanji
-		 * @param tlStatus current level item status
 		 */
 		public OptionalData (SRSDistribution srs, DashboardData.OptionalDataStatus srsStatus, 
 							 LevelProgression lp, DashboardData.OptionalDataStatus lpStatus,
-							 int criticalItems, DashboardData.OptionalDataStatus ciStatus,
-							 ItemLibrary<Radical> tlradicals, ItemLibrary<Kanji> tlkanji,
-							 DashboardData.OptionalDataStatus tlStatus)
+							 int criticalItems, DashboardData.OptionalDataStatus ciStatus)
 		{
 			this.srs = srs;
 			this.lp = lp;
@@ -124,10 +130,6 @@ public class DashboardData {
 			this.srsStatus = srsStatus;
 			this.lpStatus = lpStatus;			
 			this.ciStatus = ciStatus;
-			
-			this.tlradicals = tlradicals;
-			this.tlkanji = tlkanji;
-			this.tlStatus = tlStatus;
 		}
 		
 		/**
@@ -139,7 +141,6 @@ public class DashboardData {
 			srsStatus = DashboardData.OptionalDataStatus.RETRIEVING;
 			lpStatus = DashboardData.OptionalDataStatus.RETRIEVING;
 			ciStatus = DashboardData.OptionalDataStatus.RETRIEVING;
-			tlStatus = DashboardData.OptionalDataStatus.RETRIEVING;
 		}
 				
 		/**
@@ -166,13 +167,6 @@ public class DashboardData {
 				criticalItems = od.criticalItems;
 				ciStatus = od.ciStatus;				
 			}
-			
-			if (tlStatus != DashboardData.OptionalDataStatus.RETRIEVED &&
-				od.tlStatus == DashboardData.OptionalDataStatus.RETRIEVED) {
-					tlradicals = od.tlradicals;
-					tlkanji = od.tlkanji;
-					tlStatus = od.tlStatus;				
-			}			
 		}
 
 		/**
@@ -183,11 +177,240 @@ public class DashboardData {
 		{
 			return 	lpStatus != DashboardData.OptionalDataStatus.RETRIEVED ||
 					srsStatus != DashboardData.OptionalDataStatus.RETRIEVED ||
-					ciStatus != DashboardData.OptionalDataStatus.RETRIEVED ||
-					tlStatus != DashboardData.OptionalDataStatus.RETRIEVED;
+					ciStatus != DashboardData.OptionalDataStatus.RETRIEVED;
 		}
 	};
 	
+	private interface Storage {
+		
+		public void write ();
+		
+		public void commit ();
+		
+		public void putInt (String key, int value);
+		
+		public void putLong (String key, long value);
+
+		public void putBoolean (String key, boolean value);
+
+		public void putString (String key, String value);
+		
+		public void putSerializable (String key, Serializable value);
+
+		public boolean containsKey (String key);
+		
+		public void removeKey (String key);
+
+		public int getInt (String key);
+		
+		public String getString (String key);
+		
+		public long getLong (String key);
+		
+		public boolean getBoolean (String key);
+		
+		public Serializable getSerializable (String key);
+	}
+	
+	private static class BundleStorage implements Storage {
+		
+		Bundle bundle;				
+		
+		public BundleStorage (Bundle bundle)
+		{
+			this.bundle = bundle;
+		}
+		
+		@Override
+		public void write ()
+		{
+			/* empty */
+		}
+
+		@Override
+		public void commit ()
+		{
+			/* empty */
+		}
+
+		@Override
+		public void putInt (String key, int value)
+		{
+			bundle.putInt (key, value);
+		}
+		
+		@Override
+		public void putString (String key, String value)
+		{
+			bundle.putString (key, value);
+		}
+		
+		@Override
+		public void putLong (String key, long value)
+		{
+			bundle.putLong (key, value);
+		}
+
+		@Override
+		public void putBoolean (String key, boolean value)
+		{
+			bundle.putBoolean (key, value);
+		}
+
+		@Override
+		public void putSerializable (String key, Serializable value)
+		{
+			bundle.putSerializable (key, value);
+		}
+
+		@Override
+		public boolean containsKey (String key)
+		{
+			return bundle.containsKey (key);
+		}
+		
+		@Override
+		public void removeKey (String key)
+		{
+			/* No need to do this, since we are not persisted */
+		}
+
+		@Override
+		public int getInt (String key)
+		{
+			return bundle.getInt (key);
+		}
+		
+		@Override
+		public String getString (String key)
+		{
+			return bundle.getString (key);
+		}
+		
+		@Override
+		public boolean getBoolean (String key)
+		{
+			return bundle.getBoolean (key);
+		}		
+
+		@Override
+		public long getLong (String key)
+		{
+			return bundle.getLong (key);
+		}		
+		
+		@Override
+		public Serializable getSerializable (String key)
+		{
+			return bundle.getSerializable (key);
+		}
+	}
+	
+	private static class PreferencesStorage implements Storage {
+		
+		SharedPreferences prefs;
+		
+		Editor editor;
+		
+		String pfx;
+		
+		public PreferencesStorage (SharedPreferences prefs, String pfx)
+		{
+			this.prefs = prefs;
+			this.pfx = pfx;
+		}
+		
+		private String key (String key)
+		{
+			return pfx + "." + key;
+		}
+		
+		@Override
+		public void write ()
+		{
+			editor = prefs.edit ();
+		}
+
+		@Override
+		public void commit ()
+		{
+			editor.commit ();
+			editor = null;
+		}
+		
+		@Override
+		public void putInt (String key, int value)
+		{
+			editor.putInt (key (key), value);
+		}
+		
+		@Override
+		public void putString (String key, String value)
+		{
+			editor.putString (key (key), value);
+		}
+		
+		@Override
+		public void putLong (String key, long value)
+		{
+			editor.putLong (key (key), value);
+		}
+
+		@Override
+		public void putBoolean (String key, boolean value)
+		{
+			editor.putBoolean (key (key), value);
+		}
+
+		@Override
+		public void putSerializable (String key, Serializable value)
+		{
+			/* ignored */
+		}
+		
+		@Override
+		public boolean containsKey (String key)
+		{
+			return prefs.contains (key (key));
+		}
+		
+		@Override
+		public void removeKey (String key)
+		{
+			editor.remove (key (key));
+		}
+
+		@Override
+		public int getInt (String key)
+		{
+			return prefs.getInt (key (key), -1);
+		}
+		
+		@Override
+		public String getString (String key)
+		{
+			return prefs.getString (key (key), null);
+		}
+		
+		@Override
+		public boolean getBoolean (String key)
+		{
+			return prefs.getBoolean (key (key), false);
+		}		
+
+		@Override
+		public long getLong (String key)
+		{
+			return prefs.getLong (key (key), -1);
+		}		
+		
+		@Override
+		public Serializable getSerializable (String key)
+		{
+			return null;
+		}
+	}
+
 	private static final String PREFIX = "com.wanikani.wanikaninotifier.DashboardData.";
 
 	private static final String KEY_USERNAME = PREFIX + "username";
@@ -296,6 +519,17 @@ public class DashboardData {
 	}
 	
 	/**
+	 * Constructor. An instance is created by unmarshalling a generic storage
+	 * @param storage the storage where to read the data from
+	 */
+	private DashboardData (Storage storage)
+	{
+		od = new OptionalData ();
+		
+		doDeserialize (storage);	
+	}
+
+	/**
 	 * Updates this object with optional data.
 	 * 	@param od the optional data
 	 */
@@ -344,59 +578,86 @@ public class DashboardData {
 	 */
 	public void serialize (Bundle bundle)
 	{
-		bundle.putString (KEY_USERNAME, username);
-		bundle.putString (KEY_TITLE, title);
-		bundle.putInt(KEY_LEVEL, level);
-		/* It could be null, if e != null */
-		if (creation != null)
-			bundle.putLong (KEY_CREATION, creation.getTime ());
-		bundle.putBoolean (KEY_VACATION, vacation);
+		doSerialize (new BundleStorage (bundle));
+	}
+	
+	public void serialize (SharedPreferences prefs, Source src)
+	{
+		doSerialize (new PreferencesStorage (prefs, src.getPrefix ()));
+	}
+	
+	protected void doSerialize (Storage storage)
+	{
+		boolean ok;
 		
-		bundle.putInt (KEY_LESSONS_AVAILABLE, lessonsAvailable);
-		bundle.putInt (KEY_REVIEWS_AVAILABLE, reviewsAvailable);
-		if (nextReviewDate != null)
-			bundle.putLong (KEY_NEXT_REVIEW_DATE, nextReviewDate.getTime ());
-		bundle.putInt (KEY_REVIEWS_AVAILABLE_NEXT_HOUR, reviewsAvailableNextHour);
-		bundle.putInt (KEY_REVIEWS_AVAILABLE_NEXT_DAY, reviewsAvailableNextDay);
+		ok = false;
+		storage.write ();
 		
-		if (od.srs != null) {
-			bundle.putInt (KEY_APPRENTICE, od.srs.apprentice.total);
-			bundle.putInt (KEY_GURU, od.srs.guru.total);
-			bundle.putInt (KEY_MASTER, od.srs.master.total);
-			bundle.putInt (KEY_ENLIGHTEN, od.srs.enlighten.total);
-			bundle.putInt (KEY_BURNED, od.srs.burned.total);
+		try {
+		
+			storage.putString (KEY_USERNAME, username);
+			storage.putString (KEY_TITLE, title);
+			storage.putInt(KEY_LEVEL, level);
+			/* It could be null, if e != null */
+			if (creation != null)
+				storage.putLong (KEY_CREATION, creation.getTime ());
+			else
+				storage.removeKey (KEY_CREATION);
+			storage.putBoolean (KEY_VACATION, vacation);
+		
+			storage.putInt (KEY_LESSONS_AVAILABLE, lessonsAvailable);
+			storage.putInt (KEY_REVIEWS_AVAILABLE, reviewsAvailable);
+			if (nextReviewDate != null)
+				storage.putLong (KEY_NEXT_REVIEW_DATE, nextReviewDate.getTime ());
+			else
+				storage.removeKey (KEY_NEXT_REVIEW_DATE);
+			storage.putInt (KEY_REVIEWS_AVAILABLE_NEXT_HOUR, reviewsAvailableNextHour);
+			storage.putInt (KEY_REVIEWS_AVAILABLE_NEXT_DAY, reviewsAvailableNextDay);
+		
+			if (od.srs != null) {
+				storage.putInt (KEY_APPRENTICE, od.srs.apprentice.total);
+				storage.putInt (KEY_GURU, od.srs.guru.total);
+				storage.putInt (KEY_MASTER, od.srs.master.total);
+				storage.putInt (KEY_ENLIGHTEN, od.srs.enlighten.total);
+				storage.putInt (KEY_BURNED, od.srs.burned.total);
 
-			bundle.putInt (KEY_KANJI_APPRENTICE, od.srs.apprentice.kanji);
-			bundle.putInt (KEY_KANJI_GURU, od.srs.guru.kanji);
-			bundle.putInt (KEY_KANJI_MASTER, od.srs.master.kanji);
-			bundle.putInt (KEY_KANJI_ENLIGHTEN, od.srs.enlighten.kanji);
-			bundle.putInt (KEY_KANJI_BURNED, od.srs.burned.kanji);
+				storage.putInt (KEY_KANJI_APPRENTICE, od.srs.apprentice.kanji);
+				storage.putInt (KEY_KANJI_GURU, od.srs.guru.kanji);
+				storage.putInt (KEY_KANJI_MASTER, od.srs.master.kanji);
+				storage.putInt (KEY_KANJI_ENLIGHTEN, od.srs.enlighten.kanji);
+				storage.putInt (KEY_KANJI_BURNED, od.srs.burned.kanji);
 			
-			bundle.putInt (KEY_VOCAB_APPRENTICE, od.srs.apprentice.vocabulary);
-			bundle.putInt (KEY_VOCAB_GURU, od.srs.guru.vocabulary);
-			bundle.putInt (KEY_VOCAB_MASTER, od.srs.master.vocabulary);
-			bundle.putInt (KEY_VOCAB_ENLIGHTEN, od.srs.enlighten.vocabulary);
-			bundle.putInt (KEY_VOCAB_BURNED, od.srs.burned.vocabulary);
-		}		
+				storage.putInt (KEY_VOCAB_APPRENTICE, od.srs.apprentice.vocabulary);
+				storage.putInt (KEY_VOCAB_GURU, od.srs.guru.vocabulary);
+				storage.putInt (KEY_VOCAB_MASTER, od.srs.master.vocabulary);
+				storage.putInt (KEY_VOCAB_ENLIGHTEN, od.srs.enlighten.vocabulary);
+				storage.putInt (KEY_VOCAB_BURNED, od.srs.burned.vocabulary);
+			} else
+				storage.removeKey (KEY_APPRENTICE);
 		
-		if (od.lp != null) {
-			bundle.putInt(KEY_RADICALS_PROGRESS, od.lp.radicalsProgress);
-			bundle.putInt(KEY_RADICALS_TOTAL, od.lp.radicalsTotal);
-			bundle.putInt(KEY_KANJI_PROGRESS, od.lp.kanjiProgress);
-			bundle.putInt(KEY_KANJI_TOTAL, od.lp.kanjiTotal);
+			if (od.lp != null) {
+				storage.putInt(KEY_RADICALS_PROGRESS, od.lp.radicalsProgress);
+				storage.putInt(KEY_RADICALS_TOTAL, od.lp.radicalsTotal);
+				storage.putInt(KEY_KANJI_PROGRESS, od.lp.kanjiProgress);
+				storage.putInt(KEY_KANJI_TOTAL, od.lp.kanjiTotal);
 			
+			} else
+				storage.removeKey (KEY_RADICALS_PROGRESS);
+		
+			if (od.ciStatus == OptionalDataStatus.RETRIEVED)
+				storage.putInt (KEY_CRITICAL_ITEMS, od.criticalItems);
+			else
+				storage.removeKey (KEY_CRITICAL_ITEMS);
+		
+			if (e != null)
+				storage.putSerializable (KEY_EXCEPTION, e);
+			ok = true;
+		} finally {
+			if (!ok)
+				storage.removeKey (KEY_USERNAME);
+			
+			storage.commit ();
 		}
-		
-		if (od.ciStatus == OptionalDataStatus.RETRIEVED)
-			bundle.putInt (KEY_CRITICAL_ITEMS, od.criticalItems);
-		
-		if (od.lpStatus == OptionalDataStatus.RETRIEVED) {
-			bundle.putSerializable (KEY_CURRENT_LEVEL_RADICALS, od.tlradicals);
-			bundle.putSerializable (KEY_CURRENT_LEVEL_KANJI, od.tlkanji);
-		}
-		
-		if (e != null)
-			bundle.putSerializable (KEY_EXCEPTION, e);
 	}
 	
 	/**
@@ -404,92 +665,93 @@ public class DashboardData {
 	 * @param bundle the source bundle
 	 */
 	private void deserialize (Bundle bundle)
-	{		
-		username = bundle.getString (KEY_USERNAME);
-		title = bundle.getString (KEY_TITLE);
-		level = bundle.getInt (KEY_LEVEL);
-		if (bundle.containsKey (KEY_CREATION))
-			creation = new Date (bundle.getLong (KEY_CREATION));
-		vacation = bundle.getBoolean (KEY_VACATION);
+	{
+		doDeserialize (new BundleStorage (bundle));
+	}
+	
+	public static DashboardData fromPreferences (SharedPreferences prefs, Source src)
+	{
+		Storage storage;
 		
-		lessonsAvailable = bundle.getInt (KEY_LESSONS_AVAILABLE);
-		reviewsAvailable = bundle.getInt (KEY_REVIEWS_AVAILABLE);
-		if (bundle.containsKey (KEY_NEXT_REVIEW_DATE))
-			nextReviewDate = new Date (bundle.getLong (KEY_NEXT_REVIEW_DATE));
-		reviewsAvailableNextHour = bundle.getInt (KEY_REVIEWS_AVAILABLE_NEXT_HOUR);
-		reviewsAvailableNextDay = bundle.getInt (KEY_REVIEWS_AVAILABLE_NEXT_DAY);
+		storage = new PreferencesStorage (prefs, src.getPrefix ());
+		
+		return storage.containsKey (KEY_USERNAME) ? new DashboardData (storage) : null;
+	}
+	
+	protected void doDeserialize (Storage storage)
+	{		
+		username = storage.getString (KEY_USERNAME);
+		title = storage.getString (KEY_TITLE);
+		level = storage.getInt (KEY_LEVEL);
+		if (storage.containsKey (KEY_CREATION))
+			creation = new Date (storage.getLong (KEY_CREATION));
+		vacation = storage.getBoolean (KEY_VACATION);
+		
+		lessonsAvailable = storage.getInt (KEY_LESSONS_AVAILABLE);
+		reviewsAvailable = storage.getInt (KEY_REVIEWS_AVAILABLE);
+		if (storage.containsKey (KEY_NEXT_REVIEW_DATE))
+			nextReviewDate = new Date (storage.getLong (KEY_NEXT_REVIEW_DATE));
+		reviewsAvailableNextHour = storage.getInt (KEY_REVIEWS_AVAILABLE_NEXT_HOUR);
+		reviewsAvailableNextDay = storage.getInt (KEY_REVIEWS_AVAILABLE_NEXT_DAY);
 
-		if (bundle.containsKey (KEY_APPRENTICE)) {
+		if (storage.containsKey (KEY_APPRENTICE)) {
 			od.srs = new SRSDistribution ();
 
 			od.srsStatus = OptionalDataStatus.RETRIEVED;
-			od.srs.apprentice.total = bundle.getInt (KEY_APPRENTICE);
-			od.srs.guru.total = bundle.getInt (KEY_GURU);
-			od.srs.master.total = bundle.getInt (KEY_MASTER);
-			od.srs.enlighten.total = bundle.getInt (KEY_ENLIGHTEN);
-			od.srs.burned.total = bundle.getInt (KEY_BURNED);
-			
-			od.srs.apprentice.kanji = bundle.getInt (KEY_KANJI_APPRENTICE);
-			od.srs.guru.kanji = bundle.getInt (KEY_KANJI_GURU);
-			od.srs.master.kanji = bundle.getInt (KEY_KANJI_MASTER);
-			od.srs.enlighten.kanji = bundle.getInt (KEY_KANJI_ENLIGHTEN);
-			od.srs.burned.kanji = bundle.getInt (KEY_KANJI_BURNED);
-			
-			od.srs.apprentice.vocabulary = bundle.getInt (KEY_VOCAB_APPRENTICE);
-			od.srs.guru.vocabulary = bundle.getInt (KEY_VOCAB_GURU);
-			od.srs.master.vocabulary = bundle.getInt (KEY_VOCAB_MASTER);
-			od.srs.enlighten.vocabulary = bundle.getInt (KEY_VOCAB_ENLIGHTEN);
-			od.srs.burned.vocabulary = bundle.getInt (KEY_VOCAB_BURNED);
+			od.srs.apprentice.total = storage.getInt (KEY_APPRENTICE);
+			od.srs.guru.total = storage.getInt (KEY_GURU);
+			od.srs.master.total = storage.getInt (KEY_MASTER);
+			od.srs.enlighten.total = storage.getInt (KEY_ENLIGHTEN);
+			od.srs.burned.total = storage.getInt (KEY_BURNED);
+				
+			od.srs.apprentice.kanji = storage.getInt (KEY_KANJI_APPRENTICE);
+			od.srs.guru.kanji = storage.getInt (KEY_KANJI_GURU);
+			od.srs.master.kanji = storage.getInt (KEY_KANJI_MASTER);
+			od.srs.enlighten.kanji = storage.getInt (KEY_KANJI_ENLIGHTEN);
+			od.srs.burned.kanji = storage.getInt (KEY_KANJI_BURNED);
+				
+			od.srs.apprentice.vocabulary = storage.getInt (KEY_VOCAB_APPRENTICE);
+			od.srs.guru.vocabulary = storage.getInt (KEY_VOCAB_GURU);
+			od.srs.master.vocabulary = storage.getInt (KEY_VOCAB_MASTER);
+			od.srs.enlighten.vocabulary = storage.getInt (KEY_VOCAB_ENLIGHTEN);
+			od.srs.burned.vocabulary = storage.getInt (KEY_VOCAB_BURNED);
 		} else {
 			/* RETRIEVING is correct, because this is what DashboardActivity
-			 * will do right after calling this method */
+		     * will do right after calling this method */
 			od.srsStatus = OptionalDataStatus.RETRIEVING;
 			od.srs = null;
 		}
 		
-		if (bundle.containsKey (KEY_RADICALS_PROGRESS)) {
+		if (storage.containsKey (KEY_RADICALS_PROGRESS)) {
 			od.lp = new LevelProgression ();
-
+				
 			od.lpStatus = OptionalDataStatus.RETRIEVED;
-			od.lp.radicalsProgress = bundle.getInt (KEY_RADICALS_PROGRESS);
-			od.lp.radicalsTotal = bundle.getInt (KEY_RADICALS_TOTAL);
-			od.lp.kanjiProgress = bundle.getInt (KEY_KANJI_PROGRESS);
-			od.lp.kanjiTotal = bundle.getInt (KEY_KANJI_TOTAL);
+			od.lp.radicalsProgress = storage.getInt (KEY_RADICALS_PROGRESS);
+			od.lp.radicalsTotal = storage.getInt (KEY_RADICALS_TOTAL);
+			od.lp.kanjiProgress = storage.getInt (KEY_KANJI_PROGRESS);
+			od.lp.kanjiTotal = storage.getInt (KEY_KANJI_TOTAL);
 		} else {
 			/* RETRIEVING is correct, because this is what DashboardActivity
 			 * will do right after calling this method */
 			od.lpStatus = OptionalDataStatus.RETRIEVING;
 			od.lp = null;
 		}
-		
-		if (bundle.containsKey (KEY_CRITICAL_ITEMS)) {
+			
+		if (storage.containsKey (KEY_CRITICAL_ITEMS)) {
 			od.ciStatus = OptionalDataStatus.RETRIEVED;
-			od.criticalItems = bundle.getInt (KEY_CRITICAL_ITEMS);
+			od.criticalItems = storage.getInt (KEY_CRITICAL_ITEMS);
 		} else {
 			/* RETRIEVING is correct, because this is what DashboardActivity
 			 * will do right after calling this method */
 			od.ciStatus = OptionalDataStatus.RETRIEVING;
 			od.criticalItems = 0;
 		}
-
-		if (bundle.containsKey (KEY_CURRENT_LEVEL_RADICALS)) {
-			od.tlStatus = OptionalDataStatus.RETRIEVED;
-			od.tlradicals = (ItemLibrary<Radical>) bundle.getSerializable (KEY_CURRENT_LEVEL_RADICALS);
-			od.tlkanji = (ItemLibrary<Kanji>) bundle.getSerializable (KEY_CURRENT_LEVEL_KANJI);
-		} else {
-			/* RETRIEVING is correct, because this is what DashboardActivity
-			 * will do right after calling this method */
-			od.tlStatus = OptionalDataStatus.RETRIEVING;
-			od.tlradicals = null;
-			od.tlkanji = null;
-		}
-
-		if (bundle.containsKey (KEY_EXCEPTION))
-			e = (IOException) bundle.getSerializable (KEY_EXCEPTION);
+			
+		if (storage.containsKey (KEY_EXCEPTION))
+			e = (IOException) storage.getSerializable (KEY_EXCEPTION);
 		else
 			e = null;
-		
-	}
+		}
 	
 	/**
 	 * Tells whether some optional data is still missing.

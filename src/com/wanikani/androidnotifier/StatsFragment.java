@@ -669,7 +669,6 @@ public class StatsFragment extends Fragment implements Tab {
 			
 			show |= updateL50 (days);
 			show |= updateNextLevel (days);
-			show |= updateShortest ();
 			vity = show ? View.VISIBLE : View.GONE;
 		
 			parent.findViewById (R.id.ct_eta).setVisibility (vity);
@@ -746,79 +745,7 @@ public class StatsFragment extends Fragment implements Tab {
 				return false;
 			}
 		}
-		
-		public boolean updateShortest ()
-		{
-			List<Date> rdates, kdates;
-			Date rdate, kdate, now, date;
-			TextView shvw;
-			String time;
-			int mage, days;
-			
-			shvw = (TextView) parent.findViewById (R.id.tag_eta_shortest);
-			
-			shvw.setVisibility (View.GONE);
-			if (dd.od.tlradicals == null || dd.od.tlkanji == null)
-				return false;
-			
-			now = new Date ();
-			rdates = getExpectedDates (dd.od.tlradicals, 2, now);
-			mage = (int) Math.ceil (rdates.size () * 9. / 10);
-			rdate = mage > 0 ? rdates.get (mage - 1) : now;
-			
-			kdates = getExpectedDates (dd.od.tlkanji, 3, rdate);			
-			mage = (int) Math.ceil (kdates.size () * 9. / 10);
-			kdate = mage > 0 ? kdates.get (mage - 1) : new Date ();
-			
-			date = rdate.after (kdate) ? rdate : kdate;
-			
-			/* Something funny going on */
-			if (!date.after (now))
-				return false;
-			
-			days = delta (now, date);
-			switch (days) {
-			case 0:
-				time = getString (R.string.tag_eta_today);
-				break;
-				
-			case 1:
-				time = getString (R.string.tag_eta_tomorrow);
-				break;
-				
-			default:
-				time = getString (R.string.tag_eta_in, days);
-				break;
-			}
-			
-			shvw.setVisibility (View.VISIBLE);
-			shvw.setText (getString (R.string.fmt_eta_shortest, time));
-			
-			return true;
-		}
-		
-		public int delta (Date from, Date to)
-		{
-			Calendar cal;
-			int i;
-
-			if (from.after (to))
-				return 0;
-			
-			/* Simpleminded, but it deals with DST in the correct way */
-			from = normalize (from);
-			to = normalize (to);
-			cal = Calendar.getInstance ();
-			cal.setTime (from);
-			for (i = 0; i < 10; i++) {
-				if (cal.getTime ().equals (to))
-					break;
-				cal.add (Calendar.DATE, 1);
-			}
-			
-			return i;
-		}
-		
+						
 		private Date normalize (Date date)
 		{
 			Calendar cal;
