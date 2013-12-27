@@ -609,7 +609,6 @@ public class CustomFontActivity extends Activity {
 	protected boolean readAsArchive (FontEntry fe)
 	{
 		ZipInputStream zis;
-		File entry;		
 		long suffix;
 		ZipEntry ze;
 		boolean once;

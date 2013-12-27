@@ -10,7 +10,6 @@ import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.UnderlineSpan;
 import android.util.AttributeSet;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
@@ -59,9 +58,6 @@ public class ProgressChart extends IconizableChart {
 			SpannableString spans;
 			TextView tview;
 			ViewGroup template;
-			Context ctxt;
-
-			ctxt = getContext ();
 
 			template = (ViewGroup) inflater.inflate (R.layout.progresschart_template, null);
 			row = (TableRow) template.getChildAt (0);

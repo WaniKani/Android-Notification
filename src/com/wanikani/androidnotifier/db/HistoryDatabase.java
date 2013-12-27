@@ -13,7 +13,6 @@ import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
-import android.net.UrlQuerySanitizer.ValueSanitizer;
 
 import com.wanikani.wklib.Item;
 import com.wanikani.wklib.Kanji;

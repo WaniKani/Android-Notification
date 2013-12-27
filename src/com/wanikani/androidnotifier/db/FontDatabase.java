@@ -238,9 +238,6 @@ public class FontDatabase {
 		private static final String SQL_WHERE_NAME =
 				C_NAME + " = ?";
 
-		private static final String SQL_WHERE_ENABLED =
-				C_ENABLED + " > 0";
-
 		/**
 		 * Creates the table
 		 * @param db the database
@@ -440,8 +437,6 @@ public class FontDatabase {
 	/** The database */
 	private SQLiteDatabase db;
 		
-	private static final String PREFIX = FontDatabase.class.getName () + ".";
-	
 	public static final Object MUTEX = new Object ();
 	
 	/**

@@ -19,7 +19,6 @@ import android.widget.Toast;
 
 import com.wanikani.androidnotifier.db.Format;
 
-
 /* 
  *  Copyright (c) 2013 Alberto Cuda
  *

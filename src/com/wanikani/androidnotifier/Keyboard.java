@@ -1,7 +1,5 @@
 package com.wanikani.androidnotifier;
 
-import android.widget.ImageButton;
-
 /* 
  *  Copyright (c) 2013 Alberto Cuda
  *

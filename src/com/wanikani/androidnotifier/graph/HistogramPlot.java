@@ -536,14 +536,6 @@ public class HistogramPlot extends View {
 			return ceil (t0);
 		}
 		
-		/**
-		 * Returns the current displayed interval
-		 * @return the interval
-		 */
-		public Pager.Interval getInterval ()
-		{
-			return new Pager.Interval (floor (t0), ceil (t1));
-		}		
 	}
 			
 	/// The scroller object that tracks fling gestures

@@ -2,7 +2,6 @@ package com.wanikani.androidnotifier.stats;
 
 import java.util.EnumMap;
 import java.util.EnumSet;
-import java.util.List;
 import java.util.Vector;
 
 import android.content.res.Resources;
@@ -11,7 +10,6 @@ import android.view.View;
 import com.wanikani.androidnotifier.MainActivity;
 import com.wanikani.androidnotifier.MeterSpec;
 import com.wanikani.androidnotifier.R;
-import com.wanikani.androidnotifier.graph.IconizableChart;
 import com.wanikani.androidnotifier.graph.ProgressChart;
 import com.wanikani.androidnotifier.graph.ProgressPlot;
 import com.wanikani.wklib.Connection.Meter;
@@ -21,6 +19,23 @@ import com.wanikani.wklib.Kanji;
 import com.wanikani.wklib.Radical;
 import com.wanikani.wklib.SRSLevel;
 import com.wanikani.wklib.Vocabulary;
+
+/* 
+ *  Copyright (c) 2013 Alberto Cuda
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 public class KanjiProgressChart implements NetworkEngine.Chart {
 	

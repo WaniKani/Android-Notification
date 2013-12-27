@@ -32,7 +32,6 @@ import android.view.View;
 import android.widget.Scroller;
 
 import com.wanikani.androidnotifier.R;
-import com.wanikani.androidnotifier.graph.IconizableChart.State;
 import com.wanikani.androidnotifier.graph.Pager.DataSet;
 import com.wanikani.wklib.UserInformation;
 

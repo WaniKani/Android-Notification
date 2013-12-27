@@ -33,7 +33,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
-import com.wanikani.androidnotifier.Tab.RefreshType;
 import com.wanikani.wklib.AuthenticationException;
 import com.wanikani.wklib.Connection;
 import com.wanikani.wklib.Item;
@@ -269,20 +268,8 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	 */
 	private class RefreshTask extends AsyncTask<Connection, Void, DashboardData > {
 		
-		/// The refresh type
-		RefreshType rtype;
-		
 		/// The default "turtle" avatar
 		Bitmap defAvatar;
-		
-		/**
-		 * Constructor.
-		 * @param rtype the type of refresh to be used
-		 */
-		public RefreshTask (RefreshType rtype)
-		{
-			this.rtype = rtype;
-		}
 		
 		/**
 		 * Called before starting the task, inside the activity thread.
@@ -348,7 +335,7 @@ public class MainActivity extends FragmentActivity implements Runnable {
 				
 				refreshComplete (dd, true);
 				
-				new RefreshTaskPartII (rtype, dd.level).execute (conn);
+				new RefreshTaskPartII ().execute (conn);
 			} catch (AuthenticationException e) {
 				error (R.string.status_msg_unauthorized);
 			} catch (IOException e) {
@@ -364,23 +351,6 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	 */
 	private class RefreshTaskPartII extends AsyncTask<Connection, Void, DashboardData.OptionalData> {
 
-		/// The refresh type
-		RefreshType rtype;
-		
-		/// User level
-		int level;
-
-		/**
-		 * Constructor
-		 * @param rtype refresh type
-		 * @param level current user level
-		 */
-		public RefreshTaskPartII (RefreshType rtype, int level)
-		{
-			this.rtype = rtype;
-			this.level = level;
-		}
-		
 		/**
 		 * Called before starting the task, inside the activity thread.
 		 */
@@ -785,7 +755,7 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	    		if (resumeRefresh)
 	    			refresh (Tab.RefreshType.LIGHT);
 	    		else if (ldd.isIncomplete ())
-	    			refreshOptional (ldd.level);
+	    			refreshOptional ();
 	    	} else
 	    		refresh (Tab.RefreshType.FULL_IMPLICIT);
 	    }
@@ -970,7 +940,7 @@ public class MainActivity extends FragmentActivity implements Runnable {
 			
 			pad.flush (rtype, pager.getCurrentItem ());
 			
-			rtask = new RefreshTask (rtype);
+			rtask = new RefreshTask ();
 			rtask.execute (conn);			
 	}
 	
@@ -980,9 +950,9 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	 * optional data, and then is resumed from a bundle. I'm not even
 	 * sure it can happen, however...
 	 */
-	private void refreshOptional (int level)
+	private void refreshOptional ()
 	{
-			new RefreshTaskPartII (RefreshType.FULL_IMPLICIT, level).execute (conn);			
+			new RefreshTaskPartII ().execute (conn);			
 	}
 
 	/**

@@ -44,8 +44,6 @@ public class MeterCountersView extends LinearLayout {
 	
 	private LayoutInflater inflater;
 	
-	private MeterSpec.Counter data;
-	
 	private Binding mobile, wifi, unknown;
 	
 	private View tdiv;
@@ -86,8 +84,6 @@ public class MeterCountersView extends LinearLayout {
 	{
 		boolean empty;
 		
-		this.data = data;
-
 		empty = data.total () == 0;
 		if (tdiv != null) {
 			tdiv.setVisibility (!empty ? View.VISIBLE : View.GONE);

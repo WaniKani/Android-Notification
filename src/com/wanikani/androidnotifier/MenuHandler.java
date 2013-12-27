@@ -26,7 +26,6 @@ import com.wanikani.androidnotifier.db.CSVFormat;
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 /**
  * This class contains some code shared between all the activities that 
  * support an options menu. The menu need not be the same for all, as long
