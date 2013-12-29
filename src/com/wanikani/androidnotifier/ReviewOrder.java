@@ -93,9 +93,10 @@ public class ReviewOrder {
 "        }\r\n" + 
 "    }\r\n" + 
 "    \r\n" + 
-"    if(method=='BULK')\r\n" + 
-"        for(var i=0;i<removedCount;i++)\r\n" + 
-"        	actList.push(revList.pop());\r\n" + 
+"    if(method=='SINGLE')\r\n" +
+"        Math.random = function() { return 0;  };" +   // @Ikalou's fix 
+"    for(var i=0;i<removedCount;i++)\r\n" + 
+"       	actList.push(revList.pop());\r\n" + 
 "    \r\n" + 
 "    console.log('Ordered ReviewQueue:');\r\n" + 
 "    for(var i=0;i<revList.length;i++){\r\n" + 

@@ -884,7 +884,7 @@ public class LocalIMEKeyboard implements Keyboard {
 		divw = wav.findViewById (R.id.ime_div);
 		imel = new IMEListener ();		
 		ew.addTextChangedListener (imel);
-		ew.setFilters (new InputFilter [] { new Filter () });
+		//ew.setFilters (new InputFilter [] { new Filter () });
 		ew.setInputType (InputType.TYPE_CLASS_TEXT);
 		ew.setOnEditorActionListener (imel);
 		ew.setGravity (Gravity.CENTER);
