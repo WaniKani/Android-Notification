@@ -1,18 +1,17 @@
 package com.wanikani.wklib;
 
-import java.io.Serializable;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
-public class ItemsCache implements Serializable {
+public class ItemsCache implements ItemsCacheInterface {
 	
-	public static final long serialVersionUID = 1L;
-	
-	public class LevelCache<T extends Item> implements Serializable {
+	static final long serialVersionUID = 2L; 
+
+	public class LevelCache<T extends Item> implements ItemsCacheInterface.Cache<T>{
 		
-		public static final long serialVersionUID = 1L;		
+		static final long serialVersionUID = 2L; 
 		
 		Map<Integer, ItemLibrary<T>> ht;
 		
@@ -81,4 +80,24 @@ public class ItemsCache implements Serializable {
 		kanji = new LevelCache<Kanji> ();
 		vocab = new LevelCache<Vocabulary> ();
 	}
+	
+	@Override
+	public Cache<Radical> getRadicals ()
+	{
+		return radicals;
+	}
+	
+	@Override
+	public Cache<Kanji> getKanji ()
+	{
+		return kanji;
+	}
+	
+	@Override
+	public Cache<Vocabulary> getVocab ()
+	{
+		return vocab;
+	}
+
+	
 }

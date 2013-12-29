@@ -82,7 +82,7 @@ public class Connection {
 	
 	UserInformation ui;
 	
-	public ItemsCache cache;
+	public ItemsCacheInterface cache;
 	
 	public Connection (UserLogin login, Config config)
 	{
@@ -191,14 +191,14 @@ public class Connection {
 		ItemLibrary<Radical> ans;
 		Response res;
 			
-		ans = cache.radicals.get (level);
+		ans = cache.getRadicals ().get (level);
 		if (ans != null)
 			return ans;
 		
 		try {
 			res = call (meter, "radicals", true, Integer.toString (level));
 
-			return cache.radicals.put 
+			return cache.getRadicals ().put 
 					(new ItemLibrary<Radical> (Radical.FACTORY, res.infoAsArray));
 				
 		} catch (JSONException e) {
@@ -219,7 +219,7 @@ public class Connection {
 		Response res;
 		
 		ans = new ItemLibrary<Radical> ();
-		levels = cache.radicals.get (ans, levels);
+		levels = cache.getRadicals ().get (ans, levels);
 		if (levels.length == 0)
 			return ans;
 
@@ -227,7 +227,7 @@ public class Connection {
 			res = call (meter, "radicals", true, levelList (levels));
 			ans.add (new ItemLibrary<Radical> (Radical.FACTORY, res.infoAsArray));
 			if (cacher)
-				cache.radicals.put (ans);
+				cache.getRadicals ().put (ans);
 			return ans;			
 		} catch (JSONException e) {
 			throw new ParseException ();
@@ -246,14 +246,14 @@ public class Connection {
 		ItemLibrary<Kanji> ans;
 		Response res;
 		
-		ans = cache.kanji.get (level);
+		ans = cache.getKanji ().get (level);
 		if (ans != null)
 			return ans;
 		
 		try {
 			res = call (meter, "kanji", true, Integer.toString (level));
 
-			return cache.kanji.put 
+			return cache.getKanji ().put 
 				(new ItemLibrary<Kanji> (Kanji.FACTORY, res.infoAsArray));
 			
 		} catch (JSONException e) {
@@ -274,7 +274,7 @@ public class Connection {
 		Response res;
 			
 		ans = new ItemLibrary<Kanji> ();
-		level = cache.kanji.get (ans, level);
+		level = cache.getKanji ().get (ans, level);
 		if (level.length == 0)
 			return ans;
 		
@@ -283,7 +283,7 @@ public class Connection {
 
 			ans.add (new ItemLibrary<Kanji> (Kanji.FACTORY, res.infoAsArray));
 			if (cacher)
-				cache.kanji.put (ans);
+				cache.getKanji ().put (ans);
 			
 			return ans;
 				
@@ -304,14 +304,14 @@ public class Connection {
 		ItemLibrary<Vocabulary> ans;
 		Response res;
 		
-		ans = cache.vocab.get (level);
+		ans = cache.getVocab ().get (level);
 		if (ans != null)
 			return ans;
 		
 		try {
 			res = call (meter, "vocabulary", true, Integer.toString (level));
 
-			return cache.vocab.put
+			return cache.getVocab ().put
 					(new ItemLibrary<Vocabulary> (Vocabulary.FACTORY, res.infoAsArray));
 			
 		} catch (JSONException e) {
@@ -332,7 +332,7 @@ public class Connection {
 		Response res;		
 		
 		ans = new ItemLibrary<Vocabulary> ();
-		level = cache.vocab.get (ans, level);
+		level = cache.getVocab ().get (ans, level);
 		if (level.length == 0)
 			return ans;
 		
@@ -340,7 +340,7 @@ public class Connection {
 			res = call (meter, "vocabulary", true, levelList (level));
 			ans.add (new ItemLibrary<Vocabulary> (Vocabulary.FACTORY, res.infoAsArray));
 			if (cacher)
-				cache.vocab.put (ans);
+				cache.getVocab ().put (ans);
 			
 			return ans;			
 		} catch (JSONException e) {
