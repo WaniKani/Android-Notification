@@ -92,6 +92,8 @@ public class SettingsActivity
 	private static final String KEY_LOCK_SCREEN = "pref_lock_screen";
 	/** Full screen during reviews */
 	private static final String KEY_FULLSCREEN = "pref_fullscreen";
+	/** HW keyboard */
+	private static final String KEY_HW_KEYBOARD = "pref_hw_keyboard";
 	/** The infamous CPU/memory leak kludge */
 	private static final String KEY_LEAK_KLUDGE = "pref_leak_kludge";
 	/** The even more infamous timer reaper kludge */
@@ -578,6 +580,11 @@ public class SettingsActivity
 	public static boolean getFullscreen (Context ctxt)
 	{
 		return prefs (ctxt).getBoolean (KEY_FULLSCREEN, false);
+	}
+
+	public static boolean getHWKeyboard (Context ctxt)
+	{
+		return prefs (ctxt).getBoolean (KEY_HW_KEYBOARD, false);
 	}
 
 	public static boolean getLeakKludge (Context ctxt)
