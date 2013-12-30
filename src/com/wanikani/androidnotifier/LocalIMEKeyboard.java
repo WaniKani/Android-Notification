@@ -1036,6 +1036,8 @@ public class LocalIMEKeyboard implements Keyboard {
 		if (bpos.shallShow ()) {
 			divw.setVisibility (View.VISIBLE);		
 			ew.requestFocus ();
+			if (hwkeyb)
+				imm.hideSoftInputFromWindow (ew.getWindowToken (), 0);
 		}
 	}
 	
@@ -1172,7 +1174,8 @@ public class LocalIMEKeyboard implements Keyboard {
 		ew.setBackgroundColor (Color.WHITE);
 		ew.setCursorVisible (true);
 
-		imm.showSoftInput (ew, 0);
+		if (!hwkeyb)
+			imm.showSoftInput (ew, 0);
 		ew.requestFocus ();
 	}
 
