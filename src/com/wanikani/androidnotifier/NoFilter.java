@@ -80,7 +80,7 @@ public class NoFilter implements Filter {
 			lib = new ItemLibrary<Item> ();
 			imgrad = new Vector<Radical> ();
 			try {
-				lib.add (conn.getRadicals (meter, false));
+				lib.add (conn.getRadicals (meter));
 				i = lib.list.iterator ();
 				while (i.hasNext ()) {
 					rad = (Radical) i.next ();
@@ -96,7 +96,7 @@ public class NoFilter implements Filter {
 			
 			lib = new ItemLibrary<Item> ();
 			try {
-				lib.add (conn.getKanji (meter, false));
+				lib.add (conn.getKanji (meter));
 				lpublishProgress (lib);
 			} catch (IOException e) {
 				ok = false;
@@ -104,7 +104,7 @@ public class NoFilter implements Filter {
 			
 			lib = new ItemLibrary<Item> ();
 			try {
-				lib.add (conn.getVocabulary (meter, false));
+				lib.add (conn.getVocabulary (meter));
 				lpublishProgress (lib);
 			} catch (IOException e) {
 				ok = false;

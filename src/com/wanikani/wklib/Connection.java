@@ -7,13 +7,17 @@ import java.net.Authenticator;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Vector;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
+
+import com.wanikani.wklib.ItemsCacheInterface.Quality;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -49,13 +53,17 @@ public class Connection {
 		
 		UserInformation ui;
 		
+		Date lastModified;
+		
 		JSONObject infoAsObj;
 
 		JSONArray infoAsArray;
 
-		public Response (JSONObject obj, boolean isArray)
+		public Response (JSONObject obj, Date lastModified, boolean isArray)
 			throws JSONException, IOException
 		{
+			this.lastModified = lastModified;
+			
 			if (!obj.isNull("user_information")) {
 				ui = new UserInformation (obj.getJSONObject ("user_information"));
 				if (!obj.isNull ("requested_information")) {
@@ -70,9 +78,26 @@ public class Connection {
 		}
 	}
 	
+	class NotModifiedException extends IOException {
+		
+		private static final long serialVersionUID = 1L;
+		
+		public NotModifiedException ()
+		{
+			super ("Document not modified");
+		}
+		
+	}
+	
 	public static final int CONNECT_TIMEOUT = 20000;
 	
 	public static final int READ_TIMEOUT = 60000;
+	
+	private static final int CACHE_DISPERSION_GROUPS = 7;
+	
+	private static final long CACHE_STALE_DISPERSION = 12 * 3600 * 1000;
+	
+	private static final long CACHE_STALE_TIME = 7 * 24 * 3600 * 1000;
 	
 	UserLogin login;
 	
@@ -172,188 +197,187 @@ public class Connection {
 		return ans;
 	}
 	
-	private static String levelList (int level [])
+	private static String levelList (List<Integer> level)
 	{
 		StringBuffer sb;
 		int i;
 		
 		sb = new StringBuffer ();
-		sb.append (level [0]);		
-		for (i = 1; i < level.length; i++)
-			sb.append (',').append (level [i]);
+		sb.append (level.get (0));		
+		for (i = 1; i < level.size (); i++)
+			sb.append (',').append (level.get (i));
 		
 		return sb.toString ();
+	}
+	
+	private static<T extends Item> boolean isDataStale (ItemsCacheInterface.LevelData<T> ld, int level)
+	{		
+		Date now;
+		long age;
+		
+		now = new Date ();
+		age = now.getTime () - ld.date.getTime ();
+		if (age > CACHE_STALE_TIME + CACHE_STALE_DISPERSION * (level % CACHE_DISPERSION_GROUPS))
+			return true;
+		
+		for (T item : ld.lib.list) 
+			if (item.getAvailableDate () != null &&
+			    item.getAvailableDate ().before (now))
+				return true;
+		
+		return false;
 	}
 	
 	public ItemLibrary<Radical> getRadicals (Meter meter, int level)
 			throws IOException
 	{
-		ItemLibrary<Radical> ans;
-		Response res;
-			
-		ans = cache.getRadicals ().get (level);
-		if (ans != null)
-			return ans;
-		
-		try {
-			res = call (meter, "radicals", true, Integer.toString (level));
-
-			return cache.getRadicals ().put 
-					(new ItemLibrary<Radical> (Radical.FACTORY, res.infoAsArray));
-				
-		} catch (JSONException e) {
-			throw new ParseException ();
-		}
+		return getItems (meter, level, "radicals", Item.Type.RADICAL, Radical.FACTORY);
 	}
 
+	public ItemLibrary<Radical> getRadicals (Meter meter)
+			throws IOException
+	{		
+		return getRadicals (meter, getAllLevels (meter));
+	}
+		
 	public ItemLibrary<Radical> getRadicals (Meter meter, int levels [])
 			throws IOException
 	{
-		return getRadicals (meter, levels, true);
+		return getItems (meter, levels, "radicals", Item.Type.RADICAL, Radical.FACTORY);
 	}
 
-	public ItemLibrary<Radical> getRadicals (Meter meter, int levels [], boolean cacher)
-		throws IOException
-	{
-		ItemLibrary<Radical> ans;
-		Response res;
-		
-		ans = new ItemLibrary<Radical> ();
-		levels = cache.getRadicals ().get (ans, levels);
-		if (levels.length == 0)
-			return ans;
-
-		try {
-			res = call (meter, "radicals", true, levelList (levels));
-			ans.add (new ItemLibrary<Radical> (Radical.FACTORY, res.infoAsArray));
-			if (cacher)
-				cache.getRadicals ().put (ans);
-			return ans;			
-		} catch (JSONException e) {
-			throw new ParseException ();
-		}
-	}
-	
-	public ItemLibrary<Radical> getRadicals (Meter meter, boolean cacher)
-			throws IOException
-	{		
-		return getRadicals (meter, getAllLevels (meter), cacher);
-	}
-		
 	public ItemLibrary<Kanji> getKanji (Meter meter, int level)
-		throws IOException
+			throws IOException
 	{
-		ItemLibrary<Kanji> ans;
-		Response res;
-		
-		ans = cache.getKanji ().get (level);
-		if (ans != null)
-			return ans;
-		
-		try {
-			res = call (meter, "kanji", true, Integer.toString (level));
+		return getItems (meter, level, "kanji", Item.Type.KANJI, Kanji.FACTORY);
+	}	
 
-			return cache.getKanji ().put 
-				(new ItemLibrary<Kanji> (Kanji.FACTORY, res.infoAsArray));
-			
-		} catch (JSONException e) {
-			throw new ParseException ();
-		}
-	}
-	
-	public ItemLibrary<Kanji> getKanji (Meter meter, int level [])
-		throws IOException
-	{
-		return getKanji (meter, level, true);
-	}
-
-	public ItemLibrary<Kanji> getKanji (Meter meter, int level [], boolean cacher)
-		throws IOException
-	{
-		ItemLibrary<Kanji> ans;
-		Response res;
-			
-		ans = new ItemLibrary<Kanji> ();
-		level = cache.getKanji ().get (ans, level);
-		if (level.length == 0)
-			return ans;
-		
-		try {
-			res = call (meter, "kanji", true, levelList (level));
-
-			ans.add (new ItemLibrary<Kanji> (Kanji.FACTORY, res.infoAsArray));
-			if (cacher)
-				cache.getKanji ().put (ans);
-			
-			return ans;
-				
-		} catch (JSONException e) {
-			throw new ParseException ();
-		}
-	}
-		
-	public ItemLibrary<Kanji> getKanji (Meter meter, boolean cacher)
+	public ItemLibrary<Kanji> getKanji (Meter meter)
 			throws IOException
 	{		
-		return getKanji (meter, getAllLevels (meter), cacher);
+		return getKanji (meter, getAllLevels (meter));
+	}
+		
+	public ItemLibrary<Kanji> getKanji (Meter meter, int levels [])
+			throws IOException
+	{
+		return getItems (meter, levels, "kanji", Item.Type.KANJI, Kanji.FACTORY);
 	}
 	
 	public ItemLibrary<Vocabulary> getVocabulary (Meter meter, int level)
-		throws IOException
-	{
-		ItemLibrary<Vocabulary> ans;
-		Response res;
-		
-		ans = cache.getVocab ().get (level);
-		if (ans != null)
-			return ans;
-		
-		try {
-			res = call (meter, "vocabulary", true, Integer.toString (level));
-
-			return cache.getVocab ().put
-					(new ItemLibrary<Vocabulary> (Vocabulary.FACTORY, res.infoAsArray));
-			
-		} catch (JSONException e) {
-			throw new ParseException ();
-		}
-	}
-	
-	public ItemLibrary<Vocabulary> getVocabulary (Meter meter, int level [])
-		throws IOException
-	{
-		return getVocabulary (meter, level, true);
-	}
-
-	public ItemLibrary<Vocabulary> getVocabulary (Meter meter, int level [], boolean cacher)
 			throws IOException
 	{
-		ItemLibrary<Vocabulary> ans;
-		Response res;		
-		
-		ans = new ItemLibrary<Vocabulary> ();
-		level = cache.getVocab ().get (ans, level);
-		if (level.length == 0)
-			return ans;
-		
-		try {
-			res = call (meter, "vocabulary", true, levelList (level));
-			ans.add (new ItemLibrary<Vocabulary> (Vocabulary.FACTORY, res.infoAsArray));
-			if (cacher)
-				cache.getVocab ().put (ans);
-			
-			return ans;			
-		} catch (JSONException e) {
-			throw new ParseException ();
-		}
+		return getItems (meter, level, "vocabulary", Item.Type.VOCABULARY, Vocabulary.FACTORY);
 	}
-	
-	public ItemLibrary<Vocabulary> getVocabulary (Meter meter, boolean cacher)
+
+	public ItemLibrary<Vocabulary> getVocabulary (Meter meter)
 			throws IOException
 	{		
-		return getVocabulary (meter, getAllLevels (meter), cacher);
+		return getVocabulary (meter, getAllLevels (meter));
+	}
+		
+	public ItemLibrary<Vocabulary> getVocabulary (Meter meter, int levels [])
+			throws IOException
+	{
+		return getItems (meter, levels, "vocabulary", Item.Type.VOCABULARY, Vocabulary.FACTORY);
+	}
+	
+	protected<T extends Item> ItemLibrary<T> getItems (Meter meter, int level, String resource, 
+													   Item.Type type, Item.Factory<T> factory)
+			throws IOException
+	{
+		ItemsCacheInterface.LevelData<T> data;
+		ItemsCacheInterface.Cache<T> ic;
+		ItemLibrary<T> lib;
+		Response res;
+			
+		ic = cache.get (type);
+		data = ic.get (level);				
+		if (data.quality == ItemsCacheInterface.Quality.GOOD &&	!isDataStale (data, level))
+			return data.lib;
+		
+		try {
+			res = call (meter, resource, true, Integer.toString (level), data.date);
+
+			lib = new ItemLibrary<T> (factory, res.infoAsArray);
+			
+			data = new ItemsCacheInterface.LevelData<T> (res.lastModified, lib);
+			ic.put (data);
+			
+			return lib;
+			
+		} catch (NotModifiedException e) {	
+			return data.lib;
+		} catch (JSONException e) {
+			throw new ParseException ();
+		}
 	}
 
+	protected<T extends Item> ItemLibrary<T> getItems (Meter meter, int levels [], String resource, 
+			  										   Item.Type type, Item.Factory<T> factory)
+			throws IOException
+	{
+		Map<Integer, ItemsCacheInterface.LevelData<T>> map;
+		ItemsCacheInterface.LevelData <T> ld;
+		ItemsCacheInterface.Cache<T> ic;
+		List<Integer> badl, missingl;
+		ItemLibrary<T> ans, lib;
+		Response res;
+		Date cachedt;
+
+		ic = cache.get (type);
+		map = ItemsCacheInterface.LevelData.createMap (levels);
+		ic.get (map);
+
+		cachedt = new Date ();
+		ans = new ItemLibrary<T> ();
+		badl = new Vector<Integer> ();
+		missingl = new Vector<Integer> ();
+		for (Map.Entry<Integer, ItemsCacheInterface.LevelData<T>> e : map.entrySet ()) {
+			ld = e.getValue ();
+			switch (ld.quality) {
+			case GOOD:
+				if (isDataStale (ld, e.getKey ())) {
+					if (ld.date.before (cachedt))
+						cachedt = ld.date;
+					badl.add (e.getKey ());					
+				} else				
+					ans.add (ld.lib);
+				break;
+				
+			case MISSING:
+				missingl.add (e.getKey ());
+			}
+		}
+
+		try {
+			if (!badl.isEmpty ()) {
+				res = call (meter, resource, true, levelList (badl), cachedt);
+				lib = new ItemLibrary<T> (factory, res.infoAsArray);
+				ic.put (new ItemsCacheInterface.LevelData<T> (res.lastModified, lib));
+				ans.add (lib);
+			} 
+		} catch (NotModifiedException e) {
+			for (Integer i : badl)
+				ans.add (map.get (i).lib);
+		} catch (JSONException e) {
+			throw new ParseException ();
+		}
+		
+		try {
+			if (!missingl.isEmpty ()) {
+				res = call (meter, resource, true, levelList (missingl), null);
+				lib = new ItemLibrary<T> (factory, res.infoAsArray);
+				ic.put (new ItemsCacheInterface.LevelData<T> (res.lastModified, lib));
+				ans.add (lib);
+			} 
+		} catch (JSONException e) {
+			throw new ParseException ();
+		}
+		
+		return ans;
+	}
+	
 	public ItemLibrary<Item> getRecentUnlocks (Meter meter, int count)
 		throws IOException
 	{
@@ -426,13 +450,20 @@ public class Connection {
 	{
 			return call (meter, resource, isArray, null);
 	}
-		
+
 	protected Response call (Meter meter, String resource, boolean isArray, String arg)
+		throws IOException
+	{
+		return call (meter, resource, isArray, arg, null);
+	}
+
+	protected Response call (Meter meter, String resource, boolean isArray, String arg, Date ifModified)
 		throws IOException
 	{
 		HttpURLConnection conn;
 		JSONTokener tok;
 		InputStream is;
+		Date lastModified;
 		URL url;
 		
 		url = new URL (makeURL (resource, arg));
@@ -440,7 +471,11 @@ public class Connection {
 		tok = null;
 		try {
 			conn = (HttpURLConnection) url.openConnection ();
+			if (ifModified != null)
+				conn.setIfModifiedSince (ifModified.getTime ());
 			setTimeouts (conn);
+			if (ifModified != null && conn.getResponseCode () == HttpURLConnection.HTTP_NOT_MODIFIED)
+				throw new NotModifiedException ();
 			is = conn.getInputStream ();
 			measureHeaders (meter, conn, false);
 			tok = new JSONTokener (readStream (meter, is));
@@ -448,9 +483,15 @@ public class Connection {
 			if (conn != null)
 				conn.disconnect ();
 		}
+				
+		lastModified = new Date ();
+		if (conn.getDate () > 0)
+			lastModified = new Date (conn.getDate ());
+		if (conn.getLastModified () > 0)
+			lastModified = new Date (conn.getLastModified ());
 		
 		try {
-			return new Response (new JSONObject (tok), isArray);
+			return new Response (new JSONObject (tok), lastModified, isArray);
 		} catch (JSONException e) {
 			throw new ParseException ();
 		}

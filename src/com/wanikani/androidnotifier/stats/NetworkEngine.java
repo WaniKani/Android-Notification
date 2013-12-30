@@ -123,7 +123,7 @@ public class NetworkEngine {
 
 			try {
 				if (task.types.contains (Item.Type.RADICAL)) {
-					rlib = conn.getRadicals (task.meter, false);
+					rlib = conn.getRadicals (task.meter);
 					for (State s : states)
 						s.newRadical (rlib);
 				}
@@ -133,7 +133,7 @@ public class NetworkEngine {
 
 			try {
 				if (task.types.contains (Item.Type.KANJI)) {
-					klib = conn.getKanji (task.meter, false);
+					klib = conn.getKanji (task.meter);
 					for (State s : states)
 						s.newKanji (klib);
 				}
@@ -150,7 +150,7 @@ public class NetworkEngine {
 						bunch = new int [Math.min (BUNCH_SIZE, levels - i + 1)];
 						for (j = 0; j < BUNCH_SIZE && i <= levels; j++)
 							bunch [j] = i++;
-						vlib = conn.getVocabulary (task.meter, bunch, false);
+						vlib = conn.getVocabulary (task.meter, bunch);
 						for (State s : states)
 							s.newVocab (vlib);
 						publishProgress ((100 * (i - 1)) / (levels + 2));

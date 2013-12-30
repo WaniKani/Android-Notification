@@ -1,71 +1,60 @@
 package com.wanikani.wklib;
 
+import java.util.EnumMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
+import com.wanikani.wklib.ItemsCacheInterface.LevelData;
+
 public class ItemsCache implements ItemsCacheInterface {
 	
 	static final long serialVersionUID = 2L; 
 
-	public class LevelCache<T extends Item> implements ItemsCacheInterface.Cache<T>{
+	public class LevelCache<T extends Item> implements ItemsCacheInterface.Cache<T> {
 		
 		static final long serialVersionUID = 2L; 
 		
-		Map<Integer, ItemLibrary<T>> ht;
+		Map<Integer, ItemsCacheInterface.LevelData<T>> ht;
 		
 		public LevelCache ()
 		{
-			ht = new Hashtable<Integer, ItemLibrary<T>> ();
+			ht = new Hashtable<Integer, LevelData<T>> ();
 		}
 		
-		public synchronized ItemLibrary<T> get (int level)
+		public LevelData<T> get (int level)
 		{
-			return ht.get (level);
-		}
-		
-		
-		public synchronized int [] get (ItemLibrary<T> lib, int level [])
-		{
-			List<Integer> missing;
-			ItemLibrary<T> clib;
-			int i;
+			LevelData<T> ans;
 			
-			missing = new Vector<Integer> (level.length);
-			for (i = 0; i < level.length; i++) {
-				clib = ht.get (level [i]);
-				if (clib != null)
-					lib.add (clib);
-				else
-					missing.add (level [i]);
+			ans = ht.get (level);
+			
+			return ans != null ? ans : new LevelData<T> ();
+		}
+
+		public void get (Map<Integer, LevelData <T>> data)
+		{
+			for (int level : data.keySet ())
+				data.put (level, get (level));
+		}
+		
+		public void put (LevelData <T> data)
+		{
+			Map<Integer, LevelData <T>> map;
+			LevelData<T> ld;
+			
+			map = new Hashtable<Integer, LevelData <T>> ();
+			for (T t : data.lib.list) {
+				ld = map.get (t.level);
+				if (ld == null) {
+					ld = new LevelData<T> (data.date, new ItemLibrary<T> ());
+					map.put (t.level, ld);
+				}
+				ld.lib.add (t);
 			}
-			
-			level = new int [missing.size ()];
-			for (i = 0; i < level.length; i++)
-				level [i] = missing.get (i);
-			
-			return level;
-		}
-		
-		public synchronized ItemLibrary<T> put (ItemLibrary<T> lib)
-		{
-			Map<Integer, ItemLibrary<T>> map;
-			ItemLibrary<T> tlib;
-			
-			map = new Hashtable<Integer, ItemLibrary<T>> ();
-			for (T t : lib.list) {
-				tlib = map.get (t.level);
-				if (tlib == null)
-					map.put (t.level, tlib = new ItemLibrary<T> ());
-				tlib.list.add (t);
-			}
-			
+				
 			ht.putAll (map);
-			
-			return lib;
-		}
-		
+		}		
 	}
 
 	LevelCache<Radical> radicals;
@@ -82,22 +71,20 @@ public class ItemsCache implements ItemsCacheInterface {
 	}
 	
 	@Override
-	public Cache<Radical> getRadicals ()
+	public<T extends Item> Cache<T> get (Item.Type type)
 	{
-		return radicals;
+		switch (type) {
+		case RADICAL:
+			return (Cache<T>) radicals;
+			
+		case KANJI:
+			return (Cache <T>) kanji;
+			
+		case VOCABULARY:
+			return (Cache <T>) vocab;
+		}
+		
+		return null;
 	}
-	
-	@Override
-	public Cache<Kanji> getKanji ()
-	{
-		return kanji;
-	}
-	
-	@Override
-	public Cache<Vocabulary> getVocab ()
-	{
-		return vocab;
-	}
-
 	
 }
