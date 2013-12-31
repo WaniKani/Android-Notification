@@ -68,6 +68,8 @@ public class SettingsActivity
 	private static final String KEY_PREF_SHOW_MUTE = "pref_show_mute";
 	/** Ignore button */
 	private static final String KEY_PREF_IGNORE_BUTTON = "pref_ignore_button";
+	/** Single button */
+	private static final String KEY_PREF_SINGLE_BUTTON = "pref_single_button";
 	/** WaniKani improve */
 	private static final String KEY_PREF_WANIKANI_IMPROVE = "pref_wanikani_improve";
 	/** Review Order */
@@ -304,6 +306,9 @@ public class SettingsActivity
 		pref = findPreference (KEY_PREF_SHOW_MUTE);
 		pref.setEnabled (getUseIntegratedBrowser (prefs));
 		
+		pref = findPreference (KEY_PREF_SINGLE_BUTTON);
+		pref.setEnabled (getUseIntegratedBrowser (prefs));
+
 		pref = findPreference (KEY_PREF_REVIEW_ORDER);
 		pref.setEnabled (getUseIntegratedBrowser (prefs));
 
@@ -530,6 +535,11 @@ public class SettingsActivity
 		return prefs (ctxt).getBoolean (KEY_PREF_SHOW_MUTE, true);
 	}
 	
+	public static boolean getShowSingle (Context ctxt)
+	{
+		return prefs (ctxt).getBoolean (KEY_PREF_SINGLE_BUTTON, true);
+	}
+
 	public static boolean get42plus (Context ctxt)
 	{
 		return prefs (ctxt).getBoolean (KEY_PREF_42PLUS, false);

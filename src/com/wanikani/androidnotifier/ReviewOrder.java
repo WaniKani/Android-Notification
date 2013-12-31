@@ -26,8 +26,8 @@ public class ReviewOrder {
 "        '<tr><td>Kan</td><td align=\"right\"><span id=\"wkroKanCount\"></span></td></tr>'+\r\n" + 
 "        '<tr><td>Voc</td><td align=\"right\"><span id=\"wkroVocCount\"></span></td></tr>'+\r\n" + 
 "        '</tbody></table></div><div id=\"divSt\">Not Ordered!</div>'+\r\n" + 
-"        '<button id=\"reorderBtn1\" type=\"button\" onclick=\"window.wknReorderBulk();\">Bulk Mode</button>'+\r\n" + 
-"        '<button id=\"reorderBtn2\" type=\"button\" onclick=\"window.wknReorderSingle();\">Single Mode</button>'+\r\n" + 
+"        '<button id=\"reorderBtn1\" type=\"button\" onclick=\"window.wknReorderBulk();\">Reorder</button>'+\r\n" + 
+//"        '<button id=\"reorderBtn2\" type=\"button\" onclick=\"window.wknReorderSingle();\">Single Mode</button>'+\r\n" + 
 "        '</div>';\r\n" + 
 "    $.jStorage.listenKeyChange(\"activeQueue\",displayUpdate);\r\n" + 
 //"	window.addEventListener('reorderWKSingle',reorderSingle); \r\n" + 

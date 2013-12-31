@@ -56,14 +56,23 @@
             android:id="@+id/wv_reviews"
             android:layout_width="match_parent"
             android:layout_height="match_parent"/>
-        <ImageButton
-              android:id="@+id/kb_mute_h"
-              style="@style/AlertButton"
-              android:visibility="gone"
+        <LinearLayout 
+              android:orientation="vertical"
               android:layout_alignParentTop="true"
               android:layout_alignParentLeft="true"
               android:layout_marginTop="48dip"
+			  android:layout_width="wrap_content"
+			  android:layout_height="wrap_content">
+        <ImageButton
+              android:id="@+id/kb_mute_h"
+              style="@style/AlertButton"
               android:src="@drawable/ic_mute" />
+        <Button
+              android:id="@+id/kb_single"
+              style="@style/AlertButton"
+              android:visibility="gone"
+              android:text="1" />
+        </LinearLayout>
         <TextView
             android:id="@+id/txt_question_override"
             android:layout_width="wrap_content"
