@@ -534,10 +534,15 @@ public class WebReviewActivity extends Activity {
 	
 	/** Javascript to be called each time an HTML page is loaded. It hides or shows the keyboard */
 	private static final String JS_INIT_KBD = 
-			"var textbox, lessobj, ltextbox, reviews;" +
+			"var textbox, lessobj, ltextbox, reviews, style;" +
 			"textbox = document.getElementById (\"" + WKConfig.ANSWER_BOX + "\"); " +
 			"reviews = document.getElementById (\"" + WKConfig.REVIEWS_DIV + "\");" +
 			"quiz = document.getElementById (\"" + WKConfig.QUIZ + "\");" +
+			/* This fixes a bug that makes SRS indication slow */
+			"style = document.createElement('style');" + 
+			"style.type = 'text/css';" + 
+			"style.innerHTML = '.animated { -webkit-animation-duration:0s; }';" + 
+			"document.getElementsByTagName('head')[0].appendChild(style);" +
 			"if (quiz != null) {" +
 			"   wknKeyboard.showLessonsNew ();" +
 			"} else if (textbox != null && !textbox.disabled) {" +
