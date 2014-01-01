@@ -52,7 +52,7 @@ public class ReviewOrder {
 "    console.log('reorder() start');\r\n" + 
 "    var divSt = get(\"divSt\");\r\n" + 
 "    reorderBtn1.style.visibility=\"hidden\";\r\n" + 
-"    reorderBtn2.style.visibility=\"hidden\";\r\n" + 
+//"    reorderBtn2.style.visibility=\"hidden\";\r\n" + 
 "    divSt.innerHTML = 'Reordering.. please wait!';\r\n" + 
 "        \r\n" + 
 "    var cur = $.jStorage.get(\"currentItem\");\r\n" + 
@@ -144,7 +144,7 @@ public class ReviewOrder {
 "    $(\"#wkroStatus\").show (); " +
 "    $(\"#divSt\").show (); " +
 "    $(\"#reorderBtn1\").show (); " +
-"    $(\"#reorderBtn2\").show (); " +
+//"    $(\"#reorderBtn2\").show (); " +
 "} else {" +
 "    init();\r\n" + 
 "    console.log('script load end');" +
@@ -154,5 +154,6 @@ public class ReviewOrder {
 "$(\"#wkroStatus\").hide ();" +
 "$(\"#divSt\").hide (); " +
 "$(\"#reorderBtn1\").hide ();" +
-"$(\"#reorderBtn2\").hide ();";
+//"$(\"#reorderBtn2\").hide ();" +
+"";
 }
