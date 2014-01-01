@@ -88,7 +88,12 @@
             android:orientation="horizontal"
             android:layout_alignParentLeft="true"
             android:layout_alignParentTop="true">
-        	<ImageButton
+        	<View 
+        	    android:id="@+id/v_srs"
+        	    style="@style/HalfAlertButton"
+        	    android:visibility="gone"
+        	    android:layout_gravity="center_vertical"/>
+            <ImageButton
             	android:id="@+id/btn_ignore"
               	style="@style/AlertButton"
               	android:visibility="gone"
