@@ -551,38 +551,22 @@ public class SettingsActivity
 		return prefs (ctxt).getBoolean (KEY_MUTE, false);
 	}
 	
-	public static boolean getTipAck (Context ctxt)
-	{
-		return prefs (ctxt).getBoolean (KEY_TIP_ACK, false);
-	}
-	
-	public static boolean setTipAck (Context ctxt, boolean value)
-	{
-		return prefs (ctxt).edit ().putBoolean (KEY_TIP_ACK, value).commit ();
-	}
-	
 	public static boolean getIgnoreButtonMessage (Context ctxt)
 	{
+		String s;
+		
+		s = prefs (ctxt).getString (KEY_IGNORE_BUTTON_MESSAGE_ACK_NEW, "false");
+		
 		return 
-				prefs (ctxt).getBoolean (KEY_IGNORE_BUTTON_MESSAGE_ACK, false) ||
+				prefs (ctxt).getBoolean (KEY_IGNORE_BUTTON_MESSAGE_ACK, false) || 
 				!prefs (ctxt).getString (KEY_IGNORE_BUTTON_MESSAGE_ACK_NEW, "false").equals ("false");
 	}
 	
 	public static boolean setIgnoreButtonMessage (Context ctxt, boolean value)
 	{
-		prefs (ctxt).edit ().putString (KEY_IGNORE_BUTTON_MESSAGE_ACK_NEW, value ? "true" : "false");
+		prefs (ctxt).edit ().putString (KEY_IGNORE_BUTTON_MESSAGE_ACK_NEW, value ? "true" : "false").commit ();
 		
 		return value;
-	}
-
-	public static boolean getCustomIMEMessage (Context ctxt)
-	{
-		return prefs (ctxt).getBoolean (KEY_CUSTOM_IME, false);
-	}
-	
-	public static boolean setCustomIMEMessage (Context ctxt, boolean value)
-	{
-		return prefs (ctxt).edit ().putBoolean (KEY_CUSTOM_IME, value).commit ();
 	}
 
 	public static boolean getLockScreen (Context ctxt)
