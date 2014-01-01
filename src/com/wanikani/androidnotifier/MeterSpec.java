@@ -7,6 +7,7 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Build;
 import android.preference.PreferenceManager;
 
 import com.wanikani.wklib.Connection;
@@ -194,9 +195,14 @@ public class MeterSpec implements Connection.Meter {
 
 	private MeterSpec (Context ctxt, T type)
 	{
+		int flags;
+		
 		this.type = type;
 		
-		prefs = ctxt.getSharedPreferences (PREFERENCES_FILE, Context.MODE_MULTI_PROCESS | Context.MODE_PRIVATE);
+		flags = Context.MODE_PRIVATE;
+		if (Build.VERSION.SDK_INT >= 11)
+			flags |= Context.MODE_MULTI_PROCESS;
+		prefs = ctxt.getSharedPreferences (PREFERENCES_FILE, flags);
 		cmgr = (ConnectivityManager) ctxt.getSystemService (Context.CONNECTIVITY_SERVICE);
 	}	
 	
