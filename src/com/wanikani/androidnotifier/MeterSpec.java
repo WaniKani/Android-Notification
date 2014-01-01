@@ -188,13 +188,15 @@ public class MeterSpec implements Connection.Meter {
 	
 	private static final String CTAG_WIFI = "w.";
 	
+	private static final String PREFERENCES_FILE = "meters.xml";
+	
 	private static Object mutex = new Object ();
 
 	private MeterSpec (Context ctxt, T type)
 	{
 		this.type = type;
 		
-		prefs = PreferenceManager.getDefaultSharedPreferences (ctxt);
+		prefs = ctxt.getSharedPreferences (PREFERENCES_FILE, Context.MODE_MULTI_PROCESS | Context.MODE_PRIVATE);
 		cmgr = (ConnectivityManager) ctxt.getSystemService (Context.CONNECTIVITY_SERVICE);
 	}	
 	
