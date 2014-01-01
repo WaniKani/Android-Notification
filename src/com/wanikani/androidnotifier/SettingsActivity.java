@@ -111,6 +111,7 @@ public class SettingsActivity
 	private static final String KEY_TIP_ACK = "key_tip_ack";
 	/** Ignore button message has been read and acknowledged */
 	private static final String KEY_IGNORE_BUTTON_MESSAGE_ACK = "key_ignore_button_message_ack";
+	private static final String KEY_IGNORE_BUTTON_MESSAGE_ACK_NEW = "key_ignore_button_message_ack_new";
 	/** Custom IME message has been read and acknowledged */
 	private static final String KEY_CUSTOM_IME = "key_custom_ime";
 
@@ -562,12 +563,16 @@ public class SettingsActivity
 	
 	public static boolean getIgnoreButtonMessage (Context ctxt)
 	{
-		return prefs (ctxt).getBoolean (KEY_IGNORE_BUTTON_MESSAGE_ACK, false);
+		return 
+				prefs (ctxt).getBoolean (KEY_IGNORE_BUTTON_MESSAGE_ACK, false) ||
+				!prefs (ctxt).getString (KEY_IGNORE_BUTTON_MESSAGE_ACK_NEW, "false").equals ("false");
 	}
 	
 	public static boolean setIgnoreButtonMessage (Context ctxt, boolean value)
 	{
-		return prefs (ctxt).edit ().putBoolean (KEY_IGNORE_BUTTON_MESSAGE_ACK, value).commit ();
+		prefs (ctxt).edit ().putString (KEY_IGNORE_BUTTON_MESSAGE_ACK_NEW, value ? "true" : "false");
+		
+		return value;
 	}
 
 	public static boolean getCustomIMEMessage (Context ctxt)

@@ -1045,7 +1045,8 @@ public class WebReviewActivity extends Activity {
 		builder.setPositiveButton (R.string.ignore_button_message_ok, new OkListener ());
 		
 		dialog = builder.create ();
-		
+		SettingsActivity.setIgnoreButtonMessage (WebReviewActivity.this, true);
+
 		dialog.show ();		
 	}
 
