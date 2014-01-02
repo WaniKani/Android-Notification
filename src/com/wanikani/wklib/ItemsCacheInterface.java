@@ -21,15 +21,18 @@ public interface ItemsCacheInterface extends Serializable {
 		
 		public Quality quality;
 		
+		public String etag;
+		
 		public Date date;
 		
 		public ItemLibrary<T> lib;
 		
-		public LevelData (Date date, ItemLibrary<T> lib)
+		public LevelData (Date date, String etag, ItemLibrary<T> lib)
 		{
 			quality = Quality.GOOD;
 			this.date = date;
 			this.lib = lib;
+			this.etag = etag;
 		}
 		
 		public LevelData ()

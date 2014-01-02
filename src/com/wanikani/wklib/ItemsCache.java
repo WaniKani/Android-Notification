@@ -47,7 +47,7 @@ public class ItemsCache implements ItemsCacheInterface {
 			for (T t : data.lib.list) {
 				ld = map.get (t.level);
 				if (ld == null) {
-					ld = new LevelData<T> (data.date, new ItemLibrary<T> ());
+					ld = new LevelData<T> (data.date, data.etag, new ItemLibrary<T> ());
 					map.put (t.level, ld);
 				}
 				ld.lib.add (t);

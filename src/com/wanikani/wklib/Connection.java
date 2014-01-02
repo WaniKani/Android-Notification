@@ -10,14 +10,13 @@ import java.net.URLConnection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.StringTokenizer;
 import java.util.Vector;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
-
-import com.wanikani.wklib.ItemsCacheInterface.Quality;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -53,17 +52,13 @@ public class Connection {
 		
 		UserInformation ui;
 		
-		Date lastModified;
-		
 		JSONObject infoAsObj;
 
 		JSONArray infoAsArray;
 
-		public Response (JSONObject obj, Date lastModified, boolean isArray)
+		public Response (JSONObject obj, boolean isArray)
 			throws JSONException, IOException
 		{
-			this.lastModified = lastModified;
-			
 			if (!obj.isNull("user_information")) {
 				ui = new UserInformation (obj.getJSONObject ("user_information"));
 				if (!obj.isNull ("requested_information")) {
@@ -87,6 +82,29 @@ public class Connection {
 			super ("Document not modified");
 		}
 		
+	}
+	
+	class CacheInfo {
+		
+		public String etag;
+		
+		public Date modified;
+		
+		public CacheInfo (String etag, Date modified)
+		{
+			this.etag = etag;
+			this.modified = modified;
+		}		
+		
+		public CacheInfo ()
+		{
+			/* empty */
+		}
+		
+		public boolean hasData ()
+		{
+			return etag != null || modified != null;
+		}
 	}
 	
 	public static final int CONNECT_TIMEOUT = 20000;
@@ -289,19 +307,30 @@ public class Connection {
 		ItemsCacheInterface.LevelData<T> data;
 		ItemsCacheInterface.Cache<T> ic;
 		ItemLibrary<T> lib;
+		CacheInfo cinfo;
 		Response res;
 			
 		ic = cache.get (type);
-		data = ic.get (level);				
-		if (data.quality == ItemsCacheInterface.Quality.GOOD &&	!isDataStale (data, level))
-			return data.lib;
+		data = ic.get (level);			
+
+		switch (data.quality) {
+		case GOOD:
+			if (!isDataStale (data, level))
+				return data.lib;
+			cinfo = new CacheInfo (data.etag, data.date);
+			break;
+			
+		case MISSING:
+		default:
+			cinfo = new CacheInfo ();
+		}
 		
 		try {
-			res = call (meter, resource, true, Integer.toString (level), data.date);
+			res = call (meter, resource, true, Integer.toString (level), cinfo);
 
 			lib = new ItemLibrary<T> (factory, res.infoAsArray);
 			
-			data = new ItemsCacheInterface.LevelData<T> (res.lastModified, lib);
+			data = new ItemsCacheInterface.LevelData<T> (cinfo.modified, cinfo.etag, lib);
 			ic.put (data);
 			
 			return lib;
@@ -322,14 +351,16 @@ public class Connection {
 		ItemsCacheInterface.Cache<T> ic;
 		List<Integer> badl, missingl;
 		ItemLibrary<T> ans, lib;
+		CacheInfo cinfo;
 		Response res;
-		Date cachedt;
 
 		ic = cache.get (type);
 		map = ItemsCacheInterface.LevelData.createMap (levels);
 		ic.get (map);
 
-		cachedt = new Date ();
+		cinfo = new CacheInfo ();
+		
+		cinfo.modified = new Date ();
 		ans = new ItemLibrary<T> ();
 		badl = new Vector<Integer> ();
 		missingl = new Vector<Integer> ();
@@ -338,8 +369,8 @@ public class Connection {
 			switch (ld.quality) {
 			case GOOD:
 				if (isDataStale (ld, e.getKey ())) {
-					if (ld.date.before (cachedt))
-						cachedt = ld.date;
+					if (ld.date.before (cinfo.modified))
+						cinfo.modified = ld.date;
 					badl.add (e.getKey ());					
 				} else				
 					ans.add (ld.lib);
@@ -352,9 +383,9 @@ public class Connection {
 
 		try {
 			if (!badl.isEmpty ()) {
-				res = call (meter, resource, true, levelList (badl), cachedt);
+				res = call (meter, resource, true, levelList (badl), cinfo);
 				lib = new ItemLibrary<T> (factory, res.infoAsArray);
-				ic.put (new ItemsCacheInterface.LevelData<T> (res.lastModified, lib));
+				ic.put (new ItemsCacheInterface.LevelData<T> (cinfo.modified, null, lib));
 				ans.add (lib);
 			} 
 		} catch (NotModifiedException e) {
@@ -364,11 +395,12 @@ public class Connection {
 			throw new ParseException ();
 		}
 		
+		cinfo = new CacheInfo ();
 		try {
 			if (!missingl.isEmpty ()) {
 				res = call (meter, resource, true, levelList (missingl), null);
 				lib = new ItemLibrary<T> (factory, res.infoAsArray);
-				ic.put (new ItemsCacheInterface.LevelData<T> (res.lastModified, lib));
+				ic.put (new ItemsCacheInterface.LevelData<T> (cinfo.modified, null, lib));
 				ans.add (lib);
 			} 
 		} catch (JSONException e) {
@@ -457,13 +489,12 @@ public class Connection {
 		return call (meter, resource, isArray, arg, null);
 	}
 
-	protected Response call (Meter meter, String resource, boolean isArray, String arg, Date ifModified)
+	protected Response call (Meter meter, String resource, boolean isArray, String arg, CacheInfo cinfo)
 		throws IOException
 	{
 		HttpURLConnection conn;
 		JSONTokener tok;
 		InputStream is;
-		Date lastModified;
 		URL url;
 		
 		url = new URL (makeURL (resource, arg));
@@ -471,27 +502,37 @@ public class Connection {
 		tok = null;
 		try {
 			conn = (HttpURLConnection) url.openConnection ();
-			if (ifModified != null)
-				conn.setIfModifiedSince (ifModified.getTime ());
+			if (cinfo != null) {
+				if (cinfo.etag != null)
+					conn.setRequestProperty ("If-None-Match", cinfo.etag);
+				else if (cinfo.modified != null)
+					conn.setIfModifiedSince (cinfo.modified.getTime ());
+			}
 			setTimeouts (conn);
-			if (ifModified != null && conn.getResponseCode () == HttpURLConnection.HTTP_NOT_MODIFIED)
-				throw new NotModifiedException ();
-			is = conn.getInputStream ();
+			conn.connect ();
+			if (cinfo != null && cinfo.hasData () && 
+				conn.getResponseCode () == HttpURLConnection.HTTP_NOT_MODIFIED)
+					throw new NotModifiedException ();
 			measureHeaders (meter, conn, false);
+			is = conn.getInputStream ();
 			tok = new JSONTokener (readStream (meter, is));
 		} finally {
 			if (conn != null)
 				conn.disconnect ();
 		}
 				
-		lastModified = new Date ();
-		if (conn.getDate () > 0)
-			lastModified = new Date (conn.getDate ());
-		if (conn.getLastModified () > 0)
-			lastModified = new Date (conn.getLastModified ());
+		if (cinfo != null) {
+			cinfo.modified = new Date ();
+			if (conn.getDate () > 0)
+				cinfo.modified = new Date (conn.getDate ());
+			if (conn.getLastModified () > 0)
+				cinfo.modified = new Date (conn.getLastModified ());
+		
+			cinfo.etag = conn.getHeaderField ("ETag");
+		}
 		
 		try {
-			return new Response (new JSONObject (tok), lastModified, isArray);
+			return new Response (new JSONObject (tok), isArray);
 		} catch (JSONException e) {
 			throw new ParseException ();
 		}
