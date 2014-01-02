@@ -1,6 +1,8 @@
 package com.wanikani.androidnotifier;
 
 import java.util.EnumMap;
+import java.util.Hashtable;
+import java.util.Map;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -274,6 +276,9 @@ public class LocalIMEKeyboard implements Keyboard {
 		/// Set if we reviewing, unset if we are in the lessons quiz module
 		public boolean reviews;
 		
+		/// SRS level
+		public int level;
+		
 		/**
 		 * Constructor. Used when the edittext changes class.
 		 * @param clazz the CSS class
@@ -292,8 +297,10 @@ public class LocalIMEKeyboard implements Keyboard {
 		/**
 		 * Constructor. Used when the edittext goes back to the default class
 		 */
-		public JSListenerSetClass ()
+		public JSListenerSetClass (int level)
 		{
+			this.level = level;
+			
 			enable = false;
 			
 			wav.runOnUiThread (this);
@@ -308,7 +315,7 @@ public class LocalIMEKeyboard implements Keyboard {
 			if (enable)
 				setClass (clazz, reviews);
 			else
-				unsetClass ();
+				unsetClass (level);
 			
 			setInputType ();
 		}
@@ -484,10 +491,10 @@ public class LocalIMEKeyboard implements Keyboard {
 		 * @param qtype the type of question (reading vs meaning)
 		 */
 		@JavascriptInterface
-		public void newQuestion (String qtype)
+		public void newQuestion (String qtype, int level)
 		{
 			imel.translate (qtype.equals ("reading"));			
-			new JSListenerSetClass ();			
+			new JSListenerSetClass (level);			
 		}
 
 		@JavascriptInterface
@@ -649,7 +656,7 @@ public class LocalIMEKeyboard implements Keyboard {
 			"   window.wknSequence++;" +			
 			"};" +
 			"window.wknNewQuestion = function (entry, type) {" +
-			"   var qtype, e;" +
+			"   var qtype, e, item;" +
 			"   qtype = $.jStorage.get (\"questionType\");" +
 			"   window.wknReplace ();" +
 			"   if (" + JS_REVIEWS_P + ")" +
@@ -658,7 +665,8 @@ public class LocalIMEKeyboard implements Keyboard {
 			"        e = $(\"#character span\");" +
 			"        e.text (e.text ().replace (/〜/g, \"~\")); " +
 			"   }" +
-			"   wknJSListener.newQuestion (qtype);" +
+			"   item = $.jStorage.get (\"currentItem\");" +
+			"   wknJSListener.newQuestion (qtype, item.srs);" +
 			"};" +
 			"$.jStorage.listenKeyChange (\"currentItem\", window.wknNewQuestion);" +
 			"var oldAddClass = jQuery.fn.addClass;" +
@@ -699,7 +707,7 @@ public class LocalIMEKeyboard implements Keyboard {
 			"        e.text (e.text ().replace (/〜/g, \"~\")); " +
 			"   }" +
 			"   if ($(\"#quiz\").is (\":visible\"))" +
-			"       wknJSListener.newQuestion (qtype);" +			
+			"       wknJSListener.newQuestion (qtype, -1);" +			
 			"};" +
 			"$.jStorage.listenKeyChange (\"l/currentQuizItem\", window.wknNewQuiz);" +
 			"var oldShow = jQuery.fn.show;" +
@@ -823,9 +831,14 @@ public class LocalIMEKeyboard implements Keyboard {
     /// The current box position and state
     BoxPosition bpos;
     
+    /// The SRS view
+    View srsv;
+    
     int correctFG, incorrectFG, ignoredFG;
     
     int correctBG, incorrectBG, ignoredBG;
+    
+    Map<Integer, Integer> srsCols;
     
     EnumMap<Item.Type, Integer> cmap;
     
@@ -864,7 +877,7 @@ public class LocalIMEKeyboard implements Keyboard {
      */
 	public LocalIMEKeyboard (WebReviewActivity wav, FocusWebView wv)
 	{
-		Resources res;		
+		Resources res;
 		
 		this.wav = wav;
 		this.wv = wv;
@@ -896,6 +909,8 @@ public class LocalIMEKeyboard implements Keyboard {
 		next = (Button) wav.findViewById (R.id.ime_next);
 		next.setOnClickListener (imel);
 		
+		srsv = wav.findViewById (R.id.v_srs);
+		
 		jsl = new JSListener ();
 		wv.addJavascriptInterface (jsl, "wknJSListener");
 		
@@ -907,6 +922,8 @@ public class LocalIMEKeyboard implements Keyboard {
 		incorrectFG = res.getColor (R.color.incorrectfg);
 		ignoredFG = res.getColor (R.color.ignoredfg);
 		
+		setupSRSColors (res);
+				
 		correctBG = res.getColor (R.color.correctbg);
 		incorrectBG = res.getColor (R.color.incorrectbg);
 		ignoredBG = res.getColor (R.color.ignoredbg);
@@ -916,6 +933,31 @@ public class LocalIMEKeyboard implements Keyboard {
 		cmap.put (Item.Type.KANJI, res.getColor (R.color.kanji));
 		cmap.put (Item.Type.VOCABULARY, res.getColor (R.color.vocabulary));
 	}	
+	
+	private void setupSRSColors (Resources res)
+	{
+		int c;
+		
+		srsCols = new Hashtable<Integer, Integer> ();
+		c = res.getColor (R.color.apprentice);
+		srsCols.put (1, c);
+		srsCols.put (2, c);
+		srsCols.put (3, c);
+		srsCols.put (4, c);
+
+		c = res.getColor (R.color.guru);
+		srsCols.put (5, c);
+		srsCols.put (6, c);
+		
+		c = res.getColor (R.color.master);
+		srsCols.put (7, c);
+
+		c = res.getColor (R.color.enlightened);
+		srsCols.put (8, c);
+
+		c = res.getColor (R.color.burned);
+		srsCols.put (9, c);
+	}
 	
 	/**
 	 * Shows the keyboard. Actually we only inject the triggers: if the javascript code detects that
@@ -1125,10 +1167,19 @@ public class LocalIMEKeyboard implements Keyboard {
 	/**
 	 * Called when the HTML textbox goes back to the default CSS class.
 	 */
-	public void unsetClass ()
+	public void unsetClass (int level)
 	{
+		Integer color;
+		
 		enableIgnoreButton (false);
 		enable ();
+		
+		color = srsCols.get (level);
+		if (SettingsActivity.getSRSIndication (wav) && color != null) {
+			srsv.setVisibility (View.VISIBLE);
+			srsv.setBackgroundColor (color);
+		} else
+			srsv.setVisibility (View.GONE);
 	}
 	
 	/**

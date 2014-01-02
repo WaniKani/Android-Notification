@@ -66,8 +66,12 @@ public class SettingsActivity
 	private static final String KEY_PREF_REVIEW_IMPROVEMENTS = "pref_review_improvements";
 	/** Show mute button. Must match preferences.xml */
 	private static final String KEY_PREF_SHOW_MUTE = "pref_show_mute";
+	/** Show SRS indication. Must match preferences.xml */
+	private static final String KEY_PREF_SRS_INDICATION = "pref_srs_indication";
 	/** Ignore button */
 	private static final String KEY_PREF_IGNORE_BUTTON = "pref_ignore_button";
+	/** Single button */
+	private static final String KEY_PREF_SINGLE_BUTTON = "pref_single_button";
 	/** WaniKani improve */
 	private static final String KEY_PREF_WANIKANI_IMPROVE = "pref_wanikani_improve";
 	/** Review Order */
@@ -109,6 +113,7 @@ public class SettingsActivity
 	private static final String KEY_TIP_ACK = "key_tip_ack";
 	/** Ignore button message has been read and acknowledged */
 	private static final String KEY_IGNORE_BUTTON_MESSAGE_ACK = "key_ignore_button_message_ack";
+	private static final String KEY_IGNORE_BUTTON_MESSAGE_ACK_NEW = "key_ignore_button_message_ack_new";
 	/** Custom IME message has been read and acknowledged */
 	private static final String KEY_CUSTOM_IME = "key_custom_ime";
 
@@ -304,6 +309,12 @@ public class SettingsActivity
 		pref = findPreference (KEY_PREF_SHOW_MUTE);
 		pref.setEnabled (getUseIntegratedBrowser (prefs));
 		
+		pref = findPreference (KEY_PREF_SINGLE_BUTTON);
+		pref.setEnabled (getUseIntegratedBrowser (prefs));
+
+		pref = findPreference (KEY_PREF_SRS_INDICATION);
+		pref.setEnabled (getUseIntegratedBrowser (prefs));
+
 		pref = findPreference (KEY_PREF_REVIEW_ORDER);
 		pref.setEnabled (getUseIntegratedBrowser (prefs));
 
@@ -530,6 +541,16 @@ public class SettingsActivity
 		return prefs (ctxt).getBoolean (KEY_PREF_SHOW_MUTE, true);
 	}
 	
+	public static boolean getSRSIndication (Context ctxt)
+	{
+		return prefs (ctxt).getBoolean (KEY_PREF_SRS_INDICATION, true);
+	}
+	
+	public static boolean getShowSingle (Context ctxt)
+	{
+		return prefs (ctxt).getBoolean (KEY_PREF_SINGLE_BUTTON, true);
+	}
+
 	public static boolean get42plus (Context ctxt)
 	{
 		return prefs (ctxt).getBoolean (KEY_PREF_42PLUS, false);
@@ -540,34 +561,22 @@ public class SettingsActivity
 		return prefs (ctxt).getBoolean (KEY_MUTE, false);
 	}
 	
-	public static boolean getTipAck (Context ctxt)
-	{
-		return prefs (ctxt).getBoolean (KEY_TIP_ACK, false);
-	}
-	
-	public static boolean setTipAck (Context ctxt, boolean value)
-	{
-		return prefs (ctxt).edit ().putBoolean (KEY_TIP_ACK, value).commit ();
-	}
-	
 	public static boolean getIgnoreButtonMessage (Context ctxt)
 	{
-		return prefs (ctxt).getBoolean (KEY_IGNORE_BUTTON_MESSAGE_ACK, false);
+		String s;
+		
+		s = prefs (ctxt).getString (KEY_IGNORE_BUTTON_MESSAGE_ACK_NEW, "false");
+		
+		return 
+				prefs (ctxt).getBoolean (KEY_IGNORE_BUTTON_MESSAGE_ACK, false) || 
+				!prefs (ctxt).getString (KEY_IGNORE_BUTTON_MESSAGE_ACK_NEW, "false").equals ("false");
 	}
 	
 	public static boolean setIgnoreButtonMessage (Context ctxt, boolean value)
 	{
-		return prefs (ctxt).edit ().putBoolean (KEY_IGNORE_BUTTON_MESSAGE_ACK, value).commit ();
-	}
-
-	public static boolean getCustomIMEMessage (Context ctxt)
-	{
-		return prefs (ctxt).getBoolean (KEY_CUSTOM_IME, false);
-	}
-	
-	public static boolean setCustomIMEMessage (Context ctxt, boolean value)
-	{
-		return prefs (ctxt).edit ().putBoolean (KEY_CUSTOM_IME, value).commit ();
+		prefs (ctxt).edit ().putString (KEY_IGNORE_BUTTON_MESSAGE_ACK_NEW, value ? "true" : "false").commit ();
+		
+		return value;
 	}
 
 	public static boolean getLockScreen (Context ctxt)

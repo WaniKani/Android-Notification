@@ -52,7 +52,12 @@
         	android:title="@string/pref_ignore_button"
         	android:summary="@string/pref_ignore_button_descr"
         	android:defaultValue="true" />
-    	<CheckBoxPreference
+	    <CheckBoxPreference
+        	android:key="pref_single_button"
+        	android:title="@string/pref_single_button"
+        	android:summary="@string/pref_single_button_descr"
+        	android:defaultValue="true" />
+	    <CheckBoxPreference
         	android:key="pref_wanikani_improve"
         	android:title="@string/pref_wanikani_improve"
         	android:summary="@string/pref_wanikani_improve_descr"
@@ -94,7 +99,12 @@
         	android:title="@string/pref_show_mute"
         	android:summary="@string/pref_show_mute_desc"
         	android:defaultValue="true" />    	
-	</PreferenceCategory>	
+	    <CheckBoxPreference
+        	android:key="pref_srs_indication"
+        	android:title="@string/pref_srs_indication"
+        	android:summary="@string/pref_srs_indication_descr"
+        	android:defaultValue="true" />
+   	</PreferenceCategory>	
 	<PreferenceCategory
 	    	android:title="@string/tpref_reviews">
 	<CheckBoxPreference

@@ -726,7 +726,7 @@ public class StatsFragment extends Fragment implements Tab {
 					delay -= 0.5F;	/* This compensates the fact that granularity is one day */										
 
 					if (delay <= avgl && delay >= 0) {
-						nltag = (TextView) main.findViewById (R.id.tag_eta_next);
+						nltag = (TextView) parent.findViewById (R.id.tag_eta_next);
 						nlw.setVisibility (View.VISIBLE);
 						nltag.setText (R.string.tag_eta_next_future);
 						s = main.getString (R.string.fmt_eta_next_future, beautify (delay));

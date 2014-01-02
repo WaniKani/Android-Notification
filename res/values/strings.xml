@@ -34,6 +34,11 @@
     <string name="pref_disable_suggestions_desc">Disable suggestions when entering japanese words</string>
     <string name="pref_ignore_button">Ignore Button</string>
     <string name="pref_ignore_button_descr">Enable porting of Rui Pinheiro\'s ignore button</string>
+    <string name="pref_single_button">Single Button</string>
+    <string name="pref_single_button_descr">Show \"1\" button, to enable item by item mode 
+        				(reading and meaning are next to each other)</string>
+    <string name="pref_srs_indication">SRS Indication</string>
+    <string name="pref_srs_indication_descr">Show current item SRS level during reviews</string>
     <string name="pref_wanikani_improve">WaniKani improve</string>
     <string name="pref_wanikani_improve_descr">Skip to next question, if correct. Port of
         		\@Seiji and \@Jatacid scripts</string>
