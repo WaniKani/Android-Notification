@@ -99,7 +99,12 @@
         	android:title="@string/pref_show_mute"
         	android:summary="@string/pref_show_mute_desc"
         	android:defaultValue="true" />    	
-	</PreferenceCategory>	
+	    <CheckBoxPreference
+        	android:key="pref_srs_indication"
+        	android:title="@string/pref_srs_indication"
+        	android:summary="@string/pref_srs_indication_descr"
+        	android:defaultValue="true" />
+   	</PreferenceCategory>	
 	<PreferenceCategory
 	    	android:title="@string/tpref_reviews">
 	<CheckBoxPreference

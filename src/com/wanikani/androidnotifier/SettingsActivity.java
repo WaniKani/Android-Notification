@@ -66,6 +66,8 @@ public class SettingsActivity
 	private static final String KEY_PREF_REVIEW_IMPROVEMENTS = "pref_review_improvements";
 	/** Show mute button. Must match preferences.xml */
 	private static final String KEY_PREF_SHOW_MUTE = "pref_show_mute";
+	/** Show SRS indication. Must match preferences.xml */
+	private static final String KEY_PREF_SRS_INDICATION = "pref_srs_indication";
 	/** Ignore button */
 	private static final String KEY_PREF_IGNORE_BUTTON = "pref_ignore_button";
 	/** Single button */
@@ -310,6 +312,9 @@ public class SettingsActivity
 		pref = findPreference (KEY_PREF_SINGLE_BUTTON);
 		pref.setEnabled (getUseIntegratedBrowser (prefs));
 
+		pref = findPreference (KEY_PREF_SRS_INDICATION);
+		pref.setEnabled (getUseIntegratedBrowser (prefs));
+
 		pref = findPreference (KEY_PREF_REVIEW_ORDER);
 		pref.setEnabled (getUseIntegratedBrowser (prefs));
 
@@ -534,6 +539,11 @@ public class SettingsActivity
 	public static boolean getShowMute (Context ctxt)
 	{
 		return prefs (ctxt).getBoolean (KEY_PREF_SHOW_MUTE, true);
+	}
+	
+	public static boolean getSRSIndication (Context ctxt)
+	{
+		return prefs (ctxt).getBoolean (KEY_PREF_SRS_INDICATION, true);
 	}
 	
 	public static boolean getShowSingle (Context ctxt)

@@ -1175,7 +1175,7 @@ public class LocalIMEKeyboard implements Keyboard {
 		enable ();
 		
 		color = srsCols.get (level);
-		if (color != null) {
+		if (SettingsActivity.getSRSIndication (wav) && color != null) {
 			srsv.setVisibility (View.VISIBLE);
 			srsv.setBackgroundColor (color);
 		} else
