@@ -568,11 +568,6 @@ public class WebReviewActivity extends Activity {
 			"textbox = document.getElementById (\"" + WKConfig.ANSWER_BOX + "\"); " +
 			"reviews = document.getElementById (\"" + WKConfig.REVIEWS_DIV + "\");" +
 			"quiz = document.getElementById (\"" + WKConfig.QUIZ + "\");" +
-			/* This fixes a bug that makes SRS indication slow */
-			"style = document.createElement('style');" + 
-			"style.type = 'text/css';" + 
-			"style.innerHTML = '.animated { -webkit-animation-duration:0s; }';" + 
-			"document.getElementsByTagName('head')[0].appendChild(style);" +
 			"if (quiz != null) {" +
 			"   wknKeyboard.showLessonsNew ();" +
 			"} else if (textbox != null && !textbox.disabled) {" +
@@ -584,7 +579,13 @@ public class WebReviewActivity extends Activity {
 			"   reviews.style.overflow = \"visible\";" +
 			"}" + 
 			"window.trueRandom = Math.random;" +
-			"window.fakeRandom = function() { return 0;  };";   // @Ikalou's fix
+			"window.fakeRandom = function() { return 0;  };" +   // @Ikalou's fix
+			/* This fixes a bug that makes SRS indication slow */
+			"style = document.createElement('style');" + 
+			"style.type = 'text/css';" + 
+			"style.innerHTML = '.animated { -webkit-animation-duration:0s; }';" + 
+			"document.getElementsByTagName('head')[0].appendChild(style);";
+			
 	
 	private static final String
 			JS_BULK_MODE = "if (window.trueRandom) Math.random=window.trueRandom;"; 
