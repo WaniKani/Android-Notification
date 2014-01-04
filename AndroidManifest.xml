@@ -60,8 +60,7 @@
         </activity>
         
         <activity android:name="WebReviewActivity"
-            	  android:windowSoftInputMode="adjustPan"
-            	  android:hardwareAccelerated="false"
+            	  android:hardwareAccelerated="true"
                	  android:configChanges="orientation|keyboardHidden|screenSize" android:launchMode="singleTop" android:process=":webview"/>
                 
         <receiver
