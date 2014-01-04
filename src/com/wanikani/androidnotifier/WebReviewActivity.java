@@ -10,6 +10,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.net.Uri;
@@ -26,6 +27,7 @@ import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.ScrollView;
@@ -132,6 +134,19 @@ public class WebReviewActivity extends Activity {
 		{
 			SettingsActivity.toggleMute (WebReviewActivity.this);
 			applyMuteSettings ();
+		}
+	}
+
+	/**
+	 * The listener that receives events from the single buttons.
+	 */
+	private class SingleListener implements View.OnClickListener {
+		
+		@Override
+		public void onClick (View w)
+		{
+			single = !single;
+			applySingleSettings ();
 		}
 	}
 
@@ -367,6 +382,11 @@ public class WebReviewActivity extends Activity {
  			 {
  				 return true;
  			 }
+ 			 
+ 			 public boolean canDoSingle ()
+ 			 {
+ 				 return true;
+ 			 }
  		},
 		
 		/** Keyboard visible, all keys but ENTER visible */
@@ -382,7 +402,6 @@ public class WebReviewActivity extends Activity {
 			{
 				return true;
 			}
-			
 		},
 
 		/** Keyboard invisible */
@@ -396,7 +415,7 @@ public class WebReviewActivity extends Activity {
 				return SettingsActivity.Keyboard.NATIVE;
 			}
 			
-			public boolean backIsSafe () { return true; }
+			public boolean backIsSafe () { return true; }		
 		};
 		
 		public abstract void apply (WebReviewActivity wav);
@@ -423,6 +442,11 @@ public class WebReviewActivity extends Activity {
 			 return false;
 		}
 			
+		public boolean canDoSingle ()
+		{
+			 return false;
+		}
+		
 		public boolean hasEnter (WebReviewActivity wav)
 		{
 			return false;
@@ -515,6 +539,12 @@ public class WebReviewActivity extends Activity {
 			
 	/** The web download progress bar */
 	ProgressBar dbar;
+	
+	/// Selected button color
+	int selectedColor;
+	
+	/// Unselected button color
+	int unselectedColor;	
 
 	/** The local prefix of this class */
 	private static final String PREFIX = "com.wanikani.androidnotifier.WebReviewActivity.";
@@ -534,7 +564,7 @@ public class WebReviewActivity extends Activity {
 	
 	/** Javascript to be called each time an HTML page is loaded. It hides or shows the keyboard */
 	private static final String JS_INIT_KBD = 
-			"var textbox, lessobj, ltextbox, reviews;" +
+			"var textbox, lessobj, ltextbox, reviews, style;" +
 			"textbox = document.getElementById (\"" + WKConfig.ANSWER_BOX + "\"); " +
 			"reviews = document.getElementById (\"" + WKConfig.REVIEWS_DIV + "\");" +
 			"quiz = document.getElementById (\"" + WKConfig.QUIZ + "\");" +
@@ -547,7 +577,20 @@ public class WebReviewActivity extends Activity {
 			"}" +
 			"if (reviews != null) {" +
 			"   reviews.style.overflow = \"visible\";" +
-			"} ";
+			"}" + 
+			"window.trueRandom = Math.random;" +
+			"window.fakeRandom = function() { return 0;  };" +   // @Ikalou's fix
+			/* This fixes a bug that makes SRS indication slow */
+			"style = document.createElement('style');" + 
+			"style.type = 'text/css';" + 
+			"style.innerHTML = '.animated { -webkit-animation-duration:0s; }';" + 
+			"document.getElementsByTagName('head')[0].appendChild(style);";
+			
+	
+	private static final String
+			JS_BULK_MODE = "if (window.trueRandom) Math.random=window.trueRandom;"; 
+	private static final String
+			JS_SINGLE_MODE = "if (window.fakeRandom) Math.random=window.fakeRandom;"; 
 	
 	/** The threads reaper */
 	TimerThreadsReaper reaper;
@@ -589,7 +632,13 @@ public class WebReviewActivity extends Activity {
 	private Keyboard localIMEKeyboard;
 	
 	/** The mute button */
-	private ImageButton muteH;	
+	private ImageButton muteH;
+	
+	/** The single button */
+	private Button singleb;
+	
+	/** Single mode is on? */
+	private boolean single;
 	
 	/** Shall we download a file? */
 	private boolean download;
@@ -614,7 +663,7 @@ public class WebReviewActivity extends Activity {
 		
 		CookieSyncManager.createInstance (this);
 		setVolumeControlStream (AudioManager.STREAM_MUSIC);
-		 
+
 		mh = new MenuHandler (this, new MenuListener ());
 		
 		if (SettingsActivity.getFullscreen (this)) {
@@ -625,7 +674,11 @@ public class WebReviewActivity extends Activity {
 		setContentView (R.layout.web_review);
 
 		res = getResources ();
-		muteDrawable = res.getDrawable(R.drawable.ic_mute);
+		
+		selectedColor = res.getColor (R.color.selected);
+    	unselectedColor = res.getColor (R.color.unselected);
+		 
+    	muteDrawable = res.getDrawable(R.drawable.ic_mute);
 		notMutedDrawable = res.getDrawable(R.drawable.ic_not_muted);
 
 		kbstatus = KeyboardStatus.INVISIBLE;
@@ -668,6 +721,9 @@ public class WebReviewActivity extends Activity {
 		muteH = (ImageButton) findViewById (R.id.kb_mute_h);
 		muteH.setOnClickListener (new MuteListener ());
 
+		singleb = (Button) findViewById (R.id.kb_single);
+		singleb.setOnClickListener (new SingleListener ());
+
 		if (SettingsActivity.getTimerReaper (this)) {
 			reaper = new TimerThreadsReaper ();
 			rtask = reaper.createTask (new Handler (), 2, 7000);
@@ -705,6 +761,7 @@ public class WebReviewActivity extends Activity {
 		selectKeyboard ();
 		
 		applyMuteSettings ();
+		applySingleSettings ();
 		
 		wv.acquire ();
 		
@@ -878,6 +935,23 @@ public class WebReviewActivity extends Activity {
 		setMute (show && SettingsActivity.getMute (this));
 	}
 	
+	private void applySingleSettings ()
+	{
+		boolean show;
+		
+		show = kbstatus.canDoSingle () && SettingsActivity.getShowSingle (this); 
+		singleb.setVisibility (show ? View.VISIBLE : View.GONE);
+		if (single) {
+			singleb.setTextColor (selectedColor);
+			singleb.setTypeface (null, Typeface.BOLD);
+			wv.js (JS_SINGLE_MODE);
+		} else {
+			singleb.setTextColor (unselectedColor);
+			singleb.setTypeface (null, Typeface.NORMAL);			
+			wv.js (JS_BULK_MODE);
+		}
+	}
+	
 	private void setMute (boolean m)
 	{
 		AudioManager am;
@@ -915,6 +989,7 @@ public class WebReviewActivity extends Activity {
 		this.kbstatus = kbstatus;
 		
 		applyMuteSettings ();
+		applySingleSettings ();
 		
 		keyboard.hide ();
 	}
@@ -926,6 +1001,7 @@ public class WebReviewActivity extends Activity {
 		selectKeyboard ();
 		
 		applyMuteSettings ();
+		applySingleSettings ();
 
 		keyboard.show (kbstatus.hasEnter (this));
 	}
@@ -937,6 +1013,7 @@ public class WebReviewActivity extends Activity {
 		selectKeyboard ();
 		
 		applyMuteSettings ();
+		applySingleSettings ();
 		
 		keyboard.iconize (kbstatus.hasEnter (this));
 	}
@@ -969,7 +1046,8 @@ public class WebReviewActivity extends Activity {
 		builder.setPositiveButton (R.string.ignore_button_message_ok, new OkListener ());
 		
 		dialog = builder.create ();
-		
+		SettingsActivity.setIgnoreButtonMessage (WebReviewActivity.this, true);
+
 		dialog.show ();		
 	}
 

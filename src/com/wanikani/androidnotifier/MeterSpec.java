@@ -7,6 +7,7 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Build;
 import android.preference.PreferenceManager;
 
 import com.wanikani.wklib.Connection;
@@ -188,13 +189,20 @@ public class MeterSpec implements Connection.Meter {
 	
 	private static final String CTAG_WIFI = "w.";
 	
+	private static final String PREFERENCES_FILE = "meters.xml";
+	
 	private static Object mutex = new Object ();
 
 	private MeterSpec (Context ctxt, T type)
 	{
+		int flags;
+		
 		this.type = type;
 		
-		prefs = PreferenceManager.getDefaultSharedPreferences (ctxt);
+		flags = Context.MODE_PRIVATE;
+		if (Build.VERSION.SDK_INT >= 11)
+			flags |= Context.MODE_MULTI_PROCESS;
+		prefs = ctxt.getSharedPreferences (PREFERENCES_FILE, flags);
 		cmgr = (ConnectivityManager) ctxt.getSystemService (Context.CONNECTIVITY_SERVICE);
 	}	
 	
