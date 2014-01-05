@@ -70,6 +70,9 @@
     <string name="pref_leak_kludge">Leak workaround</string>
     <string name="pref_leak_kludge_descr">
         	Enables CPU/memory leak workaround (see WK post)</string>
+    <string name="pref_hw_accel">HW Acceleration</string>
+    <string name="pref_hw_accel_descr">
+        	Enables HW acceleration. You may need to disable this if reviews are rendered incorrectly</string>        	
     <string name="pref_timer_reaper">Timer reaper</string>
     <string name="pref_timer_reaper_descr">
         	Fix Android leak causing long review sessions to grow slower and slower 
@@ -297,6 +300,15 @@
 			http://www.wanikani.com/chat/api-and-third-party-apps/2940/
     </string>
     <string name="ignore_button_message_ok">OK, got it</string>
+    
+    <string name="hw_accel_message_title">Note</string>
+    <string name="hw_accel_message_text">
+        To improve performance, HW acceleration is now enabled during reviews.
+        This is known to be problematic on some devices: some areas may not be
+        rendered correctly. If this is your case, you can disable it
+        by unchecking Settings/HW Accel         
+    </string>    
+    <string name="hw_accel_message_ok">OK, got it</string>
     
     <string name="other_stats_error_message_title">Network error</string>
     <string name="other_stats_error_message_text">

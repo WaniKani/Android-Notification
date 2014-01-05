@@ -1,5 +1,6 @@
 package com.wanikani.androidnotifier;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -108,14 +109,14 @@ public class SettingsActivity
 	private static final String KEY_PREF_EXPORT_FILE = "pref_export_file";
 	/** Disable keyboard suggestions */
 	private static final String KEY_PREF_DISABLE_SUGGESTIONS = "pref_disable_suggestions";
+	/** Use hardware acceleration */
+	private static final String KEY_HW_ACCEL = "pref_hw_accel";
 	
-	/** Embedded keyboard message has been read and acknowledged */
-	private static final String KEY_TIP_ACK = "key_tip_ack";
+	/** HW accel message has been read and acknowledged */
+	private static final String KEY_HW_ACCEL_ACK = "key_hw_accel_ack";
 	/** Ignore button message has been read and acknowledged */
 	private static final String KEY_IGNORE_BUTTON_MESSAGE_ACK = "key_ignore_button_message_ack";
 	private static final String KEY_IGNORE_BUTTON_MESSAGE_ACK_NEW = "key_ignore_button_message_ack_new";
-	/** Custom IME message has been read and acknowledged */
-	private static final String KEY_CUSTOM_IME = "key_custom_ime";
 
 	/** Mute review */
 	private static final String KEY_MUTE = "mute";
@@ -579,6 +580,18 @@ public class SettingsActivity
 		return value;
 	}
 
+	public static boolean getHWAccelMessage (Context ctxt)
+	{
+		return !prefs (ctxt).getString (KEY_HW_ACCEL_ACK, "false").equals ("false");
+	}
+	
+	public static boolean setHWAccelMessage (Context ctxt, boolean value)
+	{
+		prefs (ctxt).edit ().putString (KEY_HW_ACCEL_ACK, value ? "true" : "false").commit ();
+
+		return value;
+	}
+
 	public static boolean getLockScreen (Context ctxt)
 	{
 		return prefs (ctxt).getBoolean (KEY_LOCK_SCREEN, true);
@@ -592,6 +605,15 @@ public class SettingsActivity
 	public static boolean getLeakKludge (Context ctxt)
 	{
 		return prefs (ctxt).getBoolean (KEY_LEAK_KLUDGE, true);
+	}
+	
+	public static Intent getWebViewIntent (Context ctxt)
+	{
+		boolean accel;
+		
+		accel = prefs (ctxt).getBoolean (KEY_HW_ACCEL, true);
+		
+		return new Intent (ctxt, accel ? WebReviewActivity.class : SWWebReviewActivity.class); 
 	}
 	
 	public static boolean getTimerReaper (Context ctxt)

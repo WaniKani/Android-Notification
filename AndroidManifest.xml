@@ -61,9 +61,14 @@
         
         <activity android:name="WebReviewActivity"
             	  android:windowSoftInputMode="adjustPan"
-            	  android:hardwareAccelerated="false"
+            	  android:hardwareAccelerated="true"
                	  android:configChanges="orientation|keyboardHidden|screenSize" android:launchMode="singleTop" android:process=":webview"/>
                 
+        <activity android:name="SWWebReviewActivity"
+            	  android:windowSoftInputMode="adjustPan"
+            	  android:hardwareAccelerated="false"
+               	  android:configChanges="orientation|keyboardHidden|screenSize" android:launchMode="singleTop" android:process=":swwebview"/>
+        
         <receiver
             android:name="NotificationService$Receiver"
             android:enabled="true"
