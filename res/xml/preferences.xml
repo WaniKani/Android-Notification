@@ -122,9 +122,19 @@
         	android:summary="@string/pref_fullscreen_descr"
         	android:defaultValue="false" />
     <CheckBoxPreference
+        	android:key="pref_hw_keyboard"
+        	android:title="@string/pref_hw_keyboard"
+        	android:summary="@string/pref_hw_keyboard_descr"
+        	android:defaultValue="false" />
+    <CheckBoxPreference
         	android:key="pref_timer_reaper"
         	android:title="@string/pref_timer_reaper"
         	android:summary="@string/pref_timer_reaper_descr"
+        	android:defaultValue="true"/>
+    <CheckBoxPreference
+        	android:key="pref_hw_accel"
+        	android:title="@string/pref_hw_accel"
+        	android:summary="@string/pref_hw_accel_descr"
         	android:defaultValue="true"/>
     <CheckBoxPreference
         	android:key="pref_leak_kludge"

@@ -123,6 +123,19 @@ public class WebReviewActivity extends Activity {
 		}		
 	}
 	
+	/**
+	 * The listener attached to the hw accel tip message.
+	 * When the user taps the ok button, we write on the property
+	 * that it has been acknowleged, so it won't show up any more. 
+	 */
+	private class AccelOkListener implements DialogInterface.OnClickListener {
+		
+		@Override
+		public void onClick (DialogInterface ifc, int which)
+		{
+			SettingsActivity.setHWAccelMessage (WebReviewActivity.this, true);
+		}		
+	}
 
 	/**
 	 * The listener that receives events from the mute buttons.
@@ -568,11 +581,6 @@ public class WebReviewActivity extends Activity {
 			"textbox = document.getElementById (\"" + WKConfig.ANSWER_BOX + "\"); " +
 			"reviews = document.getElementById (\"" + WKConfig.REVIEWS_DIV + "\");" +
 			"quiz = document.getElementById (\"" + WKConfig.QUIZ + "\");" +
-			/* This fixes a bug that makes SRS indication slow */
-			"style = document.createElement('style');" + 
-			"style.type = 'text/css';" + 
-			"style.innerHTML = '.animated { -webkit-animation-duration:0s; }';" + 
-			"document.getElementsByTagName('head')[0].appendChild(style);" +
 			"if (quiz != null) {" +
 			"   wknKeyboard.showLessonsNew ();" +
 			"} else if (textbox != null && !textbox.disabled) {" +
@@ -584,7 +592,13 @@ public class WebReviewActivity extends Activity {
 			"   reviews.style.overflow = \"visible\";" +
 			"}" + 
 			"window.trueRandom = Math.random;" +
-			"window.fakeRandom = function() { return 0;  };";   // @Ikalou's fix
+			"window.fakeRandom = function() { return 0;  };" +   // @Ikalou's fix
+			/* This fixes a bug that makes SRS indication slow */
+			"style = document.createElement('style');" + 
+			"style.type = 'text/css';" + 
+			"style.innerHTML = '.animated { -webkit-animation-duration:0s; }';" + 
+			"document.getElementsByTagName('head')[0].appendChild(style);";
+			
 	
 	private static final String
 			JS_BULK_MODE = "if (window.trueRandom) Math.random=window.trueRandom;"; 
@@ -761,6 +775,8 @@ public class WebReviewActivity extends Activity {
 		
 		applyMuteSettings ();
 		applySingleSettings ();
+		
+		showHWAccelMessage ();
 		
 		wv.acquire ();
 		
@@ -1050,4 +1066,23 @@ public class WebReviewActivity extends Activity {
 		dialog.show ();		
 	}
 
+	protected void showHWAccelMessage ()
+	{
+		AlertDialog.Builder builder;
+		Dialog dialog;
+					
+		if (!visible || SettingsActivity.getHWAccelMessage (this))
+			return;
+		
+		builder = new AlertDialog.Builder (this);
+		builder.setTitle (R.string.hw_accel_message_title);
+		builder.setMessage (R.string.hw_accel_message_text);
+		builder.setPositiveButton (R.string.hw_accel_message_ok, new AccelOkListener ());
+		
+		dialog = builder.create ();
+		SettingsActivity.setIgnoreButtonMessage (WebReviewActivity.this, true);
+
+		dialog.show ();		
+	}	
+	
 }

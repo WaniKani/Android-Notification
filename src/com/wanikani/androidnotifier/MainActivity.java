@@ -1220,7 +1220,7 @@ public class MainActivity extends FragmentActivity implements Runnable {
 		Intent intent;
 			
 		if (SettingsActivity.getUseIntegratedBrowser (this)) {
-			intent = new Intent (MainActivity.this, WebReviewActivity.class);
+			intent = SettingsActivity.getWebViewIntent (MainActivity.this);
 			intent.setAction (WebReviewActivity.OPEN_ACTION);
 		} else
 			intent = new Intent (Intent.ACTION_VIEW);

@@ -337,8 +337,11 @@ public class LocalIMEKeyboard implements Keyboard {
 		{
 			if (show) {
 				divw.setVisibility (View.VISIBLE);
-				imm.showSoftInput (wv, InputMethodManager.SHOW_FORCED);
+				if (!hwkeyb)
+					imm.showSoftInput (wv, InputMethodManager.SHOW_FORCED);
 				ew.requestFocus ();
+				if (hwkeyb)
+					imm.hideSoftInputFromWindow (ew.getWindowToken (), 0);
 			} else {
 				divw.setVisibility (View.GONE);
 				imm.hideSoftInputFromWindow (ew.getWindowToken (), 0);
@@ -870,6 +873,9 @@ public class LocalIMEKeyboard implements Keyboard {
     /// Last scheduled position task
     UpdatePositionTask lpt;
     
+    /// Use hw keyboard
+    boolean hwkeyb;
+    
     /**
      * Constructor
      * @param wav parent activity
@@ -968,6 +974,7 @@ public class LocalIMEKeyboard implements Keyboard {
 	public void show (boolean hasEnter)
 	{
 		fbox = FontDatabase.getFontBox (wav);
+		hwkeyb = SettingsActivity.getHWKeyboard (wav);
 		
 		lastSequence = -1;
 		wv.js (JS_INIT_TRIGGERS);
@@ -1071,6 +1078,8 @@ public class LocalIMEKeyboard implements Keyboard {
 		if (bpos.shallShow ()) {
 			divw.setVisibility (View.VISIBLE);		
 			ew.requestFocus ();
+			if (hwkeyb)
+				imm.hideSoftInputFromWindow (ew.getWindowToken (), 0);
 		}
 	}
 	
@@ -1216,7 +1225,8 @@ public class LocalIMEKeyboard implements Keyboard {
 		ew.setBackgroundColor (Color.WHITE);
 		ew.setCursorVisible (true);
 
-		imm.showSoftInput (ew, 0);
+		if (!hwkeyb)
+			imm.showSoftInput (ew, 0);
 		ew.requestFocus ();
 	}
 

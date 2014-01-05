@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.wanikani.androidnotifier"
-    android:versionCode="86"
-    android:versionName="1.12.2rc0">
+    android:versionCode="89"
+    android:versionName="1.13.0pre0">
 
     <uses-sdk
         android:minSdkVersion="7"
@@ -61,9 +61,14 @@
         
         <activity android:name="WebReviewActivity"
             	  android:windowSoftInputMode="adjustPan"
-            	  android:hardwareAccelerated="false"
+            	  android:hardwareAccelerated="true"
                	  android:configChanges="orientation|keyboardHidden|screenSize" android:launchMode="singleTop" android:process=":webview"/>
                 
+        <activity android:name="SWWebReviewActivity"
+            	  android:windowSoftInputMode="adjustPan"
+            	  android:hardwareAccelerated="false"
+               	  android:configChanges="orientation|keyboardHidden|screenSize" android:launchMode="singleTop" android:process=":swwebview"/>
+        
         <receiver
             android:name="NotificationService$Receiver"
             android:enabled="true"

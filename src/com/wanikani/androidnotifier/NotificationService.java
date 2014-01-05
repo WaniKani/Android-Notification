@@ -646,7 +646,7 @@ public class NotificationService
 		String url;
 		
 		if (SettingsActivity.getUseIntegratedBrowser (this)) {
-			intent = new Intent (this, WebReviewActivity.class);
+			intent = SettingsActivity.getWebViewIntent (this);
 			intent.setAction (WebReviewActivity.OPEN_ACTION);
 		} else
 			intent = new Intent (Intent.ACTION_VIEW);
