@@ -133,11 +133,13 @@ public class DatabaseFixup {
 			vacation = 0;
 		
 		for (Item i : lib.list) {
-			day = ui.getDay (i.getUnlockedDate ());
-			if (day >= minday) {
-				hdb.updateLevelup (level, day, vacation);
-				levelInfo.put (level, new HistoryDatabase.LevelInfo (day, vacation));
-				return true;
+			if (i.getUnlockedDate () != null) {
+				day = ui.getDay (i.getUnlockedDate ());
+				if (day >= minday) {
+					hdb.updateLevelup (level, day, vacation);
+					levelInfo.put (level, new HistoryDatabase.LevelInfo (day, vacation));
+					return true;
+				}
 			}
 		}		
 

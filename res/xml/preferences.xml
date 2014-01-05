@@ -132,6 +132,11 @@
         	android:summary="@string/pref_timer_reaper_descr"
         	android:defaultValue="true"/>
     <CheckBoxPreference
+        	android:key="pref_hw_accel"
+        	android:title="@string/pref_hw_accel"
+        	android:summary="@string/pref_hw_accel_descr"
+        	android:defaultValue="true"/>
+    <CheckBoxPreference
         	android:key="pref_leak_kludge"
         	android:title="@string/pref_leak_kludge"
         	android:summary="@string/pref_leak_kludge_descr"

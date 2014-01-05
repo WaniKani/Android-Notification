@@ -555,7 +555,7 @@ public class CustomFontActivity extends Activity {
 	{
 		Intent intent;
 		
-		intent = new Intent (this, WebReviewActivity.class);
+		intent = SettingsActivity.getWebViewIntent (this);
 		intent.setAction (WebReviewActivity.DOWNLOAD_ACTION);
 		intent.setData (Uri.parse (fe.url));
 		intent.putExtra (WebReviewActivity.EXTRA_DOWNLOAD_PREFIX, PREFIX);

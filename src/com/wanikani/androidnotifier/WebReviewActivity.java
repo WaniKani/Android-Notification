@@ -123,6 +123,19 @@ public class WebReviewActivity extends Activity {
 		}		
 	}
 	
+	/**
+	 * The listener attached to the hw accel tip message.
+	 * When the user taps the ok button, we write on the property
+	 * that it has been acknowleged, so it won't show up any more. 
+	 */
+	private class AccelOkListener implements DialogInterface.OnClickListener {
+		
+		@Override
+		public void onClick (DialogInterface ifc, int which)
+		{
+			SettingsActivity.setHWAccelMessage (WebReviewActivity.this, true);
+		}		
+	}
 
 	/**
 	 * The listener that receives events from the mute buttons.
@@ -763,6 +776,8 @@ public class WebReviewActivity extends Activity {
 		applyMuteSettings ();
 		applySingleSettings ();
 		
+		showHWAccelMessage ();
+		
 		wv.acquire ();
 		
 		kbstatus.apply (this);
@@ -1051,4 +1066,23 @@ public class WebReviewActivity extends Activity {
 		dialog.show ();		
 	}
 
+	protected void showHWAccelMessage ()
+	{
+		AlertDialog.Builder builder;
+		Dialog dialog;
+					
+		if (!visible || SettingsActivity.getHWAccelMessage (this))
+			return;
+		
+		builder = new AlertDialog.Builder (this);
+		builder.setTitle (R.string.hw_accel_message_title);
+		builder.setMessage (R.string.hw_accel_message_text);
+		builder.setPositiveButton (R.string.hw_accel_message_ok, new AccelOkListener ());
+		
+		dialog = builder.create ();
+		SettingsActivity.setIgnoreButtonMessage (WebReviewActivity.this, true);
+
+		dialog.show ();		
+	}	
+	
 }
