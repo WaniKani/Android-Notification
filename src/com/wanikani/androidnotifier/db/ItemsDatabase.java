@@ -792,7 +792,7 @@ public class ItemsDatabase {
 		 */
 		OpenHelper (Context ctxt)
 		{
-			super (ctxt, ctxt.getCacheDir ().getAbsolutePath () + "/" + NAME, null, VERSION);
+			super (ctxt, NAME, null, VERSION);
 		}
 		
 		@Override
