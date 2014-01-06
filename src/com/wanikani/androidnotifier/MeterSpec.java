@@ -195,16 +195,21 @@ public class MeterSpec implements Connection.Meter {
 
 	private MeterSpec (Context ctxt, T type)
 	{
-		int flags;
-		
 		this.type = type;
+		
+		prefs = prefs (ctxt);
+		cmgr = (ConnectivityManager) ctxt.getSystemService (Context.CONNECTIVITY_SERVICE);
+	}
+	
+	static SharedPreferences prefs (Context ctxt)
+	{
+		int flags;
 		
 		flags = Context.MODE_PRIVATE;
 		if (Build.VERSION.SDK_INT >= 11)
 			flags |= Context.MODE_MULTI_PROCESS;
-		prefs = ctxt.getSharedPreferences (PREFERENCES_FILE, flags);
-		cmgr = (ConnectivityManager) ctxt.getSystemService (Context.CONNECTIVITY_SERVICE);
-	}	
+		return ctxt.getSharedPreferences (PREFERENCES_FILE, flags);		
+	}
 	
 	public void count (int bytes)
 	{
@@ -295,12 +300,12 @@ public class MeterSpec implements Connection.Meter {
 		return ans;
 	}
 	
-	public static void reset (SharedPreferences prefs)
+	public static void reset (Context ctxt)
 	{
 		Editor e;
 		
 		synchronized (mutex) {
-			e = prefs.edit ();
+			e = prefs (ctxt).edit ();
 			e.putLong (START_TIME, System.currentTimeMillis ());
 			for (T type : T.values ()) {
 				e.putLong (getKey (type, CTAG_MOBILE), 0);

@@ -41,7 +41,7 @@ public class MetersActivity extends Activity {
 		@Override
 		public void onClick (View view)
 		{
-			MeterSpec.reset (PreferenceManager.getDefaultSharedPreferences (MetersActivity.this));
+			MeterSpec.reset (MetersActivity.this);
 			refresh ();
 		}
 		
