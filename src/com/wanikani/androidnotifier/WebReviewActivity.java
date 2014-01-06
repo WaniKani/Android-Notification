@@ -8,12 +8,14 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.Menu;
@@ -119,7 +121,7 @@ public class WebReviewActivity extends Activity {
 		@Override
 		public void onClick (DialogInterface ifc, int which)
 		{
-			SettingsActivity.setIgnoreButtonMessage (WebReviewActivity.this, true);
+			SettingsActivity.setIgnoreButtonMessage (prefs (), true);
 		}		
 	}
 	
@@ -133,7 +135,7 @@ public class WebReviewActivity extends Activity {
 		@Override
 		public void onClick (DialogInterface ifc, int which)
 		{
-			SettingsActivity.setHWAccelMessage (WebReviewActivity.this, true);
+			SettingsActivity.setHWAccelMessage (prefs (), true);
 		}		
 	}
 
@@ -145,7 +147,7 @@ public class WebReviewActivity extends Activity {
 		@Override
 		public void onClick (View w)
 		{
-			SettingsActivity.toggleMute (WebReviewActivity.this);
+			SettingsActivity.toggleMute (prefs ());
 			applyMuteSettings ();
 		}
 	}
@@ -575,6 +577,9 @@ public class WebReviewActivity extends Activity {
 	/** Flush caches bundle key */
 	private static final String KEY_FLUSH_CACHES = PREFIX + "flushCaches";
 	
+	/** Local preferences file. Need it because we access preferences from another file */
+	private static final String PREFERENCES_FILE = "webview.xml";
+	
 	/** Javascript to be called each time an HTML page is loaded. It hides or shows the keyboard */
 	private static final String JS_INIT_KBD = 
 			"var textbox, lessobj, ltextbox, reviews, style;" +
@@ -947,7 +952,7 @@ public class WebReviewActivity extends Activity {
 		show = kbstatus.canMute () && SettingsActivity.getShowMute (this);
 		muteH.setVisibility (show ? View.VISIBLE : View.GONE);
 		
-		setMute (show && SettingsActivity.getMute (this));
+		setMute (show && SettingsActivity.getMute (prefs ()));
 	}
 	
 	private void applySingleSettings ()
@@ -1052,7 +1057,7 @@ public class WebReviewActivity extends Activity {
 		AlertDialog.Builder builder;
 		Dialog dialog;
 					
-		if (!visible || SettingsActivity.getIgnoreButtonMessage (this))
+		if (!visible || SettingsActivity.getIgnoreButtonMessage (this, prefs ()))
 			return;
 		
 		builder = new AlertDialog.Builder (this);
@@ -1061,7 +1066,7 @@ public class WebReviewActivity extends Activity {
 		builder.setPositiveButton (R.string.ignore_button_message_ok, new OkListener ());
 		
 		dialog = builder.create ();
-		SettingsActivity.setIgnoreButtonMessage (WebReviewActivity.this, true);
+		SettingsActivity.setIgnoreButtonMessage (prefs (), true);
 
 		dialog.show ();		
 	}
@@ -1071,7 +1076,7 @@ public class WebReviewActivity extends Activity {
 		AlertDialog.Builder builder;
 		Dialog dialog;
 					
-		if (!visible || SettingsActivity.getHWAccelMessage (this))
+		if (!visible || SettingsActivity.getHWAccelMessage (prefs ()))
 			return;
 		
 		builder = new AlertDialog.Builder (this);
@@ -1080,9 +1085,13 @@ public class WebReviewActivity extends Activity {
 		builder.setPositiveButton (R.string.hw_accel_message_ok, new AccelOkListener ());
 		
 		dialog = builder.create ();
-		SettingsActivity.setIgnoreButtonMessage (WebReviewActivity.this, true);
+		SettingsActivity.setHWAccelMessage (prefs (), true);
 
 		dialog.show ();		
-	}	
+	}
 	
+	protected SharedPreferences prefs ()
+	{
+		return getSharedPreferences (PREFERENCES_FILE, Context.MODE_PRIVATE);		
+	}
 }
