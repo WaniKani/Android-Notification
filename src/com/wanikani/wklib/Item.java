@@ -329,6 +329,11 @@ public abstract class Item implements Serializable {
 			currentStreak = Util.getInt (obj, prefix + "_current_streak");
 		}
 		
+		public Performance ()
+		{
+			/* empty */
+		}
+		
 	};
 	
 	public static class Stats implements Serializable {
@@ -386,6 +391,11 @@ public abstract class Item implements Serializable {
 					userSynonyms [i] = synonyms.getString (i);
 			}
 		}
+		
+		public Stats ()
+		{
+			/* empty */
+		}
 	};
 	
 	private static class DynamicFactory implements Item.Factory<Item> {
@@ -426,8 +436,6 @@ public abstract class Item implements Serializable {
 	protected Item (JSONObject obj, Type type)
 		throws JSONException
 	{
-		int num, den;
-		
 		this.type = type;
 		
 		instanceCreationDate = new Date ();
@@ -441,15 +449,9 @@ public abstract class Item implements Serializable {
 		/* Only for critical items */
 		if (!obj.isNull ("percentage"))
 			percentage = obj.optInt ("percentage");
-		else if (stats != null) {
-			num = stats.meaning.correct;
-			den = stats.meaning.correct + stats.meaning.incorrect;
-			if (stats.reading != null) {
-				num += stats.reading.correct;
-				den += stats.reading.correct + stats.reading.incorrect;
-			}
-			percentage = den != 0 ? num * 100 / den : 100; 
-		} else
+		else if (stats != null)
+			setStats (stats);
+		else
 			percentage = -1;	/* No info */
 			
 		
@@ -457,10 +459,37 @@ public abstract class Item implements Serializable {
 		unlockedDate = Util.getDate (obj, "unlocked_date");
 	}
 	
+	protected Item (Type type)
+	{
+		this.type = type;
+	}
+	
+	public void setStats (Stats stats)
+	{
+		int num, den;
+
+		this.stats = stats;
+		
+		num = stats.meaning.correct;
+		den = stats.meaning.correct + stats.meaning.incorrect;
+		if (stats.reading != null) {
+			num += stats.reading.correct;
+			den += stats.reading.correct + stats.reading.incorrect;
+		}
+		percentage = den != 0 ? num * 100 / den : 100; 		
+	}
+	
 	public Date getUnlockedDate ()
 	{
 		return 	unlockedDate != null ? unlockedDate :
 					stats == null ? null : stats.unlockedDate;
+	}
+	
+	public void setUnlockedDate (Date date)
+	{
+		unlockedDate = date;
+		if (stats != null)
+			stats.unlockedDate = date;
 	}
 	
 	public Date getAvailableDate ()
@@ -490,5 +519,10 @@ public abstract class Item implements Serializable {
 	{
 		return meaning.contains (s) ||
 				(character != null && character.contains (s));
+	}
+	
+	public void fixup ()
+	{
+		/* empty */
 	}
 }

@@ -84,6 +84,11 @@ public class Kanji extends Item {
 			throw new JSONException ("Unknown important reading: " + s);
 	}
 	
+	public Kanji ()
+	{
+		super (Item.Type.KANJI);
+	}
+		
 	public Item deserialize (JSONObject obj)
 		throws JSONException
 	{

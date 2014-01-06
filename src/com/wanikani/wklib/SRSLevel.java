@@ -1,5 +1,9 @@
 package com.wanikani.wklib;
 
+import java.util.EnumSet;
+import java.util.Hashtable;
+import java.util.Map;
+
 /* 
  *  Copyright (c) 2013 Alberto Cuda
  *
@@ -21,6 +25,15 @@ public enum SRSLevel {
 
 	APPRENTICE, GURU, MASTER, ENLIGHTEN, BURNED;
 	
+	static Map<Integer, SRSLevel> omap;
+	
+	static {
+		omap = new Hashtable<Integer, SRSLevel> ();
+		
+		for (SRSLevel srs : EnumSet.allOf (SRSLevel.class))
+			omap.put (srs.ordinal (), srs);
+	}
+	
 	public static SRSLevel fromString (String s)
 	{
 		if (s.equals ("apprentice"))
@@ -35,5 +48,10 @@ public enum SRSLevel {
 			return BURNED;
 		
 		return null;
+	}
+	
+	public static SRSLevel fromOrdinal (int ordinal)
+	{
+		return omap.get (ordinal);
 	}
 }

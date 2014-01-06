@@ -37,11 +37,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
+import com.wanikani.androidnotifier.db.ItemsDatabase;
 import com.wanikani.wklib.AuthenticationException;
 import com.wanikani.wklib.Connection;
 import com.wanikani.wklib.Item;
 import com.wanikani.wklib.ItemLibrary;
-import com.wanikani.wklib.ItemsCache;
 import com.wanikani.wklib.LevelProgression;
 import com.wanikani.wklib.SRSDistribution;
 import com.wanikani.wklib.SRSLevel;
@@ -604,7 +604,8 @@ public class MainActivity extends FragmentActivity implements Runnable {
 
 	    /* Must be placed first, because fragments need this early */
 	    conn = new Connection (SettingsActivity.getLogin (this));
-
+	    conn.cache = new ItemsDatabase (this).getCache ();
+	    
 	    if (dsf == null)
 	    	dsf = new DashboardStatsFragment ();
 	    if (dashboardf == null)
@@ -629,12 +630,14 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	    if (bundle != null && bundle.containsKey (BUNDLE_VALID)) {
 	    	dd = new DashboardData (bundle);
 			pager.setCurrentItem (bundle.getInt (CURRENT_TAB));
+			/* -- I'm temporarily keeping this code just in case we decide to make disk caching optional -- */
+			/*
 			try {
 				conn.cache = (ItemsCache) bundle.getSerializable (ITEMS_CACHE);
 			} catch (Throwable t) {
-				/* In case serialization fails (e.g. version mismatch during upgrade) */
+				
 			}
-			
+			*/
 			resumeRefresh = bundle.getBoolean (REFRESHING);
 			
 			dbfixup = (FixupState) bundle.getSerializable (FIXUP_STATE);
@@ -771,8 +774,10 @@ public class MainActivity extends FragmentActivity implements Runnable {
 		if (dd != null) {
 			dd.serialize (bundle);
 			bundle.putBoolean (BUNDLE_VALID, true);
+			/* -- Needed only if we decide to provide memory cache too
 			if (conn != null)
 				bundle.putSerializable (ITEMS_CACHE, conn.cache);
+			*/
 			bundle.putInt (CURRENT_TAB, pager.getCurrentItem ());
 			bundle.putBoolean (REFRESHING, rtask != null);
 			bundle.putSerializable (FIXUP_STATE, dbfixup);
@@ -907,6 +912,7 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	private void updateCredentials (UserLogin login)
 	{
 		conn = new Connection (login);
+	    conn.cache = new ItemsDatabase (this).getCache ();
 		
 		refresh (Tab.RefreshType.FULL_IMPLICIT);
 	}

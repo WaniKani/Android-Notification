@@ -40,10 +40,14 @@ public class Radical extends Item {
 		
 		image = Util.getString (obj, "image");
 		
-		hyphenatedMeaning = meaning;
-		meaning = meaning.replace ('-', ' ');
+		fixup ();
 	}	
-
+	
+	public Radical ()
+	{
+		super (Item.Type.RADICAL);
+	}
+	
 	@Override
 	protected boolean hasReading ()
 	{
@@ -58,5 +62,12 @@ public class Radical extends Item {
 	protected String getClassURLComponent ()
 	{
 		return "radicals";
+	}
+	
+	@Override
+	public void fixup ()
+	{
+		hyphenatedMeaning = meaning;
+		meaning = meaning.replace ('-', ' ');
 	}
 }

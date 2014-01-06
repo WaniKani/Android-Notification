@@ -64,5 +64,7 @@ public interface ItemsCacheInterface extends Serializable {
 	}
 	
 	
-	public<T extends Item> Cache<T> get (Item.Type type);	
+	public<T extends Item> Cache<T> get (Item.Type type);
+	
+	public void flush ();
 }

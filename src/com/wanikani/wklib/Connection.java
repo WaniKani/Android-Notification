@@ -142,7 +142,7 @@ public class Connection {
 	
 	public void flush ()
 	{
-		cache = new ItemsCache ();
+		cache.flush ();
 	}
 	
 	public UserInformation getUserInformation (Meter meter)
@@ -238,10 +238,15 @@ public class Connection {
 		if (age > CACHE_STALE_TIME + CACHE_STALE_DISPERSION * (level % CACHE_DISPERSION_GROUPS))
 			return true;
 		
-		for (T item : ld.lib.list) 
-			if (item.getAvailableDate () != null &&
-			    item.getAvailableDate ().before (now))
+		for (T item : ld.lib.list) {
+			/* May become available any time */
+			if (item.getAvailableDate () == null)
 				return true;
+			if (item.stats != null && item.stats.burned)
+				continue;
+			if (item.getAvailableDate ().before (now))
+				return true;
+		}
 		
 		return false;
 	}
@@ -398,7 +403,7 @@ public class Connection {
 		cinfo = new CacheInfo ();
 		try {
 			if (!missingl.isEmpty ()) {
-				res = call (meter, resource, true, levelList (missingl), null);
+				res = call (meter, resource, true, levelList (missingl), cinfo);
 				lib = new ItemLibrary<T> (factory, res.infoAsArray);
 				ic.put (new ItemsCacheInterface.LevelData<T> (cinfo.modified, null, lib));
 				ans.add (lib);

@@ -56,6 +56,11 @@ public class Vocabulary extends Item {
 		kana = Util.getString (obj, "kana");
 	}
 	
+	public Vocabulary ()
+	{
+		super (Item.Type.VOCABULARY);
+	}
+				
 	protected String getClassURLComponent ()
 	{
 		return "vocabulary";

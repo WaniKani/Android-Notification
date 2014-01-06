@@ -65,9 +65,7 @@ public class ItemsCache implements ItemsCacheInterface {
 	
 	public ItemsCache ()
 	{
-		radicals = new LevelCache<Radical> ();
-		kanji = new LevelCache<Kanji> ();
-		vocab = new LevelCache<Vocabulary> ();
+		flush ();
 	}
 	
 	@Override
@@ -87,4 +85,10 @@ public class ItemsCache implements ItemsCacheInterface {
 		return null;
 	}
 	
+	public void flush ()
+	{
+		radicals = new LevelCache<Radical> ();
+		kanji = new LevelCache<Kanji> ();
+		vocab = new LevelCache<Vocabulary> ();
+	}
 }
