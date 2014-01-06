@@ -781,7 +781,7 @@ public class ItemsDatabase {
 	class OpenHelper extends SQLiteOpenHelper {
 		
 		/** DB Version */
-		private static final int VERSION = 1;
+		private static final int VERSION = 2;
 		
 		/** The db file */
 		private static final String NAME = "items.db";
