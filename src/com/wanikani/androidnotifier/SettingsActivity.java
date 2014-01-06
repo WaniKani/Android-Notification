@@ -115,7 +115,7 @@ public class SettingsActivity
 	private static final String KEY_HW_ACCEL = "pref_hw_accel";
 	
 	/** HW accel message has been read and acknowledged */
-	private static final String KEY_HW_ACCEL_ACK = "key_hw_accel_ack";
+	private static final String KEY_HW_ACCEL_ACK = "pref_hw_accel_ack";
 	/** Ignore button message has been read and acknowledged */
 	private static final String KEY_IGNORE_BUTTON_MESSAGE_ACK = "key_ignore_button_message_ack";
 	private static final String KEY_IGNORE_BUTTON_MESSAGE_ACK_NEW = "key_ignore_button_message_ack_new";
@@ -559,37 +559,34 @@ public class SettingsActivity
 		return prefs (ctxt).getBoolean (KEY_PREF_42PLUS, false);
 	}
 	
-	public static boolean getMute (Context ctxt)
+	public static boolean getMute (SharedPreferences prefs)
 	{
-		return prefs (ctxt).getBoolean (KEY_MUTE, false);
+		return prefs.getBoolean (KEY_MUTE, false);
 	}
 	
-	public static boolean getIgnoreButtonMessage (Context ctxt)
+	public static boolean getIgnoreButtonMessage (Context ctxt, SharedPreferences lprefs)
 	{
-		String s;
-		
-		s = prefs (ctxt).getString (KEY_IGNORE_BUTTON_MESSAGE_ACK_NEW, "false");
-		
 		return 
 				prefs (ctxt).getBoolean (KEY_IGNORE_BUTTON_MESSAGE_ACK, false) || 
-				!prefs (ctxt).getString (KEY_IGNORE_BUTTON_MESSAGE_ACK_NEW, "false").equals ("false");
+				!prefs (ctxt).getString (KEY_IGNORE_BUTTON_MESSAGE_ACK_NEW, "false").equals ("false") ||
+				!lprefs.getString (KEY_IGNORE_BUTTON_MESSAGE_ACK_NEW, "false").equals ("false");
 	}
 	
-	public static boolean setIgnoreButtonMessage (Context ctxt, boolean value)
+	public static boolean setIgnoreButtonMessage (SharedPreferences prefs, boolean value)
 	{
-		prefs (ctxt).edit ().putString (KEY_IGNORE_BUTTON_MESSAGE_ACK_NEW, value ? "true" : "false").commit ();
+		prefs.edit ().putString (KEY_IGNORE_BUTTON_MESSAGE_ACK_NEW, value ? "true" : "false").commit ();
 		
 		return value;
 	}
 
-	public static boolean getHWAccelMessage (Context ctxt)
+	public static boolean getHWAccelMessage (SharedPreferences prefs)
 	{
-		return !prefs (ctxt).getString (KEY_HW_ACCEL_ACK, "false").equals ("false");
+		return !prefs.getString (KEY_HW_ACCEL_ACK, "false").equals ("false");
 	}
 	
-	public static boolean setHWAccelMessage (Context ctxt, boolean value)
+	public static boolean setHWAccelMessage (SharedPreferences prefs, boolean value)
 	{
-		prefs (ctxt).edit ().putString (KEY_HW_ACCEL_ACK, value ? "true" : "false").commit ();
+		prefs.edit ().putString (KEY_HW_ACCEL_ACK, value ? "true" : "false").commit ();
 
 		return value;
 	}
@@ -724,13 +721,11 @@ public class SettingsActivity
 		prefs.edit ().putString (KEY_URL, url).putInt (KEY_URL_VERSION, version).commit ();
 	}
 
-	public static boolean toggleMute (Context ctxt)
+	public static boolean toggleMute (SharedPreferences prefs)
 	{
-		SharedPreferences prefs;
 		boolean v;
 
-		prefs = prefs (ctxt);
-		v = !getMute (ctxt);
+		v = !getMute (prefs);
 		prefs.edit ().putBoolean(KEY_MUTE, v).commit ();
 		
 		return v;
