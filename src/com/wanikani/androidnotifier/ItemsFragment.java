@@ -525,7 +525,7 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 			} else
 				meaning.setText ("");
 			
-			icl.setURL (item.getURL ());
+			icl.setURL (item.getURL (tls));
 
 			if (jtf != null)
 				glyphText.setTypeface (jtf);						
@@ -1208,6 +1208,9 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 	/// Need to restart refresh
 	private boolean resumeRefresh;
 	
+	/// Shall we use TLS?
+	private boolean tls;
+	
 	public ItemsFragment ()
 	{
 		rimg = new RadicalImages ();
@@ -1337,6 +1340,8 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 		SharedPreferences prefs;
 		
 		prefs = SettingsActivity.prefs (getActivity ());
+		
+		tls = SettingsActivity.getTLS (prefs);
 		showAnswers = prefs.getBoolean (KEY_SHOW_ANSWERS, true);
 		
 		fbox = FontDatabase.getFontBox (getActivity ());

@@ -293,15 +293,12 @@ public class NotificationService
 		SRSDistribution srs;
 		UserInformation ui;
 		Connection conn;
-		UserLogin login;
 		Connection.Meter meter;
 		int vday, lvday, nvdays;
 		
 		try {
 			meter = MeterSpec.T.NOTIFY_DAILY_JOBS.get (this);
-			login = SettingsActivity.getLogin (this);
-		
-			conn = new Connection (login);
+			conn = SettingsActivity.newConnection (this);
 			
 			srs = conn.getSRSDistribution (meter);
 			ui = conn.getUserInformation (meter);
@@ -469,17 +466,15 @@ public class NotificationService
 	 */
 	private void feed (NotifierStateMachine fsm, Event event)
 	{
-		UserLogin login;
 		UserInformation ui;
 		Connection.Meter meter;
 		Connection conn;
 		DashboardData dd;
 		StudyQueue sq;
 		
-		login = SettingsActivity.getLogin (this);
 		meter = event.meter ().get (this);
 		
-		conn = new Connection (login);
+		conn = SettingsActivity.newConnection (this);
 		try {
 			sq = conn.getStudyQueue (meter);
 			/* This call does not cause network traffic */

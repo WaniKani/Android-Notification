@@ -509,9 +509,13 @@ public abstract class Item implements Serializable {
 	
 	protected abstract String getClassURLComponent ();
 	
-	public String getURL ()
+	public String getURL (boolean tls)
 	{
-		return "http://www.wanikani.com/" + 
+		String scheme;
+		
+		scheme = tls ? "https" : "http";
+		
+		return scheme + "://www.wanikani.com/" + 
 				getClassURLComponent () + "/" + getItemURLComponent ();
 	}
 	

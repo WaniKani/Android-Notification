@@ -80,12 +80,6 @@ public class WebReviewActivity extends Activity {
 	 */
 	public static class WKConfig {
 		
-		/** New review start page. This is the start page when client side reviews will be deployed */
-		static final String CURRENT_REVIEW_START = "http://www.wanikani.com/review/session";
-
-		/** Review start page. Of course must be inside of @link {@link #REVIEW_SPACE} */
-		static final String CURRENT_LESSON_START = "http://www.wanikani.com/lesson/session";
-
 		/** HTML id of the textbox the user types its answer in (reviews, client-side) */
 		static final String ANSWER_BOX = "user-response";
 
@@ -857,14 +851,13 @@ public class WebReviewActivity extends Activity {
 		String lpage, rpage, url;
 		
 		url = wv.getUrl ();		
-		lpage = "http://www.wanikani.com/lesson";
-		rpage = "http://www.wanikani.com/review";
+		lpage = "www.wanikani.com/lesson";
+		rpage = "www.wanikani.com/review";
 		
 		return kbstatus.backIsSafe () &&
 				/* Need this because the reviews summary page is dangerous */
 				!(url.contains (rpage) || rpage.contains (url)) &&
-				!(url.contains (lpage) || lpage.contains (url)) &&
-				!url.contains ("http://www.wanikani.com/quickview");
+				!(url.contains (lpage) || lpage.contains (url));
 	}
 	
 	@Override

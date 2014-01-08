@@ -250,7 +250,7 @@ public class MainActivity extends FragmentActivity implements Runnable {
 			if (action.equals (SettingsActivity.ACT_CREDENTIALS)) {
 				ul = new UserLogin (i.getStringExtra (SettingsActivity.E_USERKEY));
 			
-				updateCredentials (ul);				
+				updateCredentials ();				
 				enableNotifications (i.getBooleanExtra (SettingsActivity.E_ENABLED, true));
 			} else if (action.equals (SettingsActivity.ACT_NOTIFY))
 				enableNotifications (i.getBooleanExtra (SettingsActivity.E_ENABLED, true));			
@@ -603,9 +603,9 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	    dbfixup = FixupState.NOT_RUNNING;
 
 	    /* Must be placed first, because fragments need this early */
-	    conn = new Connection (SettingsActivity.getLogin (this));
-	    conn.cache = new ItemsDatabase (this).getCache ();
-	    
+	    conn = SettingsActivity.newConnection (this);
+		conn.cache = new ItemsDatabase (this).getCache ();
+
 	    if (dsf == null)
 	    	dsf = new DashboardStatsFragment ();
 	    if (dashboardf == null)
@@ -909,10 +909,10 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	 * the GUI.
 	 * @param login the new credentials
 	 */
-	private void updateCredentials (UserLogin login)
+	private void updateCredentials ()
 	{
-		conn = new Connection (login);
-	    conn.cache = new ItemsDatabase (this).getCache ();
+		conn = SettingsActivity.newConnection (this);
+		conn.cache = new ItemsDatabase (this).getCache ();
 		
 		refresh (Tab.RefreshType.FULL_IMPLICIT);
 	}
@@ -1205,7 +1205,7 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	 */
 	public void chat ()
 	{
-		open ("http://www.wanikani.com/chat");
+		open (SettingsActivity.fixScheme (this, "http://www.wanikani.com/chat"));
 	}
 
 	/**
@@ -1213,7 +1213,7 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	 */
 	public void reviewSummary ()
 	{
-		open ("http://www.wanikani.com/review");
+		open (SettingsActivity.fixScheme (this, "http://www.wanikani.com/review"));
 	}
 
 	/**

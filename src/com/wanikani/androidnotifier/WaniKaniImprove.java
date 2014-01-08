@@ -13,7 +13,7 @@ import android.widget.TextView;
 
 /**
  * This is an integration of Seiji's "WaniKani Improve": 
- * 			http://www.wanikani.com/chat/api-and-third-party-apps/2952
+ * 			https://www.wanikani.com/chat/api-and-third-party-apps/2952
  * This script provides two features:
  * <ul>
  * 	<li>Fast forward: skip to next item, if previous has been entered correctly
@@ -76,6 +76,7 @@ public class WaniKaniImprove {
 		{
 			StringBuffer sb;
 			
+			/* This is obsolete: will be fixed as soon as I integrate version WKI 2.0 */
 			sb = new StringBuffer ("http://www.wanikani.com/quickview/");
 			
 			if (type.equals ("kanji"))

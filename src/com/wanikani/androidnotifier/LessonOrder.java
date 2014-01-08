@@ -1,7 +1,7 @@
 package com.wanikani.androidnotifier;
 
 /*
- * A port of the alucardeck's WK Reorder script (http://www.wanikani.com/chat/api-and-third-party-apps/3878)
+ * A port of the alucardeck's WK Reorder script (https://www.wanikani.com/chat/api-and-third-party-apps/3878)
  * The script can be downloaded from here: http://userscripts.org/scripts/review/182793
  * I had to replace events with direct function calls because they don't seem to work on all android devices
  */

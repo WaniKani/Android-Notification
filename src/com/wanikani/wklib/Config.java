@@ -21,17 +21,28 @@ public class Config {
 	
 	public static final String DEF_URL = "http://www.wanikani.com/api/v1.2"; 
 
+	public static final String DEF_URL_S = "https://www.wanikani.com/api/v1.2"; 
+
 	public static final String DEF_GRAVATAR_URL = "http://www.gravatar.com/avatar"; 
 	
 	public String url = DEF_URL;
 	
 	public String gravatarUrl = DEF_GRAVATAR_URL;
 	
-	public static final Config DEFAULT =
+	public static final Config DEFAULT_TCP =
 			new Config ();
 	
+	public static final Config DEFAULT_TLS =
+			new Config (DEF_URL_S, DEF_GRAVATAR_URL);
+
 	public Config ()
 	{
 		/* empty */		
+	}
+	
+	public Config (String url, String gravatarUrl)
+	{
+		this.url = url;
+		this.gravatarUrl = gravatarUrl;
 	}
 }
