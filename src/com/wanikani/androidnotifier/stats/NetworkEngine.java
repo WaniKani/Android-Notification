@@ -1,10 +1,14 @@
 package com.wanikani.androidnotifier.stats;
 
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Vector;
 
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.os.AsyncTask;
 import android.view.View;
 
@@ -62,7 +66,7 @@ public class NetworkEngine {
 	 * The asynch task that loads all the info from WK, feeds the database and
 	 * publishes the progress.
 	 */
-	private class Task extends AsyncTask<Void, Integer, Boolean> {
+	private class Task extends AsyncTask<Void, Integer, Throwable> {
 
 		/// The connection
 		private Connection conn;
@@ -90,7 +94,7 @@ public class NetworkEngine {
 		 * @return true if everything is ok
 		 */
 		@Override
-		protected Boolean doInBackground (Void... v)
+		protected Throwable doInBackground (Void... v)
 		{
 			ItemLibrary<Radical> rlib;
 			ItemLibrary<Kanji> klib;
@@ -99,8 +103,9 @@ public class NetworkEngine {
 			boolean failed;
 			State state;
 
+			try {
 			if (task.types.isEmpty ())
-				return true;
+				return null;
 			
 			failed = false;
 			try {
@@ -117,8 +122,8 @@ public class NetworkEngine {
 			}
 
 			if (failed)
-				return false;
-
+				return new IOException ();
+			
 			publishProgress ((100 * 1) / (levels + 2));
 
 			try {
@@ -128,7 +133,7 @@ public class NetworkEngine {
 						s.newRadical (rlib);
 				}
 			} catch (IOException e) {
-				return false;
+				return e;
 			} 
 
 			try {
@@ -138,7 +143,7 @@ public class NetworkEngine {
 						s.newKanji (klib);
 				}
 			} catch (IOException e) {
-				return false;
+				return e;
 			} 
 
 			publishProgress ((100 * 2) / (levels + 2));
@@ -157,10 +162,14 @@ public class NetworkEngine {
 					}
 				}
 			} catch (IOException e) {
-				return false;
+				return e;
 			} 
+			
+			} catch (Throwable t) {
+				return t;
+			}
 
-			return true;
+			return null;
 		}	
 				
 		@Override
@@ -174,12 +183,15 @@ public class NetworkEngine {
 		 * @param ok if everything was ok
 		 */
 		@Override
-		protected void onPostExecute (Boolean ok)
+		protected void onPostExecute (Throwable t)
 		{
 			for (State s : states)
-				s.done (ok);
+				s.done (t == null);
 			
-			completed (task, ok);
+			completed (task, t == null);
+			
+			if (t != null)
+				msg (t);					
 		}
 	}
 	
@@ -206,6 +218,8 @@ public class NetworkEngine {
 	}
 
 	private List<PendingTask> tasks;
+	
+	private MainActivity act;
 	
 	private Connection conn;
 	
@@ -237,11 +251,16 @@ public class NetworkEngine {
 
 	private void completed (PendingTask task, boolean ok)
 	{
-		if (ok)
-			availableTypes.addAll (task.types);
+		try {
+			if (ok)
+				availableTypes.addAll (task.types);
 		
-		tasks.remove (0);
-		runQueue ();
+			tasks.remove (0);
+			runQueue ();
+		} catch (Throwable t) {
+			msg (t);
+		}
+		
 	}
 	
 	private void runQueue ()
@@ -262,6 +281,8 @@ public class NetworkEngine {
 		
 	public void bind (MainActivity main, View view)
 	{
+		act = main;
+		
 		conn = main.getConnection ();
 		
 		for (Chart chart : charts)
@@ -272,6 +293,7 @@ public class NetworkEngine {
 	{
 		for (Chart chart : charts)
 			chart.unbind ();
+		act = null;
 	}
 	
 	public boolean scrolling ()
@@ -286,5 +308,25 @@ public class NetworkEngine {
 	public void flush ()
 	{
 		availableTypes = EnumSet.noneOf (Item.Type.class);
+	}
+	
+	private void msg (Throwable t)
+	{
+		if (act != null) {
+			AlertDialog.Builder builder;
+			StringWriter sw;
+			Dialog dialog;
+		
+			sw = new StringWriter ();
+			t.printStackTrace (new PrintWriter (sw));
+			
+			builder = new AlertDialog.Builder (act);
+			builder.setTitle ("Trace");
+			builder.setMessage (sw.getBuffer ().toString ());
+			
+			dialog = builder.create ();
+			
+			dialog.show ();
+		}
 	}
 }
