@@ -91,12 +91,6 @@ public class Connection {
 		cache = new ItemsCache ();
 	}
 	
-	public Connection (UserLogin ulogin)
-	{
-		this (ulogin, Config.DEFAULT);
-		cache = new ItemsCache ();
-	}
-	
 	public void flush ()
 	{
 		cache = new ItemsCache ();

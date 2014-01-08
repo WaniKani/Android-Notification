@@ -55,6 +55,8 @@
     <string name="pref_external_frame_placer_dict">External frame placer dictionary</string>
     <string name="pref_external_frame_placer_dict_descr">
         		Select dictionary to use when displaying definitions in the lessons module</string>
+    <string name="pref_tls">Use HTTPS</string>
+    <string name="pref_tls_descr">Always use HTTPS when accessing WK. Affects reviews, lessons forum and API calls</string>
     <string name="pref_url">Review URL</string>
     <string name="pref_url_desc">Wanikani review URL</string>
     <string name="pref_lesson_url">Lessons URL</string>
@@ -122,7 +124,7 @@
     <string name="status_msg_error">Error connecting to WaniKani</string>
     <string name="status_msg_partial">Network error. Partial results</string>
     <string name="status_msg_unauthorized">Authentication failed: check User API Key</string>
-    <string name="status_msg_unauthorized_empty">(did you subscribe to http://www.wanikani.com?)</string>
+    <string name="status_msg_unauthorized_empty">(did you subscribe to https://www.wanikani.com?)</string>
     <string name="status_msg_unauthorized_too_short">(hint: it is %d chars too short)</string>
     <string name="status_msg_unauthorized_too_long">(hint: it is %d chars too long)</string>
     
@@ -299,7 +301,7 @@
 		Kanji learning process, cheating will only make learning Japanese harder 
 		and you\'ll end up harming only yourselves!\n
 		See also \@ruipgpinheiro\'s post (author of the script) for more information:\n 
-			http://www.wanikani.com/chat/api-and-third-party-apps/2940/
+			https://www.wanikani.com/chat/api-and-third-party-apps/2940/
     </string>
     <string name="ignore_button_message_ok">OK, got it</string>
     

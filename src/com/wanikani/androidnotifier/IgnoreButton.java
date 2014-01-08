@@ -5,7 +5,7 @@ package com.wanikani.androidnotifier;
 /* ==== Wanikani Override 1.0.4 ==== == by LordGravewish ==
  *
  * For more information about this script including its changelog go to
- * http://www.wanikani.com/chat/api-and-third-party-apps/2940/
+ * https://www.wanikani.com/chat/api-and-third-party-apps/2940/
 
  * DISCLAIMER: I am not responsible for any problems caused by this script.
  * Also, anyone using this script is responsible for using it correctly. 

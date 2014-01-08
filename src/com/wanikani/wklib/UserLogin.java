@@ -36,6 +36,6 @@ public class UserLogin {
 	
 	private boolean compare (UserLogin ul)
 	{
-		return userkey.equals (ul.userkey); 
+		return 	userkey.equals (ul.userkey);
 	}
 }

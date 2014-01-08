@@ -1,6 +1,5 @@
 package com.wanikani.androidnotifier;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -12,6 +11,8 @@ import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
 
+import com.wanikani.wklib.Config;
+import com.wanikani.wklib.Connection;
 import com.wanikani.wklib.UserLogin;
 
 /* 
@@ -113,6 +114,8 @@ public class SettingsActivity
 	private static final String KEY_PREF_DISABLE_SUGGESTIONS = "pref_disable_suggestions";
 	/** Use hardware acceleration */
 	private static final String KEY_HW_ACCEL = "pref_hw_accel";
+	/** Use TLS */
+	private static final String KEY_TLS = "pref_tls";
 	
 	/** HW accel message has been read and acknowledged */
 	private static final String KEY_HW_ACCEL_ACK = "pref_hw_accel_ack";
@@ -123,6 +126,12 @@ public class SettingsActivity
 	/** Mute review */
 	private static final String KEY_MUTE = "mute";
 	
+	/** New review start page. This is the start page when client side reviews will be deployed */
+	static final String CURRENT_REVIEW_START = "http://www.wanikani.com/review/session";
+
+	/** Review start page. Of course must be inside of @link {@link #REVIEW_SPACE} */
+	static final String CURRENT_LESSON_START = "http://www.wanikani.com/lesson/session";
+		
 	/** The correct length of the API key (as far as we know) */
 	private static final int EXPECTED_KEYLEN = 32;
 	
@@ -137,6 +146,9 @@ public class SettingsActivity
 	
 	/** The current lessons notification settings. Used to check whether it is toggled */ 
 	private boolean lessonsEnabled;
+	
+	/** Is TLS currently enabled. Used to check whether it is toggled */
+	private boolean tls;
 	
 	/** The current threshold */
 	private int threshold;
@@ -183,6 +195,7 @@ public class SettingsActivity
 		login = getLogin (prefs);
 		enabled = getEnabled (prefs);
 		lessonsEnabled = getLessonsEnabled (prefs);
+		tls = getTLS (prefs);
 		threshold = getReviewThreshold (prefs);
 		
 		onSharedPreferenceChanged (prefs, KEY_PREF_USERKEY);
@@ -250,13 +263,11 @@ public class SettingsActivity
 		} else if (key.equals (KEY_URL)) {
 			s = getURL (prefs);
 			if (s.length () == 0)
-				pref.getEditor ().putString (KEY_URL, 
-						WebReviewActivity.WKConfig.CURRENT_REVIEW_START).commit ();
+				pref.getEditor ().putString (KEY_URL, CURRENT_REVIEW_START).commit ();
 		} else if (key.equals (KEY_LESSON_URL)) {
 			s = getLessonURL (prefs);
 			if (s.length () == 0)
-				pref.getEditor ().putString (KEY_LESSON_URL, 
-						WebReviewActivity.WKConfig.CURRENT_LESSON_START).commit ();
+				pref.getEditor ().putString (KEY_LESSON_URL, CURRENT_LESSON_START).commit ();
 		} else if (key.equals (KEY_PREF_EXPORT_DEST))
 			runExportDestHooks (prefs);
 		else if (key.equals (KEY_PREF_EXPORT_FILE)) {
@@ -408,9 +419,14 @@ public class SettingsActivity
 			return sb.toString ();
 	}
 	
-	public static UserLogin getLogin (Context ctxt)
+	public static Connection newConnection (Context ctxt)
 	{
-		return getLogin (prefs (ctxt));
+		SharedPreferences prefs;
+		
+		prefs = prefs (ctxt);
+		
+		return new Connection (getLogin (prefs), 
+							   getTLS (prefs) ? Config.DEFAULT_TLS : Config.DEFAULT_TCP);
 	}
 	
 	private static UserLogin getLogin (SharedPreferences prefs)
@@ -695,15 +711,7 @@ public class SettingsActivity
 
 	private static String getURL (SharedPreferences prefs)
 	{
-		String s;
-		int version;
-		
-		s = prefs.getString (KEY_URL, WebReviewActivity.WKConfig.CURRENT_REVIEW_START);
-		version = prefs.getInt (KEY_URL_VERSION, 0);
-		if (version < 2)
-			setURL (prefs, s = WebReviewActivity.WKConfig.CURRENT_REVIEW_START, 2);
-		
-		return s;
+		return prefs.getString (KEY_URL, CURRENT_REVIEW_START);
 	}
 	
 	public static String getLessonURL (Context ctxt)
@@ -713,12 +721,26 @@ public class SettingsActivity
 
 	private static String getLessonURL (SharedPreferences prefs)
 	{
-		return prefs.getString (KEY_LESSON_URL, WebReviewActivity.WKConfig.CURRENT_LESSON_START);
+		return prefs.getString (KEY_LESSON_URL, CURRENT_LESSON_START);
 	}
-
-	private static void setURL (SharedPreferences prefs, String url, int version)
+	
+	public static boolean getTLS (SharedPreferences prefs)
 	{
-		prefs.edit ().putString (KEY_URL, url).putInt (KEY_URL_VERSION, version).commit ();
+		return prefs.getBoolean (KEY_TLS, false);
+	}
+	
+	public static String fixScheme (Context ctxt, String url)
+	{
+		SharedPreferences prefs;
+		
+		if (!url.startsWith ("http:"))
+			return url;
+		
+		prefs = prefs (ctxt);
+		if (getTLS (prefs))
+			url = url.replaceFirst ("http:", "https:");
+		
+		return url;
 	}
 
 	public static boolean toggleMute (SharedPreferences prefs)
@@ -748,7 +770,7 @@ public class SettingsActivity
 	{
 		LocalBroadcastManager lbm;
 		UserLogin llogin;
-		boolean lenabled, lLessonsEnabled;
+		boolean lenabled, lLessonsEnabled, ltls;
 		int lthreshold;
 		Intent i;
 				
@@ -760,9 +782,13 @@ public class SettingsActivity
 		lLessonsEnabled &= findPreference (KEY_PREF_LESSONS_ENABLED).isEnabled ();
 		
 		lthreshold = getReviewThreshold (prefs);
-		
+
+		ltls = getTLS (prefs);
+		ltls &= findPreference (KEY_TLS).isEnabled ();
+
 		lbm = LocalBroadcastManager.getInstance (this);
-		if (!llogin.equals (login)) {
+		if (!llogin.equals (login) ||
+			ltls != tls) {
 			i = new Intent (ACT_CREDENTIALS);
 			i.putExtra (E_USERKEY, llogin.userkey);
 			i.putExtra (E_ENABLED, lenabled);
@@ -770,12 +796,14 @@ public class SettingsActivity
 			lbm.sendBroadcast (i);
 		} else if (lenabled != enabled || 
 				   lLessonsEnabled != lessonsEnabled ||
-				   lthreshold != threshold) {
+				   lthreshold != threshold ||
+				   ltls != tls) {
 			i = new Intent (ACT_NOTIFY);
 			i.putExtra (E_ENABLED, lenabled);
 			enabled = lenabled;
 			lessonsEnabled = lLessonsEnabled;
 			threshold = lthreshold;
+			tls = ltls;
 			lbm.sendBroadcast (i);
 		} 
 
