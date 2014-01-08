@@ -146,7 +146,7 @@
         	android:title="@string/pref_leak_kludge"
         	android:summary="@string/pref_leak_kludge_descr"
         	android:defaultValue="true"/>
-    <EditTextPreference android:key="pref_review_url" 
+    <EditTextPreference android:key="pref_review_url2" 
         	android:title="@string/pref_url" android:summary="@string/pref_url_desc"
         	android:defaultValue="http://www.wanikani.com/review/session" />
     <EditTextPreference android:key="pref_lesson_url2" 

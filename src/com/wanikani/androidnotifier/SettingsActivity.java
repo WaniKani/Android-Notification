@@ -89,11 +89,9 @@ public class SettingsActivity
 	/** Enable 42+ mode. Must match preferences.xml */
 	private static final String KEY_PREF_42PLUS = "pref_42plus";
 	/** Wanikani review URL */
-	private static final String KEY_URL = "pref_review_url";
+	private static final String KEY_URL = "pref_review_url2";
 	/** Wanikani lesson URL */
 	private static final String KEY_LESSON_URL = "pref_lesson_url2";
-	/** Waninaki review URL counter */
-	private static final String KEY_URL_VERSION = "review_url_version";
 	/** Lock screen during reviews */
 	private static final String KEY_LOCK_SCREEN = "pref_lock_screen";
 	/** Full screen during reviews */
