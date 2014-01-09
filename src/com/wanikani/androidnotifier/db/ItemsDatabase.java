@@ -353,13 +353,13 @@ public class ItemsDatabase {
 				db.beginTransaction ();
 				try {
 					stmt = db.compileStatement (String.format (SQL_UPDATE_INVENTORY, inventory ()));
-					stmt.bindLong (2, data.date.getTime ());
-					if (data.etag != null)
-						stmt.bindString (3, data.etag);
-					else
-						stmt.bindNull (3);
 					for (Integer level : levels) {
 						stmt.bindLong (1, level);
+						stmt.bindLong (2, data.date.getTime ());
+						if (data.etag != null)
+							stmt.bindString (3, data.etag);
+						else
+							stmt.bindNull (3);
 						stmt.execute ();
 					}
 					stmt.close ();
