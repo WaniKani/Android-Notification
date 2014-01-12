@@ -632,6 +632,10 @@ public class StatsFragment extends Fragment implements Tab {
 					ans.put (i - 1, li.day - lday);
 				lday = li != null ? (li.day + li.vacation) : null;
 			}
+			
+			/* We don't want L50 to grow... */
+			for (i = ALL_THE_LEVELS; i <= dd.level; i++)
+				ans.remove (i);
 
 			return ans;
 		}
