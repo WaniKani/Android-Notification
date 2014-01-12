@@ -177,7 +177,7 @@ public class ItemDistributionChart implements NetworkEngine.Chart {
 		
 		public void newRadical (ItemLibrary<Radical> radicals)
 		{
-			if (availableTypes.contains (Item.Type.RADICAL))
+			if (availableTypes.contains (Item.Type.RADICAL) || !types.contains (Item.Type.RADICAL))
 				return;
 			
 			for (Item i : radicals.list)
@@ -186,7 +186,7 @@ public class ItemDistributionChart implements NetworkEngine.Chart {
 		
 		public void newKanji (ItemLibrary<Kanji> kanji)
 		{
-			if (availableTypes.contains (Item.Type.KANJI))
+			if (availableTypes.contains (Item.Type.KANJI) || !types.contains (Item.Type.KANJI))
 				return;
 
 			for (Item i : kanji.list)
@@ -195,7 +195,7 @@ public class ItemDistributionChart implements NetworkEngine.Chart {
 
 		public void newVocab (ItemLibrary<Vocabulary> vocabs)
 		{
-			if (availableTypes.contains (Item.Type.VOCABULARY))
+			if (availableTypes.contains (Item.Type.VOCABULARY) || !types.contains (Item.Type.VOCABULARY))
 				return;
 
 			for (Item i : vocabs.list)
