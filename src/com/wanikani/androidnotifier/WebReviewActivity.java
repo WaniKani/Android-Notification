@@ -371,6 +371,16 @@ public class WebReviewActivity extends Activity {
 		{
 			keyboard.overrideFonts ();
 		}
+		
+		/**
+		 * Refresh the page, clearing the cache too.
+		 */
+		@Override
+		public void refresh ()
+		{
+			wv.clearCache (true);
+			wv.js ("window.location.reload (true)");
+		}
 	}
 	
 	/**
@@ -1087,4 +1097,5 @@ public class WebReviewActivity extends Activity {
 	{
 		return getSharedPreferences (PREFERENCES_FILE, Context.MODE_PRIVATE);		
 	}
+	
 }
