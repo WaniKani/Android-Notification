@@ -394,4 +394,13 @@
     <string name="id_import_failed">Import failed: %s</string>
     <string name="id_import_ok">Import succeeded: %1$d entries parsed, %2$d imported</string>
     
+    <string name="intro_title">About this app</string>
+    <string name="intro_description">
+        	As explained on the store, you can use this app only if you are subscribed to
+        	WaniKani. If so, grab you API key (it\'s in the Settings page) and
+        	enter it into the "User API Key" setting below. \n 
+        	If not, you may consider signing in (http://www.wanikani.com).
+    </string>
+    <string name="intro_ok">OK, got it</string>
+    
 </resources>

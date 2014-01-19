@@ -1,6 +1,9 @@
 package com.wanikani.androidnotifier;
 
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
@@ -41,6 +44,16 @@ import com.wanikani.wklib.UserLogin;
 public class SettingsActivity 
 	extends PreferenceActivity 
 	implements SharedPreferences.OnSharedPreferenceChangeListener {
+
+	private static class OkListener implements DialogInterface.OnClickListener {
+		
+		@Override
+		public void onClick (DialogInterface ifc, int btn)
+		{
+			/* empty */
+		}
+		
+	}
 	
 	static enum Layout {
 		
@@ -208,6 +221,14 @@ public class SettingsActivity
 		inited = true;
 		
 		prefs.registerOnSharedPreferenceChangeListener (this);
+	}
+	
+	@Override
+	protected void onResume ()
+	{
+		super.onResume ();
+		
+		intro ();
 	}
 	
 	/**
@@ -810,6 +831,25 @@ public class SettingsActivity
 			sendBroadcast (i);
 		}
 	}
+	
+	
+	protected void intro ()
+	{
+		AlertDialog.Builder builder;
+		Dialog dialog;
+					
+		if (!getLogin (prefs (this)).equals (""))
+			return;
+		
+		builder = new AlertDialog.Builder (this);
+		builder.setTitle (R.string.intro_title);
+		builder.setMessage (R.string.intro_description);
+		builder.setPositiveButton (R.string.intro_ok, new OkListener ());
+		
+		dialog = builder.create ();
+
+		dialog.show ();		
+	}	
 }
 
 
