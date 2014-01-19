@@ -132,6 +132,12 @@
                         android:text="@string/tag_filter_unlocks" />
 
                     <RadioButton
+                        android:id="@+id/btn_filter_toxic"
+                        style="@style/ItemButton"
+                        android:layout_width="wrap_content"
+                        android:text="@string/tag_filter_toxic" />
+                    
+                    <RadioButton
                         android:id="@+id/btn_filter_critical"
                         style="@style/ItemButton"
                         android:layout_width="wrap_content"

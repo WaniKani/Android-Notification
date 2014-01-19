@@ -802,8 +802,7 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 			ItemListHolder holder;
 			Item item;
 
-			item = getItem (position);
-			holder = row != null ? (ItemListHolder) row.getTag () : null;
+			item = getItem (position);			holder = row != null ? (ItemListHolder) row.getTag () : null;
 			if (holder == null || holder.type != item.type) {
 				inflater = main.getLayoutInflater ();			
 
@@ -927,6 +926,11 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 			case R.id.btn_filter_by_level:
 				sortByType ();
 				setLevelFilter (currentLevel);
+				break;
+
+			case R.id.btn_filter_toxic:
+				sortByToxicity ();
+				setToxicFilter ();
 				break;
 
 			case R.id.btn_filter_critical:
@@ -1209,6 +1213,9 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 	/// The critical items filter instance
 	CriticalFilter criticalf;	
 	
+	/// The toxic items filter instance
+	ToxicFilter toxicf;	
+
 	/// The recent unlocks items filter instance
 	UnlockFilter unlockf;
 
@@ -1263,6 +1270,7 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 		nof = new NoFilter (this);
 		levelf = new LevelFilter (this);
 		criticalf = new CriticalFilter (this);
+		toxicf = new ToxicFilter (this);
 		unlockf = new UnlockFilter (this);
 		currentFilter = levelf;
 		
@@ -1405,6 +1413,8 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 				setNoFilter ();
 			else if (currentFilter == levelf)
 				setLevelFilter (currentLevel);
+			else if (currentFilter == toxicf)
+				setToxicFilter ();
 			else if (currentFilter == criticalf)
 				setCriticalFilter ();
 			else if (currentFilter == unlockf)
@@ -1446,7 +1456,8 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 		
 		nof.stopTask ();
 		levelf.stopTask ();
-		criticalf.stopTask ();
+		toxicf.stopTask ();
+		criticalf.stopTask ();		
 		unlockf.stopTask ();
 		isd = null;
 	}
@@ -1492,6 +1503,26 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 		filterChanged ();
 	}
 	
+	/**
+	 * Switches to toxic items filter. 
+	 */
+	public void setToxicFilter ()
+	{
+		RadioButton btn;
+		
+		currentFilter = toxicf;
+
+		if (parent != null) {
+			btn = (RadioButton) parent.findViewById (R.id.btn_filter_toxic); 
+			btn.setChecked (true);
+
+			toxicf.select (meter (), main.getConnection ());
+			iview.setSelection (0);
+		}
+		
+		filterChanged ();
+	}
+
 	/**
 	 * Switches to critical items filter. 
 	 */
@@ -1856,9 +1887,12 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 
 		case MEDIUM:
 			criticalf.flush ();
+			toxicf.flush ();
 			unlockf.flush ();
 			
-			if (currentFilter == criticalf)
+			if (currentFilter == toxicf)
+				toxicf.select (meter (), main.getConnection ());
+			else if (currentFilter == criticalf)
 				criticalf.select (meter (), main.getConnection ());
 			else if (currentFilter == unlockf)
 				unlockf.select (meter (), main.getConnection ());
