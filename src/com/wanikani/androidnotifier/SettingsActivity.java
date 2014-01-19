@@ -169,6 +169,11 @@ public class SettingsActivity
 	 *  changes to the menu preferences 
 	 */
 	private boolean inited;
+	
+	/**
+	 * Did we show the intro message?
+	 */
+	private boolean introShown;
 
 	/** The action sent when credentials are changed */
 	public static final String ACT_CREDENTIALS = "com.wanikani.wanikaninotifier.action.CREDENTIALS";
@@ -838,8 +843,10 @@ public class SettingsActivity
 		AlertDialog.Builder builder;
 		Dialog dialog;
 					
-		if (!getLogin (prefs (this)).equals (""))
+		if (introShown || !getLogin (prefs (this)).userkey.equals (""))
 			return;
+		
+		introShown = true;
 		
 		builder = new AlertDialog.Builder (this);
 		builder.setTitle (R.string.intro_title);
