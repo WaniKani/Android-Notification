@@ -427,7 +427,7 @@ public abstract class Item implements Serializable {
 	
 	public Stats stats;
 	
-	public Integer percentage;
+	public int percentage;
 	
 	private Date unlockedDate;
 		
@@ -462,6 +462,8 @@ public abstract class Item implements Serializable {
 	protected Item (Type type)
 	{
 		this.type = type;
+		
+		percentage = -1;
 	}
 	
 	public void setStats (Stats stats)
