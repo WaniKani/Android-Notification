@@ -198,7 +198,7 @@ public class NoFilter implements Filter {
 	 */
 	public void select (Connection.Meter meter, Connection conn)
 	{
-		itemf.enableSorting (true, true, true);
+		itemf.enableSorting (true, true, true, true);
 		
 		if (task != null) {
 			itemf.clearData (this);

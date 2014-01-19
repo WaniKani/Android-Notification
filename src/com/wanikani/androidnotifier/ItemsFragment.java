@@ -939,6 +939,10 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 				setUnlockFilter ();
 				break;
 
+			case R.id.btn_sort_toxicity:
+				sortByToxicity ();
+				break;
+
 			case R.id.btn_sort_errors:
 				sortByErrors ();
 				break;
@@ -994,6 +998,18 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 			rg = (RadioGroup) parent.findViewById (R.id.rg_order);
 			rg.check (R.id.btn_sort_available);
 			iad.setComparator (Item.SortByAvailable.INSTANCE, ItemInfo.AVAILABLE);				
+		}
+
+		/**
+		 * Switches to toxicity sort order, fixing both ListView and radio buttons.
+		 */
+		private void sortByToxicity ()
+		{
+			RadioGroup rg;
+			
+			rg = (RadioGroup) parent.findViewById (R.id.rg_order);
+			rg.check (R.id.btn_sort_toxicity);
+			iad.setComparator (Item.SortByMistakes.INSTANCE, ItemInfo.ERRORS);
 		}
 
 		/**
@@ -1325,7 +1341,7 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 			rg.getChildAt (i).setOnClickListener (rgl);
 		rg.check (R.id.btn_sort_type);
 		
-		enableSorting (true, true, true);
+		enableSorting (true, true, true, true);
 				
     	return parent;
     }
@@ -1770,7 +1786,7 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 	}
 	
 	@Override
-	public void enableSorting (boolean errors, boolean unlock, boolean available)
+	public void enableSorting (boolean errors, boolean unlock, boolean available, boolean mistakes)
 	{
 		View view;
 		
@@ -1782,6 +1798,9 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 		
 		view = parent.findViewById (R.id.btn_sort_available);
 		view.setEnabled (available);
+		
+		view = parent.findViewById (R.id.btn_sort_toxicity);
+		view.setEnabled (mistakes);		
 	}
 	
 	/**

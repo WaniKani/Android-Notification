@@ -190,7 +190,7 @@ public class CriticalFilter implements Filter {
 	 */
 	public void select (Connection.Meter meter, Connection conn)
 	{
-		itemf.enableSorting (true, false, false);
+		itemf.enableSorting (true, false, false, false);
 		if (citems != null) {
 			itemf.setData (this, citems, true);
 			itemf.selectOtherFilter (this, false);

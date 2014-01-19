@@ -174,11 +174,17 @@
                         android:text="@string/tag_sort_srs" />
 
                     <RadioButton
+                        android:id="@+id/btn_sort_toxicity"
+                        style="@style/ItemButton"
+                        android:layout_width="wrap_content"
+                        android:text="@string/tag_sort_toxicity" />
+
+                    <RadioButton
                         android:id="@+id/btn_sort_errors"
                         style="@style/ItemButton"
                         android:layout_width="wrap_content"
                         android:text="@string/tag_sort_errors" />
-
+                    
                     <RadioButton
                         android:id="@+id/btn_sort_time"
                         style="@style/ItemButton"

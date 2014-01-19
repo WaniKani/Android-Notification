@@ -29,6 +29,106 @@ public abstract class Item implements Serializable {
 	
 	public static final long serialVersionUID = 1L;
 	
+	public static class SortByMistakes implements Comparator<Item> {
+		
+		boolean ascending;
+		
+		Comparator<Item> secondKey;
+
+		public final static SortByMistakes INSTANCE = new SortByMistakes (false);
+
+		public final static SortByMistakes INSTANCE_ASCENDING = new SortByMistakes (true);
+
+		private SortByMistakes (boolean ascending)
+		{
+			this.ascending = ascending;
+			
+			secondKey = ascending ? SortByMaxStreaks.INSTANCE : SortByTime.INSTANCE_ASCENDING;
+		}
+		
+		public SortByMistakes (boolean ascending, Comparator<Item> secondKey)
+		{
+			this.ascending = ascending;
+			this.secondKey = secondKey;
+		}
+		
+		public int compare (Item a, Item b)
+		{
+			int ans, am, bm;
+			
+			/* Klooge to make sure that when percentage is unknown,
+			 * items go at the end of the list */
+			am = a.stats != null ? 
+					(a.stats.reading != null ? a.stats.reading.incorrect : 0) + 
+					(a.stats.meaning != null ? a.stats.meaning.incorrect : 0)  : -1; 
+										
+			bm = b.stats != null ? 
+					(b.stats.reading != null ? b.stats.reading.incorrect : 0) + 
+					(b.stats.meaning != null ? b.stats.meaning.incorrect : 0)  : -1; 
+
+			if (am < 0 && ascending)
+				am = -1;
+			if (bm < 0 && ascending)
+				bm = -1;
+			
+			ans = am - bm;
+	
+			ans = ascending ? ans : -ans;
+
+			return ans == 0 ? secondKey.compare (a, b) : ans;
+		}
+	}
+	
+	public static class SortByMaxStreaks implements Comparator<Item> {
+		
+		boolean ascending;
+		
+		Comparator<Item> secondKey;
+
+		public final static SortByMaxStreaks INSTANCE = new SortByMaxStreaks (false);
+
+		public final static SortByMaxStreaks INSTANCE_ASCENDING = new SortByMaxStreaks (true);
+
+		private SortByMaxStreaks (boolean ascending)
+		{
+			this.ascending = ascending;
+			
+			secondKey = ascending ? SortByErrors.INSTANCE : SortByErrors.INSTANCE_ASCENDING;
+		}
+		
+		public SortByMaxStreaks (boolean ascending, Comparator<Item> secondKey)
+		{
+			this.ascending = ascending;
+			this.secondKey = secondKey;
+		}
+		
+		public int compare (Item a, Item b)
+		{
+			int ans, am, bm;
+			
+			/* Klooge to make sure that when percentage is unknown,
+			 * items go at the end of the list */
+			am = a.stats != null ? 
+					(a.stats.reading != null ? a.stats.reading.maxStreak : 0) + 
+					(a.stats.meaning != null ? a.stats.meaning.maxStreak : 0)  : -1; 
+										
+			bm = b.stats != null ? 
+					(b.stats.reading != null ? b.stats.reading.maxStreak : 0) + 
+					(b.stats.meaning != null ? b.stats.meaning.maxStreak : 0)  : -1; 
+
+			if (am < 0 && ascending)
+				am = -1;
+			if (bm < 0 && ascending)
+				bm = -1;
+			
+			ans = am - bm;
+	
+			ans = ascending ? ans : -ans;
+
+			return ans == 0 ? secondKey.compare (a, b) : ans;
+		}
+	}
+
 	public static class SortByErrors implements Comparator<Item> {
 		
 		boolean ascending;

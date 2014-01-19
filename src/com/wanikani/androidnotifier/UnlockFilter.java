@@ -191,7 +191,7 @@ public class UnlockFilter implements Filter {
 	 */
 	public void select (Connection.Meter meter, Connection conn)
 	{
-		itemf.enableSorting (false, true, false);
+		itemf.enableSorting (false, true, false, false);
 		if (citems != null) {
 			itemf.setData (this, citems, true);
 			itemf.selectOtherFilter (this, false);
