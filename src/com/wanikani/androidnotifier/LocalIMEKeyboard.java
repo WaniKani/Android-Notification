@@ -792,7 +792,8 @@ public class LocalIMEKeyboard implements Keyboard {
 			"window.wknOverrideQuestion ();";
 	
 	private static final String JS_INFO_POPUP =
-			"$('#option-item-info span').click()";
+			"$('#option-item-info').removeClass ();" +
+			"$('#option-item-info span').click ();";
 	
 	private static final String JS_SHOW_QUESTION =
 			"$('#character span').css ('visibility', '%s');";
