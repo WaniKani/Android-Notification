@@ -290,10 +290,13 @@ public class StatsFragment extends Fragment implements Tab {
 		{
 			super (hdbc);
 			
-			Resources res;
+			Resources res;			
+			Series burned;
 			
 			res = getResources ();
 						
+			burned = new Series (res.getColor (R.color.burned),
+								 res.getString (R.string.tag_burned));
 			completeSeries = new Vector<Series> ();
 			completeSeries.add (new Series (res.getColor (R.color.apprentice), 
 										    res.getString (R.string.tag_apprentice)));
@@ -311,6 +314,10 @@ public class StatsFragment extends Fragment implements Tab {
 			series = new Vector<Series> ();
 			series.addAll (completeSeries);
 			series.addAll (partialSeries);
+			
+			series.add (burned);
+			partialSeries.add (burned);
+			completeSeries.add (burned);			
 		}
 		
 		/**
@@ -323,7 +330,7 @@ public class StatsFragment extends Fragment implements Tab {
 		{
 			super.setCoreStats (cs);
 			
-			maxY = cs.maxUnlockedRadicals + cs.maxUnlockedKanji + cs.maxUnlockedVocab;
+			maxY = cs.maxRadicals + cs.maxKanji + cs.maxVocab;
 			if (maxY == 0)
 				maxY = 100;			
 		}
@@ -340,10 +347,12 @@ public class StatsFragment extends Fragment implements Tab {
 			int i;
 			
 			segment.series = partialSeries;
-			segment.data = new float [1][pseg.srsl.size ()];
+			segment.data = new float [2][pseg.srsl.size ()];
 			i = 0;
-			for (SRSDistribution srs : pseg.srsl)
-				segment.data [0][i++] = srs.apprentice.total;											
+			for (SRSDistribution srs : pseg.srsl) {
+				segment.data [0][i] = srs.apprentice.total;
+				segment.data [1][i++] = srs.burned.total;
+			}
 		}
 
 		/**
@@ -357,13 +366,14 @@ public class StatsFragment extends Fragment implements Tab {
 			int i;
 			
 			segment.series = completeSeries;
-			segment.data = new float [4][pseg.srsl.size ()];
+			segment.data = new float [5][pseg.srsl.size ()];
 			i = 0;
 			for (SRSDistribution srs : pseg.srsl) {
 				segment.data [0][i] = srs.apprentice.total;
 				segment.data [1][i] = srs.guru.total;
 				segment.data [2][i] = srs.master.total;
 				segment.data [3][i] = srs.enlighten.total;
+				segment.data [4][i] = srs.burned.total;
 				i++;
 			}			
 		}
@@ -1458,6 +1468,12 @@ public class StatsFragment extends Fragment implements Tab {
 		
 		ans.add (ds);
 		
+		ds = new DataSet (res.getString (R.string.tag_burned),
+				  		  res.getColor (R.color.burned),
+				  		  srs.enlighten.total);
+
+		ans.add (ds);
+
 		return ans;
 	}
 	
