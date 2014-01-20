@@ -78,7 +78,7 @@ public class ToxicFilter implements Filter {
 			lib = new ItemLibrary<Item> ();
 			try {
 				lib.add (conn.getRadicals (meter));
-				Collections.sort (lib.list, Item.SortByMistakes.INSTANCE);
+				Collections.sort (lib.list, Item.SortByToxicity.INSTANCE);
 				if (lib.list.size () > ITEMS)
 					lib.list = lib.list.subList (0, ITEMS);
 			} catch (IOException e) {
@@ -88,7 +88,7 @@ public class ToxicFilter implements Filter {
 			lib = new ItemLibrary<Item> ();
 			try {
 				lib.add (conn.getKanji (meter));
-				Collections.sort (lib.list, Item.SortByMistakes.INSTANCE);
+				Collections.sort (lib.list, Item.SortByToxicity.INSTANCE);
 				if (lib.list.size () > ITEMS)
 					lib.list = lib.list.subList (0, ITEMS);
 			} catch (IOException e) {
@@ -98,7 +98,7 @@ public class ToxicFilter implements Filter {
 			lib = new ItemLibrary<Item> ();
 			try {
 				lib.add (conn.getVocabulary (meter));
-				Collections.sort (lib.list, Item.SortByMistakes.INSTANCE);
+				Collections.sort (lib.list, Item.SortByToxicity.INSTANCE);
 				if (lib.list.size () > ITEMS)
 					lib.list = lib.list.subList (0, ITEMS);
 			} catch (IOException e) {

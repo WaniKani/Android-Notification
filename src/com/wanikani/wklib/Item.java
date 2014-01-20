@@ -29,24 +29,24 @@ public abstract class Item implements Serializable {
 	
 	public static final long serialVersionUID = 1L;
 	
-	public static class SortByMistakes implements Comparator<Item> {
+	public static class SortByToxicity implements Comparator<Item> {
 		
 		boolean ascending;
 		
 		Comparator<Item> secondKey;
 
-		public final static SortByMistakes INSTANCE = new SortByMistakes (false);
+		public final static SortByToxicity INSTANCE = new SortByToxicity (false);
 
-		public final static SortByMistakes INSTANCE_ASCENDING = new SortByMistakes (true);
+		public final static SortByToxicity INSTANCE_ASCENDING = new SortByToxicity (true);
 
-		private SortByMistakes (boolean ascending)
+		private SortByToxicity (boolean ascending)
 		{
 			this.ascending = ascending;
 			
 			secondKey = ascending ? SortByMaxStreaks.INSTANCE : SortByTime.INSTANCE_ASCENDING;
 		}
 		
-		public SortByMistakes (boolean ascending, Comparator<Item> secondKey)
+		public SortByToxicity (boolean ascending, Comparator<Item> secondKey)
 		{
 			this.ascending = ascending;
 			this.secondKey = secondKey;
@@ -58,14 +58,14 @@ public abstract class Item implements Serializable {
 			
 			/* Klooge to make sure that when percentage is unknown,
 			 * items go at the end of the list */
-			am = a.stats != null ? 
+			am = a.stats != null && !a.stats.burned ? 
 					(a.stats.reading != null ? a.stats.reading.incorrect : 0) + 
 					(a.stats.meaning != null ? a.stats.meaning.incorrect : 0)  : -1; 
 										
-			bm = b.stats != null ? 
+			bm = b.stats != null && !b.stats.burned ? 
 					(b.stats.reading != null ? b.stats.reading.incorrect : 0) + 
-					(b.stats.meaning != null ? b.stats.meaning.incorrect : 0)  : -1; 
-
+					(b.stats.meaning != null ? b.stats.meaning.incorrect : 0)  : -1;
+					
 			if (am < 0 && ascending)
 				am = -1;
 			if (bm < 0 && ascending)

@@ -1013,7 +1013,7 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 			
 			rg = (RadioGroup) parent.findViewById (R.id.rg_order);
 			rg.check (R.id.btn_sort_toxicity);
-			iad.setComparator (Item.SortByMistakes.INSTANCE, ItemInfo.ERRORS);
+			iad.setComparator (Item.SortByToxicity.INSTANCE, ItemInfo.ERRORS);
 		}
 
 		/**
