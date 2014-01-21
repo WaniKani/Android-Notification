@@ -969,6 +969,16 @@ public class StatsFragment extends Fragment implements Tab {
 		}		
 	}
 	
+	public class Callback implements LowPriorityScrollView.Callback {
+		
+		@Override
+		public boolean canScroll (LowPriorityScrollView lpsw)
+		{
+			return !scrollLock ();
+		}
+		
+	}
+	
 	/// The main activity
 	MainActivity main;
 	
@@ -1243,6 +1253,8 @@ public class StatsFragment extends Fragment implements Tab {
 			task = new GetCoreStatsTask (main, main.getConnection ());
 			task.execute ();
 		}
+		
+		((LowPriorityScrollView) parent).setCallback (new Callback ());
 				
 		return parent;
     }

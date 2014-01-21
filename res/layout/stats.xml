@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<com.wanikani.androidnotifier.LowPriorityScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:custom="http://schemas.android.com/apk/res/com.wanikani.androidnotifier"
     style="@style/Background"
     android:layout_width="match_parent"
@@ -237,4 +237,4 @@
         </LinearLayout>
     </RelativeLayout>
 
-</ScrollView>
+</com.wanikani.androidnotifier.LowPriorityScrollView>
