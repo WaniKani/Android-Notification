@@ -802,7 +802,8 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 			ItemListHolder holder;
 			Item item;
 
-			item = getItem (position);			holder = row != null ? (ItemListHolder) row.getTag () : null;
+			item = getItem (position);
+			holder = row != null ? (ItemListHolder) row.getTag () : null;
 			if (holder == null || holder.type != item.type) {
 				inflater = main.getLayoutInflater ();			
 
