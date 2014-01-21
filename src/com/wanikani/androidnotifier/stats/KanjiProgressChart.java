@@ -202,7 +202,7 @@ public class KanjiProgressChart implements NetworkEngine.Chart {
 		return type.contains (Item.Type.KANJI) ? new State () : null;
 	}
 	
-	public boolean scrolling ()
+	public boolean scrolling (boolean strict)
 	{
 		return false;
 	}

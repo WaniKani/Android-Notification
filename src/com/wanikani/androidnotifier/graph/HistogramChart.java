@@ -109,9 +109,9 @@ public class HistogramChart extends IconizableChart {
 	 * Tells if a scroll gesture is currently going on.
 	 * @return <tt>true</tt> if it is so
 	 */
-	public boolean scrolling ()
+	public boolean scrolling (boolean strict)
 	{
-		return plot.scrolling ();
+		return plot.scrolling (strict);
 	}
 	
 	/**

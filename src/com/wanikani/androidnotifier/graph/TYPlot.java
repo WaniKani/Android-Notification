@@ -77,6 +77,7 @@ public class TYPlot extends View {
 		@Override
 		public boolean onScroll (MotionEvent mev1, MotionEvent mev2, float dx, float dy)
 		{
+			strictScroll |= dx != 0;
 			vp.scroll ((int) dx, (int) dy);
 			ViewCompat.postInvalidateOnAnimation (TYPlot.this);
 			
@@ -86,6 +87,8 @@ public class TYPlot extends View {
 		@Override
 		public boolean onFling (MotionEvent mev1, MotionEvent mev2, float vx, float vy)
 		{			
+			strictScroll |= vx != 0;
+
 			scroller.forceFinished (true);
 			scroller.fling (vp.getAbsPosition (), 0, (int) -vx, 0, 0, 
 							vp.dayToAbsPosition (taxis.today) + 2000000, 0, 0);
@@ -638,6 +641,8 @@ public class TYPlot extends View {
 	/// <tt>true</tt> during fling gestures
 	private boolean scrolling;
 	
+	private boolean strictScroll;
+	
 	/// A reference to the parent chart, if any
 	private TYChart chart;
 	
@@ -720,6 +725,7 @@ public class TYPlot extends View {
 		switch (mev.getAction ()) {
 		case MotionEvent.ACTION_DOWN:
 			scrolling = true;
+			strictScroll = false;
 			break;
 
 		case MotionEvent.ACTION_UP:
@@ -937,9 +943,9 @@ public class TYPlot extends View {
 	 * True if scrolling 
 	 * @return <tt>true</tt> if scrolling
 	 */
-	public boolean scrolling ()
+	public boolean scrolling (boolean strict)
 	{
-		return scrolling;
+		return scrolling && (!strict || strictScroll);
 	}
 	
 	public void refreshing (boolean enable)

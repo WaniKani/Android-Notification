@@ -129,6 +129,7 @@ public class HistogramPlot extends View {
 		@Override
 		public boolean onScroll (MotionEvent mev1, MotionEvent mev2, float dx, float dy)
 		{
+			strictScroll |= dx != 0;			
 			vp.scroll ((int) dx, (int) dy);
 			ViewCompat.postInvalidateOnAnimation (HistogramPlot.this);
 			
@@ -138,6 +139,7 @@ public class HistogramPlot extends View {
 		@Override
 		public boolean onFling (MotionEvent mev1, MotionEvent mev2, float vx, float vy)
 		{			
+			strictScroll |= vx != 0;			
 			scroller.forceFinished (true);
 			scroller.fling (vp.getAbsPosition (), 0, (int) -vx, 0, 0, 
 							vp.barToAbsPosition (vp.bars) + 2000000, 0, 0);
@@ -559,6 +561,8 @@ public class HistogramPlot extends View {
 	/// <tt>true</tt> during fling gestures
 	private boolean scrolling;
 	
+	private boolean strictScroll;
+	
 	/// The actual data
 	private List<Samples> bars;
 	
@@ -648,6 +652,7 @@ public class HistogramPlot extends View {
 		switch (mev.getAction ()) {
 		case MotionEvent.ACTION_DOWN:
 			scrolling = true;
+			strictScroll = false;
 			break;
 
 		case MotionEvent.ACTION_UP:
@@ -778,8 +783,8 @@ public class HistogramPlot extends View {
 	 * True if scrolling 
 	 * @return <tt>true</tt> if scrolling
 	 */
-	public boolean scrolling ()
+	public boolean scrolling (boolean strict)
 	{
-		return scrolling;
+		return scrolling && (!strict || strictScroll);
 	}
 }

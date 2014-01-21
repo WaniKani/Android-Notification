@@ -381,9 +381,9 @@ public class ReviewsTimelineChart implements NetworkEngine.Chart {
 		
 		protected abstract List<Samples> getBars (State state);
 
-		public boolean scrolling ()
+		public boolean scrolling (boolean strict)
 		{
-			return chart != null && chart.scrolling ();
+			return chart != null && chart.scrolling (strict);
 		}
 	}
 	
@@ -754,9 +754,9 @@ public class ReviewsTimelineChart implements NetworkEngine.Chart {
 		typeh.updatePlot (state);
 	}
 
-	public boolean scrolling ()
+	public boolean scrolling (boolean strict)
 	{
-		return srsh.scrolling () || typeh.scrolling ();
+		return srsh.scrolling (strict) || typeh.scrolling (strict);
 	}
 
 	@Override

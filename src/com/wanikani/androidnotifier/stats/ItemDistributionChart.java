@@ -289,9 +289,9 @@ public class ItemDistributionChart implements NetworkEngine.Chart {
 			chart.setData (state.series, state.bars, -1);
 	}
 
-	public boolean scrolling ()
+	public boolean scrolling (boolean strict)
 	{
-		return chart != null && chart.scrolling ();
+		return chart != null && chart.scrolling (strict);
 	}
 
 	@Override

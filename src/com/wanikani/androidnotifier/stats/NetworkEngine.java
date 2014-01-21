@@ -55,7 +55,7 @@ public class NetworkEngine {
 		
 		public void unbind ();
 		
-		public boolean scrolling ();
+		public boolean scrolling (boolean strict);
 	}
 	
 	/**
@@ -274,10 +274,10 @@ public class NetworkEngine {
 			chart.unbind ();
 	}
 	
-	public boolean scrolling ()
+	public boolean scrolling (boolean strict)
 	{
 		for (Chart chart : charts)
-			if (chart.scrolling ())
+			if (chart.scrolling (strict))
 				return true;
 		
 		return false;

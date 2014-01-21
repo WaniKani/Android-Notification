@@ -614,7 +614,7 @@ public class StatsFragment extends Fragment implements Tab {
 			updateIfComplete ();
 		}
 		
-		public boolean scrolling ()
+		public boolean scrolling (boolean strict)
 		{
 			return false;
 		}
@@ -963,9 +963,9 @@ public class StatsFragment extends Fragment implements Tab {
 				main.dbFixup ();
 		}
 		
-		public boolean scrolling ()
+		public boolean scrolling (boolean strict)
 		{
-			return ((HistogramChart) parent.findViewById (R.id.hi_levels)).scrolling ();
+			return ((HistogramChart) parent.findViewById (R.id.hi_levels)).scrolling (strict);
 		}		
 	}
 	
@@ -974,7 +974,7 @@ public class StatsFragment extends Fragment implements Tab {
 		@Override
 		public boolean canScroll (LowPriorityScrollView lpsw)
 		{
-			return !scrollLock ();
+			return !scrolling (true);
 		}
 		
 	}
@@ -1695,15 +1695,20 @@ public class StatsFragment extends Fragment implements Tab {
 	@Override
 	public boolean scrollLock ()
 	{
+		return scrolling (false);
+	}
+	
+	public boolean scrolling (boolean strict)
+	{
 		for (TYChart chart : charts)
-			if (chart.scrolling ())
+			if (chart.scrolling (strict))
 				return true;
 		
 		for (GenericChart chart : gcharts)
-			if (chart.scrolling ())
+			if (chart.scrolling (strict))
 				return true;
 		
-		if (netwe.scrolling ())
+		if (netwe.scrolling (strict))
 			return true;
 		
 		return false; 
