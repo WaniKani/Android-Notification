@@ -745,9 +745,9 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	    		map = prefs.getAll();
 	    		
 	    		ldd = DashboardData.fromPreferences (prefs, DashboardData.Source.MAIN_ACTIVITY);
-	    		if (ldd == null || ldd.nextReviewDate.before (new Date ()))
+	    		if (ldd == null || ldd.nextReviewDate == null || ldd.nextReviewDate.before (new Date ()))
 	    			ldd = DashboardData.fromPreferences (prefs, DashboardData.Source.NOTIFICATION_SERVICE);
-	    		if (ldd == null || ldd.nextReviewDate.before (new Date ()))
+	    		if (ldd == null || ldd.nextReviewDate == null || ldd.nextReviewDate.before (new Date ()))
 	    			;	    		
 	    		else
 	    			refreshComplete (ldd, false);
