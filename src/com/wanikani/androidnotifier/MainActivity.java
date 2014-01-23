@@ -744,9 +744,9 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	    		
 	    		map = prefs.getAll();
 	    		
-	    		ldd = DashboardData.fromPreferences (prefs, DashboardData.Source.MAIN_ACTIVITY);
+	    		ldd = DashboardData.fromPreferences (this, DashboardData.Source.MAIN_ACTIVITY);
 	    		if (ldd == null || ldd.nextReviewDate == null || ldd.nextReviewDate.before (new Date ()))
-	    			ldd = DashboardData.fromPreferences (prefs, DashboardData.Source.NOTIFICATION_SERVICE);
+	    			ldd = DashboardData.fromPreferences (this, DashboardData.Source.NOTIFICATION_SERVICE);
 	    		if (ldd == null || ldd.nextReviewDate == null || ldd.nextReviewDate.before (new Date ()))
 	    			;	    		
 	    		else
@@ -1055,8 +1055,7 @@ public class MainActivity extends FragmentActivity implements Runnable {
 			dd.merge (this.dd);
 
 		if (!intermediate) {
-			dd.serialize (PreferenceManager.getDefaultSharedPreferences(this), 
-						  DashboardData.Source.MAIN_ACTIVITY);
+			dd.serialize (this, DashboardData.Source.MAIN_ACTIVITY);
 			pad.spin (false);
 		}
 

@@ -484,8 +484,7 @@ public class NotificationService
 				showLessons (dd.lessonsAvailable);
 			else
 				showLessons (0);
-			dd.serialize (PreferenceManager.getDefaultSharedPreferences(this), 
-					  	  DashboardData.Source.NOTIFICATION_SERVICE);
+			dd.serialize (this, DashboardData.Source.NOTIFICATION_SERVICE);
 		} catch (IOException e) {
 			if (event == Event.E_UNSOLICITED)
 				return;

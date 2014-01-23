@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.Date;
 
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.graphics.Bitmap;
@@ -454,6 +455,8 @@ public class DashboardData {
 	
 	private static final String KEY_CURRENT_LEVEL_RADICALS = PREFIX + "current_level_radicals";
 	private static final String KEY_CURRENT_LEVEL_KANJI = PREFIX + "current_level_kanji";
+	
+	private static final String PREFERENCES_FILE = "dd.xml";
 
 	public int lessonsAvailable;
 	
@@ -581,9 +584,14 @@ public class DashboardData {
 		doSerialize (new BundleStorage (bundle));
 	}
 	
-	public void serialize (SharedPreferences prefs, Source src)
+	private static SharedPreferences prefs (Context ctxt)
 	{
-		doSerialize (new PreferencesStorage (prefs, src.getPrefix ()));
+		return ctxt.getSharedPreferences (PREFERENCES_FILE, Context.MODE_PRIVATE);
+	}
+	
+	public void serialize (Context ctxt, Source src)
+	{
+		doSerialize (new PreferencesStorage (prefs (ctxt), src.getPrefix ()));
 	}
 	
 	protected void doSerialize (Storage storage)
@@ -669,11 +677,11 @@ public class DashboardData {
 		doDeserialize (new BundleStorage (bundle));
 	}
 	
-	public static DashboardData fromPreferences (SharedPreferences prefs, Source src)
+	public static DashboardData fromPreferences (Context ctxt, Source src)
 	{
 		Storage storage;
 		
-		storage = new PreferencesStorage (prefs, src.getPrefix ());
+		storage = new PreferencesStorage (prefs (ctxt), src.getPrefix ());
 		
 		return storage.containsKey (KEY_USERNAME) ? new DashboardData (storage) : null;
 	}
