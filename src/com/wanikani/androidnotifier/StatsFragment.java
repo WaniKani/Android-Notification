@@ -1482,7 +1482,7 @@ public class StatsFragment extends Fragment implements Tab {
 		
 		ds = new DataSet (res.getString (R.string.tag_burned),
 				  		  res.getColor (R.color.burned),
-				  		  srs.enlighten.total);
+				  		  srs.burned.total);
 
 		ans.add (ds);
 
