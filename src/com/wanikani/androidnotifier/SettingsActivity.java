@@ -126,7 +126,7 @@ public class SettingsActivity
 	/** Use hardware acceleration */
 	private static final String KEY_HW_ACCEL = "pref_hw_accel";
 	/** Use TLS */
-	private static final String KEY_TLS = "pref_tls";
+	private static final String KEY_TLS = "pref_tls_v2";
 	
 	/** HW accel message has been read and acknowledged */
 	private static final String KEY_HW_ACCEL_ACK = "pref_hw_accel_ack";
@@ -667,7 +667,7 @@ public class SettingsActivity
 
 	public static String getURL (Context ctxt)
 	{
-		return getURL (prefs (ctxt));
+		return fixScheme (ctxt, getURL (prefs (ctxt)));
 	}
 	
 	public static Layout getLayout (Context ctxt)
@@ -740,7 +740,7 @@ public class SettingsActivity
 	
 	public static String getLessonURL (Context ctxt)
 	{
-		return getLessonURL (prefs (ctxt));
+		return fixScheme (ctxt, getLessonURL (prefs (ctxt)));
 	}
 
 	private static String getLessonURL (SharedPreferences prefs)
@@ -750,7 +750,7 @@ public class SettingsActivity
 	
 	public static boolean getTLS (SharedPreferences prefs)
 	{
-		return prefs.getBoolean (KEY_TLS, false);
+		return prefs.getBoolean (KEY_TLS, true);
 	}
 	
 	public static String fixScheme (Context ctxt, String url)

@@ -137,10 +137,10 @@
         	android:summary="@string/pref_hw_accel_descr"
         	android:defaultValue="true"/>
     <CheckBoxPreference
-        	android:key="pref_tls"
+        	android:key="pref_tls_v2"
         	android:title="@string/pref_tls"
         	android:summary="@string/pref_tls_descr"
-        	android:defaultValue="false"/>
+        	android:defaultValue="true"/>
     <CheckBoxPreference
         	android:key="pref_leak_kludge"
         	android:title="@string/pref_leak_kludge"
