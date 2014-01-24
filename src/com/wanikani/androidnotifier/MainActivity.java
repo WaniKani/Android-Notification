@@ -722,10 +722,7 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	{
 	    super.onStart ();
 	    
-	    SharedPreferences prefs;	    
 	    DashboardData ldd;
-	    
-	    prefs = PreferenceManager.getDefaultSharedPreferences (this);
 	    
 	    /* A refresh task may be going on, if the review activity
 	     * has sent a refresh request before disappearing
@@ -740,10 +737,6 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	    		else if (ldd.isIncomplete ())
 	    			refreshOptional ();
 	    	} else {
-	    		Map map;
-	    		
-	    		map = prefs.getAll();
-	    		
 	    		ldd = DashboardData.fromPreferences (this, DashboardData.Source.MAIN_ACTIVITY);
 	    		if (ldd == null || ldd.nextReviewDate == null || ldd.nextReviewDate.before (new Date ()))
 	    			ldd = DashboardData.fromPreferences (this, DashboardData.Source.NOTIFICATION_SERVICE);
