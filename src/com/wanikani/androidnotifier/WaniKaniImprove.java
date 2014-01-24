@@ -28,7 +28,10 @@ import android.widget.TextView;
  * variables. Here, instead, we push all this information through the JS bridge into this 
  * class, where it is stored as an instance of the State structure.
  * I had also to break the original script into an initialization code, which builds
- * the HTML button, and a trigger part, that is run each time the "next" button is pressed. 
+ * the HTML button, and a trigger part, that is run each time the "next" button is pressed.
+ * 
+ * Since an upgrade broke the "last item info", I added some code from 2.2.12 (which is rather
+ * difficult to integrate) that brings the info popup back 
  */
 public class WaniKaniImprove {
 
@@ -77,7 +80,7 @@ public class WaniKaniImprove {
 			StringBuffer sb;
 			
 			/* This is obsolete: will be fixed as soon as I integrate version WKI 2.0 */
-			sb = new StringBuffer ("http://www.wanikani.com/quickview/");
+			sb = new StringBuffer ("https://www.wanikani.com/");
 			
 			if (type.equals ("kanji"))
 				sb.append ("kanji/").append (item).append ('/');
@@ -116,6 +119,36 @@ public class WaniKaniImprove {
 		
 		/// The dialog title
 		String title;
+
+		/// This code comes from WKI 2.2.12
+		private static final String JS_TAILOR =		
+				"var wki_iframe_content = $('body');\r\n" + 
+				"wki_iframe_content.append('<style>.footer-adjustment, footer {display: none !important} body {margin: 10px !important;} section {margin: 0 !important; } .container {margin: 0 !important; } .level-icon { min-height: 52px; float: left;} .vocabulary-icon, .kanji-icon, .radical-icon {float: right; width: 83%; height: auto; padding-left: 0 !important; padding-right: 0 !important; min-height: 52px;} .wki_iframe_header {font-weight: bold; text-align: center; line-height: 55px} .wki_iframe_section {margin: 30px 0 0 !important} .wki_iframe_section:after {clear: both; } .wki_iframe_section h2 {border-bottom: 1px solid rgb(212, 212, 212) !important; margin: 15px 0 7px !important;} .wki_iframe_header .enlarge-hover { display: none !important; } </style>');\r\n" + 
+				"\r\n" + 
+				"var wki_iframe_item = wki_iframe_content.find('header>h1');\r\n" + 
+				"var wki_iframe_item_progress = wki_iframe_content.find('#progress').addClass('wki_iframe_section').wrap('<div></div>').parent().html();\r\n" + 
+				"var wki_iframe_item_alternative_meaning = wki_iframe_content.find('#information').addClass('individual-item').wrap('<div></div>').parent();\r\n" + 
+				"{\r\n" + 
+				"       var wki_iframe_item_reading = wki_iframe_content.find('h2:contains(\"Reading\")').parent('section').addClass('wki_iframe_section');\r\n" + 
+				"\r\n" + 
+				"       $('<h2>', {'class' : 'wki_iframe_header'}).appendTo(wki_iframe_content).append(wki_iframe_item.children()).append('<br style=\"clear: both;\" />');\r\n" + 
+				"       wki_iframe_content.append(wki_iframe_item_reading);\r\n" + 
+				"}\r\n" + 
+				"{\r\n" + 
+				"       if(document.URL.indexOf ('radical') >= 0)\r\n" + 
+				"       {\r\n" + 
+				"                var wki_iframe_item_meaning = wki_iframe_content.find('h2:contains(\"Name\")').parent('section').addClass('wki_iframe_section');\r\n" + 
+				"       }\r\n" + 
+				"       else\r\n" + 
+				"       {\r\n" + 
+				"                var wki_iframe_item_meaning = wki_iframe_content.find('h2:contains(\"Meaning\")').parent('section').addClass('wki_iframe_section');\r\n" + 
+				"       }\r\n" + 
+				"       wki_iframe_content.append('<h2 class=\"wki_iframe_header\">' + wki_iframe_item.html() + '</h2>');\r\n" + 
+				"       wki_iframe_content.append(wki_iframe_item_alternative_meaning);\r\n" + 
+				"       wki_iframe_content.append(wki_iframe_item_meaning);\r\n" + 
+				"}\r\n" + 
+				"wki_iframe_content.append(wki_iframe_item_progress);\r\n";
+		
 		
 		/**
 		 * Constructor
@@ -152,6 +185,8 @@ public class WaniKaniImprove {
 	    {  
 			dialog.setTitle (title);
 			pb.setVisibility (View.GONE);
+			
+			view.loadUrl ("javascript:(function() { " + JS_TAILOR + "})()");
 	    }
 	}
 
