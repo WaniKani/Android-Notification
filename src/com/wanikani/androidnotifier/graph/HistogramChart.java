@@ -58,6 +58,8 @@ public class HistogramChart extends IconizableChart {
 		legend = (LinearLayout) findViewById (R.id.hc_legend);
 		alertPanel = findViewById (R.id.hc_lay_alert);
 		alertMessage = (TextView) findViewById (R.id.hc_alert);
+		
+		plot.loadAttributes (ctxt, attrs);
 	}
 	
 	/**

@@ -159,6 +159,14 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 custom:title="@string/ct_srs_history" />
+            
+            <com.wanikani.androidnotifier.graph.HistogramChart
+                android:id="@+id/ct_age_distribution"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                custom:drawTotal="false"
+                custom:ticks="10"
+                custom:title="@string/ct_age_distribution" />            
 			</LinearLayout>
             
             <TextView 

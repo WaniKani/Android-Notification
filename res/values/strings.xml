@@ -251,6 +251,7 @@
     <string name="ct_srs_distribution">SRS Distribution</string>
     <string name="ct_srs_history">SRS History</string>
     <string name="ct_levels">Levelup time</string>
+    <string name="ct_age_distribution">SRS by Age</string>
     
     <string name="ct_jlpt_progress">JLPT Progress</string>
     <string name="jlpt1">N1</string>

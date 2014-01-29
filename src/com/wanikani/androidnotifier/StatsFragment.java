@@ -39,6 +39,7 @@ import com.wanikani.androidnotifier.graph.PieChart;
 import com.wanikani.androidnotifier.graph.PieChart.InfoSet;
 import com.wanikani.androidnotifier.graph.PiePlot.DataSet;
 import com.wanikani.androidnotifier.graph.TYChart;
+import com.wanikani.androidnotifier.stats.ItemAgeChart;
 import com.wanikani.androidnotifier.stats.ItemDistributionChart;
 import com.wanikani.androidnotifier.stats.KanjiProgressChart;
 import com.wanikani.androidnotifier.stats.NetworkEngine;
@@ -1022,6 +1023,7 @@ public class StatsFragment extends Fragment implements Tab {
 			R.id.hi_levels };
 	
 	int semiPreserved [] = new int [] {
+			R.id.ct_age_distribution,
 			R.id.os_jlpt, R.id.os_joyo,
 			R.id.os_kanji_levels, R.id.os_levels,
 			R.id.os_review_timeline_srs, R.id.os_review_timeline_item
@@ -1141,6 +1143,8 @@ public class StatsFragment extends Fragment implements Tab {
 		
 		netwe.add (new ItemDistributionChart (netwe, R.id.os_kanji_levels, MeterSpec.T.OTHER_STATS, EnumSet.of (Item.Type.KANJI)));
 		netwe.add (new ItemDistributionChart (netwe, R.id.os_levels, MeterSpec.T.MORE_STATS, EnumSet.allOf (Item.Type.class)));
+
+		netwe.add (new ItemAgeChart (netwe, R.id.ct_age_distribution, MeterSpec.T.OTHER_STATS, EnumSet.allOf (Item.Type.class)));
 
 		netwe.add (new KanjiProgressChart (netwe, R.id.os_jlpt, MeterSpec.T.OTHER_STATS, R.string.jlpt5, KLIB_JLPT_5));		
 		netwe.add (new KanjiProgressChart (netwe, R.id.os_jlpt, MeterSpec.T.OTHER_STATS, R.string.jlpt4, KLIB_JLPT_4));		
@@ -1265,6 +1269,7 @@ public class StatsFragment extends Fragment implements Tab {
 		super.onActivityCreated (bundle);
 		
 		fcharts = new Vector<IconizableChart> ();
+		fcharts.add ((IconizableChart) parent.findViewById (R.id.ct_age_distribution));
 		fcharts.add ((IconizableChart) parent.findViewById (R.id.os_kanji_levels));
 		fcharts.add ((IconizableChart) parent.findViewById (R.id.os_levels));
 		fcharts.add ((IconizableChart) parent.findViewById (R.id.os_jlpt));

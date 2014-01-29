@@ -34,6 +34,7 @@ import com.wanikani.wklib.ItemLibrary;
 import com.wanikani.wklib.Kanji;
 import com.wanikani.wklib.Radical;
 import com.wanikani.wklib.SRSLevel;
+import com.wanikani.wklib.UserInformation;
 import com.wanikani.wklib.Vocabulary;
 
 /* 
@@ -730,7 +731,7 @@ public class ReviewsTimelineChart implements NetworkEngine.Chart {
 	}
 		
 	@Override
-	public State startUpdate (int levels, EnumSet<Item.Type> type)
+	public State startUpdate (UserInformation ui, EnumSet<Item.Type> type)
 	{
 		if (state != null)
 			return null;

@@ -110,6 +110,22 @@ public class HistogramPlot extends View {
 			samples = new Vector<Sample> ();
 		}
 		
+		public long getTotal ()
+		{
+			long ans;
+			
+			ans = 0;
+			for (Sample s : samples)
+				ans += s.value;
+			
+			return ans;
+		}
+		
+		public boolean isEmpty ()
+		{
+			return getTotal () == 0;
+		}
+		
 	}
 		
 	/**
@@ -563,6 +579,8 @@ public class HistogramPlot extends View {
 	
 	private boolean strictScroll;
 	
+	private boolean drawTotal;
+	
 	/// The actual data
 	private List<Samples> bars;
 	
@@ -595,6 +613,7 @@ public class HistogramPlot extends View {
 		pas = new PaintAssets (getResources (), attrs, meas);
 		
 		a = ctxt.obtainStyledAttributes (attrs, R.styleable.HistogramPlot);
+		drawTotal = a.getBoolean (R.styleable.HistogramPlot_drawTotal, true);
 		a.recycle ();
 	}
 		
@@ -775,7 +794,7 @@ public class HistogramPlot extends View {
 			tbl = vp.getY (vp.yMax) + meas.margin;
 		}
 					
-		if (base > 0)
+		if (base > 0 && drawTotal)
 			canvas.drawText (Long.toString (base), (left + right) / 2, tbl, lpaint);
 	}
 	

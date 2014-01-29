@@ -15,6 +15,7 @@ import com.wanikani.wklib.Item;
 import com.wanikani.wklib.ItemLibrary;
 import com.wanikani.wklib.Kanji;
 import com.wanikani.wklib.Radical;
+import com.wanikani.wklib.UserInformation;
 import com.wanikani.wklib.Vocabulary;
 
 /* 
@@ -49,7 +50,7 @@ public class NetworkEngine {
 	
 	public static interface Chart extends IconizableChart.DataSource {
 
-		public State startUpdate (int levels, EnumSet<Item.Type> types);
+		public State startUpdate (UserInformation ui, EnumSet<Item.Type> types);
 		
 		public void bind (MainActivity main, View view);
 		
@@ -95,31 +96,29 @@ public class NetworkEngine {
 			ItemLibrary<Radical> rlib;
 			ItemLibrary<Kanji> klib;
 			ItemLibrary<Vocabulary> vlib;
-			int i, j, levels, bunch [];
-			boolean failed;
+			UserInformation ui;
+			int i, j, bunch [];
 			State state;
 
 			if (task.types.isEmpty ())
 				return true;
 			
-			failed = false;
 			try {
-				levels = conn.getUserInformation (task.meter).level;
+				ui = conn.getUserInformation (task.meter);
 			} catch (IOException e) {
-				failed = true;
-				levels = 1;
+				ui = null;
 			}
 			
 			for (Chart c : charts) {
-				state = c.startUpdate (levels, task.types);
+				state = c.startUpdate (ui, task.types);
 				if (state != null)
 					states.add (state);
 			}
 
-			if (failed)
+			if (ui == null)
 				return false;
 
-			publishProgress ((100 * 1) / (levels + 2));
+			publishProgress ((100 * 1) / (ui.level + 2));
 
 			try {
 				if (task.types.contains (Item.Type.RADICAL)) {
@@ -141,19 +140,19 @@ public class NetworkEngine {
 				return false;
 			} 
 
-			publishProgress ((100 * 2) / (levels + 2));
+			publishProgress ((100 * 2) / (ui.level + 2));
 			
 			try {
 				if (task.types.contains (Item.Type.VOCABULARY)) {
 					i = 1;
-					while (i <= levels) {
-						bunch = new int [Math.min (BUNCH_SIZE, levels - i + 1)];
-						for (j = 0; j < BUNCH_SIZE && i <= levels; j++)
+					while (i <= ui.level) {
+						bunch = new int [Math.min (BUNCH_SIZE, ui.level - i + 1)];
+						for (j = 0; j < BUNCH_SIZE && i <= ui.level; j++)
 							bunch [j] = i++;
 						vlib = conn.getVocabulary (task.meter, bunch);
 						for (State s : states)
 							s.newVocab (vlib);
-						publishProgress ((100 * (i - 1)) / (levels + 2));
+						publishProgress ((100 * (i - 1)) / (ui.level + 2));
 					}
 				}
 			} catch (IOException e) {

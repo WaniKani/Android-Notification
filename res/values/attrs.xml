@@ -12,6 +12,7 @@
 
 	<declare-styleable name="HistogramPlot">
 	    <attr name="ticks" format="integer" />
+		<attr name="drawTotal" format="boolean" />
 	</declare-styleable>    
 
 </resources>
