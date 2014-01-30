@@ -105,8 +105,8 @@
     <string name="tag_btn_review">Review</string>
     <string name="tag_version">Version %s</string>
     
-    <string name="tag_radicals_progression">Radicals</string>
-    <string name="tag_kanji_progression">Kanji</string>
+    <string name="fmt_radicals_progression">%d Radicals</string>
+    <string name="fmt_kanji_progression">%d Kanji</string>
         
     <string name="fmt_remaining">%d remaining</string>
     <string name="fmt_to_go">%1$d/%2$d remaining</string>

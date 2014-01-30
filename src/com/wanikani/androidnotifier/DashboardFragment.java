@@ -122,6 +122,31 @@ public class DashboardFragment extends Fragment implements Tab {
 	}
 	
 	/**
+	 * Listener for clicks on total items link. Causes the pager to 
+	 * switch to the item tab, and sets the item type filter.
+	 */
+	private class TotalClickListener implements View.OnClickListener {
+
+		/// The item type (typically radicals or kanji)
+		private Item.Type type;
+		
+		/**
+		 * Constructor
+		 * @param type the item type (typically radicals or kanji) 
+		 */
+		public TotalClickListener (Item.Type type)
+		{
+			this.type = type;
+		}
+		
+		@Override
+		public void onClick (View v)
+		{
+			main.showTotal (type);
+		}	
+	}
+
+	/**
 	 * Listener for clicks on remaining items link. Causes the pager to 
 	 * switch to the item tab, and sets the apprentice items filter.
 	 */
@@ -223,6 +248,14 @@ public class DashboardFragment extends Fragment implements Tab {
 		view.setClickable (true);
 		view.setOnClickListener (new RemainingClickListener (Item.Type.KANJI));
 		
+		view = parent.findViewById (R.id.radicals_progression);
+		view.setClickable (true);
+		view.setOnClickListener (new TotalClickListener (Item.Type.RADICAL));
+
+		view = parent.findViewById (R.id.kanji_progression);
+		view.setClickable (true);
+		view.setOnClickListener (new TotalClickListener (Item.Type.KANJI));
+
 		view = parent.findViewById (R.id.btn_result);
 		view.setOnClickListener (new ReviewSummaryClickListener ());
 		
@@ -312,10 +345,12 @@ public class DashboardFragment extends Fragment implements Tab {
 	 * kanji progression)
 	 * @param pbid progess bar ID
 	 * @param rid remaining items text view ID
+	 * @param tid the progressions tag
+	 * @param tsid the progressions string id
 	 * @param prog number of non-apprentice items 
 	 * @param total total number of items
 	 */
-	protected void setProgress (int pbid, int rid, int prog, int total)
+	protected void setProgress (int pbid, int rid, int tid, int tsid, int prog, int total)
 	{
 		TextView tw;
 		ProgressBar pb;
@@ -343,6 +378,10 @@ public class DashboardFragment extends Fragment implements Tab {
 			tw.setVisibility (View.VISIBLE);
 		} else
 			tw.setVisibility (View.GONE);			
+		
+		tw = (TextView) parent.findViewById (tid);
+		s = String.format ("<font color=\"blue\"><u>%s</u></font>", getString (tsid, total));
+		tw.setText (Html.fromHtml (s));
 	}
 	
 	/**
@@ -415,12 +454,12 @@ public class DashboardFragment extends Fragment implements Tab {
 			
 		case RETRIEVED:
 			setVisibility (R.id.pb_w_section,View.GONE);
-			setVisibility (R.id.lay_progress, View.VISIBLE);
-			setProgress (R.id.pb_radicals, R.id.radicals_remaining,
-					 	 dd.od.lp.radicalsProgress, dd.od.lp.radicalsTotal);
+			setVisibility (R.id.lay_progress, View.VISIBLE);			
+			setProgress (R.id.pb_radicals, R.id.radicals_remaining, R.id.radicals_progression,
+					 	 R.string.fmt_radicals_progression, dd.od.lp.radicalsProgress, dd.od.lp.radicalsTotal);
 			
-			setProgress (R.id.pb_kanji, R.id.kanji_remaining,
-					     dd.od.lp.kanjiProgress, dd.od.lp.kanjiTotal);
+			setProgress (R.id.pb_kanji, R.id.kanji_remaining, R.id.kanji_progression,
+					     R.string.fmt_kanji_progression, dd.od.lp.kanjiProgress, dd.od.lp.kanjiTotal);
 
 			setVisibility (R.id.progress_section, View.VISIBLE);			
 			break;

@@ -304,7 +304,6 @@
         <TextView
             android:id="@+id/radicals_progression"
             style="@style/Progressions"
-            android:text="@string/tag_radicals_progression"
             android:textIsSelectable="true" />
         <TextView
             android:id="@+id/radicals_remaining"
@@ -329,7 +328,6 @@
         <TextView
             android:id="@+id/kanji_progression"
             style="@style/Progressions"
-            android:text="@string/tag_kanji_progression"
             android:textIsSelectable="true"/>
         <TextView
             android:id="@+id/kanji_remaining"

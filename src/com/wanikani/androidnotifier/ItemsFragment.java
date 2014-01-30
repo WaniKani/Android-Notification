@@ -1485,7 +1485,7 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 			
 	/**
 	 * Switches to level list filter. 
-	 * @param level the level to display 
+	 * @param level the level to display
 	 */
 	public void setLevelFilter (int level)
 	{
@@ -1912,7 +1912,7 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 	}
 	
 	/**
-	 * Shows the search dialog.
+	 * Shows the search dialog. SRS filtering is enabled if supported by the current filter.
 	 * @param switching <tt>true</tt> if the activity was in background
 	 * @param level the level to be selected (or <tt>null</tt> if no SRS filter should be set)
 	 * @param type the item type to be selected (or <tt>null</tt> if all types should
@@ -1920,12 +1920,26 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 	 */
 	public void showSearchDialog (boolean switching, SRSLevel level, Item.Type type)
 	{
+		showSearchDialog (switching, level, type, true);
+	}
+
+	/**
+	 * Shows the search dialog.
+	 * @param switching <tt>true</tt> if the activity was in background
+	 * @param level the level to be selected (or <tt>null</tt> if no SRS filter should be set)
+	 * @param type the item type to be selected (or <tt>null</tt> if all types should
+	 * be shown).
+	 * @param srs if srs filtering shall be enabled
+	 */
+	public void showSearchDialog (boolean switching, SRSLevel level, Item.Type type, boolean srs)
+	{
 		if (level != null)
 			iss.set (level);
 		if (type != null)
 			iss.set (type);
 		
 		isd.show (!switching);
+		isd.setSRSVisibility (srs);
 	}
 
 	/**

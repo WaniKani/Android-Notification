@@ -1242,6 +1242,19 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	}
 
 	/**
+	 * Shows the items tab, and applies a filter to displays only the items of a specific type.
+	 * Needed by the dashboard to implement the "total items" feature
+	 * @param type the type to display. Theorically it could be null, but
+	 * 	do we really want to?
+	 */
+	public void showTotal (Item.Type type)
+	{
+		pager.setCurrentItem (pad.getTabIndex (Tab.Contents.ITEMS), true);
+		itemsf.setLevelFilter (dd.level);
+		itemsf.showSearchDialog (true, null, type, false);		
+	}
+
+	/**
 	 * Shows the items tab, and applies a filter to displays only the critical items.
 	 * Needed by the dashboard to implement the "critical items" feature
 	 */

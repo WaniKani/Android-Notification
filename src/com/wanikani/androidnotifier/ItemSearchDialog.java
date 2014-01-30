@@ -554,19 +554,24 @@ public class ItemSearchDialog {
 		}
 	}
 	
+	public void setSRSVisibility (boolean enabled)
+	{
+		int visibility;
+
+		iss.srsApplied = enabled;
+		
+		visibility = enabled ? View.VISIBLE : View.GONE;
+		
+		for (View v : srsButtons.values ()) 
+			v.setVisibility (visibility);				
+	}
+	
 	/**
 	 * Called when the item filter changes. Hides or shows the relevant filters
 	 * @param f the new item filter
 	 */
 	public void itemFilterChanged (Filter ifilter)
 	{
-		int visibility;
-
-		iss.srsApplied = ifilter == null || ifilter.hasSRSLevelInfo (); 
-		
-		visibility = iss.srsApplied ? View.VISIBLE : View.GONE;
-		
-		for (View v : srsButtons.values ()) 
-			v.setVisibility (visibility);		
+		setSRSVisibility (ifilter == null || ifilter.hasSRSLevelInfo ()); 		
 	}
 }
