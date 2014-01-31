@@ -66,28 +66,6 @@ import com.wanikani.wklib.JapaneseIME;
  */
 public class LocalIMEKeyboard implements Keyboard {
 
-	private class Filter implements InputFilter {
-		
-		private static final String BANNED_CHARS = ",./;[]\\`\"=+";
-		
-		@Override
-		public CharSequence filter (CharSequence source, int start, int end, Spanned dest, int dstart, int dend) 
-		{
-			StringBuffer sb;
-			char c;
-			int i;
-			
-			sb = new StringBuffer ();
-			for (i = start; i < end; i++) {
-				c = source.charAt (i);
-				if (BANNED_CHARS.indexOf (c) < 0)
-					sb.append (c);
-			}
-			
-			return sb.toString ();
-	     } 	
-	}
-
 	/**
 	 * A listener of meaningful webview events. We need this to synchronized the position
 	 * of our text box with that of the HTML form.
@@ -134,6 +112,21 @@ public class LocalIMEKeyboard implements Keyboard {
 		
 		/// Set if we need to perform kana translation
 	    boolean translate;
+
+	    /// The list of chars are are not allowed
+		private static final String BANNED_CHARS = ",/;[]\\`\"=+";
+		
+		private int findFirstBannedChar (String s)
+		{
+			int i;
+			
+			for (i = 0; i < s.length (); i++)
+				if (BANNED_CHARS.indexOf (s.charAt (i)) >= 0)
+					return i;
+				
+			return -1;
+		}
+
 	    
 	    /**
 	     * Called after the text is changed to perform kana translation (if enabled).
@@ -145,7 +138,13 @@ public class LocalIMEKeyboard implements Keyboard {
 	    public void afterTextChanged (Editable et)
 	    {
 	    	JapaneseIME.Replacement repl;
-	    	int pos;
+	    	int pos, i;
+	    	
+	    	i = findFirstBannedChar (et.toString ());
+	    	if (i >= 0) {
+	    		et.replace (i, i + 1, "");
+	    		return;
+	    	}
 	    	
 	    	if (!translate)
 	    		return;
@@ -904,7 +903,6 @@ public class LocalIMEKeyboard implements Keyboard {
 		divw = wav.findViewById (R.id.ime_div);
 		imel = new IMEListener ();		
 		ew.addTextChangedListener (imel);
-		//ew.setFilters (new InputFilter [] { new Filter () });
 		ew.setInputType (InputType.TYPE_CLASS_TEXT);
 		ew.setOnEditorActionListener (imel);
 		ew.setGravity (Gravity.CENTER);
