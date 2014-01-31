@@ -87,15 +87,21 @@ public class PieChart extends IconizableChart {
 	 * Updates the plot with fresh data. Stops the spinner, if shown.
 	 * @param dsets the data
 	 * @param infosets additional info not to be drawn
+	 * @param anchor where to put infosets
 	 */
-	public void setData (List<DataSet> dsets, List<InfoSet> infosets)
+	public void setData (List<DataSet> dsets, List<InfoSet> infosets, int anchor)
 	{
 		LinearLayout item;		
+		int i;
 		
 		plot.setData (dsets);
 		
 		legend.removeAllViews ();
+		i = 0;
 		for (DataSet ds : dsets) {
+			if (i++ == anchor)
+				addInfosets (infosets);
+			
 			if (ds.value > 0) {
 				item = (LinearLayout) inflater.inflate (R.layout.legend, null); 
 				customizeItem (item, ds, true);
@@ -103,6 +109,17 @@ public class PieChart extends IconizableChart {
 			}
 		}
 		
+		if (i <= anchor)
+			addInfosets (infosets);
+		
+		available = true;
+		dataAvailable ();		
+	}
+	
+	private void addInfosets (List<InfoSet> infosets)
+	{
+		LinearLayout item;		
+
 		if (infosets != null && !infosets.isEmpty ()) {
 			for (DataSet ds : infosets) {
 				if (ds.value > 0) {
@@ -111,10 +128,7 @@ public class PieChart extends IconizableChart {
 					legend.addView (item);
 				}
 			}			
-		}
-		
-		available = true;
-		dataAvailable ();
+		}		
 	}	
 	
 	/**

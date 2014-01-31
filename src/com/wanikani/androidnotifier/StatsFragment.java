@@ -1412,17 +1412,17 @@ public class StatsFragment extends Fragment implements Tab {
 			if (hasSRSData (dd.od.srs)) {
 				pc.setVisibility (View.VISIBLE);
 				ds = getSRSDataSets (dd.od.srs);
-				pc.setData (ds, getInfoSet (ds));
+				pc.setData (ds, getInfoSet (ds), 5);
 			} else
 				pc.setVisibility (View.GONE);
 
 			pc = (PieChart) parent.findViewById (R.id.pc_kanji);
 			ds = getKanjiProgDataSets (dd.od.srs);
-			pc.setData (ds, getInfoSet (ds));
+			pc.setData (ds, getInfoSet (ds), 5);
 				
 			pc = (PieChart) parent.findViewById (R.id.pc_vocab);
 			ds = getVocabProgDataSets (dd.od.srs);
-			pc.setData (ds, getInfoSet (ds));
+			pc.setData (ds, getInfoSet (ds), 5);
 			
 			for (TYChart chart : charts)
 				chart.setOrigin (dd.creation);
@@ -1633,15 +1633,12 @@ public class StatsFragment extends Fragment implements Tab {
 		if (dses.size () > 4)
 			count += dses.get (4).value; /* burned */
 		
+		ds = new InfoSet (res.getString (R.string.tag_unlocked), count + dses.get (0).value);
+		ans.add (ds);
+
 		ds = new InfoSet (res.getString (R.string.tag_learned), count);
 		ans.add (ds);
 		
-		count += dses.get (0).value;
-		
-		ds = new InfoSet (res.getString (R.string.tag_unlocked), count);
-
-		ans.add (ds);
-
 		return ans;
 	}
 	
