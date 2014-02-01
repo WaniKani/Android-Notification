@@ -34,7 +34,13 @@
     <com.wanikani.androidnotifier.graph.PiePlot
         android:id="@+id/pc_plot"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>    
+        android:layout_height="wrap_content"/>
+    <TextView 
+        android:id="@+id/pc_switcher"
+        style="@style/LegendValue"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="right"/>    
 	<LinearLayout 
 	    android:id="@+id/pc_legend"
     	style="@style/ChartLegend"

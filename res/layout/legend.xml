@@ -18,4 +18,10 @@
 	    style="@style/LegendValue"
 	    android:layout_width="wrap_content"
 	    android:layout_height="wrap_content"/>	    
+	<TextView
+	    android:id="@+id/leg_percentage"
+	    style="@style/LegendValue"
+	    android:visibility="gone"
+	    android:layout_width="wrap_content"
+	    android:layout_height="wrap_content"/>	    
 </LinearLayout>
