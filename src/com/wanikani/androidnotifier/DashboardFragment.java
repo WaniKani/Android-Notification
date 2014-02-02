@@ -1,6 +1,8 @@
 package com.wanikani.androidnotifier;
 
 import java.util.Date;
+import java.util.List;
+import java.util.Vector;
 
 import android.app.Activity;
 import android.content.Context;
@@ -22,6 +24,10 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.wanikani.androidnotifier.graph.ProgressChart;
+import com.wanikani.androidnotifier.graph.ProgressPlot;
+import com.wanikani.androidnotifier.graph.ProgressChart.SubPlot;
+import com.wanikani.androidnotifier.graph.ProgressPlot.DataSet;
 import com.wanikani.wklib.Item;
 
 /* 
@@ -196,6 +202,12 @@ public class DashboardFragment extends Fragment implements Tab {
 	/// Number of reviews/lessons before switching to 42+ mode
 	public static final int LESSONS_42P = 42;
 	
+	/// The Radicals progress subplot
+	SubPlot radicalsProgress;
+	
+	/// The Kanji progress subplot
+	SubPlot kanjiProgress;	
+	
 	@Override
 	public void onAttach (Activity main)
 	{
@@ -240,14 +252,6 @@ public class DashboardFragment extends Fragment implements Tab {
 		view = parent.findViewById (R.id.btn_view_critical);
 		view.setOnClickListener (new CriticalClickListener ());
 		
-		view = parent.findViewById (R.id.radicals_remaining);
-		view.setClickable (true);
-		view.setOnClickListener (new RemainingClickListener (Item.Type.RADICAL));
-
-		view = parent.findViewById (R.id.kanji_remaining);
-		view.setClickable (true);
-		view.setOnClickListener (new RemainingClickListener (Item.Type.KANJI));
-		
 		view = parent.findViewById (R.id.radicals_progression);
 		view.setClickable (true);
 		view.setOnClickListener (new TotalClickListener (Item.Type.RADICAL));
@@ -260,8 +264,8 @@ public class DashboardFragment extends Fragment implements Tab {
 		view.setOnClickListener (new ReviewSummaryClickListener ());
 		
 		view = parent.findViewById (R.id.btn_chat);
-		view.setOnClickListener (new ChatClickListener ());
-}
+		view.setOnClickListener (new ChatClickListener ());		
+	}
 	
 	/**
 	 * Builds the GUI.
@@ -273,12 +277,20 @@ public class DashboardFragment extends Fragment implements Tab {
     public View onCreateView (LayoutInflater inflater, ViewGroup container,
             				  Bundle savedInstanceState) 
     {
+		ProgressChart chart;
+		
 		super.onCreateView (inflater, container, savedInstanceState);
 
 		parent = inflater.inflate(R.layout.dashboard, container, false);
 		registerListeners ();
+		
+		chart = (ProgressChart) parent.findViewById (R.id.pb_radicals);
+		radicalsProgress = chart.addData (parent.findViewById (R.id.rad_dropdown));
         
-    	return parent;
+		chart = (ProgressChart) parent.findViewById (R.id.pb_kanji);
+		kanjiProgress = chart.addData (parent.findViewById (R.id.kanji_dropdown));
+
+		return parent;
     }
 	
 	/**
@@ -384,6 +396,47 @@ public class DashboardFragment extends Fragment implements Tab {
 		tw.setText (Html.fromHtml (s));
 	}
 	
+	protected void setProgressNew (SubPlot splot, int pid, int tsid, int guru, int unlocked, int total)
+	{
+		List<DataSet> dsets;
+		TextView tw;
+		int threshold;
+		Resources res;
+		String s;
+
+		res = getResources ();
+		
+		tw = (TextView) parent.findViewById (pid);
+		s = String.format ("<font color=\"blue\"><u>%s</u></font>", getString (tsid, total));
+		tw.setText (Html.fromHtml (s));
+
+		dsets = new Vector<DataSet> ();
+		
+		dsets.add (new DataSet (getString (R.string.tag_guru), res.getColor (R.color.guru), guru));				
+		
+		threshold = total - (total / 10);
+		
+		if (threshold > unlocked) {
+			/* | Guru | Apprentice | Threshold | Grace | */ 
+			dsets.add (new DataSet (getString (R.string.tag_apprentice), res.getColor (R.color.apprentice), 
+									unlocked, unlocked - guru));
+			dsets.add (new DataSet (null, res.getColor (R.color.remaining), threshold));
+			dsets.add (new DataSet (null, res.getColor (R.color.grace), total));			
+		} else {
+			/* | Guru | Apprentice  | Apprentice above Threshold | Grace | */ 
+			dsets.add (new DataSet (getString (R.string.tag_apprentice), res.getColor (R.color.apprentice), 
+					                threshold, unlocked - guru));
+			dsets.add (new DataSet (null, res.getColor (R.color.apprentice_above_threshold), 
+								    unlocked - guru));
+			dsets.add (new DataSet (null, res.getColor (R.color.grace), total));			
+		}				
+		dsets.add (new DataSet (getString (R.string.tag_remaining), threshold - guru));
+		
+		ProgressPlot.DataSet.setDifferential (dsets);
+		
+		splot.setData (dsets);
+	}
+
 	/**
 	 * Called by @link MainActivity when asynchronous data
 	 * retrieval is completed. If we already have a view on which
@@ -454,12 +507,13 @@ public class DashboardFragment extends Fragment implements Tab {
 			
 		case RETRIEVED:
 			setVisibility (R.id.pb_w_section,View.GONE);
-			setVisibility (R.id.lay_progress, View.VISIBLE);			
-			setProgress (R.id.pb_radicals, R.id.radicals_remaining, R.id.radicals_progression,
-					 	 R.string.fmt_radicals_progression, dd.od.lp.radicalsProgress, dd.od.lp.radicalsTotal);
+			setVisibility (R.id.lay_progress, View.VISIBLE);
 			
-			setProgress (R.id.pb_kanji, R.id.kanji_remaining, R.id.kanji_progression,
-					     R.string.fmt_kanji_progression, dd.od.lp.kanjiProgress, dd.od.lp.kanjiTotal);
+			setProgressNew (radicalsProgress, R.id.radicals_progression, R.string.fmt_radicals_progression,  
+					  		dd.od.elp.radicalsProgress, dd.od.elp.radicalsUnlocked, dd.od.elp.radicalsTotal);
+			
+			setProgressNew (kanjiProgress, R.id.kanji_progression, R.string.fmt_kanji_progression,
+							dd.od.elp.kanjiProgress, dd.od.elp.kanjiUnlocked, dd.od.elp.kanjiTotal);
 
 			setVisibility (R.id.progress_section, View.VISIBLE);			
 			break;
@@ -467,7 +521,7 @@ public class DashboardFragment extends Fragment implements Tab {
 		case FAILED:
 			/* Just hide the spinner. 
 			 * If we already have some data, it is displayed anyway, otherwise hide it */
-			if (dd.od.lp == null)
+			if (dd.od.elp == null)
 				setVisibility (R.id.lay_progress, View.GONE);
 			setVisibility (R.id.pb_w_section, View.GONE);			
 		}

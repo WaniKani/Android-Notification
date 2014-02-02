@@ -10,6 +10,7 @@ import android.graphics.BitmapFactory;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -388,6 +389,9 @@ public abstract class IconizableChart extends LinearLayout {
 	/// The inflater
 	LayoutInflater inflater;
 	
+	/// The caption
+	View head;
+	
 	/// The chart title
 	TextView title;
 		
@@ -434,7 +438,8 @@ public abstract class IconizableChart extends LinearLayout {
 				ctxt.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		
 		inflater.inflate (id, this);
-					
+				
+		head = findViewById (R.id.gt_head);
 		title = (TextView) findViewById (R.id.gt_title);
 		spinner = (ProgressBar) findViewById (R.id.gt_spinner);
 		contents = findViewById (R.id.gt_contents);
@@ -461,10 +466,16 @@ public abstract class IconizableChart extends LinearLayout {
 	void loadAttributes (Context ctxt, AttributeSet attrs)
 	{
 		TypedArray a;
-		
+		String tas;
+				
 		a = ctxt.obtainStyledAttributes (attrs, R.styleable.PieChart);
-			 
-		title.setText (a.getString (R.styleable.PieChart_title));
+		
+		tas = a.getString (R.styleable.PieChart_title);
+		if (tas == null) {
+			head.setVisibility (View.GONE);
+			setOpen (true);
+		} else
+			title.setText (tas);
 				
 		a.recycle ();
 	}

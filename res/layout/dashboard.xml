@@ -305,22 +305,21 @@
             android:id="@+id/radicals_progression"
             style="@style/Progressions"
             android:textIsSelectable="true" />
-        <TextView
-            android:id="@+id/radicals_remaining"
-            style="@style/ProgressRemaining"
-            android:textIsSelectable="true"/>
+        <View
+            android:layout_width="0dip"
+            android:layout_height="0dip"
+            android:layout_weight="1"/>        
+        <ImageButton
+            android:id="@+id/rad_dropdown"
+            style="@style/AlertButton"
+            android:src="@drawable/expander_open"/>
         </TableRow>
             
-       <ProgressBar
+       <com.wanikani.androidnotifier.graph.ProgressChart
             android:id="@+id/pb_radicals"
          	android:layout_width="fill_parent"
          	android:layout_height="wrap_content"
-         	android:layout_gravity="center"
-         	android:max="100"
-         	style="@android:style/Widget.ProgressBar.Horizontal"
-         	android:progress="90"
-         	android:progressDrawable="@drawable/radicalsprog"
-         	android:layout_marginBottom="@dimen/m_gap"/>
+         	android:layout_gravity="center"/>
             
         <TableRow
             android:layout_width="fill_parent"
@@ -329,22 +328,21 @@
             android:id="@+id/kanji_progression"
             style="@style/Progressions"
             android:textIsSelectable="true"/>
-        <TextView
-            android:id="@+id/kanji_remaining"
-            style="@style/ProgressRemaining"
-            android:textIsSelectable="true"/>
+        <View
+            android:layout_width="0dip"
+            android:layout_height="0dip"
+            android:layout_weight="1"/>        
+        <ImageButton
+            android:id="@+id/kanji_dropdown"
+            style="@style/AlertButton"
+            android:src="@drawable/expander_open"/>
         </TableRow>
        
-       <ProgressBar
+       <com.wanikani.androidnotifier.graph.ProgressChart
             android:id="@+id/pb_kanji"
          	android:layout_width="fill_parent"
          	android:layout_height="wrap_content"
-         	android:layout_gravity="center"
-         	android:max="100"
-         	android:progress="90"
-         	style="@android:style/Widget.ProgressBar.Horizontal"
-         	android:progressDrawable="@drawable/kanjiprog"
-         	android:layout_marginBottom="@dimen/m_gap"/>
+         	android:layout_gravity="center"/>
    	</TableLayout>
    	</RelativeLayout>
     </LinearLayout>

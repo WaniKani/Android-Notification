@@ -5,14 +5,12 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.Vector;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -25,7 +23,6 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Looper;
-import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
@@ -40,9 +37,9 @@ import android.widget.TextView;
 import com.wanikani.androidnotifier.db.ItemsDatabase;
 import com.wanikani.wklib.AuthenticationException;
 import com.wanikani.wklib.Connection;
+import com.wanikani.wklib.ExtendedLevelProgression;
 import com.wanikani.wklib.Item;
 import com.wanikani.wklib.ItemLibrary;
-import com.wanikani.wklib.LevelProgression;
 import com.wanikani.wklib.SRSDistribution;
 import com.wanikani.wklib.SRSLevel;
 import com.wanikani.wklib.StudyQueue;
@@ -374,7 +371,7 @@ public class MainActivity extends FragmentActivity implements Runnable {
 		{
 			DashboardData.OptionalDataStatus srsStatus, lpStatus, ciStatus;
 			SRSDistribution srs;
-			LevelProgression lp;
+			ExtendedLevelProgression elp;
 			ItemLibrary<Item> critical;
 			int cis;
 			
@@ -387,10 +384,10 @@ public class MainActivity extends FragmentActivity implements Runnable {
 			}
 
 			try {
-				lp = conn [0].getLevelProgression (MeterSpec.T.DASHBOARD_REFRESH.get (MainActivity.this));
+				elp = conn [0].getExtendedLevelProgression (MeterSpec.T.DASHBOARD_REFRESH.get (MainActivity.this));
 				lpStatus = DashboardData.OptionalDataStatus.RETRIEVED;
 			} catch (IOException e) {
-				lp = null;
+				elp = null;
 				lpStatus = DashboardData.OptionalDataStatus.FAILED;
 			}
 
@@ -403,7 +400,7 @@ public class MainActivity extends FragmentActivity implements Runnable {
 				cis = 0;
 			}
 						
-			return new DashboardData.OptionalData (srs, srsStatus, lp, lpStatus, cis, ciStatus);
+			return new DashboardData.OptionalData (srs, srsStatus, elp, lpStatus, cis, ciStatus);
 		}	
 						
 		/**

@@ -10,6 +10,7 @@ import android.content.SharedPreferences.Editor;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 
+import com.wanikani.wklib.ExtendedLevelProgression;
 import com.wanikani.wklib.LevelProgression;
 import com.wanikani.wklib.SRSDistribution;
 import com.wanikani.wklib.StudyQueue;
@@ -91,7 +92,7 @@ public class DashboardData {
 		public DashboardData.OptionalDataStatus srsStatus;
 		
 		/** The level progression */
-		public LevelProgression lp;
+		public ExtendedLevelProgression elp;
 		
 		/** Level progression status */
 		public DashboardData.OptionalDataStatus lpStatus;
@@ -115,17 +116,17 @@ public class DashboardData {
 		 * 
 		 * @param srs SRS Distribution
 		 * @param srsStatus SRS Distribution status
-		 * @param lp the level progression
+		 * @param elp the level progression
 		 * @param lpStatus level progression status
 		 * @param criticalItems number of critical items
 		 * @param ciStatus critical items status
 		 */
 		public OptionalData (SRSDistribution srs, DashboardData.OptionalDataStatus srsStatus, 
-							 LevelProgression lp, DashboardData.OptionalDataStatus lpStatus,
+							 ExtendedLevelProgression elp, DashboardData.OptionalDataStatus lpStatus,
 							 int criticalItems, DashboardData.OptionalDataStatus ciStatus)
 		{
 			this.srs = srs;
-			this.lp = lp;
+			this.elp = elp;
 			this.criticalItems = criticalItems;
 			
 			this.srsStatus = srsStatus;
@@ -159,7 +160,7 @@ public class DashboardData {
 
 			if (lpStatus != DashboardData.OptionalDataStatus.RETRIEVED &&
 				od.lpStatus == DashboardData.OptionalDataStatus.RETRIEVED) {
-				lp = od.lp;
+				elp = od.elp;
 				lpStatus = od.lpStatus;				
 			}
 
@@ -436,6 +437,9 @@ public class DashboardData {
 	private static final String KEY_RADICALS_PROGRESS = PREFIX + "radicals_progress";
 	private static final String KEY_KANJI_PROGRESS = PREFIX + "kanji_progress";
 
+	private static final String KEY_RADICALS_UNLOCKED = PREFIX + "radicals_unlocked";
+	private static final String KEY_KANJI_UNLOCKED = PREFIX + "kanji_unlocked";
+
 	private static final String KEY_RADICALS_TOTAL = PREFIX + "radicals_total";
 	private static final String KEY_KANJI_TOTAL = PREFIX + "kanji_total";
 
@@ -643,11 +647,13 @@ public class DashboardData {
 			} else
 				storage.removeKey (KEY_APPRENTICE);
 		
-			if (od.lp != null) {
-				storage.putInt(KEY_RADICALS_PROGRESS, od.lp.radicalsProgress);
-				storage.putInt(KEY_RADICALS_TOTAL, od.lp.radicalsTotal);
-				storage.putInt(KEY_KANJI_PROGRESS, od.lp.kanjiProgress);
-				storage.putInt(KEY_KANJI_TOTAL, od.lp.kanjiTotal);
+			if (od.elp != null) {
+				storage.putInt(KEY_RADICALS_PROGRESS, od.elp.radicalsProgress);
+				storage.putInt (KEY_RADICALS_UNLOCKED, od.elp.radicalsUnlocked);
+				storage.putInt(KEY_RADICALS_TOTAL, od.elp.radicalsTotal);
+				storage.putInt(KEY_KANJI_PROGRESS, od.elp.kanjiProgress);
+				storage.putInt (KEY_KANJI_UNLOCKED, od.elp.kanjiUnlocked);
+				storage.putInt(KEY_KANJI_TOTAL, od.elp.kanjiTotal);
 			
 			} else
 				storage.removeKey (KEY_RADICALS_PROGRESS);
@@ -731,18 +737,20 @@ public class DashboardData {
 		}
 		
 		if (storage.containsKey (KEY_RADICALS_PROGRESS)) {
-			od.lp = new LevelProgression ();
+			od.elp = new ExtendedLevelProgression ();
 				
 			od.lpStatus = OptionalDataStatus.RETRIEVED;
-			od.lp.radicalsProgress = storage.getInt (KEY_RADICALS_PROGRESS);
-			od.lp.radicalsTotal = storage.getInt (KEY_RADICALS_TOTAL);
-			od.lp.kanjiProgress = storage.getInt (KEY_KANJI_PROGRESS);
-			od.lp.kanjiTotal = storage.getInt (KEY_KANJI_TOTAL);
+			od.elp.radicalsProgress = storage.getInt (KEY_RADICALS_PROGRESS);
+			od.elp.radicalsUnlocked = storage.getInt (KEY_RADICALS_UNLOCKED);
+			od.elp.radicalsTotal = storage.getInt (KEY_RADICALS_TOTAL);
+			od.elp.kanjiProgress = storage.getInt (KEY_KANJI_PROGRESS);
+			od.elp.kanjiUnlocked = storage.getInt (KEY_KANJI_UNLOCKED);
+			od.elp.kanjiTotal = storage.getInt (KEY_KANJI_TOTAL);
 		} else {
 			/* RETRIEVING is correct, because this is what DashboardActivity
 			 * will do right after calling this method */
 			od.lpStatus = OptionalDataStatus.RETRIEVING;
-			od.lp = null;
+			od.elp = null;
 		}
 			
 		if (storage.containsKey (KEY_CRITICAL_ITEMS)) {

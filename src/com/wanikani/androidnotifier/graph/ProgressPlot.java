@@ -53,9 +53,12 @@ public class ProgressPlot extends View {
 		/// The color
 		public int color;
 		
-		/// The value
-		public float value;
+		/// The displayed value
+		public float dvalue;
 		
+		/// The legend value
+		public float lvalue;
+
 		/// Path of the side
 		Path fpath;
 
@@ -68,6 +71,9 @@ public class ProgressPlot extends View {
 		/// Color context for the section
 		Paint spaint;
 		
+		/// Show in legend only
+		boolean legendOnly;
+		
 		/**
 		 * Constructor.
 		 * @param description the legend description
@@ -78,16 +84,44 @@ public class ProgressPlot extends View {
 		{
 			this.description = description;
 			this.color = color;
-			this.value = value;
+			this.dvalue = this.lvalue = value;
 		}
 		
+		/**
+		 * Constructor.
+		 * @param description the legend description
+		 * @param color the color
+		 * @param dvalue the displayed value
+		 * @param lvalue the legend value
+		 */
+		public DataSet (String description, int color, float dvalue, float lvalue)
+		{
+			this.description = description;
+			this.color = color;
+			this.dvalue = dvalue;
+			this.lvalue = lvalue;
+		}		
+		
+		/**
+		 * Constructor.
+		 * @param description the legend description
+		 * @param lvalue the legend value
+		 */
+		public DataSet (String description, float lvalue)
+		{
+			this.description = description;
+			this.dvalue = 0;
+			this.lvalue = lvalue;
+			legendOnly = true;
+		}		
+
 		/**
 		 * Constructor.
 		 * @param value the value
 		 */
 		public DataSet (float value)
 		{
-			this.value = value;
+			this.dvalue = this.lvalue = value;
 		}
 		
 		/**
@@ -100,6 +134,26 @@ public class ProgressPlot extends View {
 			this.description = description;
 			this.color = color;
 		}		
+		
+		public void add (float delta)
+		{
+			dvalue += delta;
+			lvalue += delta;
+		}
+		
+		public static void setDifferential (List<DataSet> dsets)
+		{
+			float pos;
+			
+			pos = 0;
+			for (DataSet ds : dsets) {
+				ds.dvalue -= pos;
+				if (ds.dvalue > 0)
+					pos += ds.dvalue;
+				else
+					ds.dvalue = 0;
+			}				
+		}
 	}
 	
 	/// The current datasets
@@ -202,7 +256,7 @@ public class ProgressPlot extends View {
 		nzds = null;
 		for (DataSet ds : dsets) {
 			canvas.drawPath (ds.fpath, ds.fpaint);
-			if (ds.value > 0)
+			if (ds.dvalue > 0)
 				nzds = ds;
 		}
 		if (nzds != null && ratio > 0) {
@@ -290,7 +344,7 @@ public class ProgressPlot extends View {
 			
 		total = 0;
 		for (DataSet ds : dsets)
-			total += ds.value;
+			total += ds.dvalue;
 		
 		if (total == 0)
 			return;
@@ -299,7 +353,7 @@ public class ProgressPlot extends View {
 		
 		for (DataSet ds : dsets) {
 			
-			rect.right = rect.left + unit * ds.value;  
+			rect.right = rect.left + unit * ds.dvalue;  
 			
 			fillSidePath (ds, rect, orect);
 			fillSectionPath (ds, orect);

@@ -132,8 +132,8 @@ public class KanjiProgressChart implements NetworkEngine.Chart {
 		{
 			for (Kanji k : kanji.list) {
 				if (k.stats != null && library.contains (k.character)) {
-					slds.get (k.stats.srs).value++;
-					rds.value--;
+					slds.get (k.stats.srs).add (1);
+					rds.add (-1);
 				}
 			}		
 		}

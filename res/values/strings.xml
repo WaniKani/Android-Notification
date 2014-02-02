@@ -104,6 +104,7 @@
     <string name="tag_loading">Loading&#8230;</string>
     <string name="tag_btn_review">Review</string>
     <string name="tag_version">Version %s</string>
+    <string name="tag_remaining">Needed to levelup</string>
     
     <string name="fmt_radicals_progression">%d Radicals</string>
     <string name="fmt_kanji_progression">%d Kanji</string>
