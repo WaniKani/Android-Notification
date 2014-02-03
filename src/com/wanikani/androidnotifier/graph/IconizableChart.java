@@ -14,6 +14,7 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.TableLayout;
 import android.widget.TextView;
 
 import com.wanikani.androidnotifier.R;
@@ -465,6 +466,7 @@ public abstract class IconizableChart extends LinearLayout {
 	 */
 	void loadAttributes (Context ctxt, AttributeSet attrs)
 	{
+		LinearLayout.LayoutParams params;
 		TypedArray a;
 		String tas;
 				
@@ -472,6 +474,10 @@ public abstract class IconizableChart extends LinearLayout {
 		
 		tas = a.getString (R.styleable.PieChart_title);
 		if (tas == null) {
+			params = (LinearLayout.LayoutParams) contents.getLayoutParams ();
+			params.setMargins (0, 0, 0, 0);
+			contents.setPadding (0, 0, 0, 0);
+			
 			head.setVisibility (View.GONE);
 			setOpen (true);
 		} else
