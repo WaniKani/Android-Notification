@@ -20,6 +20,7 @@ import android.widget.TextView;
 
 import com.wanikani.androidnotifier.R;
 import com.wanikani.androidnotifier.graph.ProgressPlot.DataSet;
+import com.wanikani.androidnotifier.graph.ProgressPlot.Marker;
 
 /* 
  *  Copyright (c) 2013 Alberto Cuda
@@ -108,13 +109,25 @@ public class ProgressChart extends IconizableChart {
 		 */
 		public void setData (List<DataSet> dsets)
 		{
+			setData (dsets, dsets, null);
+		}
+		
+		/**
+		 * Updates the plot with fresh data. Stops the spinner, if shown.
+		 * @param ddsets the data to be displayed
+		 * @param ldsets the data to be placed in the legend
+		 * @param markers the markers (or <tt>null</tt>)
+		 */
+		public void setData (List<DataSet> ddsets, List<DataSet> ldsets, List<Marker> markers)
+		{
+			
 			LinearLayout item;		
 			
-			plot.setData (dsets);
+			plot.setData (ddsets, markers);
 			
 			legend.removeAllViews ();
-			for (DataSet ds : dsets) {
-				if (ds.lvalue > 0 && ds.description != null) {
+			for (DataSet ds : ldsets) {
+				if ((ds.showAlways || ds.value > 0) && ds.description != null) {
 					item = (LinearLayout) inflater.inflate (R.layout.legend, null); 
 					customizeItem (item, ds);
 					legend.addView (item);
@@ -166,12 +179,12 @@ public class ProgressChart extends IconizableChart {
 			tag = new ColorDrawable (ds.color);
 			sample.setBackgroundDrawable (tag);
 		} else
-			sample.setVisibility (View.GONE);
+			sample.setVisibility (View.INVISIBLE);
 		
 		if (ds.description != null)
 			((TextView) item.findViewById (R.id.leg_description)).
 			        setText (ds.description);
 		((TextView) item.findViewById (R.id.leg_value)).
-			setText (Integer.toString (Math.round (ds.lvalue)));		
+			setText (Integer.toString (Math.round (ds.value)));		
 	}	
 }

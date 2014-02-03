@@ -3,19 +3,23 @@ package com.wanikani.androidnotifier.graph;
 import java.util.List;
 import java.util.Vector;
 
-import com.wanikani.androidnotifier.R;
-
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Paint.FontMetrics;
+import android.graphics.Paint.Style;
 import android.graphics.Path;
 import android.graphics.Path.Direction;
+import android.graphics.Rect;
 import android.graphics.RectF;
-import android.graphics.Paint.Style;
 import android.util.AttributeSet;
+import android.util.DisplayMetrics;
+import android.util.TypedValue;
 import android.view.View;
+
+import com.wanikani.androidnotifier.R;
 
 /* 
  *  Copyright (c) 2013 Alberto Cuda
@@ -53,11 +57,11 @@ public class ProgressPlot extends View {
 		/// The color
 		public int color;
 		
-		/// The displayed value
-		public float dvalue;
+		/// The value
+		public float value;
 		
-		/// The legend value
-		public float lvalue;
+		/// Show even if value is zero
+		public boolean showAlways;
 
 		/// Path of the side
 		Path fpath;
@@ -71,7 +75,7 @@ public class ProgressPlot extends View {
 		/// Color context for the section
 		Paint spaint;
 		
-		/// Show in legend only
+		/// Is this a legend only item
 		boolean legendOnly;
 		
 		/**
@@ -84,36 +88,21 @@ public class ProgressPlot extends View {
 		{
 			this.description = description;
 			this.color = color;
-			this.dvalue = this.lvalue = value;
+			this.value = value;
 		}
-		
+				
 		/**
-		 * Constructor.
+		 * Constructor for legend-only items.
 		 * @param description the legend description
-		 * @param color the color
-		 * @param dvalue the displayed value
-		 * @param lvalue the legend value
+		 * @param value the value
 		 */
-		public DataSet (String description, int color, float dvalue, float lvalue)
+		public DataSet (String description, float value)
 		{
 			this.description = description;
-			this.color = color;
-			this.dvalue = dvalue;
-			this.lvalue = lvalue;
-		}		
-		
-		/**
-		 * Constructor.
-		 * @param description the legend description
-		 * @param lvalue the legend value
-		 */
-		public DataSet (String description, float lvalue)
-		{
-			this.description = description;
-			this.dvalue = 0;
-			this.lvalue = lvalue;
+			this.value = value;
+			
 			legendOnly = true;
-		}		
+		}
 
 		/**
 		 * Constructor.
@@ -121,7 +110,7 @@ public class ProgressPlot extends View {
 		 */
 		public DataSet (float value)
 		{
-			this.dvalue = this.lvalue = value;
+			this.value = value;
 		}
 		
 		/**
@@ -135,30 +124,65 @@ public class ProgressPlot extends View {
 			this.color = color;
 		}		
 		
-		public void add (float delta)
-		{
-			dvalue += delta;
-			lvalue += delta;
-		}
-		
 		public static void setDifferential (List<DataSet> dsets)
 		{
 			float pos;
 			
 			pos = 0;
 			for (DataSet ds : dsets) {
-				ds.dvalue -= pos;
-				if (ds.dvalue > 0)
-					pos += ds.dvalue;
+				ds.value -= pos;
+				if (ds.value > 0)
+					pos += ds.value;
 				else
-					ds.dvalue = 0;
+					ds.value = 0;
 			}				
 		}
 	}
 	
-	/// The current datasets
+	public static class Marker {
+		
+		/// The legend description
+		public String description;
+		
+		/// The color
+		public int color;
+		
+		/// The value
+		public float value;
+
+		/// Color context
+		Paint paint;
+		
+		/// Is there a bar separator too?
+		boolean separator;
+		
+		/// The separator path
+		Path path;
+		
+		float left, anchor, right, baseline;
+		
+		boolean hidden;
+		
+		public Marker (String description, int color, float value)
+		{
+			this (description, color, value, false);
+		}
+		
+		public Marker (String description, int color, float value, boolean separator)
+		{
+			this.description = description;
+			this.color = color;
+			this.value = value;
+			this.separator = separator;
+		}
+	}
+	
+	/// The current displayed datasets
 	private List<DataSet> dsets;
 	
+	/// The markers
+	private List<Marker> markers;
+
 	/// The enclosing rect
 	private RectF rect;
 	
@@ -168,8 +192,17 @@ public class ProgressPlot extends View {
 	/// Default height. Set to the android rythm
 	private static final int DEFAULT_HEIGHT = 48;
 	
+	/// Default marker font size
+	public static float DEFAULT_MARKER_FONT_SIZE = 12;
+	
+	/// Default space between marker and plot
+	public static int DEFAULT_MARKER_SPACE = 10;
+
 	/// Width/height ratio of the ellipse
 	private float ratio;
+	
+	/// The marker font size (converted from sp)
+	private float markerFontSize;
 	
 	/// Is the view ready to display
 	private boolean readyToDraw; 
@@ -183,7 +216,7 @@ public class ProgressPlot extends View {
 	{		
 		super (ctxt, attrs);
 		
-		dsets = new Vector<DataSet> (0);
+		dsets = new Vector<DataSet> (0);		
 		
 		loadAttributes (ctxt, attrs);
 	}
@@ -196,7 +229,7 @@ public class ProgressPlot extends View {
 	{		
 		super (ctxt);
 		
-		dsets = new Vector<DataSet> (0);
+		dsets = new Vector<DataSet> (0);		
 	}
 
 	/**
@@ -207,12 +240,17 @@ public class ProgressPlot extends View {
 	 */
 	void loadAttributes (Context ctxt, AttributeSet attrs)
 	{
+		DisplayMetrics dm;
 		TypedArray a;
+		
+		dm = ctxt.getResources ().getDisplayMetrics ();
 		
 		a = ctxt.obtainStyledAttributes (attrs, R.styleable.PiePlot);
 		ratio = a.getFloat (R.styleable.PiePlot_ratio, DEFAULT_RATIO);
 		
 		a.recycle ();
+		
+		markerFontSize = TypedValue.applyDimension (TypedValue.COMPLEX_UNIT_SP, DEFAULT_MARKER_FONT_SIZE, dm);
 	}
 	
 	@Override
@@ -256,13 +294,22 @@ public class ProgressPlot extends View {
 		nzds = null;
 		for (DataSet ds : dsets) {
 			canvas.drawPath (ds.fpath, ds.fpaint);
-			if (ds.dvalue > 0)
+			if (ds.value > 0)
 				nzds = ds;
 		}
 		if (nzds != null && ratio > 0) {
 			canvas.drawPath (nzds.fpath, nzds.fpaint);
 			canvas.drawPath (nzds.spath, nzds.spaint);
-		}		
+		}
+		
+		if (markers != null) {
+			for (Marker m : markers) {
+				if (!m.hidden)
+					canvas.drawText (m.description, m.anchor, m.baseline, m.paint);
+				if (m.separator)
+					canvas.drawPath (m.path, m.paint);
+			}
+		}
 	}
 	
 	@Override
@@ -318,6 +365,81 @@ public class ProgressPlot extends View {
 		ds.spath = path;
 	}
 	
+	protected void prepareMarkers (RectF rect, float unit)
+	{
+		float height, hwidth, space, pos, baseline;
+		Marker m1, m2;
+		FontMetrics fm;
+		Paint paint;
+		int i, j;
+		
+		if (markers == null)
+			return;
+		
+		fm = null;
+		height = 0;
+		baseline = 0;
+		for (Marker ds : markers) {
+			
+			paint = new Paint ();
+			paint.setStyle (Style.FILL_AND_STROKE);
+			paint.setStrokeWidth (1);
+			paint.setColor (ds.color);
+			paint.setTextSize ((int) markerFontSize);
+			paint.setAntiAlias (true);
+			
+			pos = unit * ds.value;
+			hwidth = paint.measureText (ds.description) / 2;
+			space = paint.measureText (" ") / 2;
+			if (pos < hwidth) {
+				ds.anchor = 0;
+				ds.left = 0;
+				ds.right = 2 * hwidth + space;
+				paint.setTextAlign (Paint.Align.LEFT);
+			} else if (pos + hwidth > rect.width ()) {
+				ds.anchor = rect.width ();
+				ds.right = rect.width ();
+				ds.left = ds.right - 2 * hwidth - space;
+				paint.setTextAlign (Paint.Align.RIGHT);				
+			} else {
+				ds.anchor = pos;
+				ds.left = ds.anchor - hwidth - space;
+				ds.right = ds.anchor + hwidth + space;
+				paint.setTextAlign (Paint.Align.CENTER);
+			}
+			
+			if (fm == null) {
+				fm = paint.getFontMetrics ();
+				height = fm.bottom - fm.ascent;
+				baseline = rect.top - fm.ascent;
+				rect.top = height + DEFAULT_MARKER_FONT_SIZE;
+			}				
+			ds.anchor += rect.left;
+			ds.baseline = baseline;			
+			ds.paint = paint;					
+			
+			if (ds.separator) {
+				ds.path = new Path ();				
+				ds.path.moveTo (rect.left + pos, rect.top);
+				ds.path.lineTo (rect.left + pos, rect.bottom);
+			}				
+		}
+		
+		for (i = 0; i < markers.size (); i++) {
+			m1 = markers.get (i);
+			m1.hidden = false;
+			for (j = 0; j < i; j++) {
+				m2 = markers.get (j);
+				if ((m1.left >= m2.left && m1.left <= m2.right) ||
+					(m1.right >= m2.left && m1.right <= m2.right)) {
+					m1.hidden = true;
+					break;
+				}
+			}
+		}
+		
+	}
+	
 	/**
 	 * Recreates all the private fields of a dataset, to make the redraw operation
 	 * as quick as possible.
@@ -331,9 +453,17 @@ public class ProgressPlot extends View {
 		
 		if (dsets.isEmpty () || this.rect == null)
 			return;
+			
+		total = 0;
+		for (DataSet ds : dsets)
+			total += ds.value;
+		
+		if (total == 0)
+			return;
 		
 		rect = new RectF (this.rect);
-		orect = new RectF (this.rect);
+		prepareMarkers (rect, rect.width () / total);				
+		orect = new RectF (rect);
 		
 		orect.right = orect.left + orect.height () * ratio;
 		if (rect.width () <= orect.width ())
@@ -341,19 +471,12 @@ public class ProgressPlot extends View {
 		
 		rect.left += orect.width () / 2;
 		rect.right -= orect.width () / 2;
-			
-		total = 0;
-		for (DataSet ds : dsets)
-			total += ds.dvalue;
-		
-		if (total == 0)
-			return;
-		
+					
 		unit = rect.width () / total;
 		
 		for (DataSet ds : dsets) {
 			
-			rect.right = rect.left + unit * ds.dvalue;  
+			rect.right = rect.left + unit * ds.value;  
 			
 			fillSidePath (ds, rect, orect);
 			fillSectionPath (ds, orect);
@@ -370,7 +493,7 @@ public class ProgressPlot extends View {
 						
 			rect.left = rect.right;
 		}
-
+		
 		readyToDraw = true;
 	}
 	
@@ -391,12 +514,14 @@ public class ProgressPlot extends View {
 	}
 
 	/**
-	 * Updates the dataset
+	 * Updates the datasets and the markers
 	 * @param dsets a data set
+	 * @param markers the markers
 	 */
-	public void setData (List<DataSet> dsets)
+	public void setData (List<DataSet> dsets, List<Marker> markers)
 	{
 		this.dsets = dsets;
+		this.markers = markers;
 		recalc ();
 		invalidate ();
 	}

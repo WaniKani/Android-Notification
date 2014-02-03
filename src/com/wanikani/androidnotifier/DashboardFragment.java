@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
@@ -26,6 +27,7 @@ import android.widget.TextView;
 
 import com.wanikani.androidnotifier.graph.ProgressChart;
 import com.wanikani.androidnotifier.graph.ProgressPlot;
+import com.wanikani.androidnotifier.graph.Pager.Marker;
 import com.wanikani.androidnotifier.graph.ProgressChart.SubPlot;
 import com.wanikani.androidnotifier.graph.ProgressPlot.DataSet;
 import com.wanikani.wklib.Item;
@@ -396,45 +398,48 @@ public class DashboardFragment extends Fragment implements Tab {
 		tw.setText (Html.fromHtml (s));
 	}
 	
-	protected void setProgressNew (SubPlot splot, int pid, int tsid, int guru, int unlocked, int total)
+	protected void setProgressNew (SubPlot splot, int guru, int unlocked, int total)
 	{
-		List<DataSet> dsets;
-		TextView tw;
+		List<DataSet> ddsets, ldsets;
+		List<ProgressPlot.Marker> markers;
+		DataSet gds, ads, tds, rds;
 		int threshold;
 		Resources res;
-		String s;
 
 		res = getResources ();
 		
-		tw = (TextView) parent.findViewById (pid);
-		s = String.format ("<font color=\"blue\"><u>%s</u></font>", getString (tsid, total));
-		tw.setText (Html.fromHtml (s));
+		ddsets = new Vector<DataSet> ();
+		ldsets = new Vector<DataSet> ();
 
-		dsets = new Vector<DataSet> ();
-		
-		dsets.add (new DataSet (getString (R.string.tag_guru), res.getColor (R.color.guru), guru));				
-		
 		threshold = total - (total / 10);
+
+		tds = new DataSet (null, res.getColor (R.color.remaining), total);
+		ads = new DataSet (getString (R.string.tag_apprentice), res.getColor (R.color.apprentice), unlocked - guru);
+		gds = new DataSet (getString (R.string.tag_guru), res.getColor (R.color.guru), guru);
+		rds = new DataSet ("   " + getString (R.string.tag_remaining), threshold - guru);
 		
-		if (threshold > unlocked) {
-			/* | Guru | Apprentice | Threshold | Grace | */ 
-			dsets.add (new DataSet (getString (R.string.tag_apprentice), res.getColor (R.color.apprentice), 
-									unlocked, unlocked - guru));
-			dsets.add (new DataSet (null, res.getColor (R.color.remaining), threshold));
-			dsets.add (new DataSet (null, res.getColor (R.color.grace), total));			
-		} else {
-			/* | Guru | Apprentice  | Apprentice above Threshold | Grace | */ 
-			dsets.add (new DataSet (getString (R.string.tag_apprentice), res.getColor (R.color.apprentice), 
-					                threshold, unlocked - guru));
-			dsets.add (new DataSet (null, res.getColor (R.color.apprentice_above_threshold), 
-								    unlocked - guru));
-			dsets.add (new DataSet (null, res.getColor (R.color.grace), total));			
-		}				
-		dsets.add (new DataSet (getString (R.string.tag_remaining), threshold - guru));
+		/* Display data set: guru, apprentice, total */
+		ddsets.add (gds);
+		ddsets.add (ads);
+		ddsets.add (tds);		
+		ProgressPlot.DataSet.setDifferential (ddsets);
 		
-		ProgressPlot.DataSet.setDifferential (dsets);
+		/* Legends data set: apprentice, guru, remaining */
+		ldsets.add (ads);
+		gds.showAlways = true; ldsets.add (gds);
+		ldsets.add (rds);
 		
-		splot.setData (dsets);
+		markers = new Vector<ProgressPlot.Marker> ();
+		markers.add (new ProgressPlot.Marker (Integer.toString (total), Color.BLACK, total));
+		if (guru == 0 && unlocked < total)
+			markers.add (new ProgressPlot.Marker (Integer.toString (unlocked), Color.BLACK, unlocked));
+		else {
+			markers.add (new ProgressPlot.Marker (guru + "//" + unlocked, Color.BLACK, guru));
+			if (guru < threshold)
+				markers.add (new ProgressPlot.Marker ("*", res.getColor (R.color.guru), total * 9f / 10));
+		}
+		
+		splot.setData (ddsets, ldsets, markers);
 	}
 
 	/**
@@ -509,10 +514,10 @@ public class DashboardFragment extends Fragment implements Tab {
 			setVisibility (R.id.pb_w_section,View.GONE);
 			setVisibility (R.id.lay_progress, View.VISIBLE);
 			
-			setProgressNew (radicalsProgress, R.id.radicals_progression, R.string.fmt_radicals_progression,  
+			setProgressNew (radicalsProgress,   
 					  		dd.od.elp.radicalsProgress, dd.od.elp.radicalsUnlocked, dd.od.elp.radicalsTotal);
 			
-			setProgressNew (kanjiProgress, R.id.kanji_progression, R.string.fmt_kanji_progression,
+			setProgressNew (kanjiProgress, 
 							dd.od.elp.kanjiProgress, dd.od.elp.kanjiUnlocked, dd.od.elp.kanjiTotal);
 
 			setVisibility (R.id.progress_section, View.VISIBLE);			
