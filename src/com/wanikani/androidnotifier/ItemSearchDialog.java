@@ -2,6 +2,7 @@ package com.wanikani.androidnotifier;
 
 import java.util.EnumMap;
 import java.util.List;
+import java.util.StringTokenizer;
 import java.util.Vector;
 
 import android.content.res.Resources;
@@ -516,6 +517,7 @@ public class ItemSearchDialog {
 	 */
 	protected boolean matches (Item i)
 	{
+		StringTokenizer st;
 		String s;
 		
 		if (!iss.types.get (i.type))
@@ -534,7 +536,12 @@ public class ItemSearchDialog {
 		if (s.length () == 0)
 			return true;
 		
-		return i.matches (s);
+		st = new StringTokenizer (s, ",");
+		while (st.hasMoreTokens ())
+			if (i.matches (st.nextToken ()))
+				return true;
+			
+		return false;
 	}
 	
 	/**
