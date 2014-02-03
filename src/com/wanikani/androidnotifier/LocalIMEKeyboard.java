@@ -113,15 +113,21 @@ public class LocalIMEKeyboard implements Keyboard {
 		/// Set if we need to perform kana translation
 	    boolean translate;
 
-	    /// The list of chars are are not allowed
-		private static final String BANNED_CHARS = ",/;[]\\`\"=+";
+	    /// The list of chars are not allowed when entering a meaning
+		private static final String M_BANNED_CHARS = ",/;[]\\`\"=+";
 		
-		private int findFirstBannedChar (String s)
+	    /// The list of chars are not allowed when entering a reading
+		private static final String R_BANNED_CHARS = M_BANNED_CHARS + " ";
+		
+		private int findFirstBannedChar (String s, boolean kana)
 		{
+			String chars;
 			int i;
 			
+			chars = kana ? R_BANNED_CHARS : M_BANNED_CHARS;
+			
 			for (i = 0; i < s.length (); i++)
-				if (BANNED_CHARS.indexOf (s.charAt (i)) >= 0)
+				if (chars.indexOf (s.charAt (i)) >= 0)
 					return i;
 				
 			return -1;
@@ -140,7 +146,7 @@ public class LocalIMEKeyboard implements Keyboard {
 	    	JapaneseIME.Replacement repl;
 	    	int pos, i;
 	    	
-	    	i = findFirstBannedChar (et.toString ());
+	    	i = findFirstBannedChar (et.toString (), translate);
 	    	if (i >= 0) {
 	    		et.replace (i, i + 1, "");
 	    		return;
