@@ -398,7 +398,7 @@ public class DashboardFragment extends Fragment implements Tab {
 		tw.setText (Html.fromHtml (s));
 	}
 	
-	protected void setProgressNew (SubPlot splot, int guru, int unlocked, int total)
+	protected void setProgressNew (SubPlot splot, int guru, int apprentice, int total)
 	{
 		List<DataSet> ddsets, ldsets;
 		List<ProgressPlot.Marker> markers;
@@ -414,7 +414,7 @@ public class DashboardFragment extends Fragment implements Tab {
 		threshold = total - (total / 10);
 
 		tds = new DataSet (null, res.getColor (R.color.remaining), total);
-		ads = new DataSet (getString (R.string.tag_apprentice), res.getColor (R.color.apprentice), unlocked - guru);
+		ads = new DataSet (getString (R.string.tag_apprentice), res.getColor (R.color.apprentice), apprentice);
 		gds = new DataSet (getString (R.string.tag_guru), res.getColor (R.color.guru), guru);
 		rds = new DataSet ("   " + getString (R.string.tag_remaining), threshold - guru);
 		
@@ -431,10 +431,10 @@ public class DashboardFragment extends Fragment implements Tab {
 		
 		markers = new Vector<ProgressPlot.Marker> ();
 		markers.add (new ProgressPlot.Marker (Integer.toString (total), Color.BLACK, total));
-		if (guru == 0 && unlocked < total)
-			markers.add (new ProgressPlot.Marker (Integer.toString (unlocked), Color.BLACK, unlocked));
+		if (guru == 0 && apprentice < total)
+			markers.add (new ProgressPlot.Marker (Integer.toString (apprentice), Color.BLACK, apprentice));
 		else {
-			markers.add (new ProgressPlot.Marker (guru + "//" + unlocked, Color.BLACK, guru));
+			markers.add (new ProgressPlot.Marker (guru + "//" + apprentice, Color.BLACK, guru));
 			if (guru < threshold)
 				markers.add (new ProgressPlot.Marker ("*", res.getColor (R.color.guru), total * 9f / 10));
 		}
