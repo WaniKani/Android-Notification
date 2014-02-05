@@ -160,7 +160,8 @@ public class ToxicFilter implements Filter {
 	 * as possible.
 	 * @param conn a WKLib Connection 
 	 */
-	public void select (Connection.Meter meter, Connection conn)
+	@Override
+	public void select (Connection.Meter meter, Connection conn, int select)
 	{
 		itemf.enableSorting (true, true, true, true);
 		

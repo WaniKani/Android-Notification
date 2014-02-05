@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.EnumMap;
+import java.util.EnumSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
@@ -17,6 +18,7 @@ import android.content.res.Resources;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.text.SpannableStringBuilder;
 import android.text.style.ForegroundColorSpan;
@@ -502,7 +504,7 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 			String us [];
 			int i;
 			
-			if (currentFilter != levelf)
+			if (filterType != FilterType.LEVEL)
 				level.setText (Integer.toString (item.level));				
 			
 			if (item.stats != null) {
@@ -901,6 +903,225 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 		
 	}
 	
+	public enum FilterType {
+
+		NONE {
+			@Override
+			public int getId ()
+			{
+				return R.id.btn_filter_none;
+			}
+			
+			@Override
+			public SortOrder getDefaultOrder ()
+			{
+				return SortOrder.TYPE;
+			}
+		},
+			 			
+		LEVEL {
+			@Override
+			public int getId ()
+			{
+				return R.id.btn_filter_by_level;
+			}
+			
+			@Override
+			public SortOrder getDefaultOrder ()
+			{
+				return SortOrder.TYPE;
+			}
+		},
+		
+		TOXIC {
+			
+			@Override
+			public int getId ()
+			{
+				return R.id.btn_filter_toxic;
+			}
+			
+			@Override
+			public SortOrder getDefaultOrder ()
+			{
+				return SortOrder.TOXICITY;
+			}			
+		},
+		
+		CRITICAL {
+			
+			@Override
+			public int getId ()
+			{
+				return R.id.btn_filter_critical;
+			}
+			
+			@Override
+			public SortOrder getDefaultOrder ()
+			{
+				return SortOrder.ERRORS;
+			}
+			
+		},
+		
+		UNLOCKS {
+			
+			@Override
+			public int getId ()
+			{
+				return R.id.btn_filter_unlocks;
+			}
+			
+			@Override
+			public SortOrder getDefaultOrder ()
+			{
+				return SortOrder.TIME;
+			}			
+		};
+		
+		public abstract int getId ();
+		
+		public abstract SortOrder getDefaultOrder ();
+	}
+	
+	enum SortOrder {
+		
+		SRS {
+			@Override
+			public int getId ()
+			{
+				return R.id.btn_sort_srs;
+			}
+			
+			@Override
+			public Comparator<Item> getComparator ()
+			{
+				return Item.SortBySRS.INSTANCE;
+			}
+			
+			@Override
+			public ItemInfo getItemInfo ()
+			{
+				return ItemInfo.AVAILABLE;
+			}
+		},
+		
+		TIME {
+			@Override
+			public int getId ()
+			{
+				return R.id.btn_sort_time;
+			}
+			
+			@Override
+			public Comparator<Item> getComparator ()
+			{
+				return Item.SortByTime.INSTANCE;
+			}
+			
+			@Override
+			public ItemInfo getItemInfo ()
+			{
+				return ItemInfo.AGE;
+			}
+		},
+
+		AVAILABLE {
+			@Override
+			public int getId ()
+			{
+				return R.id.btn_sort_available;
+			}
+			
+			@Override
+			public Comparator<Item> getComparator ()
+			{
+				return Item.SortByAvailable.INSTANCE;
+			}
+			
+			@Override
+			public ItemInfo getItemInfo ()
+			{
+				return ItemInfo.AVAILABLE;
+			}
+		},
+
+		TOXICITY {
+			@Override
+			public int getId ()
+			{
+				return R.id.btn_sort_toxicity;
+			}
+			
+			@Override
+			public Comparator<Item> getComparator ()
+			{
+				return Item.SortByToxicity.INSTANCE;
+			}
+			
+			@Override
+			public ItemInfo getItemInfo ()
+			{
+				return ItemInfo.ERRORS;
+			}
+		},
+
+		ERRORS {
+			@Override
+			public int getId ()
+			{
+				return R.id.btn_sort_errors;
+			}
+		
+			@Override
+			public Comparator<Item> getComparator ()
+			{
+				return Item.SortByErrors.INSTANCE;
+			}
+		
+			@Override
+			public ItemInfo getItemInfo ()
+			{
+				return ItemInfo.ERRORS;
+			}
+		},
+
+		TYPE {
+			@Override
+			public int getId ()
+			{
+				return R.id.btn_sort_type;
+			}
+		
+			@Override
+			public Comparator<Item> getComparator ()
+			{
+				return Item.SortByType.INSTANCE;
+			}
+		
+			@Override
+			public ItemInfo getItemInfo ()
+			{
+				return ItemInfo.AVAILABLE;
+			}
+		};
+
+		public abstract int getId ();
+		
+		public abstract Comparator<Item> getComparator ();
+		
+		public abstract ItemInfo getItemInfo ();
+		
+		public void apply (View parent, ItemListAdapter iad)
+		{
+			RadioGroup rg;
+		
+			rg = (RadioGroup) parent.findViewById (R.id.rg_order);
+			rg.check (getId ());
+			iad.setComparator (getComparator (), getItemInfo ());				
+		}
+	}
+	
 	/**
 	 * The listener registered to the filter/sort radio group buttons.
 	 * When an item is clicked, it updates the list accordingly.
@@ -910,6 +1131,7 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 		public void onClick (View view)
 		{
 			View filterW, sortW;
+			int id;
 
 			filterW = parent.findViewById (R.id.menu_filter);
 			sortW = parent.findViewById (R.id.menu_order);			
@@ -917,130 +1139,19 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 			filterW.setVisibility (View.GONE);
 			sortW.setVisibility (View.GONE);
 			
-			switch (view.getId ()) {
-
-			case R.id.btn_filter_none:
-				sortByType ();
-				setNoFilter ();
-				break;			
+			id = view.getId ();
+			for (FilterType ft : EnumSet.allOf (FilterType.class))
+				if (id == ft.getId ()) {
+					setFilter (ft);
+					break;
+				}
 			
-			case R.id.btn_filter_by_level:
-				sortByType ();
-				setLevelFilter (currentLevel);
-				break;
-
-			case R.id.btn_filter_toxic:
-				sortByToxicity ();
-				setToxicFilter ();
-				break;
-
-			case R.id.btn_filter_critical:
-				sortByErrors ();
-				setCriticalFilter ();
-				break;
-
-			case R.id.btn_filter_unlocks:
-				sortByTime ();
-				setUnlockFilter ();
-				break;
-
-			case R.id.btn_sort_toxicity:
-				sortByToxicity ();
-				break;
-
-			case R.id.btn_sort_errors:
-				sortByErrors ();
-				break;
-
-			case R.id.btn_sort_srs:
-				sortBySRS ();
-				break;
-				
-			case R.id.btn_sort_time:
-				sortByTime ();
-				break;
-				
-			case R.id.btn_sort_available:
-				sortByAvailable ();
-				break;
-				
-			case R.id.btn_sort_type:
-				sortByType ();
-			}
-		}
-		
-		/**
-		 * Switches to SRS sort order, fixing both ListView and radio buttons.
-		 */
-		private void sortBySRS ()
-		{
-			RadioGroup rg;
-			
-			rg = (RadioGroup) parent.findViewById (R.id.rg_order);
-			rg.check (R.id.btn_sort_srs);
-			iad.setComparator (Item.SortBySRS.INSTANCE, ItemInfo.AVAILABLE);				
-		}
-		
-		/**
-		 * Switches to age sort order, fixing both ListView and radio buttons.
-		 */
-		private void sortByTime ()
-		{
-			RadioGroup rg;
-			
-			rg = (RadioGroup) parent.findViewById (R.id.rg_order);
-			rg.check (R.id.btn_sort_time);
-			iad.setComparator (Item.SortByTime.INSTANCE, ItemInfo.AGE);				
-		}
-
-		/**
-		 * Switches to next review sort order, fixing both ListView and radio buttons.
-		 */
-		private void sortByAvailable ()
-		{
-			RadioGroup rg;
-			
-			rg = (RadioGroup) parent.findViewById (R.id.rg_order);
-			rg.check (R.id.btn_sort_available);
-			iad.setComparator (Item.SortByAvailable.INSTANCE, ItemInfo.AVAILABLE);				
-		}
-
-		/**
-		 * Switches to toxicity sort order, fixing both ListView and radio buttons.
-		 */
-		private void sortByToxicity ()
-		{
-			RadioGroup rg;
-			
-			rg = (RadioGroup) parent.findViewById (R.id.rg_order);
-			rg.check (R.id.btn_sort_toxicity);
-			iad.setComparator (Item.SortByToxicity.INSTANCE, ItemInfo.ERRORS);
-		}
-
-		/**
-		 * Switches to errors sort order, fixing both ListView and radio buttons.
-		 */
-		private void sortByErrors ()
-		{
-			RadioGroup rg;
-			
-			rg = (RadioGroup) parent.findViewById (R.id.rg_order);
-			rg.check (R.id.btn_sort_errors);
-			iad.setComparator (Item.SortByErrors.INSTANCE, ItemInfo.ERRORS);
-		}
-
-		/**
-		 * Switches to type sort order, fixing both ListView and radio buttons.
-		 */
-		private void sortByType ()
-		{
-			RadioGroup rg;
-			
-			rg = (RadioGroup) parent.findViewById (R.id.rg_order);
-			rg.check (R.id.btn_sort_type);
-			iad.setComparator (Item.SortByType.INSTANCE, ItemInfo.AVAILABLE);
-		}
-
+			for (SortOrder so : EnumSet.allOf (SortOrder.class))
+				if (id == so.getId ()) {
+					setOrder (so);
+					break;
+				}
+		}		
 	}
 
 	/**
@@ -1204,25 +1315,7 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 	ItemSearchDialog isd;
 
 	/* ---------- Filters ---------- */
-	
-	/// The "no filter" instance
-	NoFilter nof;
-	
-	/// The level filter instance
-	LevelFilter levelf;	
-
-	/// The critical items filter instance
-	CriticalFilter criticalf;	
-	
-	/// The toxic items filter instance
-	ToxicFilter toxicf;	
-
-	/// The recent unlocks items filter instance
-	UnlockFilter unlockf;
-
-	/// The current filter
-	private Filter currentFilter;
-	
+		
 	/// The japanese typeface set
 	private FontBox fbox;
 	
@@ -1235,11 +1328,25 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 	/// Shall we use TLS?
 	private boolean tls;
 	
+	/// Current Sort Order
+	private SortOrder order;
+	
+	/// Current filter
+	private FilterType filterType;
+		
+	/// Filter enum to implementation mapping
+	private EnumMap<FilterType, Filter> fmap;
+	
+	private static final String PREFIX = "com.wanikani.androidnotifier.ItemsFragment.";
+	
+	private static final String PREF_ORDER = PREFIX + "order.";
+	
 	public ItemsFragment ()
 	{
 		rimg = new RadicalImages ();
 		alarm = new Alarm ();
 		refreshTask = new RefreshTask ();
+		order = SortOrder.TYPE;
 			
 		currentLevel = -1;		
 	}
@@ -1268,12 +1375,14 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 
 		setRetainInstance (true);
 
-		nof = new NoFilter (this);
-		levelf = new LevelFilter (this);
-		criticalf = new CriticalFilter (this);
-		toxicf = new ToxicFilter (this);
-		unlockf = new UnlockFilter (this);
-		currentFilter = levelf;
+		fmap = new EnumMap<FilterType, Filter> (FilterType.class);
+		fmap.put (FilterType.NONE, new NoFilter (this));
+		fmap.put (FilterType.LEVEL, new LevelFilter (this));
+		fmap.put (FilterType.CRITICAL, new CriticalFilter (this));
+		fmap.put (FilterType.TOXIC, new ToxicFilter (this));
+		fmap.put (FilterType.UNLOCKS, new UnlockFilter (this));
+
+		filterType = FilterType.LEVEL; 
 		
 		lcl = new LevelClickListener ();
 		
@@ -1329,7 +1438,7 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 		iview.setAdapter (iad);
 		
 		sview = parent.findViewById (R.id.it_search_win);
-		isd = new ItemSearchDialog (sview, iss, currentFilter, iad);
+		isd = new ItemSearchDialog (sview, iss, fmap.get (filterType), iad);
 				
 		btn = (ImageButton) parent.findViewById (R.id.btn_item_filter);
 		btn.setOnClickListener (mpl);
@@ -1409,17 +1518,7 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 		
 		if (refresh) {
 			resumeRefresh = false;
-			
-			if (currentFilter == nof)
-				setNoFilter ();
-			else if (currentFilter == levelf)
-				setLevelFilter (currentLevel);
-			else if (currentFilter == toxicf)
-				setToxicFilter ();
-			else if (currentFilter == criticalf)
-				setCriticalFilter ();
-			else if (currentFilter == unlockf)
-				setUnlockFilter ();
+			setFilter (filterType);
 		}
 	}
 	
@@ -1453,124 +1552,76 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 		super.onDetach ();
 		
 		alarm.cancel ();
-		resumeRefresh = currentFilter.stopTask ();
+		resumeRefresh = fmap.get (filterType).stopTask ();
 		
-		nof.stopTask ();
-		levelf.stopTask ();
-		toxicf.stopTask ();
-		criticalf.stopTask ();		
-		unlockf.stopTask ();
+		for (Filter f : fmap.values ())
+			f.stopTask ();
+		
 		isd = null;
 	}
-
-	/**
-	 * Switched to "no filter" view
-	 */
-	public void setNoFilter ()
+	
+	public void setOrder (SortOrder order)
 	{
-		RadioButton btn;
+		SharedPreferences prefs;
+
+		this.order = order;
 		
-		currentFilter = nof;
-
-		if (parent != null) {
-			btn = (RadioButton) parent.findViewById (R.id.btn_filter_none); 
-			btn.setChecked (true);
-
-			nof.select (meter (), main.getConnection ());
-			iview.setSelection (0);
+		order.apply (parent, iad);
+		
+		try {
+			prefs = PreferenceManager.getDefaultSharedPreferences (getActivity ());
+			prefs.edit ().putString (PREF_ORDER + filterType.name (), order.name ()).commit ();
+		} catch (Throwable t) {
+			/* Should not happen, however this is just a secondary feature ... */
 		}
-		
-		filterChanged ();
 	}
-			
-	/**
-	 * Switches to level list filter. 
-	 * @param level the level to display
-	 */
+
 	public void setLevelFilter (int level)
 	{
-		RadioGroup fg;
-		
-		currentFilter = levelf;
-
-		if (parent != null) {
-			fg = (RadioGroup) parent.findViewById (R.id.rg_filter);
-			fg.check (R.id.btn_filter_by_level); 
-		
-			levelf.select (meter (), main.getConnection (), level);
-			iview.setSelection (0);
-		}
-		
-		filterChanged ();
+		setFilter (FilterType.LEVEL, level);
 	}
 	
-	/**
-	 * Switches to toxic items filter. 
-	 */
-	public void setToxicFilter ()
+	public void setFilter (FilterType filter)
 	{
-		RadioButton btn;
-		
-		currentFilter = toxicf;
-
-		if (parent != null) {
-			btn = (RadioButton) parent.findViewById (R.id.btn_filter_toxic); 
-			btn.setChecked (true);
-
-			toxicf.select (meter (), main.getConnection ());
-			iview.setSelection (0);
-		}
-		
-		filterChanged ();
-	}
-
-	/**
-	 * Switches to critical items filter. 
-	 */
-	public void setCriticalFilter ()
-	{
-		RadioButton btn;
-		
-		currentFilter = criticalf;
-
-		if (parent != null) {
-			btn = (RadioButton) parent.findViewById (R.id.btn_filter_critical); 
-			btn.setChecked (true);
-
-			criticalf.select (meter (), main.getConnection ());
-			iview.setSelection (0);
-		}
-		
-		filterChanged ();
-	}
-
-	/**
-	 * Switches to recent unlocks filter. 
-	 */
-	public void setUnlockFilter ()
-	{
-		RadioButton btn;
-		
-		currentFilter = unlockf;
-
-		if (parent != null) {
-			btn = (RadioButton) parent.findViewById (R.id.btn_filter_unlocks); 
-			btn.setChecked (true);
-
-			unlockf.select (meter (), main.getConnection ());
-			iview.setSelection (0);
-		}
-		
-		filterChanged ();
+		setFilter (filter, currentLevel);
 	}
 	
+	public void setFilter (FilterType filter, int level)
+	{
+		SharedPreferences prefs;
+		RadioButton btn;
+		String s;
+		
+		filterType = filter;
+
+		try {
+			prefs = PreferenceManager.getDefaultSharedPreferences (getActivity ());
+			s = prefs.getString (PREF_ORDER + filterType.name (), filterType.getDefaultOrder ().name ());
+			order = SortOrder.valueOf (s);
+		} catch (Throwable t) {
+			order = filterType.getDefaultOrder ();
+		}
+		
+		if (parent != null) {
+			order.apply (parent, iad);
+
+			btn = (RadioButton) parent.findViewById (filter.getId ()); 
+			btn.setChecked (true);
+
+			fmap.get (filter).select (meter (), main.getConnection (), level);
+			iview.setSelection (0);
+		}
+		
+		filterChanged ();
+	}
+				
 	/**
 	 * Called when the filter changes
 	 */
 	protected void filterChanged ()
 	{
 		if (isd != null)
-			isd.itemFilterChanged (currentFilter);
+			isd.itemFilterChanged (fmap.get (filterType));
 	}
 	
 	/**
@@ -1604,7 +1655,7 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 	@Override
 	public void setData (Filter sfilter, List<Item> list, boolean ok)
 	{
-		if (sfilter != currentFilter)
+		if (sfilter != fmap.get (filterType))
 			return;
 
 		if (fbox != null)
@@ -1628,7 +1679,7 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 	@Override
 	public void addData (Filter sfilter, List<Item> list)
 	{
-		if (sfilter != currentFilter)
+		if (sfilter != fmap.get (filterType))
 			return;
 		iad.addAll (list);
 		iad.notifyDataSetChanged ();
@@ -1637,7 +1688,7 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 	@Override
 	public void clearData (Filter sfilter)
 	{
-		if (sfilter != currentFilter)
+		if (sfilter != fmap.get (filterType))
 			return;
 
 		if (fbox != null)
@@ -1656,7 +1707,7 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 	@Override
 	public void noMoreData (Filter sfilter, boolean ok)
 	{
-		if (sfilter != currentFilter)
+		if (sfilter != fmap.get (filterType))
 			return;
 		
 		alert (ok);
@@ -1700,7 +1751,7 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 	@Override
 	public void selectLevel (Filter filter, int level, boolean spinning)
 	{
-		if (filter != currentFilter)
+		if (filter != fmap.get (filterType))
 			return;
 		
 		if (currentLevel != level && currentLevel > 0)
@@ -1777,7 +1828,7 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 	@Override
 	public void selectOtherFilter (Filter filter, boolean spinning)
 	{
-		if (filter != currentFilter)
+		if (filter != fmap.get (filterType))
 			return;
 		
 		selectOtherFilter (true, spinning);
@@ -1867,7 +1918,7 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 	public void flush (Tab.RefreshType rtype, boolean fg)
 	{
 		/* Might be called really early! */
-		if (criticalf == null)
+		if (fmap == null)
 			return;
 		
 		switch (rtype) {
@@ -1876,29 +1927,26 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 			
 		case FULL_IMPLICIT:
 		case FULL_EXPLICIT:
-			nof.flush ();
-			levelf.flush ();
-
-			if (currentFilter == nof)
-				nof.select (meter (), main.getConnection ());
-			else if (currentFilter == levelf && currentLevel > 0)
-				levelf.select (meter (), main.getConnection (), currentLevel);
+			flush (FilterType.NONE);
+			flush (FilterType.LEVEL);
 
 			/* Fall through */
 
 		case MEDIUM:
-			criticalf.flush ();
-			toxicf.flush ();
-			unlockf.flush ();
-			
-			if (currentFilter == toxicf)
-				toxicf.select (meter (), main.getConnection ());
-			else if (currentFilter == criticalf)
-				criticalf.select (meter (), main.getConnection ());
-			else if (currentFilter == unlockf)
-				unlockf.select (meter (), main.getConnection ());
-			
+			flush (FilterType.CRITICAL);
+			flush (FilterType.TOXIC);
+			flush (FilterType.UNLOCKS);			
 		}
+	}
+	
+	private void flush (FilterType ftype)
+	{
+		Filter f;
+		
+		f = fmap.get (ftype);
+		f.flush ();
+		if (ftype == filterType && (currentLevel > 0 || ftype != FilterType.LEVEL))
+			f.select (meter (), main.getConnection (), currentLevel);
 	}
 
 	/**

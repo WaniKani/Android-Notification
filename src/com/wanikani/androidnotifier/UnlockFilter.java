@@ -189,7 +189,8 @@ public class UnlockFilter implements Filter {
 	 * as possible. 
 	 * @param conn a WKLib Connection 
 	 */
-	public void select (Connection.Meter meter, Connection conn)
+	@Override
+	public void select (Connection.Meter meter, Connection conn, int level)
 	{
 		itemf.enableSorting (false, true, false, false);
 		if (citems != null) {

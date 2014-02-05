@@ -196,7 +196,8 @@ public class NoFilter implements Filter {
 	 * as possible.
 	 * @param conn a WKLib Connection 
 	 */
-	public void select (Connection.Meter meter, Connection conn)
+	@Override
+	public void select (Connection.Meter meter, Connection conn, int level)
 	{
 		itemf.enableSorting (true, true, true, true);
 		
