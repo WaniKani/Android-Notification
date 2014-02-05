@@ -322,7 +322,8 @@
             
         <TableRow
             android:layout_width="fill_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"            
+            android:layout_marginTop="@dimen/m_gap">
         <TextView
             android:id="@+id/kanji_progression"
             android:text="@string/tag_kanji_progression"
