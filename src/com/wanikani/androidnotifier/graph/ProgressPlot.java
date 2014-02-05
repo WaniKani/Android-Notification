@@ -179,6 +179,12 @@ public class ProgressPlot extends View {
 			this.value = value;
 			this.separator = separator;
 		}
+		
+		private boolean in (Marker m)
+		{
+			return 	(left >= m.left && left <= m.right) ||
+					(right >= m.left && right <= m.right);
+		}
 	}
 	
 	/// The current displayed datasets
@@ -437,8 +443,7 @@ public class ProgressPlot extends View {
 			m1.hidden = false;
 			for (j = 0; j < i; j++) {
 				m2 = markers.get (j);
-				if ((m1.left >= m2.left && m1.left <= m2.right) ||
-					(m1.right >= m2.left && m1.right <= m2.right)) {
+				if (m1.in (m2) || m2.in (m1)) { 
 					m1.hidden = true;
 					break;
 				}
