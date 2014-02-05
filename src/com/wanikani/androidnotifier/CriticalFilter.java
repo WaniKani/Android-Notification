@@ -188,7 +188,8 @@ public class CriticalFilter implements Filter {
 	 * as possible.
 	 * @param conn a WKLib Connection 
 	 */
-	public void select (Connection.Meter meter, Connection conn)
+	@Override
+	public void select (Connection.Meter meter, Connection conn, int level)
 	{
 		itemf.enableSorting (true, false, false, false);
 		if (citems != null) {

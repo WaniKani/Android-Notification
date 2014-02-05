@@ -3,6 +3,7 @@ package com.wanikani.androidnotifier;
 import java.io.IOException;
 import java.util.List;
 
+import com.wanikani.wklib.Connection;
 import com.wanikani.wklib.Item;
 import com.wanikani.wklib.Radical;
 
@@ -144,4 +145,6 @@ public interface Filter {
 	 * Tells if the filtered items contain SRS information
 	 */
 	public boolean hasSRSLevelInfo ();
+	
+	public abstract void select (Connection.Meter meter, Connection conn, int level);
 }

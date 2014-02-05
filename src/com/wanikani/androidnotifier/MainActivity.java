@@ -1258,7 +1258,7 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	public void showCritical ()
 	{
 		pager.setCurrentItem (pad.getTabIndex (Tab.Contents.ITEMS), true);
-		itemsf.setCriticalFilter ();
+		itemsf.setFilter (ItemsFragment.FilterType.CRITICAL);
 		itemsf.hideSearchDialog ();
 	}
 
