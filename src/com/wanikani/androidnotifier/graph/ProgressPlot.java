@@ -258,6 +258,7 @@ public class ProgressPlot extends View {
 	{
 		int width, height;
 		int wMode, hMode;
+		int defaultHeight;
 		
 		width = MeasureSpec.getSize (widthSpec);
 		height = MeasureSpec.getSize (heightSpec);
@@ -268,16 +269,18 @@ public class ProgressPlot extends View {
 		if (wMode == MeasureSpec.UNSPECIFIED)
 			width = 100;
 		
+		defaultHeight = (int) Math.max (DEFAULT_HEIGHT, 2 * markerFontSize + DEFAULT_MARKER_SPACE);
+		
 		switch (hMode) {
 		case MeasureSpec.AT_MOST:
-			height = Math.min (width, DEFAULT_HEIGHT);
+			height = Math.min (width, defaultHeight);
 			break;
 			
 		case MeasureSpec.EXACTLY:
 			break;
 			
 		case MeasureSpec.UNSPECIFIED:
-			height = DEFAULT_HEIGHT;
+			height = defaultHeight;
 		}
 		
 		setMeasuredDimension (width, height);	
