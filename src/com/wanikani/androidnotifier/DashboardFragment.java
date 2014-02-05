@@ -183,7 +183,7 @@ public class DashboardFragment extends Fragment implements Tab {
 	private enum ProgressionData {
 	
 
-		TOTAL {
+		LOCKED {
 			@Override
 			public String getDescription (Resources res)
 			{
@@ -199,7 +199,7 @@ public class DashboardFragment extends Fragment implements Tab {
 			@Override
 			public int getValue (int apprentice, int guru, int total)
 			{
-				return total;
+				return total - guru - apprentice;
 			}
 			
 			@Override
@@ -494,11 +494,12 @@ public class DashboardFragment extends Fragment implements Tab {
 		view.setVisibility (flag);
 	}
 	
-	protected void setProgress (Item.Type type, int guru, int apprentice, int total)
+	protected void setProgress (Item.Type type, int guru, int unlocked, int total)
 	{
 		List<DataSet> ddsets, ldsets;
 		List<ProgressPlot.Marker> markers;
 		DataSet gds, ads, tds, rds;
+		int apprentice;
 		SubPlot splot;
 		Resources res;
 
@@ -520,8 +521,10 @@ public class DashboardFragment extends Fragment implements Tab {
 		
 		ddsets = new Vector<DataSet> ();
 		ldsets = new Vector<DataSet> ();
+		
+		apprentice = unlocked - guru;
 
-		tds = ProgressionData.TOTAL.getDataSet (main, res, type, apprentice, guru, total);
+		tds = ProgressionData.LOCKED.getDataSet (main, res, type, apprentice, guru, total);
 		ads = ProgressionData.APPRENTICE.getDataSet (main, res, type, apprentice, guru, total);
 		gds = ProgressionData.GURU.getDataSet (main, res, type, apprentice, guru, total);
 		rds = ProgressionData.REMAINING.getDataSet (main, res, type, apprentice, guru, total);
@@ -530,7 +533,6 @@ public class DashboardFragment extends Fragment implements Tab {
 		ddsets.add (gds);
 		ddsets.add (ads);
 		ddsets.add (tds);		
-		ProgressPlot.DataSet.setDifferential (ddsets);
 		
 		/* Legends data set: apprentice, guru, remaining */
 		ldsets.add (ads);
@@ -543,7 +545,7 @@ public class DashboardFragment extends Fragment implements Tab {
 		if (guru == 0 && apprentice < total)
 			markers.add (new ProgressPlot.Marker (Integer.toString (apprentice), Color.BLACK, apprentice));
 		else {
-			markers.add (new ProgressPlot.Marker (guru + "//" + apprentice, Color.BLACK, guru));
+			markers.add (new ProgressPlot.Marker (guru + "\u2194" + apprentice, Color.BLACK, guru));
 			if (rds.value > 0)
 				markers.add (new ProgressPlot.Marker ("*", res.getColor (R.color.guru), total * 9f / 10));
 		}
