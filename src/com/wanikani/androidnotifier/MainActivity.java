@@ -1248,7 +1248,7 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	{
 		pager.setCurrentItem (pad.getTabIndex (Tab.Contents.ITEMS), true);
 		itemsf.setLevelFilter (dd.level);
-		itemsf.showSearchDialog (true, null, type, false);		
+		itemsf.showSearchDialog (true, null, type, false, false);		
 	}
 
 	/**
@@ -1262,6 +1262,13 @@ public class MainActivity extends FragmentActivity implements Runnable {
 		itemsf.hideSearchDialog ();
 	}
 
+	public void showThisLevel (Item.Type type, SRSLevel srs, boolean invert)
+	{
+		pager.setCurrentItem (pad.getTabIndex (Tab.Contents.ITEMS), true);
+		itemsf.setLevelFilter (dd.level);
+		itemsf.showSearchDialog (true, srs, type, true, invert);		
+	}
+	
 	/**
 	 * Shows the items tab, and shows the search dialog
 	 */

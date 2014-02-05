@@ -63,6 +63,9 @@ public class ProgressPlot extends View {
 		/// Show even if value is zero
 		public boolean showAlways;
 
+		/// A click listener that is to receive events
+		public View.OnClickListener listener;
+
 		/// Path of the side
 		Path fpath;
 
@@ -77,6 +80,7 @@ public class ProgressPlot extends View {
 		
 		/// Is this a legend only item
 		boolean legendOnly;
+		
 		
 		/**
 		 * Constructor.

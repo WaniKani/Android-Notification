@@ -6,6 +6,7 @@ import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.text.Html;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.UnderlineSpan;
@@ -171,8 +172,9 @@ public class ProgressChart extends IconizableChart {
 	@SuppressWarnings ("deprecation")
 	protected void customizeItem (LinearLayout item, DataSet ds)
 	{
+		TextView description;
 		Drawable tag;
-		View sample;
+		View sample;		
 		
 		sample = item.findViewById (R.id.leg_color);
 		if (!ds.legendOnly) {
@@ -181,9 +183,16 @@ public class ProgressChart extends IconizableChart {
 		} else
 			sample.setVisibility (View.INVISIBLE);
 		
-		if (ds.description != null)
-			((TextView) item.findViewById (R.id.leg_description)).
-			        setText (ds.description);
+		if (ds.description != null) {
+			description = (TextView) item.findViewById (R.id.leg_description);
+			if (ds.listener != null) {
+					description.setText (Html.fromHtml (String.format ("<font color=\"blue\"><u>%s</u></font>", 
+																	   ds.description)));
+					description.setClickable (true);
+					description.setOnClickListener (ds.listener);
+			} else
+			        description.setText (ds.description);
+		}
 		((TextView) item.findViewById (R.id.leg_value)).
 			setText (Integer.toString (Math.round (ds.value)));		
 	}	
