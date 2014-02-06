@@ -108,10 +108,8 @@
     
     <string name="tag_radicals_progression">Radicals progression</string>
     <string name="tag_kanji_progression">Kanji progression</string>
+    <string name="tag_thresh_explanation">* Total gurus needed to levelup</string>
         
-    <string name="fmt_remaining">%d remaining</string>
-    <string name="fmt_to_go">%1$d/%2$d remaining</string>
-    
     <string name="em_refresh">Refresh</string>
     <string name="em_settings">Settings</string>
     <string name="em_dashboard">Dashboard</string>
