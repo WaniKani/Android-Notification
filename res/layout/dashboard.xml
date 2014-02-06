@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:custom="http://schemas.android.com/apk/res/com.wanikani.androidnotifier"
     android:id="@+id/scrollView1"
     style="@style/Background"
     android:layout_width="match_parent"
@@ -318,6 +319,7 @@
             android:id="@+id/pb_radicals"
          	android:layout_width="fill_parent"
          	android:layout_height="wrap_content"
+         	custom:border="1"
          	android:layout_gravity="center"/>
             
         <TableRow
@@ -339,6 +341,7 @@
        
        <com.wanikani.androidnotifier.graph.ProgressChart
             android:id="@+id/pb_kanji"
+         	custom:border="1"
          	android:layout_width="fill_parent"
          	android:layout_height="wrap_content"
          	android:layout_gravity="center"/>

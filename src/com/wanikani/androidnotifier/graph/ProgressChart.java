@@ -20,6 +20,7 @@ import android.widget.TableRow;
 import android.widget.TextView;
 
 import com.wanikani.androidnotifier.R;
+import com.wanikani.androidnotifier.graph.ProgressPlot.Attributes;
 import com.wanikani.androidnotifier.graph.ProgressPlot.DataSet;
 import com.wanikani.androidnotifier.graph.ProgressPlot.Marker;
 
@@ -85,6 +86,7 @@ public class ProgressChart extends IconizableChart {
 			}
 			
 			plot = (ProgressPlot) row.findViewById (R.id.pp_plot);
+			plot.merge (attrs);
 			plot.setLayoutParams (new TableRow.LayoutParams (0, LayoutParams.WRAP_CONTENT, 1));
 
 			legend = (LinearLayout) legendRow.findViewById (R.id.pp_legend);
@@ -142,6 +144,8 @@ public class ProgressChart extends IconizableChart {
 
 	TableLayout contents;
 	
+	Attributes attrs;
+	
 	/**
 	 * Constructor.
 	 * @param ctxt context
@@ -150,8 +154,11 @@ public class ProgressChart extends IconizableChart {
 	public ProgressChart (Context ctxt, AttributeSet attrs)
 	{
 		super (ctxt, attrs, R.layout.progresschart);
+				
+		this.attrs = new Attributes (ctxt, attrs);
 		
 		contents = (TableLayout) findViewById (R.id.gt_contents);
+			
 	}
 		
 	public SubPlot addData (String title)

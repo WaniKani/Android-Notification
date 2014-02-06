@@ -23,6 +23,6 @@
     <color name="ignoredfg">#fff</color>
     <color name="ignoredbg">#cccc00</color>
     <color name="separator">#000</color>
-    <color name="remaining">#868686</color>
+    <color name="remaining">#00000000</color>
     <color name="grace">#a6a6a6</color>
 </resources>

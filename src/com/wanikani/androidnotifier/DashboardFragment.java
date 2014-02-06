@@ -502,7 +502,7 @@ public class DashboardFragment extends Fragment implements Tab {
 		int apprentice;
 		SubPlot splot;
 		Resources res;
-
+		
 		switch (type) {
 		case RADICAL:
 			splot = radicalsProgress;
@@ -541,14 +541,14 @@ public class DashboardFragment extends Fragment implements Tab {
 			ldsets.add (rds);
 		
 		markers = new Vector<ProgressPlot.Marker> ();
-		markers.add (new ProgressPlot.Marker (Integer.toString (total), Color.BLACK, total));
 		if (guru == 0 && apprentice < total)
 			markers.add (new ProgressPlot.Marker (Integer.toString (apprentice), Color.BLACK, apprentice));
 		else {
 			markers.add (new ProgressPlot.Marker (guru + "\u2194" + apprentice, Color.BLACK, guru));
 			if (rds.value > 0)
-				markers.add (new ProgressPlot.Marker ("*", res.getColor (R.color.guru), total * 9f / 10));
+				markers.add (new ProgressPlot.Marker ("*", res.getColor (R.color.guru), total * 9f / 10, true));
 		}
+		markers.add (new ProgressPlot.Marker (Integer.toString (total), Color.BLACK, total));
 		
 		splot.setData (ddsets, ldsets, markers);
 	}

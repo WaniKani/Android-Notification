@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.DashPathEffect;
 import android.graphics.Paint;
 import android.graphics.Paint.FontMetrics;
 import android.graphics.Paint.Style;
@@ -143,6 +144,46 @@ public class ProgressPlot extends View {
 		}
 	}
 	
+	public static class Attributes {
+		
+		float ratio;
+		
+		int border;
+		
+		float markerFontSize;
+		
+		boolean dratio;
+		
+		boolean dborder;
+		
+		public Attributes (Context ctxt, AttributeSet attrs)
+		{
+			DisplayMetrics dm;
+			TypedArray a;
+			
+			dm = ctxt.getResources ().getDisplayMetrics ();
+			
+			a = ctxt.obtainStyledAttributes (attrs, R.styleable.PiePlot);
+			dratio = a.hasValue (R.styleable.PiePlot_ratio);
+			dborder = a.hasValue (R.styleable.PiePlot_border);
+			
+			ratio = a.getFloat (R.styleable.PiePlot_ratio, DEFAULT_RATIO);
+			border = a.getInteger (R.styleable.PiePlot_border, -1);
+			
+			a.recycle ();
+			
+			markerFontSize = TypedValue.applyDimension (TypedValue.COMPLEX_UNIT_SP, DEFAULT_MARKER_FONT_SIZE, dm);
+		}
+		
+		public void merge (Attributes attrs)
+		{
+			if (attrs.dratio)
+				ratio = attrs.ratio;
+			if (attrs.dborder)
+				border = attrs.border;
+		}
+	}
+	
 	public static class Marker {
 		
 		/// The legend description
@@ -156,6 +197,9 @@ public class ProgressPlot extends View {
 
 		/// Color context
 		Paint paint;
+		
+		/// Separator context
+		Paint spaint;
 		
 		/// Is there a bar separator too?
 		boolean separator;
@@ -197,7 +241,7 @@ public class ProgressPlot extends View {
 	private RectF rect;
 	
 	/// Default width/height ratio of the ellipse
-	private static final float DEFAULT_RATIO = .5F;
+	private static final float DEFAULT_RATIO = 0.5f;
 	
 	/// Default height. Set to the android rythm
 	private static final int DEFAULT_HEIGHT = 48;
@@ -208,14 +252,17 @@ public class ProgressPlot extends View {
 	/// Default space between marker and plot
 	public static int DEFAULT_MARKER_SPACE = 10;
 
-	/// Width/height ratio of the ellipse
-	private float ratio;
+	/// Border path (if any)
+	private Path bpath;
 	
-	/// The marker font size (converted from sp)
-	private float markerFontSize;
+	/// Border paint (if any)
+	private Paint bpaint;
 	
 	/// Is the view ready to display
-	private boolean readyToDraw; 
+	private boolean readyToDraw;
+	
+	/// The attributes
+	private Attributes attrs;
 	
 	/**
 	 * Constructor.
@@ -225,42 +272,15 @@ public class ProgressPlot extends View {
 	public ProgressPlot (Context ctxt, AttributeSet attrs)
 	{		
 		super (ctxt, attrs);
+
+		this.attrs = new Attributes (ctxt, attrs);
 		
 		dsets = new Vector<DataSet> (0);		
-		
-		loadAttributes (ctxt, attrs);
 	}
 	
-	/**
-	 * Constructor.
-	 * @param ctxt context
-	 */
-	public ProgressPlot (Context ctxt)
-	{		
-		super (ctxt);
-		
-		dsets = new Vector<DataSet> (0);		
-	}
-
-	/**
-	 * Performs the actual job of reading the attributes and updating 
-	 * the look. Meant for cascading.
-	 * @param ctxt the context
-	 * @param attrs the attributes
-	 */
-	void loadAttributes (Context ctxt, AttributeSet attrs)
+	public void merge (Attributes attrs)
 	{
-		DisplayMetrics dm;
-		TypedArray a;
-		
-		dm = ctxt.getResources ().getDisplayMetrics ();
-		
-		a = ctxt.obtainStyledAttributes (attrs, R.styleable.PiePlot);
-		ratio = a.getFloat (R.styleable.PiePlot_ratio, DEFAULT_RATIO);
-		
-		a.recycle ();
-		
-		markerFontSize = TypedValue.applyDimension (TypedValue.COMPLEX_UNIT_SP, DEFAULT_MARKER_FONT_SIZE, dm);
+		this.attrs.merge (attrs);
 	}
 	
 	@Override
@@ -279,7 +299,7 @@ public class ProgressPlot extends View {
 		if (wMode == MeasureSpec.UNSPECIFIED)
 			width = 100;
 		
-		defaultHeight = (int) Math.max (DEFAULT_HEIGHT, 2 * markerFontSize + DEFAULT_MARKER_SPACE);
+		defaultHeight = (int) Math.max (DEFAULT_HEIGHT, 2 * attrs.markerFontSize + DEFAULT_MARKER_SPACE);
 		
 		switch (hMode) {
 		case MeasureSpec.AT_MOST:
@@ -310,17 +330,20 @@ public class ProgressPlot extends View {
 			if (ds.value > 0)
 				nzds = ds;
 		}
-		if (nzds != null && ratio > 0) {
+		if (nzds != null && attrs.ratio > 0) {
 			canvas.drawPath (nzds.fpath, nzds.fpaint);
 			canvas.drawPath (nzds.spath, nzds.spaint);
 		}
+		
+		if (bpath != null)
+			canvas.drawPath(bpath, bpaint);
 		
 		if (markers != null) {
 			for (Marker m : markers) {
 				if (!m.hidden)
 					canvas.drawText (m.description, m.anchor, m.baseline, m.paint);
 				if (m.separator)
-					canvas.drawPath (m.path, m.paint);
+					canvas.drawPath (m.path, m.spaint);
 			}
 		}
 	}
@@ -398,7 +421,7 @@ public class ProgressPlot extends View {
 			paint.setStyle (Style.FILL_AND_STROKE);
 			paint.setStrokeWidth (1);
 			paint.setColor (ds.color);
-			paint.setTextSize ((int) markerFontSize);
+			paint.setTextSize ((int) attrs.markerFontSize);
 			paint.setAntiAlias (true);
 			
 			pos = unit * ds.value;
@@ -432,9 +455,17 @@ public class ProgressPlot extends View {
 			ds.paint = paint;					
 			
 			if (ds.separator) {
+				paint = new Paint ();
+				paint.setStyle (Style.STROKE);
+				paint.setStrokeWidth (1);
+				paint.setColor (Color.BLACK);
+				paint.setPathEffect (new DashPathEffect (new float [] { 1, 1 }, 0));
+				paint.setAntiAlias (true);
+
 				ds.path = new Path ();				
 				ds.path.moveTo (rect.left + pos, rect.top);
 				ds.path.lineTo (rect.left + pos, rect.bottom);
+				ds.spaint = paint;
 			}				
 		}
 		
@@ -477,7 +508,17 @@ public class ProgressPlot extends View {
 		prepareMarkers (rect, rect.width () / total);				
 		orect = new RectF (rect);
 		
-		orect.right = orect.left + orect.height () * ratio;
+		if (attrs.border >= 0) {
+			bpath = new Path ();
+			bpath.addRect (orect, Path.Direction.CW);
+			
+			bpaint = new Paint ();
+			bpaint.setStyle (Style.STROKE);
+			bpaint.setStrokeWidth (attrs.border);
+			bpaint.setColor (Color.BLACK);
+		}
+		
+		orect.right = orect.left + orect.height () * attrs.ratio;
 		if (rect.width () <= orect.width ())
 			return;
 		
