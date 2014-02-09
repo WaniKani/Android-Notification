@@ -415,7 +415,7 @@ public abstract class IconizableChart extends LinearLayout {
 	DataSource dsource;
 	
 	/// Error panel
-	View errorPanel;
+	TextView errorPanel;
 	
 	/**
 	 * Constructor. It only shows the spinner and the title, until 
@@ -441,7 +441,7 @@ public abstract class IconizableChart extends LinearLayout {
 		icb = (ImageButton) findViewById (R.id.gt_button);
 		icb.setOnClickListener (new IconizeButtonListener ());
 		
-		errorPanel = findViewById (R.id.gt_error);
+		errorPanel = (TextView) findViewById (R.id.gt_error);
 		
 		res = getResources ();
 		openBmp = BitmapFactory.decodeResource (res, R.drawable.expander_open);
@@ -538,5 +538,11 @@ public abstract class IconizableChart extends LinearLayout {
 	{
 		dataAvailable ();
 		setState (state.evError ());
+	}
+	
+	public void setError (String msg)
+	{
+		errorPanel.setText (msg);
+		setError ();
 	}
 }
