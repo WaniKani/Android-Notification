@@ -106,8 +106,8 @@
     <string name="tag_version">Version %s</string>
     <string name="tag_remaining">Needed to levelup</string>
     
-    <string name="tag_radicals_progression">Radicals progression</string>
-    <string name="tag_kanji_progression">Kanji progression</string>
+    <string name="tag_radicals_progression">Radicals progress</string>
+    <string name="tag_kanji_progression">Kanji progress</string>
     <string name="tag_thresh_explanation">* Total gurus needed to levelup</string>
         
     <string name="em_refresh">Refresh</string>
