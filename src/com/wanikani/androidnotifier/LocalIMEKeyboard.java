@@ -755,6 +755,9 @@ public class LocalIMEKeyboard implements Keyboard {
 			"	wknJSListener.hideKeyboard ();" +
 			"   wknJSListener.timeout (false);" +
 			"}" +
+			"if (typeof idleTime === \"object\") {" +	 // An explicit reset when entering an answer would be much better, 
+			"	idleTime.view = function() { };" +       // but the class does not expose it
+			"}" +
 			"var form, tbox;" +
 			"form = $(\"#answer-form fieldset\");" +
 			"form.css ('visibility', 'hidden');" +
