@@ -52,6 +52,8 @@ public class ItemAgeChart implements NetworkEngine.Chart {
 		
 		EnumMap<SRSLevel, Integer> colors;
 		
+		String notEnoughData;
+		
 		public ResourceData (MainActivity main)
 		{
 			Resources res;
@@ -59,6 +61,8 @@ public class ItemAgeChart implements NetworkEngine.Chart {
 			meter = mtype.get (main);
 			
 			res = main.getResources ();
+			
+			notEnoughData = main.getString (R.string.other_stats_not_enough_samples);
 			
 			tags = new EnumMap<SRSLevel, String> (SRSLevel.class);
 			colors = new EnumMap<SRSLevel, Integer> (SRSLevel.class);
@@ -111,7 +115,7 @@ public class ItemAgeChart implements NetworkEngine.Chart {
 
 		private static final int MIN_SAMPLES = 20;
 		
-		private static final int MIN_BARS = 3;
+		private static final int MIN_BARS = 30;
 		
 		public State (UserInformation ui)
 		{
@@ -343,13 +347,15 @@ public class ItemAgeChart implements NetworkEngine.Chart {
 		
 		if (rd != null)
 			state.loadResources (rd);
-		
-		chart.setVisibility (state.error || !state.sbars.isEmpty () ? View.VISIBLE : View.GONE);
-		
+				
 		if (state.error)
 			chart.setError ();
 		else if (!state.sbars.isEmpty ())		
 			chart.setData (state.series, state.sbars, -1);
+		else if (rd != null)
+			chart.setError (rd.notEnoughData);
+		else
+			chart.setError ("Not enough data to build this plot yet");
 	}
 
 	public boolean scrolling (boolean strict)
