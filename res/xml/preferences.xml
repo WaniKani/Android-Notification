@@ -8,6 +8,10 @@
         		android:key="pref_enabled" 
         		android:title="@string/pref_enabled" 
         		android:defaultValue="true" android:summary="@string/pref_enabled_descr"/>
+    	<CheckBoxPreference 
+        		android:key="pref_persistent" 
+        		android:title="@string/pref_persistent" 
+        		android:defaultValue="false" android:summary="@string/pref_persistent_descr"/>
     	<EditTextPreference  
         		android:title="@string/pref_not_threshold" 
         		android:key="pref_not_threshold"

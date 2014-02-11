@@ -67,6 +67,8 @@ public class SettingsActivity
 	
 	/** Preferences enabled key. Must match preferences.xml */
 	private static final String KEY_PREF_ENABLED = "pref_enabled";
+	/** Persistent preferences enabled key */
+	private static final String KEY_PREF_PERSISTENT = "pref_persistent";
 	/** Notify threshold */
 	private static final String KEY_PREF_NOT_THRESHOLD = "pref_not_threshold";
 	/** Enable lessons. Must match preferences.xml */
@@ -155,6 +157,9 @@ public class SettingsActivity
 	/** The current notification settings. Used to check whether it is toggled */ 
 	private boolean enabled;
 	
+	/** The current persistent nofications settings. Used to check whether it is toggled */ 
+	private boolean persistent;
+
 	/** The current lessons notification settings. Used to check whether it is toggled */ 
 	private boolean lessonsEnabled;
 	
@@ -210,6 +215,7 @@ public class SettingsActivity
 		prefs = prefs (this);
 		login = getLogin (prefs);
 		enabled = getEnabled (prefs);
+		persistent = getPersistent (prefs);
 		lessonsEnabled = getLessonsEnabled (prefs);
 		tls = getTLS (prefs);
 		threshold = getReviewThreshold (prefs);
@@ -254,6 +260,8 @@ public class SettingsActivity
 				
 		if (key.equals (KEY_PREF_ENABLED))
 			runEnabledHooks (prefs);
+		else if (key.equals (KEY_PREF_PERSISTENT))
+			runPersistentHooks (prefs);
 		else if (key.equals (KEY_PREF_USE_INTEGRATED_BROWSER)) {
 			pref.setSummary (getUseIntegratedBrowser (prefs) ? 
 							 R.string.pref_use_integrated_browser_desc :
@@ -333,9 +341,21 @@ public class SettingsActivity
 		Preference pref;
 		
 		pref = findPreference (KEY_PREF_LESSONS_ENABLED);
-		pref.setEnabled (getEnabled (prefs));		
+		pref.setEnabled (getEnabled (prefs));
+		
+		pref = findPreference (KEY_PREF_PERSISTENT);
+		pref.setEnabled (getEnabled (prefs));
 	}
 	
+	@SuppressWarnings ("deprecation")
+	private void runPersistentHooks (SharedPreferences prefs)
+	{
+		Preference pref;
+		
+		pref = findPreference (KEY_PREF_LESSONS_ENABLED);
+		pref.setEnabled (!getEnabled (prefs));
+	}
+
 	@SuppressWarnings ("deprecation")
 	private void runIntegratedBrowserHook (SharedPreferences prefs)
 	{
@@ -458,6 +478,16 @@ public class SettingsActivity
 		return new UserLogin (prefs.getString (KEY_PREF_USERKEY, ""));		
 	}
 
+	public static boolean getPersistent (Context ctxt)
+	{
+		return getPersistent (prefs (ctxt));
+	}
+
+	private static boolean getPersistent (SharedPreferences prefs)
+	{
+		return prefs.getBoolean (KEY_PREF_PERSISTENT, false);	
+	}
+
 	public static boolean getEnabled (Context ctxt)
 	{
 		return getEnabled (prefs (ctxt));
@@ -475,7 +505,8 @@ public class SettingsActivity
 	
 	private static boolean getLessonsEnabled (SharedPreferences prefs)
 	{
-		return getEnabled (prefs) && prefs.getBoolean (KEY_PREF_LESSONS_ENABLED, false);	
+		return getEnabled (prefs) && 
+					(prefs.getBoolean (KEY_PREF_LESSONS_ENABLED, false) || getPersistent (prefs));	
 	}
 
 	public static boolean getUseIntegratedBrowser (Context ctxt)
@@ -669,6 +700,16 @@ public class SettingsActivity
 	{
 		return fixScheme (ctxt, getURL (prefs (ctxt)));
 	}
+
+	public static String getChatURL (Context ctxt)
+	{
+		return fixScheme (ctxt, "http://www.wanikani.com/chat");
+	}
+
+	public static String getReviewSummaryURL (Context ctxt)
+	{
+		return fixScheme (ctxt, "http://www.wanikani.com/review");
+	}
 	
 	public static Layout getLayout (Context ctxt)
 	{
@@ -794,13 +835,16 @@ public class SettingsActivity
 	{
 		LocalBroadcastManager lbm;
 		UserLogin llogin;
-		boolean lenabled, lLessonsEnabled, ltls;
+		boolean lenabled, lpersistent, lLessonsEnabled, ltls;
 		int lthreshold;
 		Intent i;
 				
 		llogin = getLogin (prefs);
 		lenabled = getEnabled (prefs);
 		lenabled &= findPreference (KEY_PREF_ENABLED).isEnabled ();
+		
+		lpersistent = getPersistent (prefs);
+		lpersistent &= findPreference (KEY_PREF_PERSISTENT).isEnabled ();
 		
 		lLessonsEnabled = getLessonsEnabled (prefs);
 		lLessonsEnabled &= findPreference (KEY_PREF_LESSONS_ENABLED).isEnabled ();
@@ -818,12 +862,14 @@ public class SettingsActivity
 			i.putExtra (E_ENABLED, lenabled);
 			login = llogin;
 			lbm.sendBroadcast (i);
-		} else if (lenabled != enabled || 
+		} else if (lenabled != enabled ||
+				   lpersistent != persistent ||
 				   lLessonsEnabled != lessonsEnabled ||
 				   lthreshold != threshold ||
 				   ltls != tls) {
 			i = new Intent (ACT_NOTIFY);
 			i.putExtra (E_ENABLED, lenabled);
+			persistent = lpersistent;
 			enabled = lenabled;
 			lessonsEnabled = lLessonsEnabled;
 			threshold = lthreshold;

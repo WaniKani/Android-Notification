@@ -5,14 +5,12 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.Vector;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -25,7 +23,6 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Looper;
-import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
@@ -38,6 +35,7 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.wanikani.androidnotifier.db.ItemsDatabase;
+import com.wanikani.androidnotifier.notification.NotificationService;
 import com.wanikani.wklib.AuthenticationException;
 import com.wanikani.wklib.Connection;
 import com.wanikani.wklib.Item;
@@ -1197,7 +1195,7 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	 */
 	public void chat ()
 	{
-		open (SettingsActivity.fixScheme (this, "http://www.wanikani.com/chat"));
+		open (SettingsActivity.getChatURL (this));
 	}
 
 	/**
@@ -1205,7 +1203,7 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	 */
 	public void reviewSummary ()
 	{
-		open (SettingsActivity.fixScheme (this, "http://www.wanikani.com/review"));
+		open (SettingsActivity.getReviewSummaryURL (this));
 	}
 
 	/**
