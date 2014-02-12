@@ -33,17 +33,7 @@ class PersistentNotification implements NotificationInterface {
 			@Override
 			public String getText (Context ctxt, StateData sd)
 			{
-				String nice;
-
-				if (sd.dd == null)
-					return ctxt.getString (R.string.app_name);
-				
-				nice = DashboardFragment.niceInterval (ctxt.getResources (), sd.dd.nextReviewDate, sd.dd.vacation);
-				/* This is somehow ugly. No. It's ugly. */
-				if (sd.dd.nextReviewDate == null || sd.dd.vacation)
-					return nice;
-				else
-					return ctxt.getString (R.string.next_review, nice);
+				return nextReviews (ctxt, sd);
 			}
 			
 			@Override
@@ -70,13 +60,13 @@ class PersistentNotification implements NotificationInterface {
 			@Override
 			public String getText (Context ctxt, StateData sd)
 			{
-				return lessonsAvailable (ctxt, sd);
+				return nextReviews (ctxt, sd);
 			}
 
 			@Override
 			public String getAccessoryText (Context ctxt, StateData sd)
 			{
-				return reviewsNextHour (ctxt, sd);				
+				return lessonsAvailable (ctxt, sd);
 			}
 		},
 		
@@ -103,14 +93,10 @@ class PersistentNotification implements NotificationInterface {
 			@Override
 			public String getAccessoryText (Context ctxt, StateData sd)
 			{
-				String lessons, reviews;
-				
-				lessons = lessonsAvailable (ctxt, sd);
-				reviews = reviewsNextHour (ctxt, sd);
-				if (lessons.length () != 0 && reviews.length () != 0)
-					lessons = lessons + "; ";
-				
-				return lessons + reviews;
+				if (sd.hasLessons)
+					return lessonsAvailable (ctxt, sd);
+				else
+					return reviewsNextHour (ctxt, sd);
 			}			
 		};
 		
@@ -122,17 +108,41 @@ class PersistentNotification implements NotificationInterface {
 		
 		public abstract String getAccessoryText (Context ctxt, StateData sd);
 
+		private static String nextReviews (Context ctxt, StateData sd)
+		{
+			String nice;
+
+			if (sd.dd == null)
+				return ctxt.getString (R.string.app_name);
+			
+			if (sd.dd.reviewsAvailable > 0) /* This happens when reviewing or the threshold is > 0. Let the user know, anyhow */ 
+				return reviewsAvailable (ctxt, sd.dd.reviewsAvailable);
+			
+			nice = DashboardFragment.niceInterval (ctxt.getResources (), sd.dd.nextReviewDate, sd.dd.vacation);
+			/* This is somehow ugly. No. It's ugly. */
+			if (sd.dd.nextReviewDate == null || sd.dd.vacation)
+				return nice;
+			else
+				return ctxt.getString (R.string.next_review, nice);			
+		}
+		
 		private static String reviewsAvailable (Context ctxt, StateData sd)
 		{
 			if (!sd.hasReviews)
 				return "";
-			else if (SettingsActivity.get42plus (ctxt) && sd.reviews > DashboardFragment.LESSONS_42P)
-				return ctxt.getString (R.string.new_reviews_42plus, DashboardFragment.LESSONS_42P);
 			else
-				return ctxt.getString (sd.reviews == 1 ? 
-									   R.string.new_review : R.string.new_reviews, sd.reviews);
+				return reviewsAvailable (ctxt, sd.reviews);
 		}
 		
+		private static String reviewsAvailable (Context ctxt, int count)
+		{
+			if (SettingsActivity.get42plus (ctxt) && count > DashboardFragment.LESSONS_42P)
+				return ctxt.getString (R.string.new_reviews_42plus, DashboardFragment.LESSONS_42P);
+			else
+				return ctxt.getString (count == 1 ? 
+									   R.string.new_review : R.string.new_reviews, count);
+		}
+
 		private static String lessonsAvailable (Context ctxt, StateData sd)
 		{
 			if (!sd.hasLessons)
