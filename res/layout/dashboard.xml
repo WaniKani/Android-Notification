@@ -345,11 +345,21 @@
          	android:layout_width="fill_parent"
          	android:layout_height="wrap_content"
          	android:layout_gravity="center"/>
-       <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/tag_thresh_explanation"
-            style="@style/Note"/>
+       <LinearLayout 
+           android:layout_width="wrap_content"
+           android:layout_height="wrap_content"
+           android:orientation="horizontal">
+	       <TextView
+    	        android:layout_width="wrap_content"
+        	    android:layout_height="wrap_content"
+            	style="@style/Asterisk"
+            	android:text="* "/>          
+	       <TextView
+    	        android:layout_width="wrap_content"
+        	    android:layout_height="wrap_content"
+            	style="@style/Note"
+            	android:text="@string/tag_thresh_explanation"/>
+       </LinearLayout>
    	</TableLayout>
    	</RelativeLayout>
     </LinearLayout>
