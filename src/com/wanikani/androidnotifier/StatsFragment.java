@@ -1032,10 +1032,10 @@ public class StatsFragment extends Fragment implements Tab {
 	private Map<Integer, Boolean> semiPreservedState;
 	
 	/// Overall number of kanji
-	private static final int ALL_THE_KANJI = 1700;
+	private static final int ALL_THE_KANJI = 1679;
 	
 	/// Overall number of vocab items
-	private static final int ALL_THE_VOCAB = 5000;
+	private static final int ALL_THE_VOCAB = 5029;
 	
 	/// Overall number of levels
 	private static final int ALL_THE_LEVELS = 50;
