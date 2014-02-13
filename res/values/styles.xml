@@ -64,6 +64,10 @@
         <item name="android:gravity">left</item>
     </style>
     
+    <style name="Asterisk" parent="Note">
+        <item name="android:textColor">@color/guru</item>
+    </style>
+    
     <style parent="AppTheme" name="Table">
 	    <item name="android:layout_margin">@dimen/m_gap</item>
 	    <item name="android:background">@drawable/table_background</item>

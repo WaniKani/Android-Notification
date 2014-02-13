@@ -110,11 +110,11 @@
     <string name="tag_loading">Loading&#8230;</string>
     <string name="tag_btn_review">Review</string>
     <string name="tag_version">Version %s</string>
-    <string name="tag_remaining">Needed to levelup</string>
+    <string name="tag_remaining">Needed to level-up</string>
     
     <string name="tag_radicals_progression">Radicals progress</string>
     <string name="tag_kanji_progression">Kanji progress</string>
-    <string name="tag_thresh_explanation">* Total gurus needed to levelup</string>
+    <string name="tag_thresh_explanation">Total gurus needed to level-up</string>
         
     <string name="em_refresh">Refresh</string>
     <string name="em_settings">Settings</string>
@@ -246,7 +246,7 @@
     <string name="tag_eta_next_future">Next level in:</string>
     <string name="tag_eta_next_past">Next level:</string>
     <string name="tag_eta_l50">Level 50 on:</string>
-    <string name="fmt_eta_shortest">You can levelup %s</string>
+    <string name="fmt_eta_shortest">You can level-up %s</string>
     <string name="tag_eta_today">today</string>
     <string name="tag_eta_tomorrow">tomorrow</string>
     <string name="tag_eta_in">in %d days</string>
@@ -256,7 +256,7 @@
     
     <string name="ct_srs_distribution">SRS Distribution</string>
     <string name="ct_srs_history">SRS History</string>
-    <string name="ct_levels">Levelup time</string>
+    <string name="ct_levels">Level-up time</string>
     <string name="ct_age_distribution">SRS by Age</string>
     
     <string name="ct_jlpt_progress">JLPT Progress</string>
