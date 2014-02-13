@@ -59,6 +59,11 @@
         <item name="android:textColor">#ffffff</item>
     </style>
 
+    <style name="Note" parent="AppTheme">
+		<item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
+        <item name="android:gravity">left</item>
+    </style>
+    
     <style parent="AppTheme" name="Table">
 	    <item name="android:layout_margin">@dimen/m_gap</item>
 	    <item name="android:background">@drawable/table_background</item>
@@ -99,12 +104,9 @@
 	    <item name="android:layout_margin">@dimen/m_half_gap</item>
 	</style>
 	
-	<style parent="AppTheme" name="Progressions"> 
-		<item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
-		<item name="android:layout_margin">@dimen/m_half_gap</item>
-		<item name="android:layout_width">0dip</item>
-		<item name="android:layout_height">wrap_content</item>				
-		<item name="android:layout_weight">1</item>
+	<style parent="ChartTitle" name="Progressions">
+		<item name="android:layout_gravity">left</item>	   	    
+		<item name="android:gravity">left</item>	   	    
 	</style>
 	
 	<style parent="AppTheme" name="ProgressRemaining"> 
@@ -119,7 +121,7 @@
 	</style>
 	
     <style parent="Table" name="ProgressTable">
-	</style>
+    </style>
 	
     <style parent="AppTheme" name="kb_key">
         <item name="android:layout_height">@dimen/m_kb_key</item>

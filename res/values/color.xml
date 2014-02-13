@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="apprentice">#ff00aa</color>
+    <color name="apprentice_above_threshold">#ff33cc</color>
     <color name="guru">#aa38c6</color>
     <color name="enlightened">#00aaff</color>
     <color name="master">#5571e2</color>
@@ -22,4 +23,6 @@
     <color name="ignoredfg">#fff</color>
     <color name="ignoredbg">#cccc00</color>
     <color name="separator">#000</color>
+    <color name="remaining">#00000000</color>
+    <color name="grace">#a6a6a6</color>
 </resources>

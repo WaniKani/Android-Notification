@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:custom="http://schemas.android.com/apk/res/com.wanikani.androidnotifier"
     android:id="@+id/scrollView1"
     style="@style/Background"
     android:layout_width="match_parent"
@@ -303,48 +304,52 @@
             android:layout_height="wrap_content">
         <TextView
             android:id="@+id/radicals_progression"
+            android:layout_width="0dip"
+            android:layout_weight="1"
             style="@style/Progressions"
+            android:text="@string/tag_radicals_progression"
             android:textIsSelectable="true" />
-        <TextView
-            android:id="@+id/radicals_remaining"
-            style="@style/ProgressRemaining"
-            android:textIsSelectable="true"/>
+        <ImageButton
+            android:id="@+id/rad_dropdown"
+            style="@style/AlertButton"
+            android:src="@drawable/expander_open"/>
         </TableRow>
             
-       <ProgressBar
+       <com.wanikani.androidnotifier.graph.ProgressChart
             android:id="@+id/pb_radicals"
          	android:layout_width="fill_parent"
          	android:layout_height="wrap_content"
-         	android:layout_gravity="center"
-         	android:max="100"
-         	style="@android:style/Widget.ProgressBar.Horizontal"
-         	android:progress="90"
-         	android:progressDrawable="@drawable/radicalsprog"
-         	android:layout_marginBottom="@dimen/m_gap"/>
+         	custom:border="1"
+         	android:layout_gravity="center"/>
             
         <TableRow
             android:layout_width="fill_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"            
+            android:layout_marginTop="@dimen/m_gap">
         <TextView
             android:id="@+id/kanji_progression"
+            android:text="@string/tag_kanji_progression"
+            android:layout_width="0dip"
+            android:layout_weight="1"
             style="@style/Progressions"
             android:textIsSelectable="true"/>
-        <TextView
-            android:id="@+id/kanji_remaining"
-            style="@style/ProgressRemaining"
-            android:textIsSelectable="true"/>
+        <ImageButton
+            android:id="@+id/kanji_dropdown"
+            style="@style/AlertButton"
+            android:src="@drawable/expander_open"/>
         </TableRow>
        
-       <ProgressBar
+       <com.wanikani.androidnotifier.graph.ProgressChart
             android:id="@+id/pb_kanji"
+         	custom:border="1"
          	android:layout_width="fill_parent"
          	android:layout_height="wrap_content"
-         	android:layout_gravity="center"
-         	android:max="100"
-         	android:progress="90"
-         	style="@android:style/Widget.ProgressBar.Horizontal"
-         	android:progressDrawable="@drawable/kanjiprog"
-         	android:layout_marginBottom="@dimen/m_gap"/>
+         	android:layout_gravity="center"/>
+       <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/tag_thresh_explanation"
+            style="@style/Note"/>
    	</TableLayout>
    	</RelativeLayout>
     </LinearLayout>

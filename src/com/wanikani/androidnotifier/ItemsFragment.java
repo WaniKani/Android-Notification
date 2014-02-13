@@ -1968,7 +1968,7 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 	 */
 	public void showSearchDialog (boolean switching, SRSLevel level, Item.Type type)
 	{
-		showSearchDialog (switching, level, type, true);
+		showSearchDialog (switching, level, type, true, false);
 	}
 
 	/**
@@ -1978,11 +1978,12 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 	 * @param type the item type to be selected (or <tt>null</tt> if all types should
 	 * be shown).
 	 * @param srs if srs filtering shall be enabled
+	 * @param invert inverts the srs filter (i.e. show all the objects not at the specified SRS level)
 	 */
-	public void showSearchDialog (boolean switching, SRSLevel level, Item.Type type, boolean srs)
+	public void showSearchDialog (boolean switching, SRSLevel level, Item.Type type, boolean srs, boolean invert)
 	{
 		if (level != null)
-			iss.set (level);
+			iss.set (level, invert);
 		if (type != null)
 			iss.set (type);
 		

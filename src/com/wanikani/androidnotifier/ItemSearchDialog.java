@@ -129,11 +129,12 @@ public class ItemSearchDialog {
 		/**
 		 * Sets filter to a specific SRS level (and none other)
 		 * @param srs the item level
+		 * @param invert negates the filter
 		 */
-		public void set (SRSLevel level)
+		public void set (SRSLevel level, boolean invert)
 		{
 			for (SRSLevel l : srses.keySet ())
-				srses.put (l, l == level);
+				srses.put (l, invert ^ (l == level));
 		}
 		
 	}

@@ -1,12 +1,15 @@
 package com.wanikani.androidnotifier;
 
 import java.util.Date;
+import java.util.List;
+import java.util.Vector;
 
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
@@ -22,7 +25,13 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.wanikani.androidnotifier.graph.ProgressChart;
+import com.wanikani.androidnotifier.graph.ProgressPlot;
+import com.wanikani.androidnotifier.graph.Pager.Marker;
+import com.wanikani.androidnotifier.graph.ProgressChart.SubPlot;
+import com.wanikani.androidnotifier.graph.ProgressPlot.DataSet;
 import com.wanikani.wklib.Item;
+import com.wanikani.wklib.SRSLevel;
 
 /* 
  *  Copyright (c) 2013 Alberto Cuda
@@ -145,32 +154,177 @@ public class DashboardFragment extends Fragment implements Tab {
 			main.showTotal (type);
 		}	
 	}
+	
+	private static class ProgressionClickListener implements View.OnClickListener {
 
-	/**
-	 * Listener for clicks on remaining items link. Causes the pager to 
-	 * switch to the item tab, and sets the apprentice items filter.
-	 */
-	private class RemainingClickListener implements View.OnClickListener {
-
+		/// Main activity
+		private MainActivity main;
+		
 		/// The item type (typically radicals or kanji)
 		private Item.Type type;
 		
-		/**
-		 * Constructor
-		 * @param type the item type (typically radicals or kanji) 
-		 */
-		public RemainingClickListener (Item.Type type)
+		/// The type of data to show		
+		private ProgressionData pdata;
+		
+		public ProgressionClickListener (MainActivity main, Item.Type type, ProgressionData pdata)
 		{
+			this.main = main;
 			this.type = type;
+			this.pdata = pdata;
 		}
 		
 		@Override
 		public void onClick (View v)
 		{
-			main.showRemaining (type);
+			pdata.show (main, type);
 		}	
 	}
+
+	private enum ProgressionData {
 	
+
+		LOCKED {
+			@Override
+			public String getDescription (Resources res)
+			{
+				return null;	/* This means it won't be displayed */
+			}
+			
+			@Override
+			public int getColor ()
+			{
+				return R.color.remaining;
+			}
+			
+			@Override
+			public int getValue (int apprentice, int guru, int total)
+			{
+				return total - guru - apprentice;
+			}
+			
+			@Override
+			public void show (MainActivity main, Item.Type type)
+			{
+				/* ignore, can't happen */
+			}
+		},
+		
+		APPRENTICE {
+			@Override
+			public String getDescription (Resources res)
+			{
+				return res.getString (R.string.tag_apprentice);
+			}
+			
+			@Override
+			public int getColor ()
+			{
+				return R.color.apprentice;
+			}
+			
+			@Override
+			public int getValue (int apprentice, int guru, int total)
+			{
+				return apprentice;
+			}
+			
+			@Override
+			public void show (MainActivity main, Item.Type type)
+			{
+				main.showThisLevel (type, SRSLevel.APPRENTICE, false);
+			}			
+		},
+		
+		GURU {
+			@Override
+			public String getDescription (Resources res)
+			{
+				return res.getString (R.string.tag_guru);
+			}
+			
+			@Override
+			public int getColor ()
+			{
+				return R.color.guru;
+			}
+			
+			@Override
+			public int getValue (int apprentice, int guru, int total)
+			{
+				return guru;
+			}
+			
+			@Override
+			public void show (MainActivity main, Item.Type type)
+			{
+				main.showThisLevel (type, SRSLevel.APPRENTICE, true);
+			}			
+		},
+
+		REMAINING {
+			@Override
+			public String getDescription (Resources res)
+			{
+				return "    " + res.getString (R.string.tag_remaining);
+			}
+			
+			@Override
+			public boolean hasColor ()
+			{
+				return false;
+			}
+			
+			@Override
+			public int getColor ()
+			{
+				return -1;	/* Doesn't matter */
+			}
+			
+			@Override
+			public int getValue (int apprentice, int guru, int total)
+			{
+				return total - (total / 10) - guru;
+			}
+			
+			@Override
+			public void show (MainActivity main, Item.Type type)
+			{
+				main.showRemaining (type);
+			}			
+		};
+
+		
+		public DataSet getDataSet (MainActivity main, Resources res, 
+								   Item.Type type, int apprentice, int guru, int total)
+		{
+			DataSet ans;
+					
+			if (hasColor ())
+				ans = new DataSet (getDescription (res), res.getColor (getColor ()), 
+								   getValue (apprentice, guru, total));
+			else
+				ans = new DataSet (getDescription (res), getValue (apprentice, guru, total));
+
+			ans.listener = new ProgressionClickListener (main, type, this);
+			
+			return ans;
+		}
+		
+		public abstract String getDescription (Resources res);
+		
+		public boolean hasColor ()
+		{
+			return true;
+		}
+		
+		public abstract int getColor ();
+		
+		public abstract int getValue (int apprentice, int guru, int total);
+		
+		public abstract void show (MainActivity main, Item.Type type);
+		
+	}
+		
 	/**
 	 * Listener for clicks on critical items link. Causes the pager to 
 	 * switch to the item tab, and sets the critical items filter.
@@ -195,6 +349,12 @@ public class DashboardFragment extends Fragment implements Tab {
 	
 	/// Number of reviews/lessons before switching to 42+ mode
 	public static final int LESSONS_42P = 42;
+	
+	/// The Radicals progress subplot
+	SubPlot radicalsProgress;
+	
+	/// The Kanji progress subplot
+	SubPlot kanjiProgress;	
 	
 	@Override
 	public void onAttach (Activity main)
@@ -240,14 +400,6 @@ public class DashboardFragment extends Fragment implements Tab {
 		view = parent.findViewById (R.id.btn_view_critical);
 		view.setOnClickListener (new CriticalClickListener ());
 		
-		view = parent.findViewById (R.id.radicals_remaining);
-		view.setClickable (true);
-		view.setOnClickListener (new RemainingClickListener (Item.Type.RADICAL));
-
-		view = parent.findViewById (R.id.kanji_remaining);
-		view.setClickable (true);
-		view.setOnClickListener (new RemainingClickListener (Item.Type.KANJI));
-		
 		view = parent.findViewById (R.id.radicals_progression);
 		view.setClickable (true);
 		view.setOnClickListener (new TotalClickListener (Item.Type.RADICAL));
@@ -260,8 +412,8 @@ public class DashboardFragment extends Fragment implements Tab {
 		view.setOnClickListener (new ReviewSummaryClickListener ());
 		
 		view = parent.findViewById (R.id.btn_chat);
-		view.setOnClickListener (new ChatClickListener ());
-}
+		view.setOnClickListener (new ChatClickListener ());		
+	}
 	
 	/**
 	 * Builds the GUI.
@@ -273,12 +425,20 @@ public class DashboardFragment extends Fragment implements Tab {
     public View onCreateView (LayoutInflater inflater, ViewGroup container,
             				  Bundle savedInstanceState) 
     {
+		ProgressChart chart;
+		
 		super.onCreateView (inflater, container, savedInstanceState);
 
 		parent = inflater.inflate(R.layout.dashboard, container, false);
 		registerListeners ();
+		
+		chart = (ProgressChart) parent.findViewById (R.id.pb_radicals);
+		radicalsProgress = chart.addData (parent.findViewById (R.id.rad_dropdown));
         
-    	return parent;
+		chart = (ProgressChart) parent.findViewById (R.id.pb_kanji);
+		kanjiProgress = chart.addData (parent.findViewById (R.id.kanji_dropdown));
+
+		return parent;
     }
 	
 	/**
@@ -334,56 +494,65 @@ public class DashboardFragment extends Fragment implements Tab {
 		view.setVisibility (flag);
 	}
 	
-	/**
-	 * Update level progression info. The information to be displayed comprises:
-	 * <ul>
-	 * 	<li>Completion percentage
-	 *  <li>Number of items to complete level
-	 *  <li>Number of apprentice items
-	 * </ul>
-	 * This method is called twice (one for radicals progression, one for 
-	 * kanji progression)
-	 * @param pbid progess bar ID
-	 * @param rid remaining items text view ID
-	 * @param tid the progressions tag
-	 * @param tsid the progressions string id
-	 * @param prog number of non-apprentice items 
-	 * @param total total number of items
-	 */
-	protected void setProgress (int pbid, int rid, int tid, int tsid, int prog, int total)
+	protected void setProgress (Item.Type type, int guru, int unlocked, int total)
 	{
-		TextView tw;
-		ProgressBar pb;
-		int percent, rem, grace;
-		String s;
-
-		percent = prog * 100 / total;
+		List<DataSet> ddsets, ldsets;
+		List<ProgressPlot.Marker> markers;
+		DataSet gds, ads, tds, rds;
+		int apprentice;
+		SubPlot splot;
+		Resources res;
 		
-		pb = (ProgressBar) parent.findViewById (pbid);
-		pb.setSecondaryProgress (percent);
-		
-		tw = (TextView) parent.findViewById (rid);
-		rem = total - prog;
-		grace = total / 10;
-		if (percent < 90)
-			s = getString (R.string.fmt_to_go, rem - grace, rem);
-		else if (prog < total)
-			s = getString (R.string.fmt_remaining, rem);
-		else
-			s = null;
+		switch (type) {
+		case RADICAL:
+			splot = radicalsProgress;
+			break;
 			
-		if (s != null) {
-			s = String.format ("<font color=\"blue\"><u>%s</u></font>", s);
-			tw.setText (Html.fromHtml (s));
-			tw.setVisibility (View.VISIBLE);
-		} else
-			tw.setVisibility (View.GONE);			
+		case KANJI:
+			splot = kanjiProgress;
+			break;
+			
+		case VOCABULARY:
+		default:
+			return;
+		}
 		
-		tw = (TextView) parent.findViewById (tid);
-		s = String.format ("<font color=\"blue\"><u>%s</u></font>", getString (tsid, total));
-		tw.setText (Html.fromHtml (s));
+		res = getResources ();
+		
+		ddsets = new Vector<DataSet> ();
+		ldsets = new Vector<DataSet> ();
+		
+		apprentice = unlocked - guru;
+
+		tds = ProgressionData.LOCKED.getDataSet (main, res, type, apprentice, guru, total);
+		ads = ProgressionData.APPRENTICE.getDataSet (main, res, type, apprentice, guru, total);
+		gds = ProgressionData.GURU.getDataSet (main, res, type, apprentice, guru, total);
+		rds = ProgressionData.REMAINING.getDataSet (main, res, type, apprentice, guru, total);
+		
+		/* Display data set: guru, apprentice, total */
+		ddsets.add (gds);
+		ddsets.add (ads);
+		ddsets.add (tds);		
+		
+		/* Legends data set: apprentice, guru, remaining */
+		ldsets.add (ads);
+		gds.showAlways = true; ldsets.add (gds);
+		if (rds.value > 0)
+			ldsets.add (rds);
+		
+		markers = new Vector<ProgressPlot.Marker> ();
+		if (guru == 0 && apprentice < total)
+			markers.add (new ProgressPlot.Marker (Integer.toString (apprentice), Color.BLACK, apprentice));
+		else {
+			markers.add (new ProgressPlot.Marker (guru + "\u2194" + apprentice, Color.BLACK, guru));
+			if (rds.value > 0)
+				markers.add (new ProgressPlot.Marker ("*", res.getColor (R.color.guru), total * 9f / 10, true));
+		}
+		markers.add (new ProgressPlot.Marker (Integer.toString (total), Color.BLACK, total));
+		
+		splot.setData (ddsets, ldsets, markers);
 	}
-	
+
 	/**
 	 * Called by @link MainActivity when asynchronous data
 	 * retrieval is completed. If we already have a view on which
@@ -454,12 +623,13 @@ public class DashboardFragment extends Fragment implements Tab {
 			
 		case RETRIEVED:
 			setVisibility (R.id.pb_w_section,View.GONE);
-			setVisibility (R.id.lay_progress, View.VISIBLE);			
-			setProgress (R.id.pb_radicals, R.id.radicals_remaining, R.id.radicals_progression,
-					 	 R.string.fmt_radicals_progression, dd.od.lp.radicalsProgress, dd.od.lp.radicalsTotal);
+			setVisibility (R.id.lay_progress, View.VISIBLE);
 			
-			setProgress (R.id.pb_kanji, R.id.kanji_remaining, R.id.kanji_progression,
-					     R.string.fmt_kanji_progression, dd.od.lp.kanjiProgress, dd.od.lp.kanjiTotal);
+			setProgress (Item.Type.RADICAL,   
+					  	 dd.od.elp.radicalsProgress, dd.od.elp.radicalsUnlocked, dd.od.elp.radicalsTotal);
+			
+			setProgress (Item.Type.KANJI, 
+						 dd.od.elp.kanjiProgress, dd.od.elp.kanjiUnlocked, dd.od.elp.kanjiTotal);
 
 			setVisibility (R.id.progress_section, View.VISIBLE);			
 			break;
@@ -467,7 +637,7 @@ public class DashboardFragment extends Fragment implements Tab {
 		case FAILED:
 			/* Just hide the spinner. 
 			 * If we already have some data, it is displayed anyway, otherwise hide it */
-			if (dd.od.lp == null)
+			if (dd.od.elp == null)
 				setVisibility (R.id.lay_progress, View.GONE);
 			setVisibility (R.id.pb_w_section, View.GONE);			
 		}

@@ -193,6 +193,20 @@ public class Connection {
 		}
 	}
 	
+	public ExtendedLevelProgression getExtendedLevelProgression (Meter meter)
+			throws IOException
+	{
+		ItemLibrary<Radical> rlib;
+		ItemLibrary<Kanji> klib;
+		UserInformation ui;
+		
+		ui = getUserInformation (meter);
+		rlib = getRadicals (meter, ui.level);
+		klib = getKanji (meter, ui.level);
+		
+		return new ExtendedLevelProgression (rlib, klib);
+	}
+
 	private int [] getAllLevels (Meter meter)
 		throws IOException
 	{

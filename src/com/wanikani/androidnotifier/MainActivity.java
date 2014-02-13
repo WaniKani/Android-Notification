@@ -38,9 +38,9 @@ import com.wanikani.androidnotifier.db.ItemsDatabase;
 import com.wanikani.androidnotifier.notification.NotificationService;
 import com.wanikani.wklib.AuthenticationException;
 import com.wanikani.wklib.Connection;
+import com.wanikani.wklib.ExtendedLevelProgression;
 import com.wanikani.wklib.Item;
 import com.wanikani.wklib.ItemLibrary;
-import com.wanikani.wklib.LevelProgression;
 import com.wanikani.wklib.SRSDistribution;
 import com.wanikani.wklib.SRSLevel;
 import com.wanikani.wklib.StudyQueue;
@@ -372,7 +372,7 @@ public class MainActivity extends FragmentActivity implements Runnable {
 		{
 			DashboardData.OptionalDataStatus srsStatus, lpStatus, ciStatus;
 			SRSDistribution srs;
-			LevelProgression lp;
+			ExtendedLevelProgression elp;
 			ItemLibrary<Item> critical;
 			int cis;
 			
@@ -385,10 +385,10 @@ public class MainActivity extends FragmentActivity implements Runnable {
 			}
 
 			try {
-				lp = conn [0].getLevelProgression (MeterSpec.T.DASHBOARD_REFRESH.get (MainActivity.this));
+				elp = conn [0].getExtendedLevelProgression (MeterSpec.T.DASHBOARD_REFRESH.get (MainActivity.this));
 				lpStatus = DashboardData.OptionalDataStatus.RETRIEVED;
 			} catch (IOException e) {
-				lp = null;
+				elp = null;
 				lpStatus = DashboardData.OptionalDataStatus.FAILED;
 			}
 
@@ -401,7 +401,7 @@ public class MainActivity extends FragmentActivity implements Runnable {
 				cis = 0;
 			}
 						
-			return new DashboardData.OptionalData (srs, srsStatus, lp, lpStatus, cis, ciStatus);
+			return new DashboardData.OptionalData (srs, srsStatus, elp, lpStatus, cis, ciStatus);
 		}	
 						
 		/**
@@ -1249,7 +1249,7 @@ public class MainActivity extends FragmentActivity implements Runnable {
 	{
 		pager.setCurrentItem (pad.getTabIndex (Tab.Contents.ITEMS), true);
 		itemsf.setLevelFilter (dd.level);
-		itemsf.showSearchDialog (true, null, type, false);		
+		itemsf.showSearchDialog (true, null, type, false, false);		
 	}
 
 	/**
@@ -1263,6 +1263,13 @@ public class MainActivity extends FragmentActivity implements Runnable {
 		itemsf.hideSearchDialog ();
 	}
 
+	public void showThisLevel (Item.Type type, SRSLevel srs, boolean invert)
+	{
+		pager.setCurrentItem (pad.getTabIndex (Tab.Contents.ITEMS), true);
+		itemsf.setLevelFilter (dd.level);
+		itemsf.showSearchDialog (true, srs, type, true, invert);		
+	}
+	
 	/**
 	 * Shows the items tab, and shows the search dialog
 	 */
