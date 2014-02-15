@@ -539,7 +539,7 @@ public class ItemSearchDialog {
 		
 		st = new StringTokenizer (s, ",");
 		while (st.hasMoreTokens ())
-			if (i.matches (st.nextToken ()))
+			if (i.matches (st.nextToken ().trim ()))
 				return true;
 			
 		return false;
