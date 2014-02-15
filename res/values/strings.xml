@@ -214,6 +214,9 @@
     <string name="fmt_ni_one_month_days">one month, %d days</string>
     <string name="fmt_ni_months_days">%1$d months, %2$d days</string>
     
+    <string name="tag_current_level_radicals">This level\'s radicals available</string>
+    <string name="tag_current_level_kanji">This level\'s kanji available</string>
+    
     <string name="fmt_bd">%d days</string>
     <string name="fmt_bd_one">one day</string>
     <string name="fmt_bh">%d hours</string>

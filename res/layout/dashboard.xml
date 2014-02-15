@@ -156,6 +156,58 @@
          
         </RelativeLayout>
         
+         <TableLayout
+             android:id="@+id/tab_current_level"
+	         style="@style/Table"
+	         android:visibility="gone"
+	         android:orientation="vertical"
+             android:layout_width="fill_parent"
+             android:layout_height="wrap_content">
+            <TableRow
+                android:id="@+id/tr_cl_radicals"
+                style="@style/Row"
+                android:layout_width="fill_parent"
+                android:visibility="gone" >
+
+                <TextView
+                    style="@style/LabelKey"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/tag_current_level_radicals" />
+
+                <TextView
+                    android:id="@+id/current_level_radicals_val"
+                    style="@style/LabelValue"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:textIsSelectable="true" />
+            </TableRow>
+            <TableRow
+                android:id="@+id/tr_cl_kanji"
+                style="@style/Row"
+                android:layout_width="fill_parent"
+                android:visibility="gone" >
+
+                <TextView
+                    style="@style/LabelKey"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/tag_current_level_kanji" />
+
+                <TextView
+                    android:id="@+id/current_level_kanji_val"
+                    style="@style/LabelValue"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:textIsSelectable="true" />
+            </TableRow>
+       </TableLayout>
+             
+        
         <!-- The first (review) table -->
 
         <TableLayout

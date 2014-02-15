@@ -552,6 +552,24 @@ public class DashboardFragment extends Fragment implements Tab {
 		
 		splot.setData (ddsets, ldsets, markers);
 	}
+	
+	protected boolean setCurrentLevel (int rid, int vid, int number)
+	{
+		View row;
+		TextView tv;
+		
+		row = parent.findViewById (rid);
+		tv = (TextView) parent.findViewById (vid);
+		
+		if (number > 0) {
+			tv.setText (Integer.toString (number));
+			row.setVisibility (View.VISIBLE);
+			return true;
+		} else {
+			row.setVisibility (View.GONE);
+			return false;
+		}
+	}
 
 	/**
 	 * Called by @link MainActivity when asynchronous data
@@ -565,6 +583,7 @@ public class DashboardFragment extends Fragment implements Tab {
 		Context ctxt;
 		ImageView iw;
 		String s;
+		boolean show;
 		
 		ctxt = getActivity ();
 
@@ -624,6 +643,13 @@ public class DashboardFragment extends Fragment implements Tab {
 		case RETRIEVED:
 			setVisibility (R.id.pb_w_section,View.GONE);
 			setVisibility (R.id.lay_progress, View.VISIBLE);
+			
+			show = false;
+			show |= setCurrentLevel (R.id.tr_cl_radicals, R.id.current_level_radicals_val, 
+									 dd.od.elp.currentLevelRadicalsAvailable);
+			show |= setCurrentLevel (R.id.tr_cl_kanji, R.id.current_level_kanji_val, 
+									 dd.od.elp.currentLevelKanjiAvailable);
+			setVisibility (R.id.tab_current_level, show ? View.VISIBLE : View.GONE);
 			
 			setProgress (Item.Type.RADICAL,   
 					  	 dd.od.elp.radicalsProgress, dd.od.elp.radicalsUnlocked, dd.od.elp.radicalsTotal);

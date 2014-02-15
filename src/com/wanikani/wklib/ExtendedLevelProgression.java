@@ -1,7 +1,6 @@
 package com.wanikani.wklib;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import java.util.Date;
 
 /* 
  *  Copyright (c) 2013 Alberto Cuda
@@ -27,20 +26,29 @@ public class ExtendedLevelProgression {
 	
 	public int radicalsTotal;
 	
+	public int currentLevelRadicalsAvailable;
+	
 	public int kanjiProgress;
 	
 	public int kanjiUnlocked;
 	
 	public int kanjiTotal;
 	
+	public int currentLevelKanjiAvailable;
+
 	ExtendedLevelProgression (ItemLibrary<Radical> rlib, ItemLibrary<Kanji> klib)
 	{
+		Date now;
+		
+		now = new Date ();
 		for (Radical r : rlib.list) {
 			radicalsTotal++;
 			if (r.stats != null) {
 				radicalsUnlocked++;
 				if (r.stats.srs != SRSLevel.APPRENTICE)
 					radicalsProgress++;
+				if (r.stats.availableDate.before (now))
+					currentLevelRadicalsAvailable++;
 			}
 		}
 			
@@ -50,6 +58,8 @@ public class ExtendedLevelProgression {
 				kanjiUnlocked++;
 				if (k.stats.srs != SRSLevel.APPRENTICE)
 					kanjiProgress++;
+				if (k.stats.availableDate.before (now))
+					currentLevelKanjiAvailable++;
 			}
 		}
 	}
