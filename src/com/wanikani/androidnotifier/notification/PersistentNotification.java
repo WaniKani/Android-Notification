@@ -1,5 +1,9 @@
 package com.wanikani.androidnotifier.notification;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -100,6 +104,10 @@ class PersistentNotification implements NotificationInterface {
 			}			
 		};
 		
+		private static DateFormat hdf = new SimpleDateFormat ("HH:mm");
+		
+		private static DateFormat ddf = new SimpleDateFormat ("EEE, HH:mm");
+		
 		public abstract int getIcon ();
 		
 		public abstract String getIntent ();
@@ -109,21 +117,30 @@ class PersistentNotification implements NotificationInterface {
 		public abstract String getAccessoryText (Context ctxt, StateData sd);
 
 		private static String nextReviews (Context ctxt, StateData sd)
-		{
+		{			
+			Calendar rcal, ncal;
 			String nice;
+			int ddelta;
 
 			if (sd.dd == null)
 				return ctxt.getString (R.string.app_name);
 			
 			if (sd.dd.reviewsAvailable > 0) /* This happens when reviewing or the threshold is > 0. Let the user know, anyhow */ 
 				return reviewsAvailable (ctxt, sd.dd.reviewsAvailable);
+						
+			if (sd.dd.nextReviewDate != null && !sd.dd.vacation) {
+				rcal = Calendar.getInstance ();
+				ncal = Calendar.getInstance ();
+				rcal.setTime (sd.dd.nextReviewDate);
+				ddelta = ncal.get (Calendar.DATE) - rcal.get (Calendar.DATE);
+				if (ddelta == 0)
+					nice = ctxt.getString (R.string.fmt_not_next_review_b, hdf.format (sd.dd.nextReviewDate));
+				else
+					nice = ctxt.getString (R.string.fmt_not_next_review_d, ddf.format (sd.dd.nextReviewDate));
+			} else
+				nice = DashboardFragment.niceInterval (ctxt.getResources (), sd.dd.nextReviewDate, sd.dd.vacation);
 			
-			nice = DashboardFragment.niceInterval (ctxt.getResources (), sd.dd.nextReviewDate, sd.dd.vacation);
-			/* This is somehow ugly. No. It's ugly. */
-			if (sd.dd.nextReviewDate == null || sd.dd.vacation)
-				return nice;
-			else
-				return ctxt.getString (R.string.next_review, nice);			
+			return nice;
 		}
 		
 		private static String reviewsAvailable (Context ctxt, StateData sd)

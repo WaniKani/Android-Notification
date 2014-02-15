@@ -11,7 +11,9 @@
     <string name="next_hour_no_review">No reviews next hour</string>
     <string name="next_hour_one_review">One review next hour</string>
     <string name="next_hour_reviews">%d reviews next hour</string>
-    
+	<string name="fmt_not_next_review_d">Next review on %s</string>
+	<string name="fmt_not_next_review_b">Next review at %s</string>
+	
     <string name="tpref_notifications">Notifications</string>
     <string name="tpref_dashboard">Dashboard</string>
     <string name="tpref_reviews">Reviews</string>
