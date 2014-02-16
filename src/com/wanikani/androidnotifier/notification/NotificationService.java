@@ -15,6 +15,7 @@ import android.database.SQLException;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 
 import com.wanikani.androidnotifier.DashboardData;
 import com.wanikani.androidnotifier.MeterSpec;
@@ -88,6 +89,13 @@ public class NotificationService
 			prefs.edit ().
 				putInt (PREF_REVIEWS, hasReviews ? reviews : 0).
 				putInt (PREF_LESSONS, hasLessons ? lessons : 0).commit ();
+		}
+		
+		@Override
+		public String toString ()
+		{
+			return (hasReviews ? "R" : "r") + reviews +
+				   (hasLessons ? "L" : "l") + lessons;
 		}
 	}
 	
@@ -262,13 +270,17 @@ public class NotificationService
 	{
 		String action;
 		boolean enabled;
-		
-		sd = new StateData (prefs ());
 
+		log ("Handling intent: " + intent.getAction ());		
+
+		sd = new StateData (prefs ());
+		log ("SD: " + sd);
+		
 		enabled = SettingsActivity.getEnabled (this);
 		action = intent.getAction ();
 				
 		if (nifc == null) {
+			log ("No notification interface: recreating one");
 			acn = new AutoCancelNotification (this);
 			pn = new PersistentNotification (this);
 		
@@ -292,10 +304,13 @@ public class NotificationService
 			return;
 		}
 		
+		log ("Not a TAP/HIDE event, running cron");
 		cronDaily (enabled);
 		
 		if (!enabled)
 			return;
+		
+		log ("Handling event");
 		
 		if (action.equals (ACTION_BOOT_COMPLETED))
 			bootCompleted (intent);
@@ -306,6 +321,7 @@ public class NotificationService
 		else if (action.equals (ACTION_NEW_DATA))
 			newData (intent);
 
+		log ("Event handled: " + sd);
 		sd.serialize (prefs ());
 	}
 	
@@ -328,6 +344,7 @@ public class NotificationService
 
 		next = prefs.getLong (PREFS_CRON_NEXT, normalize (now));
 		if (now >= next) {
+			log ("Time for cron: elapsed: " + (now - next));
 			ok = false;
 			try {				
 				ok = runDailyJobs (prefs);
@@ -338,6 +355,7 @@ public class NotificationService
 				} else
 					next = now + CRON_RETRY;
 				
+				log ("Cron result: " + ok + "reschedule at +" + (next - now));
 				if (!enabled)
 					schedule (null, new Date (next));
 			}			
@@ -512,8 +530,10 @@ public class NotificationService
 		if (intent.hasExtra (KEY_DD)) {
 			sd.dd = new DashboardData (intent.getBundleExtra (KEY_DD));
 			nifc.update (sd, ChangeType.DATA);
+			log ("FSM next (1): was " + fsm.lstate);
 			fsm.next (NotifierStateMachine.Event.E_UNSOLICITED, 
 					  SettingsActivity.getReviewThreshold (this), sd.dd);
+			log ("FSM next (1): is " + fsm.lstate);
 		} else
 			feed (fsm, NotifierStateMachine.Event.E_UNSOLICITED);
 	}
@@ -582,7 +602,9 @@ public class NotificationService
 			dd = new DashboardData (e);
 		}
 		
+		log ("FSM next (2): was " + fsm.lstate);
 		fsm.next (event, SettingsActivity.getReviewThreshold (this), dd);
+		log ("FSM next (2): is " + fsm.lstate);
 	}	
 	
 	/**
@@ -625,6 +647,8 @@ public class NotificationService
 		Bundle b;
 		Intent i;
 		
+		log ("Schedule at: " + (date.getTime () - System.currentTimeMillis ()) / 1000);
+		
 		i = new Intent (this, getClass ());
 		i.setAction (ACTION_ALARM);
 		if (fsm != null) {
@@ -662,5 +686,10 @@ public class NotificationService
 		intent.setFlags (Intent.FLAG_ACTIVITY_NEW_TASK);
 		
 		startActivity (intent);
+	}
+	
+	private void log (String message)
+	{
+		Log.d ("WKM", ((System.currentTimeMillis () / 1000) % 3600) +  ": " + message);
 	}
 }

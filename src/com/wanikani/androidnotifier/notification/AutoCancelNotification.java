@@ -6,6 +6,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.support.v4.app.NotificationCompat;
+import android.util.Log;
 
 import com.wanikani.androidnotifier.DashboardData;
 import com.wanikani.androidnotifier.DashboardFragment;
@@ -44,6 +45,8 @@ class AutoCancelNotification implements NotificationInterface {
 	@Override
 	public void update (StateData sd, ChangeType ctype)
 	{
+		Log.d ("WKM", "update: " + ctype + ": " + sd);
+		
 		switch (ctype) {
 		case LESSONS:
 			if (sd.hasLessons)
