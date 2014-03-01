@@ -1191,6 +1191,8 @@ public class LocalIMEKeyboard implements Keyboard {
 		enableIgnoreButton (false);
 		enable ();
 		
+		wv.js (ifReviews (WanikaniKunOn.JS_CODE));
+		
 		color = srsCols.get (level);
 		if (SettingsActivity.getSRSIndication (wav) && color != null) {
 			srsv.setVisibility (View.VISIBLE);
