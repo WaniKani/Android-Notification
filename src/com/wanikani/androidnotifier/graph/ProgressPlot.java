@@ -152,6 +152,10 @@ public class ProgressPlot extends View {
 		
 		float markerFontSize;
 		
+		float height;
+		
+		float markerSpace;
+		
 		boolean dratio;
 		
 		boolean dborder;
@@ -172,7 +176,9 @@ public class ProgressPlot extends View {
 			
 			a.recycle ();
 			
-			markerFontSize = TypedValue.applyDimension (TypedValue.COMPLEX_UNIT_SP, DEFAULT_MARKER_FONT_SIZE, dm);
+			markerFontSize = TypedValue.applyDimension (TypedValue.COMPLEX_UNIT_SP, DEFAULT_MARKER_FONT_SIZE_SP, dm);
+			height = TypedValue.applyDimension (TypedValue.COMPLEX_UNIT_DIP, DEFAULT_HEIGHT_DP, dm);
+			markerSpace = TypedValue.applyDimension (TypedValue.COMPLEX_UNIT_DIP, DEFAULT_MARKER_SPACE_DP, dm);
 		}
 		
 		public void merge (Attributes attrs)
@@ -244,14 +250,14 @@ public class ProgressPlot extends View {
 	private static final float DEFAULT_RATIO = 0.5f;
 	
 	/// Default height. Set to the android rythm
-	private static final int DEFAULT_HEIGHT = 48;
+	private static final int DEFAULT_HEIGHT_DP = 48;
 	
 	/// Default marker font size
-	public static float DEFAULT_MARKER_FONT_SIZE = 12;
+	public static float DEFAULT_MARKER_FONT_SIZE_SP = 12;
 	
 	/// Default space between marker and plot
-	public static int DEFAULT_MARKER_SPACE = 10;
-
+	public static int DEFAULT_MARKER_SPACE_DP = 10;
+	
 	/// Border path (if any)
 	private Path bpath;
 	
@@ -299,7 +305,7 @@ public class ProgressPlot extends View {
 		if (wMode == MeasureSpec.UNSPECIFIED)
 			width = 100;
 		
-		defaultHeight = (int) Math.max (DEFAULT_HEIGHT, 2 * attrs.markerFontSize + DEFAULT_MARKER_SPACE);
+		defaultHeight = (int) Math.max (attrs.height, 2 * attrs.markerFontSize + attrs.markerSpace);
 		
 		switch (hMode) {
 		case MeasureSpec.AT_MOST:
@@ -448,7 +454,7 @@ public class ProgressPlot extends View {
 				fm = paint.getFontMetrics ();
 				height = fm.bottom - fm.ascent;
 				baseline = rect.top - fm.ascent;
-				rect.top = height + DEFAULT_MARKER_FONT_SIZE;
+				rect.top = height + attrs.markerFontSize;
 			}				
 			ds.anchor += rect.left;
 			ds.baseline = baseline;			
