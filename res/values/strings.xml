@@ -60,6 +60,10 @@
     <string name="pref_external_frame_placer_descr">
         		Enable \@jeshuamorrissey\'s script, showing an external dictionary page
         		in the lessons module (requires a large screen)</string>
+    <string name="pref_part_of_speech">Part of Speech</string>
+    <string name="pref_part_of_speech_descr">
+        		Enable \@jeshuamorrissey\'s script, annotating items with external definitions,
+        		part of speech and additional notes</string>
     <string name="pref_external_frame_placer_dict">External frame placer dictionary</string>
     <string name="pref_external_frame_placer_dict_descr">
         		Select dictionary to use when displaying definitions in the lessons module</string>

@@ -97,6 +97,8 @@ public class SettingsActivity
 	private static final String KEY_PREF_LESSON_ORDER = "pref_lesson_order";
 	/** Frame placer */
 	private static final String KEY_PREF_EXTERNAL_FRAME_PLACER = "pref_external_frame_placer";
+	/* Part of speech */
+	private static final String KEY_PREF_PART_OF_SPEECH = "pref_part_of_speech";
 	/** Frame placer dictionary */
 	private static final String KEY_PREF_EXTERNAL_FRAME_PLACER_DICT = "pref_external_frame_placer_dict";
 	/** Info popup */
@@ -604,6 +606,11 @@ public class SettingsActivity
 		
 		return dict;
 	}	
+
+	public static boolean getPartOfSpeech (Context ctxt)
+	{
+		return prefs (ctxt).getBoolean (KEY_PREF_PART_OF_SPEECH, true);
+	}
 
 	public static boolean getErrorPopup (Context ctxt)
 	{

@@ -236,6 +236,9 @@ public class WebReviewActivity extends Activity {
 					dict = SettingsActivity.getExternalFramePlacerDictionary (WebReviewActivity.this);
 					ExternalFramePlacer.run (wv, dict);
 				}
+				
+				if (SettingsActivity.getPartOfSpeech (WebReviewActivity.this))
+					PartOfSpeech.enter (WebReviewActivity.this, wv, url);
 			}
 	    }
 	}

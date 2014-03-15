@@ -89,6 +89,11 @@
 	        android:entries="@array/dictionaryURL"
 	        android:entryValues="@array/dictionaryURLValues"/>    	
     	<CheckBoxPreference
+    	    android:key="pref_part_of_speech"
+    	    android:title="@string/pref_part_of_speech"
+    	    android:summary="@string/pref_part_of_speech_descr"
+    	    android:defaultValue="true"/>
+   		<CheckBoxPreference
         	android:key="pref_error_popup"
         	android:title="@string/pref_error_popup"
         	android:summary="@string/pref_error_popup_descr"

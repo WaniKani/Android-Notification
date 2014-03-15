@@ -184,6 +184,25 @@ public class FocusWebView extends WebView {
 	 */
 	public void js (String s)
 	{
-       loadUrl ("javascript:(function() { " + s + "})()");
+		jsEnd (jsStart ().append (s));
 	}
+	
+	public StringBuffer jsStart ()
+	{
+		StringBuffer sb;
+		
+		sb = new StringBuffer ();
+		sb.append ("javascript:(function() {");
+		
+		return sb;
+	}
+	
+	
+	public void jsEnd (StringBuffer sb)
+	{
+		sb.append ("})()");
+		
+		loadUrl (sb.toString ());
+	}
+	
 }
