@@ -123,6 +123,19 @@ public class MenuHandler {
 			
 			ctxt.startActivity (intent);			
 		}
+		
+		/**
+		 * About
+		 */
+		public void about ()
+		{
+			Intent intent;
+			
+			intent = new Intent (ctxt, AboutActivity.class);
+			
+			ctxt.startActivity (intent);			
+		}
+		
 	}
 	
 	/**
@@ -217,6 +230,10 @@ public class MenuHandler {
 			
 		case R.id.em_customfonts:
 			listener.customFont ();
+			break;
+			
+		case R.id.em_about:
+			listener.about ();
 			break;
 			
 		default:

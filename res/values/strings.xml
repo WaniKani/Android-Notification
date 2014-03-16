@@ -63,7 +63,7 @@
     <string name="pref_part_of_speech">Part of Speech</string>
     <string name="pref_part_of_speech_descr">
         		Enable \@jeshuamorrissey\'s script, annotating items with external definitions,
-        		part of speech and additional notes</string>
+        		part of speech and additional notes. Source is EDICT (see About)</string>
     <string name="pref_external_frame_placer_dict">External frame placer dictionary</string>
     <string name="pref_external_frame_placer_dict_descr">
         		Select dictionary to use when displaying definitions in the lessons module</string>
@@ -131,6 +131,7 @@
     <string name="em_fonts">JP fonts</string>
     <string name="em_meters">Meters</string>
     <string name="em_custom_fonts">Choose JP font</string>
+    <string name="em_about">About</string>
     <string name="pref_enabled_descr">Show event icon when you have reviews</string>
     <string name="pref_persistent_descr">Make notification icon persistent, showing useful info</string>
     <string name="status_msg_error">Error connecting to WaniKani</string>
@@ -421,5 +422,68 @@
         	If not, you may consider signing in (http://www.wanikani.com).
     </string>
     <string name="intro_ok">OK, got it</string>
-        
+
+    <string name="info_credits_title">Credits</string>
+	<string name="info_credits">    
+This program contains many important contributions from WaniKani users, who kindly
+gave permission to integrate their work:</string>
+
+		<string name="info_credit_rui">\@ruipgpinheiro</string>  
+	<string name="info_credit_rui_descr">
+<a href="https://www.wanikani.com/chat/api-and-third-party-apps/2940">WaniKani Override</a>\n
+<a href="https://www.wanikani.com/chat/api-and-third-party-apps/3981">WaniKani KunOn</a>
+</string>
+
+	<string name="info_credit_seiji">\@Seiji</string>  
+	<string name="info_credit_seiji_descr">
+<a href="https://www.wanikani.com/chat/api-and-third-party-apps/2952">WaniKani Improve</a>
+</string>
+	
+	<string name="info_credit_alucardeck">\@alucardeck</string>  
+	<string name="info_credit_alucardeck_descr">
+<a href="https://www.wanikani.com/chat/api-and-third-party-apps/3023">WaniKani Review Order</a>\n
+<a href="https://www.wanikani.com/chat/api-and-third-party-apps/3878">WaniKani Lesson Order</a>
+	</string>
+
+	<string name="info_credit_jeshuamorrissey">\@jeshuamorrissey</string>  
+	<string name="info_credit_jeshuamorrissey_descr">
+<a href="https://www.wanikani.com/chat/api-and-third-party-apps/3947">External Definition Frame Placer</a>\n
+<a href="https://www.wanikani.com/chat/api-and-third-party-apps/4882">WaniKani Part-Of-Speech</a>
+    </string>
+	
+	<string name="info_credit_edict">This program uses the 
+<a href="http://www.csse.monash.edu.au/~jwb/edict.html">EDICT</a> and
+<a href="http://www.csse.monash.edu.au/~jwb/kanjidic.html">KANJIDIC</a> dictionary files.
+These files are the property of the 
+<a href="http://www.edrdg.org/"> Electronic Dictionary 
+Research and Development Group</a>, and are used in
+conformance with the Group\'s 
+<a href="http://www.edrdg.org/edrdg/licence.html">licence</a></string>  
+					
+	<string name="info_licence_title">Licence Terms</string>
+
+	<string name="info_licence_text">
+Copyright &#169; 2013-2014 Alberto Cuda\n
+\n	    
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.\n
+\n
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.\n
+\n
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see http://www.gnu.org/licenses/.        
+    </string>
+    
+    <string name="info_thanks_title">Thanks</string>
+	<string name="info_thanks">
+The author wishes to thank all the WK community members for constant support and
+their clever suggestions. And of course thanks to Viet and Koichi: without their work this app would
+be an empty box.	    
+	</string>
+	
 </resources>

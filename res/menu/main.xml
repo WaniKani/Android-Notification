@@ -12,4 +12,6 @@
           android:showAsAction="ifRoom|withText" android:icon="@drawable/ic_menu_save"/>
     <item android:id="@+id/em_import" android:title="@string/em_import" 
           android:showAsAction="ifRoom|withText" android:icon="@drawable/ic_menu_restore"/>
+    <item android:id="@+id/em_about" android:title="@string/em_about"
+          android:showAsAction="ifRoom|withText" android:icon="@drawable/ic_menu_info_details"/>
 </menu>

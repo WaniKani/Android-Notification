@@ -361,4 +361,11 @@
     <style name="Meter" parent="Estimates">
        <item name="android:textStyle">italic</item>                                
     </style>
+    
+    <style name="Contribution" parent="AppTheme">
+		<item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
+    </style>    
+    <style name="Contributor" parent="Contribution">
+       <item name="android:textStyle">bold</item>                                
+    </style>    
 </resources>
