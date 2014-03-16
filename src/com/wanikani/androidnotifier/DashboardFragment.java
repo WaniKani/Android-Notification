@@ -543,6 +543,8 @@ public class DashboardFragment extends Fragment implements Tab {
 		markers = new Vector<ProgressPlot.Marker> ();
 		if (guru == 0 && apprentice < total)
 			markers.add (new ProgressPlot.Marker (Integer.toString (apprentice), Color.BLACK, apprentice));
+		else if (apprentice == 0)
+			markers.add (new ProgressPlot.Marker (Integer.toString (guru), Color.BLACK, guru));		
 		else {
 			markers.add (new ProgressPlot.Marker (guru + "\u2194" + apprentice, Color.BLACK, guru));
 			if (rds.value > 0)
