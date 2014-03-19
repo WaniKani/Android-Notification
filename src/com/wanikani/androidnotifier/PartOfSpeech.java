@@ -45,7 +45,7 @@ public class PartOfSpeech {
 				sb.append (buf, 0, rd);
 			}
 			wv.jsEnd (sb);
-		} catch (IOException e) {
+		} catch (Throwable t) {
 			/* empty */
 		} finally {
 			try {
