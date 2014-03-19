@@ -69,6 +69,8 @@ public class SettingsActivity
 	private static final String KEY_PREF_ENABLED = "pref_enabled";
 	/** Persistent preferences enabled key */
 	private static final String KEY_PREF_PERSISTENT = "pref_persistent";
+	/** Persistent preferences takes to dashboard */
+	private static final String KEY_PREF_PERSISTENT_HOME = "pref_persistent_home";
 	/** Notify threshold */
 	private static final String KEY_PREF_NOT_THRESHOLD = "pref_not_threshold";
 	/** Enable lessons. Must match preferences.xml */
@@ -231,6 +233,7 @@ public class SettingsActivity
 		onSharedPreferenceChanged (prefs, KEY_PREF_EXPORT_DEST);
 		onSharedPreferenceChanged (prefs, KEY_PREF_EXPORT_FILE);
 		onSharedPreferenceChanged (prefs, KEY_PREF_EXTERNAL_FRAME_PLACER);
+		onSharedPreferenceChanged (prefs, KEY_PREF_PERSISTENT);
 		inited = true;
 		
 		prefs.registerOnSharedPreferenceChangeListener (this);
@@ -354,8 +357,8 @@ public class SettingsActivity
 	{
 		Preference pref;
 		
-		pref = findPreference (KEY_PREF_LESSONS_ENABLED);
-		pref.setEnabled (!getEnabled (prefs));
+		pref = findPreference (KEY_PREF_PERSISTENT_HOME);
+		pref.setEnabled (getPersistent (prefs));
 	}
 
 	@SuppressWarnings ("deprecation")
@@ -478,6 +481,15 @@ public class SettingsActivity
 	private static UserLogin getLogin (SharedPreferences prefs)
 	{
 		return new UserLogin (prefs.getString (KEY_PREF_USERKEY, ""));		
+	}
+
+	public static boolean getPersistentHome (Context ctxt)
+	{
+		SharedPreferences prefs;
+		
+		prefs = prefs (ctxt);
+		
+		return getPersistent (prefs) && prefs.getBoolean (KEY_PREF_PERSISTENT_HOME, false);	
 	}
 
 	public static boolean getPersistent (Context ctxt)

@@ -21,6 +21,7 @@
     <string name="tpref_review_enhancements">Userscripts and enhancements</string>
     <string name="pref_enabled">Enable notifications</string>
     <string name="pref_persistent">Persistent notifications</string>
+    <string name="pref_persistent_home">Open dashboard</string>
     <string name="pref_not_threshold">Threshold</string>
     <string name="pref_not_threshold_desc">Will notify when at least %d reviews are pending</string>
     <string name="pref_not_threshold_one_desc">Will notify when at least one review is pending</string>
@@ -134,6 +135,7 @@
     <string name="em_about">About</string>
     <string name="pref_enabled_descr">Show event icon when you have reviews</string>
     <string name="pref_persistent_descr">Make notification icon persistent, showing useful info</string>
+    <string name="pref_persistent_home_descr">Tapping on persistent notification message opens dashboard</string>
     <string name="status_msg_error">Error connecting to WaniKani</string>
     <string name="status_msg_partial">Network error. Partial results</string>
     <string name="status_msg_unauthorized">Authentication failed: check User API Key</string>

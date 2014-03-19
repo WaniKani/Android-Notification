@@ -17,6 +17,7 @@ import android.net.Uri;
 import android.os.Bundle;
 
 import com.wanikani.androidnotifier.DashboardData;
+import com.wanikani.androidnotifier.MainActivity;
 import com.wanikani.androidnotifier.MeterSpec;
 import com.wanikani.androidnotifier.SettingsActivity;
 import com.wanikani.androidnotifier.WebReviewActivity;
@@ -188,7 +189,7 @@ public class NotificationService
 	 *  that may be polling with large intervals */
 	public static final String ACTION_LESSONS_TAP = 
 			PREFIX + "LESSONS_TAP";
-
+	
 	/** Called by @link DashboardActivity when the notification icon needs to
 	 *  be hidden. It is similar to @link {@link #ACTION_TAP}, however it
 	 *  does not start the browser, because this is done at activity level  */
@@ -475,6 +476,9 @@ public class NotificationService
 	{
 		NotifierStateMachine fsm;
 		
+		if (openDashboard ())
+			return;
+		
 		openBrowser (SettingsActivity.getURL (this));
 		if (enabled) {
 			fsm = new NotifierStateMachine (this);
@@ -490,12 +494,35 @@ public class NotificationService
 	 */
 	protected void lessonsTap (Intent intent)
 	{
+		if (openDashboard ())
+			return;
+
 		openBrowser (SettingsActivity.getLessonURL (this));
 	}
 	
 	protected void nullTap (Intent intent)
 	{
+		if (openDashboard ())
+			return;
+
 		openBrowser (SettingsActivity.getChatURL (this));
+	}
+	
+	private boolean openDashboard ()
+	{
+		Intent i;
+		
+		if (SettingsActivity.getPersistentHome (this)) {
+			
+			i = new Intent (this, MainActivity.class);
+			i.setAction (Intent.ACTION_MAIN);
+			i.addFlags (Intent.FLAG_ACTIVITY_REORDER_TO_FRONT | Intent.FLAG_ACTIVITY_NEW_TASK);
+			
+			startActivity (i);
+		
+			return true;
+		} else
+			return false;
 	}
 
 	/**
