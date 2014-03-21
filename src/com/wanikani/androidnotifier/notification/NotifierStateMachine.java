@@ -100,6 +100,9 @@ public class NotifierStateMachine {
 	/** Cap polling timeout when reviews are availble (one hour) */
 	private static int T_CAP_REVIEWS = 60;
 	
+	/** Cap polling timeout when reviews are availble and this level feature is set (15 minutes) */
+	private static int T_CAP_TL_REVIEWS = 15;
+
 	/** Timeout when waiting for reviews */
 	private static int T_INT_WAITING_FOR_REVIEWS = 1; 
 	
@@ -162,7 +165,7 @@ public class NotifierStateMachine {
 		 */
 		S_NO_REVIEWS {
 			public void enter (NotifierStateMachine fsm, Event event, 
-								State prev, DashboardData ldd, DashboardData cdd) 
+								State prev, DashboardData ldd, DashboardData cdd, boolean thisLevelEnabled) 
 				{
 					fsm.ifc.hideNotification ();
 					if (cdd.nextReviewDate == null)
@@ -180,7 +183,7 @@ public class NotifierStateMachine {
 		 */
 		S_TOO_FEW_REVIEWS {
 			public void enter (NotifierStateMachine fsm, Event event, 
-							   State prev, DashboardData ldd, DashboardData cdd) 
+							   State prev, DashboardData ldd, DashboardData cdd, boolean thisLevelEnabled) 
 				{
 					fsm.ifc.hideNotification ();
 					if (prev != this)
@@ -197,7 +200,7 @@ public class NotifierStateMachine {
 		 */
 		S_REVIEWS_AVAILABLE {			
 				public void enter (NotifierStateMachine fsm, Event event, 
-									State prev, DashboardData ldd, DashboardData cdd) 
+									State prev, DashboardData ldd, DashboardData cdd, boolean thisLevelEnabled) 
 				{
 					if (event == Event.E_TAP ||
 						(prev == this && detectActivity (ldd, cdd))) {
@@ -209,7 +212,8 @@ public class NotifierStateMachine {
 					} else {
 						fsm.ifc.showNotification (cdd.reviewsAvailable);
 						fsm.schedule (NotifierStateMachine.T_INT_REVIEWS,
-									  NotifierStateMachine.T_CAP_REVIEWS);
+									  thisLevelEnabled ? NotifierStateMachine.T_CAP_TL_REVIEWS : 
+								      NotifierStateMachine.T_CAP_REVIEWS);
 					}
 				}			
 		},
@@ -220,7 +224,7 @@ public class NotifierStateMachine {
 		 */
 		S_ERROR {
 			public void enter (NotifierStateMachine fsm, Event event, 
-							   State prev, DashboardData ldd, DashboardData cdd) 
+							   State prev, DashboardData ldd, DashboardData cdd, boolean thisLevelEnabled) 
 				{
 					if (cdd.e instanceof AuthenticationException)
 						fsm.schedule (NotifierStateMachine.T_CAP_ERROR);
@@ -243,9 +247,10 @@ public class NotifierStateMachine {
 		 *	@param prev the previous state (may be self)
 		 *	@param ldd the previous study queue data (or null)
 		 *	@param cdd the current study queue data
+		 *  @param thisLevelEnabled set if "this level" feature is enabled
 		 */
 		public abstract void enter (NotifierStateMachine fsm, Event e, State prev,
-						   			DashboardData ldd, DashboardData cdd);	 
+						   			DashboardData ldd, DashboardData cdd, boolean thisLevelEnabled);	 
 
 		/**
 		 * Tells whether the user is currently reviewing.
@@ -339,15 +344,18 @@ public class NotifierStateMachine {
 	 *  @param event the kind of event
 	 *  @param threshold the number of reviews needed to show a notification 
 	 *	@param dd the study queue
+	 *  @param thisLevel set if there are kanji at this level
+	 *  @param thisLevelEnabled set if "this level enabled" feature is set
 	 */
-	public void next (Event event, int threshold, DashboardData dd)
+	public void next (Event event, int threshold, DashboardData dd, 
+					  boolean thisLevel, boolean thisLevelEnabled)
 	{
 		State cstate, llstate;
 		DashboardData lldd;
 		
 		try {
 			dd.wail ();
-			if (dd.reviewsAvailable >= threshold)
+			if (dd.reviewsAvailable >= threshold || thisLevel)
 				cstate = State.S_REVIEWS_AVAILABLE;
 			else if (dd.reviewsAvailable > 0)
 				cstate = State.S_TOO_FEW_REVIEWS;
@@ -366,7 +374,7 @@ public class NotifierStateMachine {
 		lstate = cstate;
 		ldd = dd;
 		
-		cstate.enter (this, event, llstate, lldd, dd);
+		cstate.enter (this, event, llstate, lldd, dd, thisLevelEnabled);
 	}
 	
  	/**

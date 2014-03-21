@@ -25,6 +25,9 @@ import com.wanikani.androidnotifier.db.HistoryDatabase;
 import com.wanikani.androidnotifier.notification.NotificationInterface.ChangeType;
 import com.wanikani.androidnotifier.notification.NotifierStateMachine.Event;
 import com.wanikani.wklib.Connection;
+import com.wanikani.wklib.ItemLibrary;
+import com.wanikani.wklib.Kanji;
+import com.wanikani.wklib.Radical;
 import com.wanikani.wklib.SRSDistribution;
 import com.wanikani.wklib.StudyQueue;
 import com.wanikani.wklib.UserInformation;
@@ -66,6 +69,8 @@ public class NotificationService
 		
 		public boolean hasLessons;
 		
+		public boolean thisLevel;
+		
 		public int reviews;
 		
 		public int lessons;
@@ -76,10 +81,13 @@ public class NotificationService
 		
 		private static final String PREF_LESSONS = PREFIX + "sd.lessons";
 
+		private static final String PREF_THIS_LEVEL = PREFIX + "sd.thisLevel";
+
 		private StateData (SharedPreferences prefs)
 		{
 			reviews = prefs.getInt (PREF_REVIEWS, 0);
 			lessons = prefs.getInt (PREF_LESSONS, 0);
+			thisLevel = prefs.getBoolean (PREF_THIS_LEVEL, false);
 			hasReviews = reviews > 0;
 			hasLessons = lessons > 0;
 		}
@@ -88,7 +96,8 @@ public class NotificationService
 		{
 			prefs.edit ().
 				putInt (PREF_REVIEWS, hasReviews ? reviews : 0).
-				putInt (PREF_LESSONS, hasLessons ? lessons : 0).commit ();
+				putInt (PREF_LESSONS, hasLessons ? lessons : 0).
+				putBoolean (PREF_THIS_LEVEL, thisLevel).commit ();
 		}
 	}
 	
@@ -538,9 +547,15 @@ public class NotificationService
 		fsm = new NotifierStateMachine (this);
 		if (intent.hasExtra (KEY_DD)) {
 			sd.dd = new DashboardData (intent.getBundleExtra (KEY_DD));
+			if (sd.dd.od.elp != null)
+				sd.thisLevel = 
+					(sd.dd.od.elp.currentLevelKanjiAvailable + 
+					 sd.dd.od.elp.currentLevelRadicalsAvailable) > 0 &&
+					SettingsActivity.getThisLevel (this);
 			nifc.update (sd, ChangeType.DATA);
 			fsm.next (NotifierStateMachine.Event.E_UNSOLICITED, 
-					  SettingsActivity.getReviewThreshold (this), sd.dd);
+					  SettingsActivity.getReviewThreshold (this), sd.dd, sd.thisLevel,
+					  SettingsActivity.getThisLevel (this));
 		} else
 			feed (fsm, NotifierStateMachine.Event.E_UNSOLICITED);
 	}
@@ -597,7 +612,8 @@ public class NotificationService
 			ui = conn.getUserInformation (meter);
 			sd.dd = new DashboardData (ui, sq);
 			sd.lessons = sd.dd.lessonsAvailable;
-			sd.hasLessons = sd.lessons > 0 && SettingsActivity.getLessonsEnabled (this); 
+			sd.hasLessons = sd.lessons > 0 && SettingsActivity.getLessonsEnabled (this);
+			checkThisLevel (conn, sd, meter);
 			nifc.update (sd, ChangeType.LESSONS);
 			sd.dd.serialize (this, DashboardData.Source.NOTIFICATION_SERVICE);
 			
@@ -609,8 +625,43 @@ public class NotificationService
 			dd = new DashboardData (e);
 		}
 		
-		fsm.next (event, SettingsActivity.getReviewThreshold (this), dd);
+		fsm.next (event, SettingsActivity.getReviewThreshold (this), dd,
+				  sd.thisLevel, SettingsActivity.getThisLevel (this));
 	}	
+	
+	public void checkThisLevel (Connection conn, StateData sd, Connection.Meter meter)
+	{
+		ItemLibrary<Radical> rlib;
+		ItemLibrary<Kanji> klib;
+		Date now;
+		
+		now = new Date ();
+		sd.thisLevel = false;
+		
+		try {
+			if (sd.dd == null || sd.dd.reviewsAvailable == 0 || !SettingsActivity.getThisLevel (this))
+				return;
+
+			klib = conn.getKanji (meter, sd.dd.level);
+			for (Kanji k : klib.list) {
+				if (k.stats != null && k.stats.availableDate.before (now)) {
+					sd.thisLevel = true;
+					return;
+				}
+			}
+
+			rlib = conn.getRadicals (meter, sd.dd.level);			
+			for (Radical r : rlib.list) {
+				if (r.stats != null && r.stats.availableDate.before (now)) {
+					sd.thisLevel = true;
+					return;
+				}
+			}
+			
+		} catch (IOException e) {
+			/* empty */
+		}
+	}
 	
 	/**
 	 * Shows the notification icon.

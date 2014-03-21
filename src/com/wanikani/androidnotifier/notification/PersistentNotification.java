@@ -23,7 +23,7 @@ class PersistentNotification implements NotificationInterface {
 		NOTHING {
 			
 			@Override
-			public int getIcon ()
+			public int getIcon (StateData sd)
 			{
 				return R.drawable.not_dash;
 			}
@@ -50,7 +50,7 @@ class PersistentNotification implements NotificationInterface {
 		LESSONS {
 			
 			@Override
-			public int getIcon ()
+			public int getIcon (StateData sd)
 			{
 				return R.drawable.not_lessons;
 			}
@@ -77,9 +77,9 @@ class PersistentNotification implements NotificationInterface {
 		REVIEWS {
 			
 			@Override
-			public int getIcon ()
+			public int getIcon (StateData sd)
 			{
-				return R.drawable.not_icon;
+				return sd.thisLevel ? R.drawable.not_g_icon : R.drawable.not_icon;
 			}
 			
 			@Override
@@ -108,7 +108,7 @@ class PersistentNotification implements NotificationInterface {
 		
 		private static DateFormat ddf = new SimpleDateFormat ("EEE, HH:mm");
 		
-		public abstract int getIcon ();
+		public abstract int getIcon (StateData sd);
 		
 		public abstract String getIntent ();
 		
@@ -244,7 +244,7 @@ class PersistentNotification implements NotificationInterface {
 			pint = null;
 
 		builder = new NotificationCompat.Builder (ctxt);
-		builder.setSmallIcon (state.getIcon ());
+		builder.setSmallIcon (state.getIcon (sd));
 				
 		builder.setContentTitle (state.getText (ctxt, sd));
 								 

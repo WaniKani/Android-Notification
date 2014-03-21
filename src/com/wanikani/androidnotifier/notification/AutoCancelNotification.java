@@ -54,7 +54,7 @@ class AutoCancelNotification implements NotificationInterface {
 			
 		case REVIEWS:
 			if (sd.hasReviews)
-				showReviews (sd.reviews);
+				showReviews (sd.reviews, sd.thisLevel);
 			else
 				hideReviews ();
 			break;
@@ -110,7 +110,7 @@ class AutoCancelNotification implements NotificationInterface {
 		nmanager.cancel (NOT_LESSONS_ID);		
 	}
 	
-	public void showReviews (int reviews)
+	public void showReviews (int reviews, boolean thisLevel)
 	{
 		NotificationManager nmanager;
 		NotificationCompat.Builder builder;
@@ -128,7 +128,7 @@ class AutoCancelNotification implements NotificationInterface {
 		pint = PendingIntent.getService (ctxt, 0, intent, 0);
 
 		builder = new NotificationCompat.Builder (ctxt);
-		builder.setSmallIcon (R.drawable.not_icon);
+		builder.setSmallIcon (thisLevel ? R.drawable.not_g_icon : R.drawable.not_icon);
 		
 		if (SettingsActivity.get42plus (ctxt) && reviews > DashboardFragment.LESSONS_42P)
 			text = ctxt.getString (R.string.new_reviews_42plus, DashboardFragment.LESSONS_42P);

@@ -20,6 +20,7 @@
     <string name="tpref_export">Export</string>
     <string name="tpref_review_enhancements">Userscripts and enhancements</string>
     <string name="pref_enabled">Enable notifications</string>
+    <string name="pref_this_level">Current level items icon</string>
     <string name="pref_persistent">Persistent notifications</string>
     <string name="pref_persistent_home">Open dashboard</string>
     <string name="pref_not_threshold">Threshold</string>
@@ -134,6 +135,8 @@
     <string name="em_custom_fonts">Choose JP font</string>
     <string name="em_about">About</string>
     <string name="pref_enabled_descr">Show event icon when you have reviews</string>
+    <string name="pref_this_level_descr">Show a different notification icon when this level\'s 
+        	kanji/radicals are available. Consumes more battery</string>
     <string name="pref_persistent_descr">Make notification icon persistent, showing useful info</string>
     <string name="pref_persistent_home_descr">Tapping on persistent notification message opens dashboard</string>
     <string name="status_msg_error">Error connecting to WaniKani</string>

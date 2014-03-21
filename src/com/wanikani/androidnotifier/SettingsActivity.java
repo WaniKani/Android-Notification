@@ -68,6 +68,8 @@ public class SettingsActivity
 	/** Preferences enabled key. Must match preferences.xml */
 	private static final String KEY_PREF_ENABLED = "pref_enabled";
 	/** Persistent preferences enabled key */
+	private static final String KEY_PREF_THIS_LEVEL = "pref_this_level";
+	/** Persistent preferences enabled key */
 	private static final String KEY_PREF_PERSISTENT = "pref_persistent";
 	/** Persistent preferences takes to dashboard */
 	private static final String KEY_PREF_PERSISTENT_HOME = "pref_persistent_home";
@@ -164,6 +166,9 @@ public class SettingsActivity
 	/** The current persistent nofications settings. Used to check whether it is toggled */ 
 	private boolean persistent;
 
+	/** The current "this level" notification settings. Used to check whether it is toggled */ 
+	private boolean thisLevel;
+
 	/** The current lessons notification settings. Used to check whether it is toggled */ 
 	private boolean lessonsEnabled;
 	
@@ -220,6 +225,7 @@ public class SettingsActivity
 		login = getLogin (prefs);
 		enabled = getEnabled (prefs);
 		persistent = getPersistent (prefs);
+		thisLevel = getThisLevel (prefs);
 		lessonsEnabled = getLessonsEnabled (prefs);
 		tls = getTLS (prefs);
 		threshold = getReviewThreshold (prefs);
@@ -350,6 +356,9 @@ public class SettingsActivity
 		
 		pref = findPreference (KEY_PREF_PERSISTENT);
 		pref.setEnabled (getEnabled (prefs));
+		
+		pref = findPreference (KEY_PREF_THIS_LEVEL);
+		pref.setEnabled (getEnabled (prefs));		
 	}
 	
 	@SuppressWarnings ("deprecation")
@@ -495,6 +504,16 @@ public class SettingsActivity
 	public static boolean getPersistent (Context ctxt)
 	{
 		return getPersistent (prefs (ctxt));
+	}
+
+	public static boolean getThisLevel (Context ctxt)
+	{
+		return getThisLevel (prefs (ctxt));
+	}
+
+	private static boolean getThisLevel (SharedPreferences prefs)
+	{
+		return prefs.getBoolean (KEY_PREF_THIS_LEVEL, false);	
 	}
 
 	private static boolean getPersistent (SharedPreferences prefs)
@@ -854,7 +873,7 @@ public class SettingsActivity
 	{
 		LocalBroadcastManager lbm;
 		UserLogin llogin;
-		boolean lenabled, lpersistent, lLessonsEnabled, ltls;
+		boolean lenabled, lpersistent, lLessonsEnabled, lthisLevel, ltls;
 		int lthreshold;
 		Intent i;
 				
@@ -865,6 +884,9 @@ public class SettingsActivity
 		lpersistent = getPersistent (prefs);
 		lpersistent &= findPreference (KEY_PREF_PERSISTENT).isEnabled ();
 		
+		lthisLevel = getThisLevel (prefs);
+		lthisLevel &= findPreference (KEY_PREF_THIS_LEVEL).isEnabled ();
+
 		lLessonsEnabled = getLessonsEnabled (prefs);
 		lLessonsEnabled &= findPreference (KEY_PREF_LESSONS_ENABLED).isEnabled ();
 		
@@ -885,7 +907,8 @@ public class SettingsActivity
 				   lpersistent != persistent ||
 				   lLessonsEnabled != lessonsEnabled ||
 				   lthreshold != threshold ||
-				   ltls != tls) {
+				   ltls != tls ||
+				   lthisLevel != thisLevel) {
 			i = new Intent (ACT_NOTIFY);
 			i.putExtra (E_ENABLED, lenabled);
 			persistent = lpersistent;
@@ -893,6 +916,7 @@ public class SettingsActivity
 			lessonsEnabled = lLessonsEnabled;
 			threshold = lthreshold;
 			tls = ltls;
+			thisLevel = lthisLevel;
 			lbm.sendBroadcast (i);
 		} 
 

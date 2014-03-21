@@ -9,6 +9,10 @@
         		android:title="@string/pref_enabled" 
         		android:defaultValue="true" android:summary="@string/pref_enabled_descr"/>
     	<CheckBoxPreference 
+        		android:key="pref_this_level" 
+        		android:title="@string/pref_this_level" 
+        		android:defaultValue="false" android:summary="@string/pref_this_level"/>
+    	<CheckBoxPreference 
         		android:key="pref_persistent" 
         		android:title="@string/pref_persistent" 
         		android:defaultValue="false" android:summary="@string/pref_persistent_descr"/>
