@@ -653,7 +653,9 @@ public class DashboardData {
 				storage.putInt(KEY_RADICALS_TOTAL, od.elp.radicalsTotal);
 				storage.putInt(KEY_KANJI_PROGRESS, od.elp.kanjiProgress);
 				storage.putInt (KEY_KANJI_UNLOCKED, od.elp.kanjiUnlocked);
-				storage.putInt(KEY_KANJI_TOTAL, od.elp.kanjiTotal);
+				storage.putInt (KEY_KANJI_TOTAL, od.elp.kanjiTotal);
+				storage.putInt (KEY_CURRENT_LEVEL_RADICALS, od.elp.currentLevelRadicalsAvailable);
+				storage.putInt (KEY_CURRENT_LEVEL_KANJI, od.elp.currentLevelKanjiAvailable);
 			
 			} else
 				storage.removeKey (KEY_RADICALS_PROGRESS);
@@ -746,6 +748,8 @@ public class DashboardData {
 			od.elp.kanjiProgress = storage.getInt (KEY_KANJI_PROGRESS);
 			od.elp.kanjiUnlocked = storage.getInt (KEY_KANJI_UNLOCKED);
 			od.elp.kanjiTotal = storage.getInt (KEY_KANJI_TOTAL);
+			od.elp.currentLevelRadicalsAvailable = storage.getInt (KEY_CURRENT_LEVEL_RADICALS);
+			od.elp.currentLevelKanjiAvailable = storage.getInt (KEY_CURRENT_LEVEL_KANJI);
 		} else {
 			/* RETRIEVING is correct, because this is what DashboardActivity
 			 * will do right after calling this method */
