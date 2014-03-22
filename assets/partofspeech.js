@@ -197,22 +197,29 @@ $(function() {
                 $('div#item-info').prepend(section.append('<br />'));
             }
         });
+
+        // Had to add this explicit call because otherwise we skip the first item -- Alberto
+        var item = $.jStorage.get('currentItem');
+        var section = item != null ? GetPartOfSpeechData(item.voc, DATA) : null;
+        if (section && $('#answer-form input').attr('lang') != 'ja') {
+             $('div#item-info').prepend(section.append('<br />'));
+        }
     }
 
     // Process the lesson page.
     else if (url.indexOf('lesson/session') != -1) {
         $.jStorage.listenKeyChange('l/currentLesson', function(key) {
             var section = GetPartOfSpeechData($.jStorage.get(key).voc, DATA);
-            if (section && $('div#supplement-voc-meaning') == null) {
+            if (section) {
                 $('div#supplement-voc-meaning').append(section.prepend('<br />'));
             }
         });
         
         // Had to add this explicit call because otherwise we skip the first item -- Alberto
-            var item = $.jStorage.get('l/currentLesson');
-            var section = item != null ? GetPartOfSpeechData(item.voc, DATA) : null;
-            if (section) {
-                $('div#supplement-voc-meaning').append(section.prepend('<br />'));
-            }
+        var item = $.jStorage.get('l/currentLesson');
+        var section = item != null ? GetPartOfSpeechData(item.voc, DATA) : null;
+        if (section) {
+            $('div#supplement-voc-meaning').append(section.prepend('<br />'));
+        }
     }
 });
