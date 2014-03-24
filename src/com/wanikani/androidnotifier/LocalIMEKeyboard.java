@@ -1115,13 +1115,13 @@ public class LocalIMEKeyboard implements Keyboard {
 		params.addRule (RelativeLayout.CENTER_HORIZONTAL);
 		
 		if (!name.endsWith (".png")) {
-			adjustWidth (qvw, params, name);
 			qvw.setTextSize (size);
 			//qvw.setBackgroundColor (cmap.get (type));
 			qvw.setTextColor (Color.WHITE);
 			qvw.setText (name);
 			jtf = fbox != null ? fbox.nextFont () : null;
 			qvw.setTypeface (jtf);			
+			adjustWidth (qvw, params, name);
 			showQuestionPatch (jtf != null);
 		} else
 			showQuestionPatch (false);
