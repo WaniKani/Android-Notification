@@ -2,6 +2,7 @@ package com.wanikani.androidnotifier;
 
 import java.io.File;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -370,10 +371,13 @@ public class WebReviewActivity extends Activity {
 		/**
 		 * Toggle override fonts
 		 */
+		@SuppressLint("NewApi")
 		@Override
 		public void fonts ()
 		{
 			keyboard.overrideFonts ();
+			if (android.os.Build.VERSION.SDK_INT >= 11)
+				invalidateOptionsMenu ();
 		}
 		
 		/**
@@ -902,9 +906,6 @@ public class WebReviewActivity extends Activity {
 		return true;
 	}
 
-	/**
-	 * Need to hide/show the ignore button
-	 */
 	@Override
 	public boolean onPrepareOptionsMenu (Menu menu) 
 	{
@@ -913,8 +914,11 @@ public class WebReviewActivity extends Activity {
 		
 		for (i = 0; i < menu.size (); i++) {
 			mi = menu.getItem (i);
-			if (mi.getItemId () == R.id.em_fonts)
+			if (mi.getItemId () == R.id.em_fonts) {
 				mi.setVisible (keyboard.canOverrideFonts ());
+				mi.setIcon (keyboard.getOverrideFonts () ? 
+							R.drawable.ic_menu_font_enabled : R.drawable.ic_menu_font);
+			}
 		}
 		
 		return true;

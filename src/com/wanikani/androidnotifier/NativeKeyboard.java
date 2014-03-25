@@ -109,5 +109,12 @@ public class NativeKeyboard implements Keyboard {
 	public void overrideFonts ()
 	{
 		/* empty */
-	}	
+	}
+
+	@Override
+	public boolean getOverrideFonts ()
+	{
+		return false;
+	}
+
 }

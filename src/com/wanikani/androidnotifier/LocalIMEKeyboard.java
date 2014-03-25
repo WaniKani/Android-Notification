@@ -1104,7 +1104,7 @@ public class LocalIMEKeyboard implements Keyboard {
 		RelativeLayout.LayoutParams params;
 		Typeface jtf;
 
-		if (!overrideFont ())
+		if (!getOverrideFonts ())
 			return;
 		
 		params = (RelativeLayout.LayoutParams) qvw.getLayoutParams ();
@@ -1269,7 +1269,8 @@ public class LocalIMEKeyboard implements Keyboard {
 		return "if (!" + JS_REVIEWS_P + ") {" + js + "}";
 	}
 
-	protected boolean overrideFont ()
+	@Override
+	public boolean getOverrideFonts ()
 	{
 		SharedPreferences prefs;
 

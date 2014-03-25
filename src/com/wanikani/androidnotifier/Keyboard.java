@@ -72,4 +72,10 @@ public interface Keyboard {
 	 * Toggle font overriding
 	 */
 	public void overrideFonts ();
+	
+	/**
+	 * Get fond overriding state
+	 * @return true if fonts are overridden
+	 */
+	public boolean getOverrideFonts ();
 }
