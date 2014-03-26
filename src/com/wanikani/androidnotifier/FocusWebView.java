@@ -41,6 +41,22 @@ public class FocusWebView extends WebView {
 		
 	}
 	
+	private class JSExecutor  implements Runnable {
+		
+		String js;
+		
+		public JSExecutor (String js)
+		{
+			this.js = js;
+		}
+		
+		public void run ()
+		{
+			loadUrl (js);
+		}
+		
+	}
+	
 	/// The input manager
 	private InputMethodManager imm;
 	
@@ -201,8 +217,9 @@ public class FocusWebView extends WebView {
 	public void jsEnd (StringBuffer sb)
 	{
 		sb.append ("})()");
-		
-		loadUrl (sb.toString ());
+
+		if (getContext () instanceof Activity)		
+			((Activity) getContext ()).runOnUiThread (new JSExecutor (sb.toString ()));
 	}
 	
 }
