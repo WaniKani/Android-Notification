@@ -35,11 +35,14 @@ public class ExtendedLevelProgression {
 	public int kanjiTotal;
 	
 	public int currentLevelKanjiAvailable;
+	
+	public Date currentLevelAvailable;
 
 	ExtendedLevelProgression (ItemLibrary<Radical> rlib, ItemLibrary<Kanji> klib)
 	{
 		Date now;
 		
+		currentLevelAvailable = null;
 		now = new Date ();
 		for (Radical r : rlib.list) {
 			radicalsTotal++;
@@ -49,6 +52,9 @@ public class ExtendedLevelProgression {
 					radicalsProgress++;
 				if (r.stats.availableDate.before (now))
 					currentLevelRadicalsAvailable++;
+				if (currentLevelAvailable == null ||
+					r.stats.availableDate.before (currentLevelAvailable))
+					currentLevelAvailable = r.stats.availableDate;
 			}
 		}
 			
@@ -60,6 +66,9 @@ public class ExtendedLevelProgression {
 					kanjiProgress++;
 				if (k.stats.availableDate.before (now))
 					currentLevelKanjiAvailable++;
+				if (currentLevelAvailable == null ||
+					k.stats.availableDate.before (currentLevelAvailable))
+					currentLevelAvailable = k.stats.availableDate;
 			}
 		}
 	}

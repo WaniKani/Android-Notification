@@ -8,6 +8,7 @@ import android.os.Bundle;
 import com.wanikani.androidnotifier.DashboardData;
 import com.wanikani.androidnotifier.MeterSpec;
 import com.wanikani.wklib.AuthenticationException;
+import com.wanikani.wklib.ExtendedLevelProgression;
 
 /* 
  *  Copyright (c) 2013 Alberto Cuda
@@ -100,9 +101,6 @@ public class NotifierStateMachine {
 	/** Cap polling timeout when reviews are availble (one hour) */
 	private static int T_CAP_REVIEWS = 60;
 	
-	/** Cap polling timeout when reviews are availble and this level feature is set (15 minutes) */
-	private static int T_CAP_TL_REVIEWS = 15;
-
 	/** Timeout when waiting for reviews */
 	private static int T_INT_WAITING_FOR_REVIEWS = 1; 
 	
@@ -165,7 +163,8 @@ public class NotifierStateMachine {
 		 */
 		S_NO_REVIEWS {
 			public void enter (NotifierStateMachine fsm, Event event, 
-								State prev, DashboardData ldd, DashboardData cdd, boolean thisLevelEnabled) 
+								State prev, DashboardData ldd, DashboardData cdd, 
+								NotificationService.StateData sd) 
 				{
 					fsm.ifc.hideNotification ();
 					if (cdd.nextReviewDate == null)
@@ -183,7 +182,8 @@ public class NotifierStateMachine {
 		 */
 		S_TOO_FEW_REVIEWS {
 			public void enter (NotifierStateMachine fsm, Event event, 
-							   State prev, DashboardData ldd, DashboardData cdd, boolean thisLevelEnabled) 
+							   State prev, DashboardData ldd, DashboardData cdd, 
+							   NotificationService.StateData sd) 
 				{
 					fsm.ifc.hideNotification ();
 					if (prev != this)
@@ -200,7 +200,8 @@ public class NotifierStateMachine {
 		 */
 		S_REVIEWS_AVAILABLE {			
 				public void enter (NotifierStateMachine fsm, Event event, 
-									State prev, DashboardData ldd, DashboardData cdd, boolean thisLevelEnabled) 
+									State prev, DashboardData ldd, DashboardData cdd, 
+									NotificationService.StateData sd) 
 				{
 					if (event == Event.E_TAP ||
 						(prev == this && detectActivity (ldd, cdd))) {
@@ -208,12 +209,11 @@ public class NotifierStateMachine {
 						fsm.schedule (NotifierStateMachine.T_INT_REVIEWING);
 					} else if (prev != this) {
 						fsm.ifc.showNotification (cdd.reviewsAvailable);
-						fsm.schedule (NotifierStateMachine.T_INT_REVIEWS);
+						fsm.schedule (sd.cap (NotifierStateMachine.T_INT_REVIEWS));
 					} else {
 						fsm.ifc.showNotification (cdd.reviewsAvailable);
 						fsm.schedule (NotifierStateMachine.T_INT_REVIEWS,
-									  thisLevelEnabled ? NotifierStateMachine.T_CAP_TL_REVIEWS : 
-								      NotifierStateMachine.T_CAP_REVIEWS);
+									  sd.cap (NotifierStateMachine.T_CAP_REVIEWS));
 					}
 				}			
 		},
@@ -224,7 +224,8 @@ public class NotifierStateMachine {
 		 */
 		S_ERROR {
 			public void enter (NotifierStateMachine fsm, Event event, 
-							   State prev, DashboardData ldd, DashboardData cdd, boolean thisLevelEnabled) 
+							   State prev, DashboardData ldd, DashboardData cdd, 
+							   NotificationService.StateData sd) 
 				{
 					if (cdd.e instanceof AuthenticationException)
 						fsm.schedule (NotifierStateMachine.T_CAP_ERROR);
@@ -247,10 +248,11 @@ public class NotifierStateMachine {
 		 *	@param prev the previous state (may be self)
 		 *	@param ldd the previous study queue data (or null)
 		 *	@param cdd the current study queue data
-		 *  @param thisLevelEnabled set if "this level" feature is enabled
+		 *  @param sd the state data
 		 */
 		public abstract void enter (NotifierStateMachine fsm, Event e, State prev,
-						   			DashboardData ldd, DashboardData cdd, boolean thisLevelEnabled);	 
+						   			DashboardData ldd, DashboardData cdd, 
+						   			NotificationService.StateData sd);	 
 
 		/**
 		 * Tells whether the user is currently reviewing.
@@ -342,20 +344,19 @@ public class NotifierStateMachine {
 	 * Called when a timeout (or network connectivity change) event
 	 * is triggered <i>and</i> study queue data is available
 	 *  @param event the kind of event
-	 *  @param threshold the number of reviews needed to show a notification 
-	 *	@param dd the study queue
-	 *  @param thisLevel set if there are kanji at this level
-	 *  @param thisLevelEnabled set if "this level enabled" feature is set
+	 *  @param threshold the number of reviews needed to show a notification
+	 *  @param dd the study queue data 
+	 *	@param sd the state data
 	 */
-	public void next (Event event, int threshold, DashboardData dd, 
-					  boolean thisLevel, boolean thisLevelEnabled)
+	public void next (Event event, int threshold, 
+					  DashboardData dd, NotificationService.StateData sd)
 	{
 		State cstate, llstate;
 		DashboardData lldd;
 		
 		try {
 			dd.wail ();
-			if (dd.reviewsAvailable >= threshold || thisLevel)
+			if (dd.reviewsAvailable >= threshold || sd.thisLevel)
 				cstate = State.S_REVIEWS_AVAILABLE;
 			else if (dd.reviewsAvailable > 0)
 				cstate = State.S_TOO_FEW_REVIEWS;
@@ -374,7 +375,7 @@ public class NotifierStateMachine {
 		lstate = cstate;
 		ldd = dd;
 		
-		cstate.enter (this, event, llstate, lldd, dd, thisLevelEnabled);
+		cstate.enter (this, event, llstate, lldd, dd, sd);
 	}
 	
  	/**

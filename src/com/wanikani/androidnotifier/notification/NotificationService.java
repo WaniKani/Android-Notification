@@ -17,6 +17,7 @@ import android.net.Uri;
 import android.os.Bundle;
 
 import com.wanikani.androidnotifier.DashboardData;
+import com.wanikani.androidnotifier.DashboardData.OptionalDataStatus;
 import com.wanikani.androidnotifier.MainActivity;
 import com.wanikani.androidnotifier.MeterSpec;
 import com.wanikani.androidnotifier.SettingsActivity;
@@ -25,6 +26,7 @@ import com.wanikani.androidnotifier.db.HistoryDatabase;
 import com.wanikani.androidnotifier.notification.NotificationInterface.ChangeType;
 import com.wanikani.androidnotifier.notification.NotifierStateMachine.Event;
 import com.wanikani.wklib.Connection;
+import com.wanikani.wklib.ExtendedLevelProgression;
 import com.wanikani.wklib.ItemLibrary;
 import com.wanikani.wklib.Kanji;
 import com.wanikani.wklib.Radical;
@@ -63,7 +65,7 @@ import com.wanikani.wklib.UserInformation;
 public class NotificationService 
 	extends IntentService implements NotifierStateMachine.Interface {
 	
-	public static class StateData {
+	public class StateData {
 		
 		public boolean hasReviews;
 		
@@ -76,6 +78,8 @@ public class NotificationService
 		public int lessons;
 		
 		public DashboardData dd;
+		
+		public ExtendedLevelProgression elp;
 		
 		private static final String PREF_REVIEWS = PREFIX + "sd.reviews";
 		
@@ -98,6 +102,37 @@ public class NotificationService
 				putInt (PREF_REVIEWS, hasReviews ? reviews : 0).
 				putInt (PREF_LESSONS, hasLessons ? lessons : 0).
 				putBoolean (PREF_THIS_LEVEL, thisLevel).commit ();
+		}
+		
+		private void setExtendedLevelProgression (ExtendedLevelProgression elp)
+		{
+			this.elp = elp;
+
+			thisLevel =
+					elp != null && 
+					// reviewsAvailable = 0 && currentLevelXXX > 0 is possible
+					// if the local clock is noy in sync with WK 
+					dd.reviewsAvailable > 0 && 
+					(elp.currentLevelKanjiAvailable + 
+					 elp.currentLevelRadicalsAvailable) > 0 &&
+					SettingsActivity.getThisLevel (NotificationService.this);			
+		}
+		
+		public int cap (int timeout)
+		{
+			int ans;
+			
+			if (elp == null || elp.currentLevelAvailable == null || 
+				!SettingsActivity.getThisLevel (NotificationService.this))
+				return timeout;
+			
+			ans = (int) ((elp.currentLevelAvailable.getTime () - System.currentTimeMillis ()) / 1000 / 60);
+			if (ans < 0)
+				ans = timeout;
+
+			ans = Math.min (ans, 4 * 60);	/* In case of new lessons  -> first SRS time out */
+			
+			return Math.min (ans, timeout);
 		}
 	}
 	
@@ -547,15 +582,12 @@ public class NotificationService
 		fsm = new NotifierStateMachine (this);
 		if (intent.hasExtra (KEY_DD)) {
 			sd.dd = new DashboardData (intent.getBundleExtra (KEY_DD));
-			if (sd.dd.od.elp != null)
-				sd.thisLevel = 
-					(sd.dd.od.elp.currentLevelKanjiAvailable + 
-					 sd.dd.od.elp.currentLevelRadicalsAvailable) > 0 &&
-					SettingsActivity.getThisLevel (this);
+			if (sd.dd.od.elp != null && sd.dd.od.lpStatus == OptionalDataStatus.RETRIEVED)
+				sd.setExtendedLevelProgression (sd.dd.od.elp);
 			nifc.update (sd, ChangeType.DATA);
 			fsm.next (NotifierStateMachine.Event.E_UNSOLICITED, 
-					  SettingsActivity.getReviewThreshold (this), sd.dd, sd.thisLevel,
-					  SettingsActivity.getThisLevel (this));
+					  SettingsActivity.getReviewThreshold (this), 
+					  sd.dd, sd);
 		} else
 			feed (fsm, NotifierStateMachine.Event.E_UNSOLICITED);
 	}
@@ -613,7 +645,11 @@ public class NotificationService
 			sd.dd = new DashboardData (ui, sq);
 			sd.lessons = sd.dd.lessonsAvailable;
 			sd.hasLessons = sd.lessons > 0 && SettingsActivity.getLessonsEnabled (this);
-			checkThisLevel (conn, sd, meter);
+			try {
+				sd.setExtendedLevelProgression (conn.getExtendedLevelProgression (meter));
+			} catch (IOException e) {
+				sd.setExtendedLevelProgression (null);
+			}
 			nifc.update (sd, ChangeType.LESSONS);
 			sd.dd.serialize (this, DashboardData.Source.NOTIFICATION_SERVICE);
 			
@@ -625,44 +661,9 @@ public class NotificationService
 			dd = new DashboardData (e);
 		}
 		
-		fsm.next (event, SettingsActivity.getReviewThreshold (this), dd,
-				  sd.thisLevel, SettingsActivity.getThisLevel (this));
+		fsm.next (event, SettingsActivity.getReviewThreshold (this), dd, sd);
 	}	
-	
-	public void checkThisLevel (Connection conn, StateData sd, Connection.Meter meter)
-	{
-		ItemLibrary<Radical> rlib;
-		ItemLibrary<Kanji> klib;
-		Date now;
 		
-		now = new Date ();
-		sd.thisLevel = false;
-		
-		try {
-			if (sd.dd == null || sd.dd.reviewsAvailable == 0 || !SettingsActivity.getThisLevel (this))
-				return;
-
-			klib = conn.getKanji (meter, sd.dd.level);
-			for (Kanji k : klib.list) {
-				if (k.stats != null && k.stats.availableDate.before (now)) {
-					sd.thisLevel = true;
-					return;
-				}
-			}
-
-			rlib = conn.getRadicals (meter, sd.dd.level);			
-			for (Radical r : rlib.list) {
-				if (r.stats != null && r.stats.availableDate.before (now)) {
-					sd.thisLevel = true;
-					return;
-				}
-			}
-			
-		} catch (IOException e) {
-			/* empty */
-		}
-	}
-	
 	/**
 	 * Shows the notification icon.
 	 *	@param reviews the number of pending reviews
