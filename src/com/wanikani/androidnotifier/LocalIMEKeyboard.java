@@ -81,6 +81,9 @@ public class LocalIMEKeyboard implements Keyboard {
 		{
 			Handler handler;
 			
+			if (!bpos.visible)
+				return;
+			
 			scroll (dx, dy);
 			handler = new Handler ();
 			handler.postDelayed (new UpdatePositionTask (), 707);
