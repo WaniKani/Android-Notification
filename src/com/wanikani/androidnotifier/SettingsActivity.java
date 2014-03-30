@@ -71,6 +71,8 @@ public class SettingsActivity
 	private static final String KEY_PREF_THIS_LEVEL = "pref_this_level";
 	/** Persistent preferences enabled key */
 	private static final String KEY_PREF_PERSISTENT = "pref_persistent";
+	/** Persistent preferences enabled key */
+	private static final String KEY_PREF_PORTRAIT = "pref_portrait";
 	/** Persistent preferences takes to dashboard */
 	private static final String KEY_PREF_PERSISTENT_HOME = "pref_persistent_home";
 	/** Notify threshold */
@@ -384,6 +386,9 @@ public class SettingsActivity
 		pref = findPreference (KEY_PREF_SINGLE_BUTTON);
 		pref.setEnabled (getUseIntegratedBrowser (prefs));
 
+		pref = findPreference (KEY_PREF_PORTRAIT);
+		pref.setEnabled (getUseIntegratedBrowser (prefs));
+
 		pref = findPreference (KEY_PREF_SRS_INDICATION);
 		pref.setEnabled (getUseIntegratedBrowser (prefs));
 
@@ -661,6 +666,11 @@ public class SettingsActivity
 	public static boolean getShowSingle (Context ctxt)
 	{
 		return prefs (ctxt).getBoolean (KEY_PREF_SINGLE_BUTTON, true);
+	}
+
+	public static boolean getPortrait (Context ctxt)
+	{
+		return prefs (ctxt).getBoolean (KEY_PREF_PORTRAIT, false);
 	}
 
 	public static boolean get42plus (Context ctxt)

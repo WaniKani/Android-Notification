@@ -6,6 +6,7 @@ import java.util.Map;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.pm.ActivityInfo;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -14,9 +15,7 @@ import android.graphics.Typeface;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.text.Editable;
-import android.text.InputFilter;
 import android.text.InputType;
-import android.text.Spanned;
 import android.text.TextWatcher;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
@@ -888,6 +887,9 @@ public class LocalIMEKeyboard implements Keyboard {
     /// Use hw keyboard
     boolean hwkeyb;
     
+    /// Default orientation
+    int orientation;
+    
     /**
      * Constructor
      * @param wav parent activity
@@ -990,6 +992,10 @@ public class LocalIMEKeyboard implements Keyboard {
 		lastSequence = -1;
 		wv.js (JS_INIT_TRIGGERS);
 
+		orientation = wav.getRequestedOrientation ();
+		if (SettingsActivity.getPortrait (wav))
+			wav.setRequestedOrientation (ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+
 		if (SettingsActivity.getReviewOrder (wav))
 			wv.js (ifReviews (ReviewOrder.JS_CODE));
 		if (SettingsActivity.getLessonOrder (wav))
@@ -1027,6 +1033,8 @@ public class LocalIMEKeyboard implements Keyboard {
 		wv.js (JS_STOP_TRIGGERS);
 		if (isWKIEnabled)
 			wki.uninitPage ();
+		if (SettingsActivity.getPortrait (wav))
+			wav.setRequestedOrientation (orientation);
 		if (SettingsActivity.getReviewOrder (wav))
 			wv.js (ifReviews (ReviewOrder.JS_UNINIT_CODE));
 		if (SettingsActivity.getLessonOrder (wav))
