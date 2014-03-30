@@ -232,6 +232,15 @@ public class WebReviewActivity extends Activity {
 			bar.setVisibility (View.GONE);
 
 			if (url.startsWith ("http")) {
+				
+				/*
+				 * The login page is a big problem for small screens. This parameter makes
+				 * login easier on some devices. Other pages should use ADJUST_RESIZE and
+				 * (specified in the manifest): I could add an else clause but I won't do it 
+				 */
+				if (url.endsWith ("login"))
+					getWindow ().setSoftInputMode (WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
+				
 				wv.js (JS_INIT_KBD);
 				if (SettingsActivity.getExternalFramePlacer (WebReviewActivity.this)) {
 					dict = SettingsActivity.getExternalFramePlacerDictionary (WebReviewActivity.this);
