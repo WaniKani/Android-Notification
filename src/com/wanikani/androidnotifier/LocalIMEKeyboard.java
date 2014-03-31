@@ -344,12 +344,19 @@ public class LocalIMEKeyboard implements Keyboard {
 		{
 			if (show) {
 				divw.setVisibility (View.VISIBLE);
-				if (!hwkeyb)
+				if (!hwkeyb) {
 					imm.showSoftInput (wv, InputMethodManager.SHOW_FORCED);
+					if (SettingsActivity.getPortrait (wav))
+						wav.setRequestedOrientation (ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+				}					
 				ew.requestFocus ();
 				if (hwkeyb)
 					imm.hideSoftInputFromWindow (ew.getWindowToken (), 0);
 			} else {
+				if (!hwkeyb) {
+					if (SettingsActivity.getPortrait (wav))
+						wav.setRequestedOrientation (orientation);
+				}
 				divw.setVisibility (View.GONE);
 				imm.hideSoftInputFromWindow (ew.getWindowToken (), 0);
 			}
@@ -993,8 +1000,6 @@ public class LocalIMEKeyboard implements Keyboard {
 		wv.js (JS_INIT_TRIGGERS);
 
 		orientation = wav.getRequestedOrientation ();
-		if (SettingsActivity.getPortrait (wav))
-			wav.setRequestedOrientation (ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
 		if (SettingsActivity.getReviewOrder (wav))
 			wv.js (ifReviews (ReviewOrder.JS_CODE));
