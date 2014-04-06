@@ -413,9 +413,12 @@ public class MainActivity extends FragmentActivity implements Runnable {
 		@Override
 		protected void onPostExecute (DashboardData.OptionalData od)
 		{
-			dd.setOptionalData (od);
+			/* Data may disappear when we get an unauthorized code */
+			if (dd != null) {
+				dd.setOptionalData (od);
 			
-			refreshComplete (dd, false);
+				refreshComplete (dd, false);
+			}
 		}
 	}
 	
