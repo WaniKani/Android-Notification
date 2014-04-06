@@ -81,6 +81,8 @@ public class SettingsActivity
 	private static final String KEY_PREF_LESSONS_ENABLED = "pref_lessons_enabled";
 	/** Use integrated browser key. Must match preferences.xml */
 	private static final String KEY_PREF_USE_INTEGRATED_BROWSER = "pref_use_integrated_browser";
+	/** Keyboard resizes webview */
+	private static final String KEY_PREF_RESIZE_WEBIVEW = "pref_resize_webview";
 	/** User key. Must match preferences.xml */
 	private static final String KEY_PREF_USERKEY = "pref_userkey";
 	/** Refresh timeout. Must match preferences.xml */
@@ -718,6 +720,11 @@ public class SettingsActivity
 	public static boolean getFullscreen (Context ctxt)
 	{
 		return prefs (ctxt).getBoolean (KEY_FULLSCREEN, false);
+	}
+	
+	public static boolean getResizeWebview (Context ctxt)
+	{
+		return prefs (ctxt).getBoolean (KEY_PREF_RESIZE_WEBIVEW, false);
 	}
 
 	public static boolean getHWKeyboard (Context ctxt)

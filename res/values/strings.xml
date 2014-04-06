@@ -85,6 +85,9 @@
     <string name="pref_lock_screen_descr">Keep screen awake during lessons and reviews</string>
     <string name="pref_fullscreen">Full screen</string>
     <string name="pref_fullscreen_descr">Display lessons and reviews in fullscreen</string>
+    <string name="pref_resize_webview">Resize Browser</string>
+    <string name="pref_resize_webview_descr">Resize internal browser when the soft keyboard is displayed.
+          Depending on screen size, it can make things worse or better.</string>
     <string name="pref_hw_keyboard">HW keyboard</string>
     <string name="pref_hw_keyboard_descr">Hide soft keyboard during reviews</string>
     <string name="pref_leak_kludge">Leak workaround</string>
