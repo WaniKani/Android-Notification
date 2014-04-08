@@ -788,9 +788,9 @@ public class WebReviewActivity extends Activity {
 			window.clearFlags (WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 		
 		if (SettingsActivity.getResizeWebview (this))
-			window.setSoftInputMode (WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
-		else
 			window.setSoftInputMode (WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+		else
+			window.setSoftInputMode (WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
 		
 		visible = true;
 		
