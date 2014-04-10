@@ -46,7 +46,7 @@ public class ExtendedLevelProgression {
 		now = new Date ();
 		for (Radical r : rlib.list) {
 			radicalsTotal++;
-			if (r.stats != null) {
+			if (r.stats != null && r.stats.availableDate != null) {
 				radicalsUnlocked++;
 				if (r.stats.srs != SRSLevel.APPRENTICE)
 					radicalsProgress++;
@@ -60,7 +60,7 @@ public class ExtendedLevelProgression {
 			
 		for (Kanji k : klib.list) {
 			kanjiTotal++;
-			if (k.stats != null) {
+			if (k.stats != null && k.stats.availableDate != null) {
 				kanjiUnlocked++;
 				if (k.stats.srs != SRSLevel.APPRENTICE)
 					kanjiProgress++;
