@@ -633,6 +633,9 @@ public class StatsFragment extends Fragment implements Tab {
 			HistoryDatabase.LevelInfo li;
 			int i, ans;
 			
+			if (dd == null || cs == null || cs.levelInfo == null)
+				return 0;
+			
 			ans = 0;
 			for (i = 1; i <= dd.level; i++) {
 				li = cs.levelInfo.get (i);
