@@ -720,7 +720,7 @@ public class StatsFragment extends Fragment implements Tab {
 			tw = (TextView) parent.findViewById (R.id.tv_eta_l50);
 			if (delay != null && dd.level < ALL_THE_LEVELS) {
 				
-				li = cs.levelInfo.get (dd.level);
+				li = cs != null && cs.levelInfo != null ? cs.levelInfo.get (dd.level) : null;
 				cal = Calendar.getInstance ();
 
 				cal.setTime (dd.creation);				
