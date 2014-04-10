@@ -708,6 +708,7 @@ public class StatsFragment extends Fragment implements Tab {
 		
 		private boolean updateL50 (Map<Integer, Integer> days, int vacation)
 		{
+			HistoryDatabase.LevelInfo li;
 			TextView tw;
 			Float delay;
 			Calendar cal;
@@ -715,9 +716,22 @@ public class StatsFragment extends Fragment implements Tab {
 			delay = weight (days, WEXP_L50);
 			tw = (TextView) parent.findViewById (R.id.tv_eta_l50);
 			if (delay != null && dd.level < ALL_THE_LEVELS) {
+				
+				li = cs.levelInfo.get (dd.level);
 				cal = Calendar.getInstance ();
+
 				cal.setTime (dd.creation);				
-				cal.add (Calendar.DATE, (int) (delay * ALL_THE_LEVELS) + vacation);
+				if (li != null) {
+					/* Algorithm 1: last_levelup_time + avg_time * (50 - current_level)  
+					 * More accurate but may fail if for some reason we have no leveup info for the current level
+					 */
+					cal.add (Calendar.DATE, li.day + li.vacation);
+					cal.add (Calendar.DATE, (int) (delay * (ALL_THE_LEVELS - dd.level)));
+				} else {
+					/* Algorithm 2: subscription_date + total_vacation + 50 * avg_time */   
+					cal.add (Calendar.DATE, (int) (delay * ALL_THE_LEVELS) + vacation);
+				}
+				
 				tw.setText (df.format (cal.getTime ()));
 				tw.setVisibility (View.VISIBLE);
 				
