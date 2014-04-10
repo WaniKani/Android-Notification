@@ -46,29 +46,33 @@ public class ExtendedLevelProgression {
 		now = new Date ();
 		for (Radical r : rlib.list) {
 			radicalsTotal++;
-			if (r.stats != null && r.stats.availableDate != null) {
+			if (r.stats != null) {
 				radicalsUnlocked++;
 				if (r.stats.srs != SRSLevel.APPRENTICE)
 					radicalsProgress++;
-				if (r.stats.availableDate.before (now))
-					currentLevelRadicalsAvailable++;
-				if (currentLevelAvailable == null ||
-					r.stats.availableDate.before (currentLevelAvailable))
-					currentLevelAvailable = r.stats.availableDate;
+				if (r.stats.availableDate != null) {
+					if (r.stats.availableDate.before (now))
+						currentLevelRadicalsAvailable++;
+					if (currentLevelAvailable == null ||
+						r.stats.availableDate.before (currentLevelAvailable))
+						currentLevelAvailable = r.stats.availableDate;
+				}
 			}
 		}
 			
 		for (Kanji k : klib.list) {
 			kanjiTotal++;
-			if (k.stats != null && k.stats.availableDate != null) {
+			if (k.stats != null) {
 				kanjiUnlocked++;
 				if (k.stats.srs != SRSLevel.APPRENTICE)
 					kanjiProgress++;
-				if (k.stats.availableDate.before (now))
-					currentLevelKanjiAvailable++;
-				if (currentLevelAvailable == null ||
-					k.stats.availableDate.before (currentLevelAvailable))
-					currentLevelAvailable = k.stats.availableDate;
+				if (k.stats.availableDate != null) {
+					if (k.stats.availableDate.before (now))
+						currentLevelKanjiAvailable++;
+					if (currentLevelAvailable == null ||
+						k.stats.availableDate.before (currentLevelAvailable))
+						currentLevelAvailable = k.stats.availableDate;
+				}
 			}
 		}
 	}
