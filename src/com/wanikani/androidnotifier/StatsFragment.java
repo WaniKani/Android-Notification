@@ -628,6 +628,21 @@ public class StatsFragment extends Fragment implements Tab {
 		
 		protected abstract void update ();
 		
+		protected int getVacation ()
+		{
+			HistoryDatabase.LevelInfo li;
+			int i, ans;
+			
+			ans = 0;
+			for (i = 1; i <= dd.level; i++) {
+				li = cs.levelInfo.get (i);
+				if (li != null)
+					ans += li.vacation;
+			}
+			
+			return ans;
+		}
+		
 		protected Map<Integer, Integer> getDays ()
 		{
 			Map<Integer, Integer> ans;
@@ -676,13 +691,14 @@ public class StatsFragment extends Fragment implements Tab {
 		protected void update ()
 		{
 			Map<Integer, Integer> days;
+			int vity, vacation;
 			boolean show;
-			int vity;
 			
 			days = getDays ();
+			vacation = getVacation ();
 			show = false;
 			
-			show |= updateL50 (days);
+			show |= updateL50 (days, vacation);
 			show |= updateNextLevel (days);
 			vity = show ? View.VISIBLE : View.GONE;
 		
@@ -690,7 +706,7 @@ public class StatsFragment extends Fragment implements Tab {
 			parent.findViewById (R.id.ctab_eta). setVisibility (vity);
 		}
 		
-		private boolean updateL50 (Map<Integer, Integer> days)
+		private boolean updateL50 (Map<Integer, Integer> days, int vacation)
 		{
 			TextView tw;
 			Float delay;
@@ -701,7 +717,7 @@ public class StatsFragment extends Fragment implements Tab {
 			if (delay != null && dd.level < ALL_THE_LEVELS) {
 				cal = Calendar.getInstance ();
 				cal.setTime (dd.creation);				
-				cal.add (Calendar.DATE, (int) (delay * ALL_THE_LEVELS));
+				cal.add (Calendar.DATE, (int) (delay * ALL_THE_LEVELS) + vacation);
 				tw.setText (df.format (cal.getTime ()));
 				tw.setVisibility (View.VISIBLE);
 				
