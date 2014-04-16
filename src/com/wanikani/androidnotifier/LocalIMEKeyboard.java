@@ -815,7 +815,22 @@ public class LocalIMEKeyboard implements Keyboard {
 	private static final String JS_SHOW_QUESTION =
 			"$('#character span').css ('visibility', '%s');";
 
+	private static final String JS_LESSONS_MUTE =
+			"window.wkAutoplay = $.jStorage.get (\"l/audioAutoplay\"); " + 
+			"$.jStorage.set(\"l/audioAutoplay\",false);";
+			
+	private static final String JS_LESSONS_UNMUTE =
+			"if (window.wkAutoplay != null)" +
+			"	$.jStorage.set(\"l/audioAutoplay\",window.wkAutoplay);";
 	
+	private static final String JS_REVIEWS_MUTE =
+			"window.wkAutoplay = audioAutoplay;" + 
+			"audioAutoplay = false;";
+
+	private static final String JS_REVIEWS_UNMUTE =
+			"if (window.wkAutoplay != null) " +
+			"	audioAutoplay = window.wkAutoplay;";
+
 	/// Parent activity
 	WebReviewActivity wav;
 	
@@ -875,6 +890,8 @@ public class LocalIMEKeyboard implements Keyboard {
     boolean canIgnore;
     
     FontBox fbox;
+    
+    boolean isMuted;
 
     /// Is the text box frozen because it is waiting for a class change
     boolean frozen;
@@ -1056,6 +1073,15 @@ public class LocalIMEKeyboard implements Keyboard {
 		divw.setVisibility (View.GONE);
 		showQuestionPatch (false);
 	}	
+	
+	@Override
+	public void setMute (boolean m)
+	{
+		this.isMuted = m;
+		
+		wv.js (ifLessons (m ? JS_LESSONS_MUTE : JS_LESSONS_UNMUTE) +
+			   ifReviews (m ? JS_REVIEWS_MUTE : JS_REVIEWS_UNMUTE));
+	}
 	
 	public void showQuestionPatch (boolean enable)
 	{

@@ -1,6 +1,7 @@
 package com.wanikani.androidnotifier;
 
 import android.content.Context;
+import android.media.AudioManager;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageButton;
@@ -116,5 +117,15 @@ public class NativeKeyboard implements Keyboard {
 	{
 		return false;
 	}
+	
+	@Override
+	public void setMute (boolean m)
+	{
+		AudioManager am;
+		
+		am = (AudioManager) wav.getSystemService(Context.AUDIO_SERVICE);
+	    
+		am.setStreamMute (AudioManager.STREAM_MUSIC, m);
+	}			
 
 }

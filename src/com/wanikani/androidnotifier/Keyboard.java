@@ -74,8 +74,14 @@ public interface Keyboard {
 	public void overrideFonts ();
 	
 	/**
-	 * Get fond overriding state
+	 * Get font overriding state
 	 * @return true if fonts are overridden
 	 */
 	public boolean getOverrideFonts ();
+	
+	/**
+	 * Mute/unmute
+	 * @param m true if should be muted
+	 */
+	public void setMute (boolean m);
 }

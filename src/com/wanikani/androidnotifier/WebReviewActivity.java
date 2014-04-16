@@ -991,18 +991,14 @@ public class WebReviewActivity extends Activity {
 	
 	private void setMute (boolean m)
 	{
-		AudioManager am;
 		Drawable d;
 		
 		d = m ? muteDrawable : notMutedDrawable;
 		muteH.setImageDrawable (d);
 
-		if (isMuted != m) {
+		if (isMuted != m && keyboard != null) { 
+			keyboard.setMute (m);
 			isMuted = m;
-		
-			am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-	    
-			am.setStreamMute (AudioManager.STREAM_MUSIC, m);
 		}
 	}	
 		
