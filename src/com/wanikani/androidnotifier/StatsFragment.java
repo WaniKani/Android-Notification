@@ -1175,7 +1175,7 @@ public class StatsFragment extends Fragment implements Tab {
 		netwe.add (timeline);
 		
 		netwe.add (new ItemDistributionChart (netwe, R.id.os_kanji_levels, MeterSpec.T.OTHER_STATS, EnumSet.of (Item.Type.KANJI)));
-		netwe.add (new ItemDistributionChart (netwe, R.id.os_levels, MeterSpec.T.MORE_STATS, EnumSet.allOf (Item.Type.class)));
+		netwe.add (new ItemDistributionChart (netwe, R.id.os_levels, MeterSpec.T.MORE_STATS, EnumSet.of (Item.Type.VOCABULARY)));
 
 		netwe.add (new ItemAgeChart (netwe, R.id.ct_age_distribution, MeterSpec.T.OTHER_STATS, EnumSet.allOf (Item.Type.class)));
 
