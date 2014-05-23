@@ -72,7 +72,7 @@ public class NetworkEngine {
 		private PendingTask task;
 		
 		/// Number of levels to load at once
-		private static final int BUNCH_SIZE = 50;
+		private static final int BUNCH_SIZE = 20;
 
 		/// Chart states
 		List<State> states;
