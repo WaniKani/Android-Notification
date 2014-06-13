@@ -18,6 +18,7 @@ import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -183,14 +184,23 @@ public class WebReviewActivity extends Activity {
 	    {
     		Intent intent;
 
+    		d ("Should override url: " + url);
     		if (!url.contains ("wanikani.com") && !download) {
+        		d ("Handled externally ");
     			intent = new Intent (Intent.ACTION_VIEW);	    		
 	    		intent.setData (Uri.parse (url));
 	    		startActivity (intent);		
-	    	} else
+	    	} else {
+        		d ("Handled internally ");
 	    		view.loadUrl (url);
+	    	}
 	    	
 	    	return false;
+	    }
+	    
+	    private void d (String s)
+	    {
+	    	Log.d ("ChromeClient", s);
 	    }
 		
 	    /**
@@ -206,6 +216,7 @@ public class WebReviewActivity extends Activity {
 	    {
 	    	String s;
 	    	
+	    	d ("Receoved error: " + errorCode);
 	    	s = getResources ().getString (R.string.fmt_web_review_error, description);
 	    	splashScreen (s);
 	    	bar.setVisibility (View.GONE);
@@ -214,6 +225,7 @@ public class WebReviewActivity extends Activity {
 		@Override  
 	    public void onPageStarted (WebView view, String url, Bitmap favicon)  
 	    {  
+	    	d ("Starting page: " + url);
 	        bar.setVisibility (View.VISIBLE);
     		keyboard.reset ();
 		}
@@ -229,6 +241,7 @@ public class WebReviewActivity extends Activity {
 	    {  
 			ExternalFramePlacer.Dictionary dict;
 			
+	    	d ("Finished page: " + url);
 			bar.setVisibility (View.GONE);
 
 			if (url.startsWith ("http")) {

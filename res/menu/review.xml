@@ -8,6 +8,8 @@
           android:showAsAction="ifRoom|withText"  android:icon="@drawable/ic_menu_preferences"/>
     <item android:id="@+id/em_fonts" android:title="@string/em_fonts" 
           android:showAsAction="ifRoom|withText" android:icon="@drawable/ic_menu_font"/>
+    <item android:id="@+id/em_log" android:title="@string/em_log"
+          android:showAsAction="ifRoom|withText"/>
     <item android:id="@+id/em_about" android:title="@string/em_about"
           android:showAsAction="ifRoom|withText" android:icon="@drawable/ic_menu_info_details"/>
 </menu>

@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.wanikani.androidnotifier"
-    android:versionCode="171"
-    android:versionName="1.15.5pre0">
+    android:versionCode="190"
+    android:versionName="1.15.5pre2-log0">
 
     <uses-sdk
         android:minSdkVersion="7"
@@ -14,6 +14,7 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>    
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>    
 	<uses-permission android:name="android.permission.VIBRATE" />
+	<uses-permission android:name="android.permission.READ_LOGS"/>
 	    
 	<application
         android:icon="@drawable/ic_launcher"
@@ -45,6 +46,7 @@
         <activity android:name="SettingsActivity" />
         <activity android:name="MetersActivity" />
         <activity android:name="AboutActivity" />
+        <activity android:name="LogActivity" />
         <activity android:name="OtherStatsActivity" 
             	  android:configChanges="orientation|keyboardHidden|screenSize"/>
         

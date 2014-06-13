@@ -112,6 +112,15 @@ public class MenuHandler {
 			ctxt.startActivity (intent);			
 		}
 		
+		public void log ()
+		{
+			Intent intent;
+			
+			intent = new Intent (ctxt, LogActivity.class);
+			
+			ctxt.startActivity (intent);			
+		}
+
 		/**
 		 * Start meters activity
 		 */
@@ -234,6 +243,10 @@ public class MenuHandler {
 			
 		case R.id.em_about:
 			listener.about ();
+			break;
+			
+		case R.id.em_log:
+			listener.log ();
 			break;
 			
 		default:
