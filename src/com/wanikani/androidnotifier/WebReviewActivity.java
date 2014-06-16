@@ -624,6 +624,11 @@ public class WebReviewActivity extends Activity {
 			"}" + 
 			"window.trueRandom = Math.random;" +
 			"window.fakeRandom = function() { return 0;  };" +   // @Ikalou's fix
+			/* Remove request to open additional windows */
+			"anchors = document.getElementsByTagName('a');" +
+			"for (i = 0; i < anchors.length; i++) { " +
+			"	anchors [i].removeAttribute ('target'); " +
+			"}" +			
 			/* This fixes a bug that makes SRS indication slow */
 			"style = document.createElement('style');" + 
 			"style.type = 'text/css';" + 
