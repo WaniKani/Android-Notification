@@ -624,11 +624,6 @@ public class WebReviewActivity extends Activity {
 			"}" + 
 			"window.trueRandom = Math.random;" +
 			"window.fakeRandom = function() { return 0;  };" +   // @Ikalou's fix
-			/* Remove request to open additional windows */
-			"anchors = document.getElementsByTagName('a');" +
-			"for (i = 0; i < anchors.length; i++) { " +
-			"	anchors [i].removeAttribute ('target'); " +
-			"}" +			
 			/* This fixes a bug that makes SRS indication slow */
 			"style = document.createElement('style');" + 
 			"style.type = 'text/css';" + 
@@ -746,7 +741,7 @@ public class WebReviewActivity extends Activity {
 
 		wv.getSettings ().setJavaScriptEnabled (true);
 		wv.getSettings().setJavaScriptCanOpenWindowsAutomatically (true);
-		wv.getSettings ().setSupportMultipleWindows (true);
+		wv.getSettings ().setSupportMultipleWindows (false);
 		wv.getSettings ().setUseWideViewPort (false);
 		wv.getSettings ().setDatabaseEnabled (true);
 		wv.getSettings ().setDomStorageEnabled (true);
