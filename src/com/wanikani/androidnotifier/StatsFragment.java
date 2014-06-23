@@ -713,17 +713,30 @@ public class StatsFragment extends Fragment implements Tab {
 		{
 			HistoryDatabase.LevelInfo li;
 			TextView tw;
+			View dw;
 			Float delay;
 			Calendar cal;
+			boolean show;
 
 			delay = weight (days, WEXP_L50);
 			tw = (TextView) parent.findViewById (R.id.tv_eta_l50);
-			if (delay != null && dd.level < ALL_THE_LEVELS) {
+			dw = parent.findViewById (R.id.div_eta_l50);
+			li = cs != null && cs.levelInfo != null ? 
+					cs.levelInfo.get (Math.min (dd.level, ALL_THE_LEVELS)) : null;
+					
+			cal = Calendar.getInstance ();
+			cal.setTime (dd.creation);
+			if (dd.level >= ALL_THE_LEVELS) {
+				/* Give info only if we know when we levelled up */
+				if (li != null) {
+					cal.add (Calendar.DATE, li.day);					
+					show = true;
+				} else
+					show = false;
 				
-				li = cs != null && cs.levelInfo != null ? cs.levelInfo.get (dd.level) : null;
-				cal = Calendar.getInstance ();
-
-				cal.setTime (dd.creation);				
+			} else if (delay != null) {
+				
+				
 				if (li != null) {
 					/* Algorithm 1: last_levelup_time + avg_time * (50 - current_level)  
 					 * More accurate but may fail if for some reason we have no leveup info for the current level
@@ -735,15 +748,14 @@ public class StatsFragment extends Fragment implements Tab {
 					cal.add (Calendar.DATE, (int) (delay * ALL_THE_LEVELS) + vacation);
 				}
 				
-				tw.setText (df.format (cal.getTime ()));
-				tw.setVisibility (View.VISIBLE);
-				
-				return true;
-			} else {
-				tw.setVisibility (View.GONE);
-				
-				return false;
-			}
+				show = true;
+			} else				
+				show = false;
+
+			tw.setText (df.format (cal.getTime ()));
+			dw.setVisibility (show ? View.VISIBLE : View.GONE);
+			
+			return show;
 		}
 		
 		private boolean updateNextLevel (Map<Integer, Integer> days)
@@ -758,7 +770,7 @@ public class StatsFragment extends Fragment implements Tab {
 			avgl = delay = weight (days, WEXP_NEXT);
 			nlw = parent.findViewById (R.id.div_eta_next);
 			avgw = parent.findViewById (R.id.div_eta_avg);
-			if (delay != null) {
+			if (delay != null && dd.level < ALL_THE_LEVELS) {
 				avgw.setVisibility (View.VISIBLE);
 
 				tw = (TextView) parent.findViewById (R.id.tv_eta_avg);
