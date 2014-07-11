@@ -18,6 +18,7 @@ import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v4.app.ActivityCompat;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -372,13 +373,11 @@ public class WebReviewActivity extends Activity {
 		/**
 		 * Toggle override fonts
 		 */
-		@SuppressLint("NewApi")
 		@Override
 		public void fonts ()
 		{
 			keyboard.overrideFonts ();
-			if (android.os.Build.VERSION.SDK_INT >= 11)
-				invalidateOptionsMenu ();
+			ActivityCompat.invalidateOptionsMenu (WebReviewActivity.this);
 		}
 		
 		/**
@@ -921,7 +920,8 @@ public class WebReviewActivity extends Activity {
 		for (i = 0; i < menu.size (); i++) {
 			mi = menu.getItem (i);
 			if (mi.getItemId () == R.id.em_fonts) {
-				mi.setVisible (keyboard.canOverrideFonts ());
+				/* Commented out for testing purposes only! Not to be released on official APKs */
+				//mi.setVisible (keyboard.canOverrideFonts ());
 				mi.setIcon (keyboard.getOverrideFonts () ? 
 							R.drawable.ic_menu_font_enabled : R.drawable.ic_menu_font);
 			}
@@ -930,6 +930,14 @@ public class WebReviewActivity extends Activity {
 		return true;
 	}
 	
+	/**
+	 * Force menu invalidation.
+	 */
+	public void invalidateMenu ()
+	{
+		ActivityCompat.invalidateOptionsMenu (this);
+	}	
+
 	/**
 	 * Menu handler. Relays the call to the common {@link MenuHandler}.
 	 * 	@param item the selected menu item

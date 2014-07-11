@@ -418,7 +418,23 @@ public class LocalIMEKeyboard implements Keyboard {
 		}
 	}
 
-	private class BoxPosition {
+	/**
+	 * Chain runnable that handles "invalidateMenu" on app thread. 
+	 */
+	private class JSInvalidateMenu implements Runnable {
+		
+			public JSInvalidateMenu ()
+			{
+				wav.runOnUiThread (this);
+			}
+	
+			public void run ()
+			{
+				wav.invalidateMenu ();
+			}
+	}
+
+		private class BoxPosition {
 
 		Rect frect;
 		
@@ -574,7 +590,13 @@ public class LocalIMEKeyboard implements Keyboard {
 		@JavascriptInterface
 		public void sync (boolean correct, boolean incorrect, String text, boolean reviews)
 		{
+			boolean needMenuUpdate;
+			
+			needMenuUpdate = reviews != bpos.reviews; 
 			bpos.reviews = reviews;
+			
+			if (needMenuUpdate)
+				new JSInvalidateMenu ();			
 			if (correct)
 				new JSListenerSetClass ("correct", reviews);
 			if (incorrect)
