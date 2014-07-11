@@ -920,8 +920,7 @@ public class WebReviewActivity extends Activity {
 		for (i = 0; i < menu.size (); i++) {
 			mi = menu.getItem (i);
 			if (mi.getItemId () == R.id.em_fonts) {
-				/* Commented out for testing purposes only! Not to be released on official APKs */
-				//mi.setVisible (keyboard.canOverrideFonts ());
+				mi.setVisible (keyboard.canOverrideFonts ());
 				mi.setIcon (keyboard.getOverrideFonts () ? 
 							R.drawable.ic_menu_font_enabled : R.drawable.ic_menu_font);
 			}
