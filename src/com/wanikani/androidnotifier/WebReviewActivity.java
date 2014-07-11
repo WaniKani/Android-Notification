@@ -757,7 +757,7 @@ public class WebReviewActivity extends Activity {
 
 		wv.getSettings ().setJavaScriptEnabled (true);
 		wv.getSettings().setJavaScriptCanOpenWindowsAutomatically (true);
-		wv.getSettings ().setSupportMultipleWindows (true);
+		wv.getSettings ().setSupportMultipleWindows (false);
 		wv.getSettings ().setUseWideViewPort (false);
 		wv.getSettings ().setDatabaseEnabled (true);
 		wv.getSettings ().setDomStorageEnabled (true);
