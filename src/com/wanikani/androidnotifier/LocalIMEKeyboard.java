@@ -817,8 +817,9 @@ public class LocalIMEKeyboard implements Keyboard {
 	 * not touch the user-response field 
 	 */
 	private static final String JS_ENTER =
-			"$(\"#answer-form button\").click ();" +
-			"wknJSListener.unfreeze ();";
+			MistakeDelay.injectAnswer (
+					"$(\"#answer-form button\").click ();") +
+					"wknJSListener.unfreeze ();";
 	
 	/**
 	 * Injects an answer into the HTML text box and clickes the "next" button.
@@ -1044,6 +1045,7 @@ public class LocalIMEKeyboard implements Keyboard {
 			wv.js (ifReviews (ReviewOrder.JS_CODE));
 		if (SettingsActivity.getLessonOrder (wav))
 			wv.js (ifLessons (LessonOrder.JS_CODE));
+		wv.js (MistakeDelay.JS_INIT);
 		
 		isWKIEnabled = SettingsActivity.getWaniKaniImprove (wav); 
 		if (isWKIEnabled)
@@ -1227,6 +1229,8 @@ public class LocalIMEKeyboard implements Keyboard {
 		} else if (clazz.equals ("incorrect")) {
 			if (SettingsActivity.getErrorPopup (wav))
 				errorPopup ();
+			if (SettingsActivity.getMistakeDelay (wav))
+				wv.js (MistakeDelay.JS_MISTAKE);
 			enableIgnoreButton (reviews);
 			disable (incorrectFG, incorrectBG);
 		} else if (clazz.equals ("WKO_ignored")) {

@@ -111,6 +111,8 @@ public class SettingsActivity
 	private static final String KEY_PREF_EXTERNAL_FRAME_PLACER_DICT = "pref_external_frame_placer_dict";
 	/** Info popup */
 	private static final String KEY_PREF_ERROR_POPUP = "pref_error_popup";
+	/** Mistake delay */
+	private static final String KEY_PREF_MISTAKE_DELAY = "pref_mistake_delay";
 	/** Enable 42+ mode. Must match preferences.xml */
 	private static final String KEY_PREF_42PLUS = "pref_42plus";
 	/** Wanikani review URL */
@@ -400,6 +402,9 @@ public class SettingsActivity
 		pref = findPreference (KEY_PREF_LESSON_ORDER);
 		pref.setEnabled (getUseIntegratedBrowser (prefs));
 
+		pref = findPreference (KEY_PREF_MISTAKE_DELAY);
+		pref.setEnabled (getUseIntegratedBrowser (prefs));
+
 		pref = findPreference (KEY_PREF_ERROR_POPUP);
 		pref.setEnabled (getUseIntegratedBrowser (prefs));
 
@@ -418,9 +423,12 @@ public class SettingsActivity
 		pref = findPreference (KEY_PREF_DISABLE_SUGGESTIONS);
 		pref.setEnabled (lime);
 		
-		pref = findPreference (KEY_PREF_ERROR_POPUP);
+		pref = findPreference (KEY_PREF_MISTAKE_DELAY);
 		pref.setEnabled (lime);
 		
+		pref = findPreference (KEY_PREF_ERROR_POPUP);
+		pref.setEnabled (lime);
+
 		pref = findPreference (KEY_PREF_IGNORE_BUTTON);
 		pref.setEnabled (lime);
 		
@@ -648,6 +656,11 @@ public class SettingsActivity
 	public static boolean getPartOfSpeech (Context ctxt)
 	{
 		return prefs (ctxt).getBoolean (KEY_PREF_PART_OF_SPEECH, true);
+	}
+
+	public static boolean getMistakeDelay (Context ctxt)
+	{
+		return prefs (ctxt).getBoolean (KEY_PREF_MISTAKE_DELAY, false);
 	}
 
 	public static boolean getErrorPopup (Context ctxt)

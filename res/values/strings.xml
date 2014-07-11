@@ -34,6 +34,9 @@
     <string name="pref_refresh_timeout">Refresh interval</string>
     <string name="pref_refresh_descr">Data will be refreshed every %d minutes</string>
 	<string name="pref_refresh_one_min_descr">Data will be refreshed every minute</string>
+	<string name="pref_mistake_delay">Mistake Delay</string>
+	<string name="pref_mistake_delay_descr">Block enter for one second after entering a wrong answer.
+	    	Port of Rui Pinheiro\'s userscript</string>
 	<string name="pref_error_popup">Auto popup</string>
 	<string name="pref_error_popup_descr">Open info popup automatically after entering a wrong answer</string>
 	<string name="pref_userkey_descr">Copy here the "Public API Key" from your Account Settings page</string>
@@ -442,6 +445,7 @@ gave permission to integrate their work:</string>
 	<string name="info_credit_rui_descr">
 <a href="https://www.wanikani.com/chat/api-and-third-party-apps/2940">WaniKani Override</a>\n
 <a href="https://www.wanikani.com/chat/api-and-third-party-apps/3981">WaniKani KunOn</a>
+<a href="https://www.wanikani.com/chat/api-and-third-party-apps/3026">WaniKani Mistake Delay</a>
 </string>
 
 	<string name="info_credit_seiji">\@Seiji</string>  
