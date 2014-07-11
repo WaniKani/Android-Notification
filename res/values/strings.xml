@@ -30,7 +30,10 @@
     <string name="pref_lessons_enabled_descr">Notify also when new items can be unlocked</string>
     <string name="pref_use_integrated_browser">Use integrated browser</string>
     <string name="pref_use_integrated_browser_desc">Open integrated browser when doing reviews and lessons</string>
-    <string name="pref_use_external_browser_desc">Open external browser when doing reviews and lessons</string>  
+    <string name="pref_use_external_browser_desc">Open external browser when doing reviews and lessons</string>
+    <string name="pref_external_items">External Items</string>         
+    <string name="pref_external_items_descr">Open external browser when opening item pages during
+        			reviews and lessons</string>      
     <string name="pref_refresh_timeout">Refresh interval</string>
     <string name="pref_refresh_descr">Data will be refreshed every %d minutes</string>
 	<string name="pref_refresh_one_min_descr">Data will be refreshed every minute</string>

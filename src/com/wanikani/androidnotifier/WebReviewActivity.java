@@ -183,13 +183,43 @@ public class WebReviewActivity extends Activity {
 	    public boolean shouldOverrideUrlLoading (WebView view, String url) 
 	    {
     		Intent intent;
-
-    		if (!url.contains ("wanikani.com") && !download) {
+    		    		
+    		if (shouldOpenExternal (url)) {
     			intent = new Intent (Intent.ACTION_VIEW);	    		
 	    		intent.setData (Uri.parse (url));
 	    		startActivity (intent);		
 	    	} else
 	    		view.loadUrl (url);
+	    	
+	    	return false;
+	    }
+	    
+	    /**
+	     * Tells if we should spawn an external browser
+	     *  @param url the url we are opening
+	     * 	@return true if we should
+	     */
+	    public boolean shouldOpenExternal (String url)
+	    {	    	
+	    	String curl;
+	    	
+	    	if (!url.contains ("wanikani.com") && !download)
+	    		return true;
+	    	
+	    	curl = wv.getUrl ();
+	    	if (curl == null)
+	    		return false;
+
+	    	/* Seems the only portable way to do this */
+	    	if (curl.contains ("www.wanikani.com/lesson") ||
+	    		curl.contains ("www.wanikani.com/review")) {
+	    		
+	    		if ((url.contains ("/kanji/") ||
+	    			 url.contains ("/radicals/")) &&
+	    			 SettingsActivity.getExternalItems (WebReviewActivity.this))
+	    			return true;
+	    			
+	    	}
 	    	
 	    	return false;
 	    }

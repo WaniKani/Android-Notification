@@ -113,6 +113,8 @@ public class SettingsActivity
 	private static final String KEY_PREF_ERROR_POPUP = "pref_error_popup";
 	/** Mistake delay */
 	private static final String KEY_PREF_MISTAKE_DELAY = "pref_mistake_delay";
+	/** External items */
+	private static final String KEY_PREF_EXTERNAL_ITEMS = "pref_external_items";	
 	/** Enable 42+ mode. Must match preferences.xml */
 	private static final String KEY_PREF_42PLUS = "pref_42plus";
 	/** Wanikani review URL */
@@ -405,6 +407,9 @@ public class SettingsActivity
 		pref = findPreference (KEY_PREF_MISTAKE_DELAY);
 		pref.setEnabled (getUseIntegratedBrowser (prefs));
 
+		pref = findPreference (KEY_PREF_EXTERNAL_ITEMS);
+		pref.setEnabled (getUseIntegratedBrowser (prefs));
+
 		pref = findPreference (KEY_PREF_ERROR_POPUP);
 		pref.setEnabled (getUseIntegratedBrowser (prefs));
 
@@ -432,6 +437,9 @@ public class SettingsActivity
 		pref = findPreference (KEY_PREF_IGNORE_BUTTON);
 		pref.setEnabled (lime);
 		
+		pref = findPreference (KEY_PREF_EXTERNAL_ITEMS);
+		pref.setEnabled (lime);
+
 		pref = findPreference (KEY_PREF_REVIEW_ORDER);
 		pref.setEnabled (lime);
 		
@@ -661,6 +669,11 @@ public class SettingsActivity
 	public static boolean getMistakeDelay (Context ctxt)
 	{
 		return prefs (ctxt).getBoolean (KEY_PREF_MISTAKE_DELAY, false);
+	}
+
+	public static boolean getExternalItems (Context ctxt)
+	{
+		return prefs (ctxt).getBoolean (KEY_PREF_EXTERNAL_ITEMS, false);
 	}
 
 	public static boolean getErrorPopup (Context ctxt)

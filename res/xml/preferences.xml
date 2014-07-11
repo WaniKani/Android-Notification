@@ -159,6 +159,11 @@
         	android:summary="@string/pref_resize_webview_descr"
         	android:defaultValue="false" />
     <CheckBoxPreference
+        	android:key="pref_external_items"
+        	android:title="@string/pref_external_items"
+        	android:summary="@string/pref_external_items_descr"
+        	android:defaultValue="false" />
+    <CheckBoxPreference
         	android:key="pref_timer_reaper"
         	android:title="@string/pref_timer_reaper"
         	android:summary="@string/pref_timer_reaper_descr"
