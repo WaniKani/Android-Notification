@@ -110,6 +110,9 @@ public class ItemAgeChart implements NetworkEngine.Chart {
 		/// Got an error
 		private boolean error;
 		
+		/// First nonempty bar
+		private int origin;
+		
 		/// Time scale, in days
 		private static final int SCALE = 7;
 
@@ -183,6 +186,12 @@ public class ItemAgeChart implements NetworkEngine.Chart {
 			if (ok) {				
 				availableTypes.addAll (collectedTypes);
 				sbars = scale (bars);
+				origin = 0;
+				for (HistogramPlot.Samples bar : bars) {
+					if (bar.getTotal () != 0)
+						break;
+					origin++;
+				}				
 				for (Item.Type t : types)
 					if (!availableTypes.contains (t))
 						return;
@@ -350,9 +359,9 @@ public class ItemAgeChart implements NetworkEngine.Chart {
 				
 		if (state.error)
 			chart.setError ();
-		else if (!state.sbars.isEmpty ())		
-			chart.setData (state.series, state.sbars, -1);
-		else if (rd != null)
+		else if (!state.sbars.isEmpty ()) {
+			chart.setData (state.series, state.sbars, -1, state.origin);
+		} else if (rd != null)
 			chart.setError (rd.notEnoughData);
 		else
 			chart.setError ("Not enough data to build this plot yet");

@@ -377,7 +377,7 @@ public class ReviewsTimelineChart implements NetworkEngine.Chart {
 			if (state.error)
 				chart.setError ();
 			else		
-				chart.setData (series, getBars (state), -1, true);
+				chart.setData (series, getBars (state), -1, 0);
 		}
 		
 		protected abstract List<Samples> getBars (State state);

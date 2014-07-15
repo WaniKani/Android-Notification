@@ -458,10 +458,20 @@ public class HistogramPlot extends View {
 		 */
 		public void setAbsPosition (int pos)
 		{
-			t0 = absPositionToBar (pos);
+			setBar (absPositionToBar (pos));
+		}
+		
+		/**
+		 * Moves the viewport, putting its left margin on the left of a given bar
+		 * @param bar the bar
+		 */
+		public void setBar (float bar)
+		{
+			t0 = bar;
 			t1 = t0 + interval;
 			adjust ();
 		}
+		
 		
 		/**
 		 * Returns the number of pixels between the leftmost bar and a given bar
@@ -625,7 +635,7 @@ public class HistogramPlot extends View {
 	 */
 	public void setData (List<Series> series, List<Samples> bars, long cap)
 	{
-		setData (series, bars, cap, false);
+		setData (series, bars, cap, -1);
 	}
 
 	/**
@@ -633,14 +643,14 @@ public class HistogramPlot extends View {
 	 * @param series a list of series that will be referenced by <tt>data</tt> 
 	 * @param bars a list of samples, each representing a bar
 	 * @param cap maximum Y value admitted (may be smaller if bars are smaller than that)
-	 * @param alignLeft if set move to the origin, otherwise to the last bar
+	 * @param bar which bar to align to (set it to a negative value not to align it)
 	 */
-	public void setData (List<Series> series, List<Samples> bars, long cap, boolean alignLeft)
+	public void setData (List<Series> series, List<Samples> bars, long cap, int bar)
 	{
 		pas.setSeries (series);
 		vp = new Viewport (meas, bars.size (), getMaxY (bars, cap));
-		if (alignLeft)
-			vp.setAbsPosition (0);
+		if (bar >= 0)
+			vp.setBar (bar);
 		this.bars = bars;
 		
 		invalidate ();
