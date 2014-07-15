@@ -187,11 +187,12 @@ public class WebReviewActivity extends Activity {
     		if (shouldOpenExternal (url)) {
     			intent = new Intent (Intent.ACTION_VIEW);	    		
 	    		intent.setData (Uri.parse (url));
-	    		startActivity (intent);		
-	    	} else
-	    		view.loadUrl (url);
+	    		startActivity (intent);	
+	    		
+	    		return true;
+	    	}
 	    	
-	    	return false;
+    		return false;
 	    }
 	    
 	    /**
