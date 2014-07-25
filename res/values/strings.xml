@@ -263,7 +263,7 @@
     <string name="tag_vocab">Vocabulary</string>
     
     <string name="os_levels">SRS by level</string>
-    <string name="os_kanji_levels">Kanji SRS by level</string>
+    <string name="os_kanji_levels">SRS by level</string>
     <string name="os_review_timeline">Reviews Timeline</string>
     <string name="os_review_timeline_srs">SRS</string>
     <string name="os_review_timeline_item">Type</string>
