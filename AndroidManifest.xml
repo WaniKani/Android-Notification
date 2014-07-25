@@ -1,6 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.wanikani.androidnotifier"
-    android:versionCode="209"
+    android:versionCode="210"
     android:versionName="1.15.5rc1">
 
     <uses-sdk
@@ -24,7 +24,7 @@
         <service android:name="com.wanikani.androidnotifier.notification.NotificationService" />
 
         <activity android:name="MainActivity">
-            <intent-filter>
+            <intent-filter android:label="@string/launch_name">
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
