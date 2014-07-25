@@ -421,9 +421,15 @@ public class HistogramPlot extends View {
 		 */
 		public void updateSize ()
 		{
+			boolean firstRun;
+			
+			firstRun = interval == 0;
+			
 			interval = meas.plotArea.width () / (meas.dipPerBar + meas.gap);
 			yScale = meas.plotArea.height () / yMax;
-			t0 = t1 - interval;
+			if (!firstRun)
+				t0 = t1 - interval;
+			
 			adjust ();
 		}
 		
