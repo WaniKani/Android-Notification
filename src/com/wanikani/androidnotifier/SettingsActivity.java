@@ -137,6 +137,8 @@ public class SettingsActivity
 	private static final String KEY_PREF_EXPORT_DEST = "pref_export_dest";
 	/** The export file */
 	private static final String KEY_PREF_EXPORT_FILE = "pref_export_file";
+	/** Force romaji */
+	private static final String KEY_PREF_ROMAJI = "pref_romaji";
 	/** Disable keyboard suggestions */
 	private static final String KEY_PREF_DISABLE_SUGGESTIONS = "pref_disable_suggestions";
 	/** Use hardware acceleration */
@@ -428,6 +430,9 @@ public class SettingsActivity
 		pref = findPreference (KEY_PREF_DISABLE_SUGGESTIONS);
 		pref.setEnabled (lime);
 		
+		pref = findPreference (KEY_PREF_ROMAJI);
+		pref.setEnabled (lime);
+
 		pref = findPreference (KEY_PREF_MISTAKE_DELAY);
 		pref.setEnabled (lime);
 		
@@ -629,6 +634,11 @@ public class SettingsActivity
 	public static boolean getLessonOrder (Context ctxt)
 	{
 		return prefs (ctxt).getBoolean (KEY_PREF_LESSON_ORDER, false);
+	}
+
+	public static boolean getRomaji (Context ctxt)
+	{
+		return prefs (ctxt).getBoolean (KEY_PREF_ROMAJI, false);
 	}
 
 	public static boolean getDisableSuggestions (Context ctxt)
