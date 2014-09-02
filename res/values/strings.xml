@@ -47,6 +47,9 @@
     <string name="pref_userkey">User API Key</string>    
     <string name="pref_review_improvements">Review Improvements</string>
     <string name="pref_review_improvements_desc">Enable userscripts and Custom IME</string>
+    <string name="pref_romaji">Force romaji</string>
+    <string name="pref_romaji_desc">Disable suggestions when entering english words. 
+        Might enable romaji if using system IME</string>
     <string name="pref_disable_suggestions">No suggestions</string>
     <string name="pref_disable_suggestions_desc">Disable suggestions when entering japanese words</string>
     <string name="pref_ignore_button">Ignore Button</string>

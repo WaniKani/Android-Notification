@@ -117,6 +117,11 @@
         	android:summary="@string/pref_mistake_delay_descr"
         	android:defaultValue="false" />    
    		<CheckBoxPreference
+        	android:key="pref_romaji"
+        	android:title="@string/pref_romaji"
+        	android:summary="@string/pref_romaji_desc"
+        	android:defaultValue="false" />       	
+   		<CheckBoxPreference
         	android:key="pref_disable_suggestions"
         	android:title="@string/pref_disable_suggestions"
         	android:summary="@string/pref_disable_suggestions_desc"
