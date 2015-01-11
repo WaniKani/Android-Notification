@@ -1047,8 +1047,12 @@ public class LocalIMEKeyboard implements Keyboard {
 
 		if (SettingsActivity.getReviewOrder (wav))
 			wv.js (ifReviews (ReviewOrder.JS_CODE));
-		if (SettingsActivity.getLessonOrder (wav))
-			wv.js (ifLessons (LessonOrder.JS_CODE));
+		if (SettingsActivity.getLessonOrder (wav)) {
+			if (SettingsActivity.getLessonOrderRev (wav))
+				wv.js (ifLessons (LessonOrder.JS_CODE_REV));
+			else
+				wv.js (ifLessons (LessonOrder.JS_CODE));
+		}
 		wv.js (MistakeDelay.JS_INIT);
 		
 		isWKIEnabled = SettingsActivity.getWaniKaniImprove (wav); 

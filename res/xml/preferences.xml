@@ -90,6 +90,11 @@
         	android:summary="@string/pref_lesson_order_descr"
         	android:defaultValue="false" />
     	<CheckBoxPreference
+        	android:key="pref_lesson_order_rev"
+        	android:title="@string/pref_lesson_order_rev"
+        	android:summary="@string/pref_lesson_order_rev_off_descr"
+        	android:defaultValue="false" />
+    		<CheckBoxPreference
     	    android:key="pref_external_frame_placer"
     	    android:title="@string/pref_external_frame_placer"
     	    android:summary="@string/pref_external_frame_placer_descr"

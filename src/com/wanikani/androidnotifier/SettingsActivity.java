@@ -103,6 +103,8 @@ public class SettingsActivity
 	private static final String KEY_PREF_REVIEW_ORDER = "pref_review_order";
 	/** Lesson Order */
 	private static final String KEY_PREF_LESSON_ORDER = "pref_lesson_order";
+	/** Lesson Order, reverse */
+	private static final String KEY_PREF_LESSON_ORDER_REV = "pref_lesson_order_rev";
 	/** Frame placer */
 	private static final String KEY_PREF_EXTERNAL_FRAME_PLACER = "pref_external_frame_placer";
 	/* Part of speech */
@@ -331,6 +333,13 @@ public class SettingsActivity
 			runReviewImprovementsHooks (prefs);
 		else if (key.equals (KEY_PREF_EXTERNAL_FRAME_PLACER))
 			runExternalFramePlacerHooks (prefs);
+		else if (key.equals (KEY_PREF_LESSON_ORDER))
+			runLessonOrderHooks (prefs);
+		else if (key.equals (KEY_PREF_LESSON_ORDER_REV))
+			pref.setSummary (getLessonOrderRev (prefs) ? 
+					 R.string.pref_lesson_order_rev_on_descr :
+					 R.string.pref_lesson_order_rev_off_descr);
+
 		 
 		updateConfig (prefs);
 	}
@@ -406,6 +415,8 @@ public class SettingsActivity
 		pref = findPreference (KEY_PREF_LESSON_ORDER);
 		pref.setEnabled (getUseIntegratedBrowser (prefs));
 
+		runLessonOrderHooks (prefs);
+
 		pref = findPreference (KEY_PREF_MISTAKE_DELAY);
 		pref.setEnabled (getUseIntegratedBrowser (prefs));
 
@@ -471,6 +482,15 @@ public class SettingsActivity
 		
 		pref = findPreference (KEY_PREF_EXTERNAL_FRAME_PLACER_DICT);
 		pref.setEnabled (getExternalFramePlacer (prefs));
+	}
+
+	@SuppressWarnings ("deprecation")
+	private void runLessonOrderHooks (SharedPreferences prefs)
+	{
+		Preference pref;
+				
+		pref = findPreference (KEY_PREF_LESSON_ORDER_REV);
+		pref.setEnabled (getLessonOrder (prefs));
 	}
 
 	public static SharedPreferences prefs (Context ctxt)
@@ -633,7 +653,22 @@ public class SettingsActivity
 	
 	public static boolean getLessonOrder (Context ctxt)
 	{
-		return prefs (ctxt).getBoolean (KEY_PREF_LESSON_ORDER, false);
+		return getLessonOrder (prefs (ctxt));
+	}
+
+	public static boolean getLessonOrder (SharedPreferences prefs)
+	{
+		return prefs.getBoolean (KEY_PREF_LESSON_ORDER, false);
+	}
+
+	public static boolean getLessonOrderRev (Context ctxt)
+	{
+		return getLessonOrderRev (prefs (ctxt));
+	}
+
+	public static boolean getLessonOrderRev (SharedPreferences prefs)
+	{
+		return prefs.getBoolean (KEY_PREF_LESSON_ORDER_REV, false);
 	}
 
 	public static boolean getRomaji (Context ctxt)

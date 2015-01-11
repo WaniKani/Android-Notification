@@ -70,6 +70,9 @@
     <string name="pref_lesson_order">Lesson Order</string>
     <string name="pref_lesson_order_descr">Teach radicals and kanji first. Port of
         		\@Alucardeck\'s WKLO script</string>
+    <string name="pref_lesson_order_rev">Put vocab first</string>
+    <string name="pref_lesson_order_rev_on_descr">Vocab items will be moved first, in a batch of lessons</string>
+    <string name="pref_lesson_order_rev_off_descr">Radical/Kanji items will be moved first, in a batch of lessons</string>
     <string name="pref_external_frame_placer">External frame placer</string>
     <string name="pref_external_frame_placer_descr">
         		Enable \@jeshuamorrissey\'s script, showing an external dictionary page
