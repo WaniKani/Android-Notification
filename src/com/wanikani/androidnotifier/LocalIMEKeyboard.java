@@ -192,7 +192,8 @@ public class LocalIMEKeyboard implements Keyboard {
 	    public boolean onEditorAction (TextView tv, int actionId, KeyEvent event)
 	    {
 	    	
-	        if (actionId == EditorInfo.IME_ACTION_DONE) {
+	        if (actionId == EditorInfo.IME_ACTION_DONE || 
+	        	(hwkeyb && actionId == EditorInfo.IME_NULL)) {
 	        	next ();
 	        	return true;
 	        }
