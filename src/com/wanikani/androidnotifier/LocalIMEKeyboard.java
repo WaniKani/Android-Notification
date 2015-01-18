@@ -193,7 +193,8 @@ public class LocalIMEKeyboard implements Keyboard {
 	    {
 	    	
 	        if (actionId == EditorInfo.IME_ACTION_DONE || 
-	        	(hwkeyb && actionId == EditorInfo.IME_NULL)) {
+	        	(hwkeyb && actionId == EditorInfo.IME_NULL && 
+	        	 event.getAction () == KeyEvent.ACTION_DOWN && event.getRepeatCount () == 0)) {
 	        	next ();
 	        	return true;
 	        }
