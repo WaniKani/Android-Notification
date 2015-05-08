@@ -260,10 +260,14 @@ public class WebReviewActivity extends Activity {
 	    public void onPageFinished (WebView view, String url)  
 	    {  
 			ExternalFramePlacer.Dictionary dict;
+			boolean wasVisible;
 			
+			wasVisible = bar.getVisibility () != View.GONE;
 			bar.setVisibility (View.GONE);
-
-			if (url.startsWith ("http")) {
+			
+			/* wasVisible is just an hack because externalframeplacer 
+			 * causes a spurious call to onPageFinished on some devices */
+			if (wasVisible && url.startsWith ("http")) {
 				
 				wv.js (JS_INIT_KBD);
 				if (SettingsActivity.getExternalFramePlacer (WebReviewActivity.this)) {
@@ -273,7 +277,7 @@ public class WebReviewActivity extends Activity {
 				
 				if (SettingsActivity.getPartOfSpeech (WebReviewActivity.this))
 					PartOfSpeech.enter (WebReviewActivity.this, wv, url);
-			}
+			}			
 	    }
 	}
 	
