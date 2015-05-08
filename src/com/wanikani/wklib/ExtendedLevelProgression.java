@@ -50,7 +50,8 @@ public class ExtendedLevelProgression {
 				radicalsUnlocked++;
 				if (r.stats.srs != SRSLevel.APPRENTICE)
 					radicalsProgress++;
-				if (r.stats.availableDate != null) {
+				if (r.stats.availableDate != null &&
+					r.stats.srs != SRSLevel.BURNED) {
 					if (r.stats.availableDate.before (now))
 						currentLevelRadicalsAvailable++;
 					if (currentLevelAvailable == null ||
@@ -67,7 +68,8 @@ public class ExtendedLevelProgression {
 				if (k.stats.srs != SRSLevel.APPRENTICE)
 					kanjiProgress++;
 				if (k.stats.availableDate != null) {
-					if (k.stats.availableDate.before (now))
+					if (k.stats.availableDate.before (now) &&
+						k.stats.srs != SRSLevel.BURNED)
 						currentLevelKanjiAvailable++;
 					if (currentLevelAvailable == null ||
 						k.stats.availableDate.before (currentLevelAvailable))
