@@ -83,6 +83,8 @@ public class SettingsActivity
 	private static final String KEY_PREF_USE_INTEGRATED_BROWSER = "pref_use_integrated_browser";
 	/** Keyboard resizes webview */
 	private static final String KEY_PREF_RESIZE_WEBIVEW = "pref_resize_webview";
+	/** Font scale vector */
+	private static final String KEY_PREF_FONT_SIZE = "pref_font_size";
 	/** User key. Must match preferences.xml */
 	private static final String KEY_PREF_USERKEY = "pref_userkey";
 	/** Refresh timeout. Must match preferences.xml */
@@ -425,7 +427,10 @@ public class SettingsActivity
 
 		pref = findPreference (KEY_PREF_ERROR_POPUP);
 		pref.setEnabled (getUseIntegratedBrowser (prefs));
-
+		
+		pref = findPreference (KEY_PREF_FONT_SIZE);
+		pref.setEnabled (getUseIntegratedBrowser (prefs));
+		
 		runReviewImprovementsHooks (prefs);
 	}
 
@@ -572,6 +577,18 @@ public class SettingsActivity
 	public static boolean getEnabled (Context ctxt)
 	{
 		return getEnabled (prefs (ctxt));
+	}
+	
+	public static float getFontSize (Context ctxt)
+	{
+		String s;
+		
+		s = prefs (ctxt).getString (KEY_PREF_FONT_SIZE, "1");
+		try {
+			return Float.parseFloat (s);
+		} catch (NumberFormatException e) {
+			return 1;
+		}
 	}
 	
 	private static boolean getEnabled (SharedPreferences prefs)

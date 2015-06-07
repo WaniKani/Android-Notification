@@ -141,7 +141,13 @@
         	android:title="@string/pref_srs_indication"
         	android:summary="@string/pref_srs_indication_descr"
         	android:defaultValue="true" />
-   	</PreferenceCategory>	
+    	<EditTextPreference  
+        	android:key="pref_font_size"
+        	android:title="@string/pref_font_size" 
+        	android:summary="@string/pref_font_size_descr"
+        	android:inputType="numberDecimal"
+        	android:defaultValue="1"/>
+	    </PreferenceCategory>	
 	<PreferenceCategory
 	    	android:title="@string/tpref_reviews">
 	<CheckBoxPreference

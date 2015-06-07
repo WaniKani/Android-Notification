@@ -103,6 +103,8 @@
           Depending on screen size, it can make things worse or better.</string>
     <string name="pref_hw_keyboard">HW keyboard</string>
     <string name="pref_hw_keyboard_descr">Hide soft keyboard during reviews</string>
+    <string name="pref_font_size">Font size</string>
+    <string name="pref_font_size_descr">Scale factor of reviews font size</string>
     <string name="pref_leak_kludge">Leak workaround</string>
     <string name="pref_leak_kludge_descr">
         	Enables CPU/memory leak workaround (see WK post)</string>

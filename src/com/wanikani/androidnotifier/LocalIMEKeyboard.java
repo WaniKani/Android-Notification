@@ -567,7 +567,7 @@ public class LocalIMEKeyboard implements Keyboard {
 			} catch (NumberFormatException e) {
 				xsize = 0;
 			}
-			
+						
 			new JSListenerShowQuestion (sequence, type, name, new Rect (left, top, right, bottom), xsize);
 		}
 		
@@ -1179,10 +1179,22 @@ public class LocalIMEKeyboard implements Keyboard {
 	{
 		RelativeLayout.LayoutParams params;
 		Typeface jtf;
+		float factor;
 
 		if (!getOverrideFonts ())
 			return;
 		
+		factor = SettingsActivity.getFontSize (wav);
+		if (factor <= 0)
+			factor = 1;
+		
+		size *= factor;
+		factor -= 1;
+		rect.top -= rect.height () * factor / 2;
+		rect.bottom += rect.height () * factor / 2;
+		rect.left -= rect.width () * factor / 2;
+		rect.right += rect.width () * factor / 2;
+				
 		params = (RelativeLayout.LayoutParams) qvw.getLayoutParams ();
 		params.topMargin = rect.top - 5;
 		params.leftMargin = rect.left - 5;
