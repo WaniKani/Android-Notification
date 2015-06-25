@@ -921,18 +921,34 @@ public class WebReviewActivity extends Activity {
 	@Override
 	public void onBackPressed ()
 	{
-		String url;
-		
-		url = wv.getUrl ();
+        	String url;
 
-		if (url == null)
-			super.onBackPressed ();
-		else if (url.contains ("http://www.wanikani.com/quickview"))
-			wv.loadUrl (SettingsActivity.getLessonURL (this));
-		else if (wv.canGoBack () && backIsSafe ())
-			wv.goBack ();
-		else		
-			super.onBackPressed ();
+        	url = wv.getUrl ();
+
+        	if (url == null)
+        		super.onBackPressed();
+        	else if (url.contains ("http://www.wanikani.com/quickview"))
+        		wv.loadUrl (SettingsActivity.getLessonURL (this));
+        	else if (wv.canGoBack () && backIsSafe ())
+        		wv.goBack();
+        	else {
+        		// Dialog box added 25/6/2015 by Aralox, based on http://stackoverflow.com/a/9901871/1072869
+        		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        		builder.setMessage(R.string.back_msg)
+                    .setCancelable(false)
+                    .setPositiveButton(R.string.back_yes, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            WebReviewActivity.super.onBackPressed();
+                        }
+                    })
+                    .setNegativeButton(R.string.back_no, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            dialog.cancel();
+                        }
+                    });
+        		AlertDialog alert = builder.create();
+        		alert.show();
+        	}
 	}
 	
 	/**

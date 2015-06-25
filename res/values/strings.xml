@@ -439,6 +439,10 @@
     <string name="id_import_failed">Import failed: %s</string>
     <string name="id_import_ok">Import succeeded: %1$d entries parsed, %2$d imported</string>
     
+    <string name="back_msg">Are you sure you want to exit?</string>
+    <string name="back_yes">Yes</string>
+    <string name="back_no">No</string>
+            
     <string name="intro_title">About this app</string>
     <string name="intro_description">
         	As explained on the store, you can use this app only if you are subscribed to
