@@ -45,10 +45,17 @@
                     android:id="@+id/it_onyomi"
                     style="@style/ItemImportantReading" />
 
+                <LinearLayout
+                    android:layout_width="wrap_content"
+            		android:layout_height="wrap_content"
+                    android:orientation="horizontal">
                 <TextView
                     android:id="@+id/it_kunyomi"
                     style="@style/ItemReading" />
-
+                <TextView
+                    android:id="@+id/it_nanori"
+                    style="@style/ItemReading" />
+                				</LinearLayout>
                 <TextView
                     android:id="@+id/it_info"
                     style="@style/ItemInfo" />

@@ -340,11 +340,14 @@ public class ItemsDatabase {
 			SQLiteStatement stmt;
 			Set<Integer> levels;
 			String lset;
-			
+		
 			levels = new HashSet<Integer> ();
 			for (T item : data.lib.list)
 				levels.add (item.level);
 
+			if (levels.isEmpty ())
+				return;
+			
 			lset = getLSet (levels);
 			
 			synchronized (MUTEX) {
@@ -636,24 +639,34 @@ public class ItemsDatabase {
 		/** Kun'yomi reading */
 		private static final String C_KUNYOMI = "kunyomi";
 		
+		/** Nanori reading */
+		private static final String C_NANORI = "nanori";
+
 		/** Is on'yomi the important reading */
 		private static final String C_IMPORTANT_IS_ON = "important_is_on";
 		
+		/** Is kun'yomi the important reading */
+		private static final String C_IMPORTANT_IS_KUN = "important_is_kun";
+
 		/** The SQL create statement */
 		private static final String SQL_CREATE = 
 				"CREATE TABLE " + TABLE + " (" +
 						SQL_CREATE_COLUMNS + ", " +
 						C_ONYOMI + " TEXT NULL, " + 
 						C_KUNYOMI + " TEXT NULL, " + 
-						C_IMPORTANT_IS_ON + " INTEGER NOT NULL)";
+						C_NANORI + " TEXT NULL, " +
+						C_IMPORTANT_IS_ON + " INTEGER NOT NULL," +
+						C_IMPORTANT_IS_KUN + " INTEGER NOT NULL)";
 		
 		private static final String SQL_INSERT =
 				"INSERT INTO " + TABLE + "(" + 
 						SQL_INSERT_COLUMNS + ", " +
 						C_ONYOMI + ", " + 
-						C_KUNYOMI + ", " + 
-						C_IMPORTANT_IS_ON + ") VALUES (" +
-						SQL_INSERT_ARGS + ", ?, ?, ?)";		
+						C_KUNYOMI + ", " +
+						C_NANORI + ", " +
+						C_IMPORTANT_IS_ON + ", " +
+						C_IMPORTANT_IS_KUN + ") VALUES (" +
+						SQL_INSERT_ARGS + ", ?, ?, ?, ?, ?)";		
 
 		public String getTable ()
 		{
@@ -682,8 +695,12 @@ public class ItemsDatabase {
 			super.setFields (c, ans);			
 			ans.onyomi = c.getString (c.getColumnIndex (C_ONYOMI));
 			ans.kunyomi = c.getString (c.getColumnIndex (C_KUNYOMI));
-			ans.importantReading = c.getInt (c.getColumnIndex (C_IMPORTANT_IS_ON)) == 1 ?
-							Kanji.Reading.ONYOMI : Kanji.Reading.KUNYOMI;
+			ans.nanori = c.getString (c.getColumnIndex (C_NANORI));
+			ans.importantReading = 
+				c.getInt (c.getColumnIndex (C_IMPORTANT_IS_ON)) == 1 ?
+							Kanji.Reading.ONYOMI : 
+				c.getInt (c.getColumnIndex (C_IMPORTANT_IS_KUN)) == 1 ?
+							Kanji.Reading.KUNYOMI : Kanji.Reading.NANORI;
 			
 			return ans;
 		}
@@ -704,7 +721,13 @@ public class ItemsDatabase {
 			else
 				stmt.bindNull (idx++);
 			
+			if (item.nanori != null)
+				stmt.bindString (idx++, item.nanori);
+			else
+				stmt.bindNull (idx++);
+
 			stmt.bindLong (idx++, item.importantReading == Kanji.Reading.ONYOMI ? 1 : 0);
+			stmt.bindLong (idx++, item.importantReading == Kanji.Reading.KUNYOMI ? 1 : 0);
 			
 			return idx;
 		}		
@@ -781,7 +804,7 @@ public class ItemsDatabase {
 	class OpenHelper extends SQLiteOpenHelper {
 		
 		/** DB Version */
-		private static final int VERSION = 2;
+		private static final int VERSION = 5;
 		
 		/** The db file */
 		private static final String NAME = "items.db";

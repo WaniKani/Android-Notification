@@ -602,6 +602,8 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 		
 		public TextView kunyomi;
 		
+		public TextView nanori;
+		
 		/**
 		 * Constructor.
 		 * @param ila the list adapter that will receive high priority scroll view
@@ -615,6 +617,7 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 			
 			onyomi = (TextView) row.findViewById (R.id.it_onyomi);
 			kunyomi = (TextView) row.findViewById (R.id.it_kunyomi);
+			nanori = (TextView) row.findViewById (R.id.it_nanori);
 		}
 		
 		@Override
@@ -636,16 +639,27 @@ public class ItemsFragment extends Fragment implements Tab, Filter.Callback {
 
 			kunyomi.setText (showAnswers ? kanji.kunyomi : "");
 			
+			if (kanji.nanori != null && !kanji.nanori.equals (""))
+				nanori.setText (showAnswers ? "[" + kanji.nanori + "]" : "");
+			else
+				nanori.setText ("");
+			
+			onyomi.setTextColor (normalColor);
+			kunyomi.setTextColor (normalColor);
+			nanori.setTextColor (normalColor);
+
 			switch (kanji.importantReading) {
 			case ONYOMI:
 				onyomi.setTextColor (importantColor);
-				kunyomi.setTextColor (normalColor);
 				break;
 
 			case KUNYOMI:
-				onyomi.setTextColor (normalColor);
 				kunyomi.setTextColor (importantColor);
 				break;
+				
+			case NANORI:
+				nanori.setTextColor (importantColor);
+				break;				
 			}
 
 			glyphText.setText (kanji.character);

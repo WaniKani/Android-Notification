@@ -353,9 +353,15 @@ public class DashboardFragment extends Fragment implements Tab {
 	/// The Radicals progress subplot
 	SubPlot radicalsProgress;
 	
+	/// The radicals progress chart
+	View radicalsRow;
+	
 	/// The Kanji progress subplot
 	SubPlot kanjiProgress;	
 	
+	/// The kanji progress chart
+	View kanjiRow;
+
 	@Override
 	public void onAttach (Activity main)
 	{
@@ -425,16 +431,18 @@ public class DashboardFragment extends Fragment implements Tab {
     public View onCreateView (LayoutInflater inflater, ViewGroup container,
             				  Bundle savedInstanceState) 
     {
-		ProgressChart chart;
-		
 		super.onCreateView (inflater, container, savedInstanceState);
+		
+		ProgressChart chart;
 
 		parent = inflater.inflate(R.layout.dashboard, container, false);
 		registerListeners ();
 		
+		radicalsRow = parent.findViewById (R.id.row_radicals);
 		chart = (ProgressChart) parent.findViewById (R.id.pb_radicals);
 		radicalsProgress = chart.addData (parent.findViewById (R.id.rad_dropdown));
         
+		kanjiRow = parent.findViewById (R.id.row_kanji);
 		chart = (ProgressChart) parent.findViewById (R.id.pb_kanji);
 		kanjiProgress = chart.addData (parent.findViewById (R.id.kanji_dropdown));
 
@@ -500,22 +508,29 @@ public class DashboardFragment extends Fragment implements Tab {
 		List<ProgressPlot.Marker> markers;
 		DataSet gds, ads, tds, rds;
 		int apprentice;
+		View schart;
 		SubPlot splot;
 		Resources res;
 		
 		switch (type) {
 		case RADICAL:
 			splot = radicalsProgress;
+			schart = radicalsRow;
 			break;
 			
 		case KANJI:
 			splot = kanjiProgress;
+			schart = kanjiRow;
 			break;
 			
 		case VOCABULARY:
 		default:
 			return;
 		}
+
+		schart.setVisibility (total > 0 ? View.VISIBLE : View.GONE);
+		if (total <= 0)
+			return;
 		
 		res = getResources ();
 		

@@ -662,8 +662,8 @@ public class StatsFragment extends Fragment implements Tab {
 				lday = li != null ? (li.day + li.vacation) : null;
 			}
 			
-			/* We don't want L50 to grow... */
-			for (i = ALL_THE_LEVELS; i <= dd.level; i++)
+			/* We don't want the last level to grow... */
+			for (i = LAST_LEVEL; i <= dd.level; i++)
 				ans.remove (i);
 
 			return ans;
@@ -1077,14 +1077,18 @@ public class StatsFragment extends Fragment implements Tab {
 	private Map<Integer, Boolean> semiPreservedState;
 	
 	/// Overall number of kanji
-	private static final int ALL_THE_KANJI = 1679;
+	private static final int ALL_THE_KANJI = 2027;
 	
 	/// Overall number of vocab items
-	private static final int ALL_THE_VOCAB = 5029;
+	private static final int ALL_THE_VOCAB = 6190;
 	
 	/// Overall number of levels
 	private static final int ALL_THE_LEVELS = 50;
 	
+	/// Last level (should be set to ALL_THE_LEVELS when/if we fix the algorithm
+	/// to take care of the fact that l50 should be ignored when doing estimates)
+	private static final int LAST_LEVEL = 60;
+
 	/// The database
 	HistoryDatabaseCache hdbc;
 	

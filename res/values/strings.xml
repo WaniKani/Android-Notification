@@ -135,7 +135,7 @@
     <string name="tag_unlocked">Unlocked</string>
     <string name="tag_learned">Learned</string>
     <string name="tag_gravatar">Gravatar</string>
-    <string name="tag_loading">Loading&#8230;</string>
+    <string name="tag_loading">Connecting to WaniKani&#8230;</string>
     <string name="tag_btn_review">Review</string>
     <string name="tag_version">Version %s</string>
     <string name="tag_remaining">Needed to level-up</string>

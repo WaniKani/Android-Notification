@@ -352,6 +352,7 @@
             android:visibility="invisible" >
 
         <TableRow
+            android:id="@+id/row_radicals"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content">
         <TextView
@@ -375,6 +376,7 @@
          	android:layout_gravity="center"/>
             
         <TableRow
+            android:id="@+id/row_kanji"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"            
             android:layout_marginTop="@dimen/m_gap">

@@ -48,7 +48,9 @@ public class Kanji extends Item {
 		
 		ONYOMI, 
 		
-		KUNYOMI;
+		KUNYOMI,
+		
+		NANORI; 
 		
 		public static Reading fromString (String s)
 		{
@@ -56,6 +58,8 @@ public class Kanji extends Item {
 				return ONYOMI;
 			else if (s.equals ("kunyomi"))
 				return KUNYOMI;
+			else if (s.equals ("nanori"))
+				return NANORI;
 			else
 				return null;
 		}
@@ -66,6 +70,8 @@ public class Kanji extends Item {
 	public String onyomi;
 	
 	public String kunyomi;
+	
+	public String nanori;
 	
 	public Reading importantReading;
 		
@@ -78,10 +84,11 @@ public class Kanji extends Item {
 		
 		onyomi = Util.getString (obj, "onyomi");
 		kunyomi = Util.getString (obj, "kunyomi");
+		nanori = Util.getString (obj, "nanori");
 		s = Util.getString (obj, "important_reading");
 		importantReading = Reading.fromString (s);
 		if (importantReading == null)
-			throw new JSONException ("Unknown important reading: " + s);
+			importantReading = Reading.ONYOMI;
 	}
 	
 	public Kanji ()
