@@ -173,6 +173,7 @@ public class JapaneseIME {
 		put ("na", "な");
 		putI ("n", "に");
 		putU ("n", "ぬ");
+		put ("nwa", "んわ");
 		put ("ne", "ね");
 		put ("no", "の");
 		
@@ -189,7 +190,7 @@ public class JapaneseIME {
 		put ("ro", "ろ");
 		
 		put ("ya", "や");
-		put ("yi", "い");		
+		put ("yi", "い");
 		put ("yu", "ゆ");
 		put ("ye", "いぇ");
 		put ("yo", "よ");
@@ -227,7 +228,7 @@ public class JapaneseIME {
 
 		put ("cya", "ちゃ");
 		put ("cyo", "ちょ");
-		put ("cyu", "ちゅ");				
+		put ("cyu", "ちゅ");
 		
 		put ("fa", "ふぁ");
 		putI ("f", "ふ");
@@ -254,7 +255,7 @@ public class JapaneseIME {
 		put ("vi", "vyi", "ヴィ");
 		put ("vu", "vyu", "ヴ");
 		put ("ve", "vye", "ヴぇ");
-		put ("vo", "vyo", "ヴぉ");		
+		put ("vo", "vyo", "ヴぉ");
 				
 		put ("sha", "しゃ");
 		put ("shu", "しゅ");
@@ -296,7 +297,8 @@ public class JapaneseIME {
 		ja = s [s.length - 1];
 		for (i = 0; i < s.length - 1; i++) {
 			put (s [i] + "u", ja);
-			put (s [i] + "wa", ja + "ぁ");
+			if (!s [i].equals("n"))
+				put (s [i] + "wa", ja + "ぁ");
 		}
 	}
 	
