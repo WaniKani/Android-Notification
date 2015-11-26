@@ -173,7 +173,6 @@ public class JapaneseIME {
 		put ("na", "な");
 		putI ("n", "に");
 		putU ("n", "ぬ");
-		put ("nwa", "んわ");
 		put ("ne", "ね");
 		put ("no", "の");
 		
